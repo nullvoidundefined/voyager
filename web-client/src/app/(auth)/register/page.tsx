@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 
-import { GoogleIcon } from '@/components/GoogleIcon/GoogleIcon';
 import { Toast } from '@/components/Toast/Toast';
 import { useAuth } from '@/context/AuthContext';
 import { ApiError, put } from '@/lib/api';
@@ -48,7 +47,7 @@ const SOCIAL_OPTIONS = [
 ] as const;
 
 export default function RegisterPage() {
-    const { signup, loginWithGoogle, isLoading } = useAuth();
+    const { signup, isLoading } = useAuth();
     const router = useRouter();
 
     // Step management
@@ -112,16 +111,6 @@ export default function RegisterPage() {
         }
     }
 
-    async function handleGoogle() {
-        setToast('');
-        try {
-            await loginWithGoogle();
-            router.push('/trips');
-        } catch {
-            setToast('Google sign-up failed. Please try again.');
-        }
-    }
-
     return (
         <div className={styles.page}>
             <div className={styles.card}>
@@ -147,6 +136,7 @@ export default function RegisterPage() {
 
                 {step === 1 && (
                     <>
+                        {/* TODO: Google OAuth
                         <button
                             type="button"
                             className={styles.googleButton}
@@ -160,6 +150,7 @@ export default function RegisterPage() {
                         <div className={styles.divider}>
                             <span>or</span>
                         </div>
+                        */}
 
                         <form onSubmit={handleStepOne} className={styles.form}>
                             <label className={styles.field}>

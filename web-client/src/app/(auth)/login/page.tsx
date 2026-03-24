@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 
-import { GoogleIcon } from '@/components/GoogleIcon/GoogleIcon';
 import { Toast } from '@/components/Toast/Toast';
 import { useAuth } from '@/context/AuthContext';
 import { ApiError } from '@/lib/api';
@@ -12,7 +11,7 @@ import { ApiError } from '@/lib/api';
 import styles from '../auth.module.scss';
 
 export default function LoginPage() {
-    const { login, loginWithGoogle, isLoading } = useAuth();
+    const { login, isLoading } = useAuth();
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -40,16 +39,6 @@ export default function LoginPage() {
         }
     }
 
-    async function handleGoogle() {
-        setToast('');
-        try {
-            await loginWithGoogle();
-            router.push('/trips');
-        } catch {
-            setToast('Google sign-in failed. Please try again.');
-        }
-    }
-
     return (
         <div className={styles.page}>
             <div className={styles.card}>
@@ -58,6 +47,7 @@ export default function LoginPage() {
                     <p>Sign in to plan your next trip</p>
                 </div>
 
+                {/* TODO: Google OAuth
                 <button
                     type="button"
                     className={styles.googleButton}
@@ -71,6 +61,7 @@ export default function LoginPage() {
                 <div className={styles.divider}>
                     <span>or</span>
                 </div>
+                */}
 
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <label className={styles.field}>
