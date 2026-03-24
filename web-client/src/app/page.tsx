@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 import { MockChatBox } from '@/components/MockChatBox/MockChatBox';
 import { useAuth } from '@/context/AuthContext';
@@ -9,6 +11,13 @@ import styles from './page.module.scss';
 
 export default function Home() {
     const { user } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (user) {
+            router.replace('/trips');
+        }
+    }, [user, router]);
 
     return (
         <div className={styles.landing}>
@@ -43,10 +52,7 @@ export default function Home() {
                 <div className={styles.feature}>
                     <span className={styles.featureIcon}>&#9992;</span>
                     <h3>Real Flights</h3>
-                    <p>
-                        Searches Amadeus for actual flight prices and
-                        availability.
-                    </p>
+                    <p>Searches real flight prices and availability.</p>
                 </div>
                 <div className={styles.feature}>
                     <span className={styles.featureIcon}>&#127976;</span>
