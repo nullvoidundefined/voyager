@@ -1,8 +1,13 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import Link from 'next/link';
+
+import { Footer } from '@/components/Footer/Footer';
+import { Header } from '@/components/Header/Header';
+import { AuthProvider } from '@/context/AuthContext';
+import { QueryProvider } from '@/providers/QueryProvider';
 
 import './globals.scss';
+import styles from './layout.module.scss';
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
@@ -15,9 +20,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: 'Next template',
+    title: 'Atlas — AI Trip Planner',
     description:
-        'Minimal Next.js App Router starter for standalone apps or pnpm workspaces',
+        'Plan your next trip with an AI agent that searches flights, hotels, and experiences within your budget.',
 };
 
 export default function RootLayout({
@@ -28,10 +33,15 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={`${geistSans.variable} ${geistMono.variable}`}>
-                <nav>
-                    <Link href="/account">Account</Link>
-                </nav>
-                {children}
+                <QueryProvider>
+                    <AuthProvider>
+                        <div className={styles.appShell}>
+                            <Header />
+                            <main className={styles.main}>{children}</main>
+                            <Footer />
+                        </div>
+                    </AuthProvider>
+                </QueryProvider>
             </body>
         </html>
     );

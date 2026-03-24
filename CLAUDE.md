@@ -34,3 +34,6 @@ POC → send "Plan a trip to Barcelona, $3000 budget" → agent calls search_fli
 
 ## Critical implementation note
 The agent loop runs synchronously on the API server (not BullMQ). The agent needs immediate results to reason. BullMQ is only for background tasks (cache warming). Cache Amadeus responses aggressively — 10 req/s rate limit on test tier.
+
+## Frontend conventions
+- Use **TanStack Query** (React Query) for all server state — data fetching, caching, mutations, and optimistic updates. No raw useEffect + fetch patterns.
