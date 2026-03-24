@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { use } from 'react';
 
+import { ChatBox } from '@/components/ChatBox/ChatBox';
 import { get } from '@/lib/api';
 
 import styles from './tripDetail.module.scss';
@@ -343,6 +344,11 @@ export default function TripDetailPage({
                         </p>
                     </div>
                 )}
+
+            <div className={styles.chatSection}>
+                <h2>Chat with Atlas</h2>
+                <ChatBox tripId={trip.id} />
+            </div>
         </div>
     );
 }
