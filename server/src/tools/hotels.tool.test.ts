@@ -163,5 +163,29 @@ describe("hotels.tool", () => {
       expect(result).toHaveLength(1);
       expect(result[0]!.name).toBe("Budget Inn Barcelona");
     });
+
+    it("parses hotel_class string format (e.g. '4-star hotel')", async () => {
+      vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
+      vi.mocked(serpApiService.serpApiGet).mockResolvedValueOnce({
+        properties: [
+          {
+            name: "Fancy Hotel",
+            overall_rating: 4.5,
+            hotel_class: "4-star hotel",
+            rate_per_night: { lowest: "$200", extracted_lowest: 200 },
+            total_rate: { lowest: "$1000", extracted_lowest: 1000 },
+          },
+        ],
+      });
+
+      const result = await searchHotels({
+        city: "Barcelona",
+        check_in: "2026-07-01",
+        check_out: "2026-07-06",
+        guests: 2,
+      });
+
+      expect(result[0]!.star_rating).toBe(4);
+    });
   });
 });

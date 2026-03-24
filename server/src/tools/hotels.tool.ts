@@ -30,9 +30,9 @@ export interface HotelResult {
 interface SerpApiHotel {
   name: string;
   overall_rating: number;
-  hotel_class: number;
-  rate_per_night: { lowest: string; extracted_lowest: number };
-  total_rate: { lowest: string; extracted_lowest: number };
+  hotel_class: number | string;
+  rate_per_night?: { lowest: string; extracted_lowest: number };
+  total_rate?: { lowest: string; extracted_lowest: number };
   nearby_places?: Array<{ name: string }>;
   gps_coordinates?: { latitude: number; longitude: number };
   check_in_time?: string;
@@ -45,6 +45,15 @@ interface SerpApiHotelsResponse {
   search_metadata?: { id: string };
 }
 
+function parseStarRating(hotelClass: number | string | undefined): number {
+  if (typeof hotelClass === "number") return hotelClass;
+  if (typeof hotelClass === "string") {
+    const match = hotelClass.match(/(\d)/);
+    return match ? Number(match[1]) : 0;
+  }
+  return 0;
+}
+
 function normalizeHotel(entry: SerpApiHotel, index: number, input: HotelSearchInput): HotelResult {
   return {
     hotel_id: `serpapi-hotel-${index}`,
@@ -52,7 +61,7 @@ function normalizeHotel(entry: SerpApiHotel, index: number, input: HotelSearchIn
     name: entry.name,
     address: "",
     city: input.city,
-    star_rating: entry.hotel_class || 0,
+    star_rating: parseStarRating(entry.hotel_class),
     total_price: entry.total_rate?.extracted_lowest ?? entry.rate_per_night?.extracted_lowest ?? 0,
     price_per_night: entry.rate_per_night?.extracted_lowest ?? 0,
     currency: "USD",
