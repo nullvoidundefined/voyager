@@ -99,10 +99,14 @@ export default function RegisterPage() {
 
         try {
             await signup(email, password);
-            // TODO: call real preferences API once AuthContext uses real API
+            await put('/user-preferences', { dietary, intensity, social });
             router.push('/trips');
-        } catch {
-            setError('Something went wrong. Please try again.');
+        } catch (err) {
+            if (err instanceof ApiError) {
+                setError(err.message);
+            } else {
+                setError('Something went wrong. Please try again.');
+            }
         }
     }
 
