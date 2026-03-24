@@ -1,0 +1,400 @@
+.page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 64px - 73px);
+    padding: 48px 24px;
+}
+
+.card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--background-translucent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px 32px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 28px;
+
+    h1 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--accent);
+        letter-spacing: -0.02em;
+    }
+
+    p {
+        margin-top: 8px;
+        font-size: 15px;
+        color: var(--foreground-muted);
+    }
+}
+
+/* ---- Google button ---- */
+
+.googleButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 11px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--foreground);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
+
+    &:hover:not(:disabled) {
+        background: var(--surface-hover);
+        border-color: var(--foreground-muted);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+/* ---- Divider ---- */
+
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 20px 0;
+
+    &::before,
+    &::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+    }
+
+    span {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--foreground-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+}
+
+/* ---- Form ---- */
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    span {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--foreground);
+    }
+
+    input {
+        padding: 10px 14px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--foreground);
+        font-size: 14px;
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.15s;
+
+        &::placeholder {
+            color: var(--foreground-muted);
+            opacity: 0.6;
+        }
+
+        &:focus {
+            border-color: var(--accent);
+        }
+    }
+}
+
+.error {
+    font-size: 13px;
+    color: #ef4444;
+    text-align: center;
+}
+
+.submit {
+    margin-top: 4px;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.15s;
+
+    &:hover:not(:disabled) {
+        opacity: 0.9;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+/* ---- Footer links ---- */
+
+.switchLink {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: var(--foreground-muted);
+
+    a {
+        color: var(--accent);
+        font-weight: 600;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+.faqLink {
+    display: block;
+    text-align: center;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--foreground-muted);
+    transition: color 0.15s;
+
+    &:hover {
+        color: var(--accent);
+    }
+}
+
+.forgotLink {
+    text-align: right;
+    margin-top: -8px;
+
+    a {
+        font-size: 13px;
+        color: var(--foreground-muted);
+        transition: color 0.15s;
+
+        &:hover {
+            color: var(--accent);
+        }
+    }
+}
+
+/* ---- Terms ---- */
+
+.terms {
+    text-align: center;
+    font-size: 12px;
+    color: var(--foreground-muted);
+    line-height: 1.5;
+    margin-top: 4px;
+
+    a {
+        color: var(--accent);
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+/* ---- Step indicator ---- */
+
+.steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 24px;
+}
+
+.stepDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.2s;
+}
+
+.stepActive {
+    background: var(--accent);
+}
+
+.stepLine {
+    width: 40px;
+    height: 2px;
+    background: var(--border);
+}
+
+/* ---- Fieldset ---- */
+
+.fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+
+    legend {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--foreground);
+        margin-bottom: 10px;
+    }
+}
+
+/* ---- Chip group (dietary, social) ---- */
+
+.chipGroup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--surface);
+    color: var(--foreground-muted);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition:
+        background 0.15s,
+        border-color 0.15s,
+        color 0.15s;
+
+    &:hover {
+        border-color: var(--foreground-muted);
+    }
+}
+
+.chipSelected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+
+    &:hover {
+        border-color: var(--accent);
+    }
+}
+
+/* ---- Option cards (intensity) ---- */
+
+.optionGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.optionCard {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    cursor: pointer;
+    transition:
+        border-color 0.15s,
+        background 0.15s;
+
+    &:hover {
+        border-color: var(--foreground-muted);
+    }
+}
+
+.optionSelected {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.optionLabel {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.optionDesc {
+    font-size: 12px;
+    color: var(--foreground-muted);
+}
+
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* ---- Step navigation ---- */
+
+.stepButtons {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.backButton {
+    flex: 0 0 auto;
+    padding: 12px 20px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--foreground);
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
+
+    &:hover {
+        background: var(--surface-hover);
+        border-color: var(--foreground-muted);
+    }
+}
+
+.stepButtons .submit {
+    flex: 1;
+}
+
+@media (max-width: 480px) {
+    .card {
+        padding: 32px 20px;
+    }
+}

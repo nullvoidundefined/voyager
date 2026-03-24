@@ -6,6 +6,7 @@ import { FormEvent, useState } from 'react';
 
 import { GoogleIcon } from '@/components/GoogleIcon/GoogleIcon';
 import { useAuth } from '@/context/AuthContext';
+import { ApiError, put } from '@/lib/api';
 
 import styles from '../auth.module.scss';
 
