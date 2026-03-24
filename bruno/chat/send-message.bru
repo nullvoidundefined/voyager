@@ -1,0 +1,22 @@
+meta {
+  name: Send Chat Message (SSE)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/trips/{{tripId}}/chat
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+  Accept: text/event-stream
+}
+
+body:json {
+  {
+    "message": "Plan a 5-day trip to Barcelona from SFO, budget $3000. I love museums, food, and architecture."
+  }
+}

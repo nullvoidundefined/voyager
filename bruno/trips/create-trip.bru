@@ -1,0 +1,38 @@
+meta {
+  name: Create Trip
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/trips
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "destination": "Barcelona",
+    "origin": "SFO",
+    "departure_date": "2026-07-01",
+    "return_date": "2026-07-06",
+    "budget_total": 3000,
+    "budget_currency": "USD",
+    "travelers": 2,
+    "preferences": {
+      "interests": ["museums", "food", "architecture"],
+      "accommodation_type": "hotel",
+      "travel_style": "moderate"
+    }
+  }
+}
+
+script:post-response {
+  if (res.status === 201) {
+    bru.setVar("tripId", res.body.trip.id);
+  }
+}
