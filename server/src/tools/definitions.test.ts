@@ -35,9 +35,9 @@ describe("tool definitions", () => {
     expect(tool.input_schema.required).toContain("passengers");
   });
 
-  it("search_hotels requires city_code, check_in, check_out, guests", () => {
+  it("search_hotels requires city, check_in, check_out, guests", () => {
     const tool = TOOL_DEFINITIONS.find((t) => t.name === "search_hotels")!;
-    expect(tool.input_schema.required).toContain("city_code");
+    expect(tool.input_schema.required).toContain("city");
     expect(tool.input_schema.required).toContain("check_in");
     expect(tool.input_schema.required).toContain("check_out");
     expect(tool.input_schema.required).toContain("guests");

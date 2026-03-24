@@ -6,8 +6,8 @@ const config = {
     importOrder: ['<THIRD_PARTY_MODULES>', '^@/.*', '^[./]'],
     importOrderSeparation: true,
     importOrderSortSpecifiers: true,
-  insertPragma: false,
-  jsxSingleQuote: false,
+    insertPragma: false,
+    jsxSingleQuote: false,
     overrides: [
         {
             files: '*.ts',

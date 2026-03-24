@@ -1,11 +1,11 @@
-import { amadeusGet } from "app/services/amadeus.service.js";
 import { cacheGet, cacheSet, normalizeCacheKey } from "app/services/cache.service.js";
+import { serpApiGet } from "app/services/serpapi.service.js";
 import { logger } from "app/utils/logs/logger.js";
 
 const CACHE_TTL = 3600;
 
 export interface HotelSearchInput {
-  city_code: string;
+  city: string;
   check_in: string;
   check_out: string;
   guests: number;
@@ -27,55 +27,47 @@ export interface HotelResult {
   check_out: string;
 }
 
-interface AmadeusHotelOffer {
-  hotel: {
-    hotelId: string;
-    name: string;
-    rating: string;
-    address: { lines: string[]; cityName: string };
-  };
-  offers: Array<{
-    id: string;
-    price: { total: string; currency: string };
-    checkInDate: string;
-    checkOutDate: string;
-  }>;
+interface SerpApiHotel {
+  name: string;
+  overall_rating: number;
+  hotel_class: number;
+  rate_per_night: { lowest: string; extracted_lowest: number };
+  total_rate: { lowest: string; extracted_lowest: number };
+  nearby_places?: Array<{ name: string }>;
+  gps_coordinates?: { latitude: number; longitude: number };
+  check_in_time?: string;
+  check_out_time?: string;
+  link?: string;
 }
 
-function normalizeHotel(entry: AmadeusHotelOffer): HotelResult | null {
-  const offer = entry.offers[0];
-  if (!offer) return null;
+interface SerpApiHotelsResponse {
+  properties?: SerpApiHotel[];
+  search_metadata?: { id: string };
+}
 
-  const totalPrice = parseFloat(offer.price.total);
-  const checkIn = new Date(offer.checkInDate);
-  const checkOut = new Date(offer.checkOutDate);
-  const nights = Math.max(
-    1,
-    Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)),
-  );
-
+function normalizeHotel(entry: SerpApiHotel, index: number, input: HotelSearchInput): HotelResult {
   return {
-    hotel_id: entry.hotel.hotelId,
-    offer_id: offer.id,
-    name: entry.hotel.name,
-    address: entry.hotel.address.lines.join(", "),
-    city: entry.hotel.address.cityName,
-    star_rating: parseInt(entry.hotel.rating) || 0,
-    total_price: totalPrice,
-    price_per_night: Math.round((totalPrice / nights) * 100) / 100,
-    currency: offer.price.currency,
-    check_in: offer.checkInDate,
-    check_out: offer.checkOutDate,
+    hotel_id: `serpapi-hotel-${index}`,
+    offer_id: `serpapi-hotel-offer-${index}`,
+    name: entry.name,
+    address: "",
+    city: input.city,
+    star_rating: entry.hotel_class || 0,
+    total_price: entry.total_rate?.extracted_lowest ?? entry.rate_per_night?.extracted_lowest ?? 0,
+    price_per_night: entry.rate_per_night?.extracted_lowest ?? 0,
+    currency: "USD",
+    check_in: input.check_in,
+    check_out: input.check_out,
   };
 }
 
 export async function searchHotels(input: HotelSearchInput): Promise<HotelResult[]> {
-  const cacheKey = normalizeCacheKey("amadeus", "hotel-offers", {
-    cityCode: input.city_code,
-    checkInDate: input.check_in,
-    checkOutDate: input.check_out,
-    adults: input.guests,
-    ratings: input.star_rating_min,
+  const cacheKey = normalizeCacheKey("serpapi", "google-hotels", {
+    city: input.city,
+    checkIn: input.check_in,
+    checkOut: input.check_out,
+    guests: input.guests,
+    starRatingMin: input.star_rating_min,
   });
 
   const cached = await cacheGet<HotelResult[]>(cacheKey);
@@ -85,24 +77,30 @@ export async function searchHotels(input: HotelSearchInput): Promise<HotelResult
   }
 
   const params: Record<string, string | number | undefined> = {
-    cityCode: input.city_code,
-    checkInDate: input.check_in,
-    checkOutDate: input.check_out,
+    q: `hotels in ${input.city}`,
+    check_in_date: input.check_in,
+    check_out_date: input.check_out,
     adults: input.guests,
-    ratings: input.star_rating_min,
+    currency: "USD",
+    hl: "en",
   };
 
-  const response = (await amadeusGet("/v3/shopping/hotel-offers", params)) as {
-    data: AmadeusHotelOffer[];
-  };
+  const response = (await serpApiGet("google_hotels", params)) as SerpApiHotelsResponse;
 
-  const results = (response.data || [])
-    .map(normalizeHotel)
-    .filter((r): r is HotelResult => r !== null)
-    .sort((a, b) => a.total_price - b.total_price);
+  let results = (response.properties ?? []).map((h, i) => normalizeHotel(h, i, input));
+
+  if (input.star_rating_min) {
+    results = results.filter((r) => r.star_rating >= input.star_rating_min!);
+  }
+
+  if (input.max_price_per_night) {
+    results = results.filter((r) => r.price_per_night <= input.max_price_per_night!);
+  }
+
+  results = results.sort((a, b) => a.total_price - b.total_price).slice(0, 5);
 
   await cacheSet(cacheKey, results, CACHE_TTL);
-  logger.info({ count: results.length, city: input.city_code }, "Hotel search complete");
+  logger.info({ count: results.length, city: input.city }, "Hotel search complete");
 
   return results;
 }

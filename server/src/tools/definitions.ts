@@ -46,11 +46,11 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   {
     name: "search_hotels",
     description:
-      "Search for hotel offers in a city. Returns up to 5 options sorted by price. Use IATA city codes. Call get_destination_info first to resolve city names to codes.",
+      "Search for hotel offers in a city. Returns up to 5 options sorted by price. Use a city name (e.g., Barcelona, Paris).",
     input_schema: {
       type: "object",
       properties: {
-        city_code: { type: "string", description: "IATA city code (e.g., BCN, PAR, LON)" },
+        city: { type: "string", description: "City name (e.g., Barcelona, Paris, Tokyo)" },
         check_in: { type: "string", description: "Check-in date in YYYY-MM-DD format" },
         check_out: { type: "string", description: "Check-out date in YYYY-MM-DD format" },
         guests: { type: "number", description: "Number of guests" },
@@ -63,7 +63,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
           description: "Maximum price per night in USD (optional)",
         },
       },
-      required: ["city_code", "check_in", "check_out", "guests"],
+      required: ["city", "check_in", "check_out", "guests"],
     },
   },
   {

@@ -1,48 +1,30 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("app/services/amadeus.service.js");
+vi.mock("app/services/serpapi.service.js");
 vi.mock("app/services/cache.service.js");
 vi.mock("app/utils/logs/logger.js", () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
 let searchHotels: typeof import("app/tools/hotels.tool.js").searchHotels;
-let amadeusService: typeof import("app/services/amadeus.service.js");
+let serpApiService: typeof import("app/services/serpapi.service.js");
 let cacheService: typeof import("app/services/cache.service.js");
 
-const mockHotelOffers = {
-  data: [
+const mockHotelsResponse = {
+  properties: [
     {
-      hotel: {
-        hotelId: "HTBCN001",
-        name: "Hotel Barcelona Beach",
-        rating: "4",
-        address: { lines: ["Passeig Maritim 12"], cityName: "Barcelona" },
-      },
-      offers: [
-        {
-          id: "offer1",
-          price: { total: "150.00", currency: "USD" },
-          checkInDate: "2026-07-01",
-          checkOutDate: "2026-07-06",
-        },
-      ],
+      name: "Hotel Barcelona Beach",
+      overall_rating: 4.5,
+      hotel_class: 4,
+      rate_per_night: { lowest: "$150", extracted_lowest: 150 },
+      total_rate: { lowest: "$750", extracted_lowest: 750 },
     },
     {
-      hotel: {
-        hotelId: "HTBCN002",
-        name: "Budget Inn Barcelona",
-        rating: "2",
-        address: { lines: ["Carrer de la Rambla 5"], cityName: "Barcelona" },
-      },
-      offers: [
-        {
-          id: "offer2",
-          price: { total: "80.00", currency: "USD" },
-          checkInDate: "2026-07-01",
-          checkOutDate: "2026-07-06",
-        },
-      ],
+      name: "Budget Inn Barcelona",
+      overall_rating: 3.2,
+      hotel_class: 2,
+      rate_per_night: { lowest: "$80", extracted_lowest: 80 },
+      total_rate: { lowest: "$400", extracted_lowest: 400 },
     },
   ],
 };
@@ -52,8 +34,8 @@ describe("hotels.tool", () => {
     vi.clearAllMocks();
     vi.resetModules();
 
-    vi.doMock("app/services/amadeus.service.js", () => ({
-      amadeusGet: vi.fn(),
+    vi.doMock("app/services/serpapi.service.js", () => ({
+      serpApiGet: vi.fn(),
     }));
     vi.doMock("app/services/cache.service.js", () => ({
       cacheGet: vi.fn(),
@@ -66,7 +48,7 @@ describe("hotels.tool", () => {
 
     const hotelsMod = await import("app/tools/hotels.tool.js");
     searchHotels = hotelsMod.searchHotels;
-    amadeusService = await import("app/services/amadeus.service.js");
+    serpApiService = await import("app/services/serpapi.service.js");
     cacheService = await import("app/services/cache.service.js");
   });
 
@@ -76,22 +58,22 @@ describe("hotels.tool", () => {
       vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(cached);
 
       const result = await searchHotels({
-        city_code: "BCN",
+        city: "Barcelona",
         check_in: "2026-07-01",
         check_out: "2026-07-06",
         guests: 2,
       });
 
       expect(result).toEqual(cached);
-      expect(amadeusService.amadeusGet).not.toHaveBeenCalled();
+      expect(serpApiService.serpApiGet).not.toHaveBeenCalled();
     });
 
-    it("calls Amadeus API and returns normalized results", async () => {
+    it("calls SerpApi and returns normalized results", async () => {
       vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
-      vi.mocked(amadeusService.amadeusGet).mockResolvedValueOnce(mockHotelOffers);
+      vi.mocked(serpApiService.serpApiGet).mockResolvedValueOnce(mockHotelsResponse);
 
       const result = await searchHotels({
-        city_code: "BCN",
+        city: "Barcelona",
         check_in: "2026-07-01",
         check_out: "2026-07-06",
         guests: 2,
@@ -106,10 +88,10 @@ describe("hotels.tool", () => {
 
     it("sorts results by total price ascending", async () => {
       vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
-      vi.mocked(amadeusService.amadeusGet).mockResolvedValueOnce(mockHotelOffers);
+      vi.mocked(serpApiService.serpApiGet).mockResolvedValueOnce(mockHotelsResponse);
 
       const result = await searchHotels({
-        city_code: "BCN",
+        city: "Barcelona",
         check_in: "2026-07-01",
         check_out: "2026-07-06",
         guests: 2,
@@ -120,10 +102,10 @@ describe("hotels.tool", () => {
 
     it("caches results after fetching", async () => {
       vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
-      vi.mocked(amadeusService.amadeusGet).mockResolvedValueOnce(mockHotelOffers);
+      vi.mocked(serpApiService.serpApiGet).mockResolvedValueOnce(mockHotelsResponse);
 
       await searchHotels({
-        city_code: "BCN",
+        city: "Barcelona",
         check_in: "2026-07-01",
         check_out: "2026-07-06",
         guests: 2,
@@ -138,10 +120,10 @@ describe("hotels.tool", () => {
 
     it("handles empty results gracefully", async () => {
       vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
-      vi.mocked(amadeusService.amadeusGet).mockResolvedValueOnce({ data: [] });
+      vi.mocked(serpApiService.serpApiGet).mockResolvedValueOnce({ properties: [] });
 
       const result = await searchHotels({
-        city_code: "XYZ",
+        city: "XYZ",
         check_in: "2026-07-01",
         check_out: "2026-07-06",
         guests: 1,
@@ -150,27 +132,36 @@ describe("hotels.tool", () => {
       expect(result).toEqual([]);
     });
 
-    it("passes optional parameters (star_rating_min, max_price_per_night)", async () => {
+    it("filters by star_rating_min", async () => {
       vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
-      vi.mocked(amadeusService.amadeusGet).mockResolvedValueOnce({ data: [] });
+      vi.mocked(serpApiService.serpApiGet).mockResolvedValueOnce(mockHotelsResponse);
 
-      await searchHotels({
-        city_code: "BCN",
+      const result = await searchHotels({
+        city: "Barcelona",
         check_in: "2026-07-01",
         check_out: "2026-07-06",
         guests: 2,
         star_rating_min: 3,
-        max_price_per_night: 200,
       });
 
-      expect(amadeusService.amadeusGet).toHaveBeenCalledWith(
-        "/v3/shopping/hotel-offers",
-        expect.objectContaining({
-          cityCode: "BCN",
-          adults: 2,
-          ratings: 3,
-        }),
-      );
+      expect(result).toHaveLength(1);
+      expect(result[0]!.name).toBe("Hotel Barcelona Beach");
+    });
+
+    it("filters by max_price_per_night", async () => {
+      vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
+      vi.mocked(serpApiService.serpApiGet).mockResolvedValueOnce(mockHotelsResponse);
+
+      const result = await searchHotels({
+        city: "Barcelona",
+        check_in: "2026-07-01",
+        check_out: "2026-07-06",
+        guests: 2,
+        max_price_per_night: 100,
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0]!.name).toBe("Budget Inn Barcelona");
     });
   });
 });
