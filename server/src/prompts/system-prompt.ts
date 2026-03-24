@@ -37,10 +37,13 @@ You are **only** allowed to discuss topics related to travel, trips, itineraries
 - Acknowledge the user's preferences and explain your choices`;
 
 export function buildSystemPrompt(tripContext?: TripContext): string {
+  const today = new Date().toISOString().split("T")[0];
+  const dateLine = `\n\nToday's date is ${today}. All flight and hotel searches must use dates in the future — never use past dates.`;
+
   if (!tripContext) {
-    return BASE_PROMPT;
+    return BASE_PROMPT + dateLine;
   }
 
   const contextBlock = formatTripContext(tripContext);
-  return `${BASE_PROMPT}\n\n---\n\n${contextBlock}`;
+  return `${BASE_PROMPT}${dateLine}\n\n---\n\n${contextBlock}`;
 }

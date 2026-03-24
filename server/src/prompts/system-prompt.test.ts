@@ -76,6 +76,13 @@ describe("system-prompt", () => {
       expect(prompt.length).toBeGreaterThan(100);
     });
 
+    it("includes today's date and future-dates instruction", () => {
+      const prompt = buildSystemPrompt();
+      const today = new Date().toISOString().split("T")[0];
+      expect(prompt).toContain(today!);
+      expect(prompt).toContain("never use past dates");
+    });
+
     it("includes topic guardrail restricting to travel-related topics", () => {
       const prompt = buildSystemPrompt();
       expect(prompt).toMatch(/off.topic|unrelated|only.*travel|decline|politely/i);
