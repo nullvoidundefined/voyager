@@ -41,16 +41,6 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     position: relative;
-
-    &::before {
-        content: '';
-        position: fixed;
-        inset: 0;
-        z-index: -1;
-        background: url('/world-map.svg') center center / cover no-repeat;
-        opacity: 1;
-        pointer-events: none;
-    }
 }
 
 * {
