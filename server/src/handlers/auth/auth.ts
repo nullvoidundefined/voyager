@@ -21,12 +21,25 @@ export async function register(req: Request, res: Response): Promise<void> {
     res.status(400).json({ error: { message } });
     return;
   }
-  const { email, password } = parsed.data;
+  const { email, password, first_name, last_name } = parsed.data;
   try {
-    const { user, sessionId } = await authRepo.createUserAndSession(email, password);
+    const { user, sessionId } = await authRepo.createUserAndSession(
+      email,
+      password,
+      first_name,
+      last_name,
+    );
     logger.info({ event: "register_success", userId: user.id, ip: req.ip }, "User registered");
     res.cookie(SESSION_COOKIE_NAME, sessionId, SESSION_COOKIE_OPTIONS);
-    res.status(201).json({ user: { id: user.id, email: user.email, created_at: user.created_at } });
+    res.status(201).json({
+      user: {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        created_at: user.created_at,
+      },
+    });
   } catch (err) {
     const code =
       err && typeof err === "object" && "code" in err ? (err as { code: string }).code : undefined;
@@ -71,7 +84,15 @@ export async function login(req: Request, res: Response): Promise<void> {
   const sessionId = await authRepo.loginUser(user.id);
   logger.info({ event: "login_success", userId: user.id, ip: req.ip }, "User logged in");
   res.cookie(SESSION_COOKIE_NAME, sessionId, SESSION_COOKIE_OPTIONS);
-  res.json({ user: { id: user.id, email: user.email, created_at: user.created_at } });
+  res.json({
+    user: {
+      id: user.id,
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      created_at: user.created_at,
+    },
+  });
 }
 
 export async function logout(req: Request, res: Response): Promise<void> {

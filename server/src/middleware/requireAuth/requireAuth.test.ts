@@ -40,6 +40,8 @@ describe("loadSession", () => {
     const user = {
       id: id,
       email: "u@example.com",
+      first_name: "Test",
+      last_name: "User",
       created_at: new Date("2025-01-01"),
       updated_at: null,
     };
@@ -53,6 +55,8 @@ describe("loadSession", () => {
     expect(res.body.user).toEqual({
       id: id,
       email: "u@example.com",
+      first_name: "Test",
+      last_name: "User",
       created_at: "2025-01-01T00:00:00.000Z",
       updated_at: null,
     });

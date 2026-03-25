@@ -17,12 +17,14 @@ function hashSessionToken(token: string): string {
 export async function createUser(
   email: string,
   password: string,
+  firstName: string,
+  lastName: string,
   client?: PoolClient,
 ): Promise<User> {
   const password_hash = await bcrypt.hash(password, SALT_ROUNDS);
   const result = await query<User & { password_hash: string }>(
-    "INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email, created_at, updated_at",
-    [email.toLowerCase().trim(), password_hash],
+    "INSERT INTO users (email, password_hash, first_name, last_name) VALUES ($1, $2, $3, $4) RETURNING id, email, first_name, last_name, created_at, updated_at",
+    [email.toLowerCase().trim(), password_hash, firstName.trim(), lastName.trim()],
     client,
   );
   const row = result.rows[0];
@@ -34,7 +36,7 @@ export async function findUserByEmail(
   email: string,
 ): Promise<(User & { password_hash: string }) | null> {
   const result = await query<User & { password_hash: string }>(
-    "SELECT id, email, password_hash, created_at, updated_at FROM users WHERE email = $1",
+    "SELECT id, email, first_name, last_name, password_hash, created_at, updated_at FROM users WHERE email = $1",
     [email.toLowerCase().trim()],
   );
   return result.rows[0] ?? null;
@@ -42,7 +44,7 @@ export async function findUserByEmail(
 
 export async function findUserById(id: string): Promise<User | null> {
   const result = await query<User>(
-    "SELECT id, email, created_at, updated_at FROM users WHERE id = $1",
+    "SELECT id, email, first_name, last_name, created_at, updated_at FROM users WHERE id = $1",
     [id],
   );
   return result.rows[0] ?? null;
@@ -68,7 +70,7 @@ export async function createSession(userId: string, client?: PoolClient): Promis
 export async function getSessionWithUser(sessionId: string): Promise<User | null> {
   const idHash = hashSessionToken(sessionId);
   const result = await query<User>(
-    `SELECT u.id, u.email, u.created_at, u.updated_at
+    `SELECT u.id, u.email, u.first_name, u.last_name, u.created_at, u.updated_at
      FROM sessions s
      INNER JOIN users u ON u.id = s.user_id
      WHERE s.id = $1 AND s.expires_at > NOW()`,
@@ -111,9 +113,11 @@ export async function loginUser(userId: string): Promise<string> {
 export async function createUserAndSession(
   email: string,
   password: string,
+  firstName: string,
+  lastName: string,
 ): Promise<{ user: User; sessionId: string }> {
   return withTransaction(async (client) => {
-    const user = await createUser(email, password, client);
+    const user = await createUser(email, password, firstName, lastName, client);
     const sessionId = await createSession(user.id, client);
     return { user, sessionId };
   });

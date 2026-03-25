@@ -30,6 +30,8 @@ app.get(
       req.user = {
         id,
         email: "user@example.com",
+        first_name: "Test",
+        last_name: "User",
         created_at: new Date("2025-01-01"),
         updated_at: null,
       };
@@ -44,6 +46,8 @@ app.use(errorHandler);
 const mockUser: User & { password_hash: string } = {
   id,
   email: "user@example.com",
+  first_name: "Test",
+  last_name: "User",
   password_hash: "hashed",
   created_at: new Date("2025-01-01"),
   updated_at: null,
@@ -67,26 +71,39 @@ describe("auth handlers", () => {
         sessionId: "session-id",
       });
 
-      const res = await request(app)
-        .post("/register")
-        .send({ email: "user@example.com", password: "password123" });
+      const res = await request(app).post("/register").send({
+        email: "user@example.com",
+        password: "password123",
+        first_name: "Test",
+        last_name: "User",
+      });
 
       expect(res.status).toBe(201);
       expect(res.body.user).toEqual({
         id,
         email: "user@example.com",
+        first_name: "Test",
+        last_name: "User",
         created_at: "2025-01-01T00:00:00.000Z",
       });
       expect(res.headers["set-cookie"]).toBeDefined();
-      expect(authRepo.createUserAndSession).toHaveBeenCalledWith("user@example.com", "password123");
+      expect(authRepo.createUserAndSession).toHaveBeenCalledWith(
+        "user@example.com",
+        "password123",
+        "Test",
+        "User",
+      );
     });
     it("returns 409 on unique violation (23505)", async () => {
       const err = Object.assign(new Error("duplicate key"), { code: "23505" });
       vi.mocked(authRepo.createUserAndSession).mockRejectedValueOnce(err);
 
-      const res = await request(app)
-        .post("/register")
-        .send({ email: "user@example.com", password: "password123" });
+      const res = await request(app).post("/register").send({
+        email: "user@example.com",
+        password: "password123",
+        first_name: "Test",
+        last_name: "User",
+      });
 
       expect(res.status).toBe(409);
       expect(res.body.error.message).toBe("Email already registered");
@@ -94,9 +111,12 @@ describe("auth handlers", () => {
     it("returns 500 on other errors", async () => {
       vi.mocked(authRepo.createUserAndSession).mockRejectedValueOnce(new Error("DB error"));
 
-      const res = await request(app)
-        .post("/register")
-        .send({ email: "user@example.com", password: "password123" });
+      const res = await request(app).post("/register").send({
+        email: "user@example.com",
+        password: "password123",
+        first_name: "Test",
+        last_name: "User",
+      });
 
       expect(res.status).toBe(500);
       expect(res.body.error.message).toBeDefined();
@@ -143,6 +163,8 @@ describe("auth handlers", () => {
       expect(res.body.user).toEqual({
         id,
         email: "user@example.com",
+        first_name: "Test",
+        last_name: "User",
         created_at: "2025-01-01T00:00:00.000Z",
       });
       expect(res.headers["set-cookie"]).toBeDefined();
@@ -195,6 +217,8 @@ describe("auth handlers", () => {
       expect(res.body.user).toEqual({
         id,
         email: "user@example.com",
+        first_name: "Test",
+        last_name: "User",
         created_at: "2025-01-01T00:00:00.000Z",
         updated_at: null,
       });

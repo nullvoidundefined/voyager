@@ -23,10 +23,10 @@ export default function Home() {
         <div className={styles.landing}>
             <section className={styles.hero}>
                 <h1 className={styles.title}>
-                    Where do you want to go
+                    Where do you want to go,
                     <br />
                     <span className={styles.accent}>
-                        {user ? user.email.split('@')[0] : 'explorer'}?
+                        {user?.first_name ?? 'explorer'}?
                     </span>
                 </h1>
                 <p className={styles.subtitle}>
@@ -35,11 +35,8 @@ export default function Home() {
                     build a complete itinerary.
                 </p>
                 <div className={styles.ctas}>
-                    <Link href="/login" className={styles.primaryCta}>
+                    <Link href="/register" className={styles.primaryCta}>
                         Start Planning
-                    </Link>
-                    <Link href="/login" className={styles.secondaryCta}>
-                        Sign In
                     </Link>
                 </div>
             </section>

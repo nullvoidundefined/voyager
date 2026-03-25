@@ -54,7 +54,8 @@ export default function RegisterPage() {
     const [step, setStep] = useState<1 | 2>(1);
 
     // Step 1 fields
-    const [name, setName] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -70,7 +71,7 @@ export default function RegisterPage() {
         e.preventDefault();
         setError('');
 
-        if (!name || !email || !password) {
+        if (!firstName || !lastName || !email || !password) {
             setError('Please fill in all fields.');
             return;
         }
@@ -99,7 +100,7 @@ export default function RegisterPage() {
         setToast('');
 
         try {
-            await signup(email, password);
+            await signup(email, password, firstName, lastName);
             await put('/user-preferences', { dietary, intensity, social });
             router.push('/trips/new');
         } catch (err) {
@@ -153,16 +154,32 @@ export default function RegisterPage() {
                         */}
 
                         <form onSubmit={handleStepOne} className={styles.form}>
-                            <label className={styles.field}>
-                                <span>Name</span>
-                                <input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder="Your name"
-                                    autoComplete="name"
-                                />
-                            </label>
+                            <div className={styles.nameRow}>
+                                <label className={styles.field}>
+                                    <span>First name</span>
+                                    <input
+                                        type="text"
+                                        value={firstName}
+                                        onChange={(e) =>
+                                            setFirstName(e.target.value)
+                                        }
+                                        placeholder="First name"
+                                        autoComplete="given-name"
+                                    />
+                                </label>
+                                <label className={styles.field}>
+                                    <span>Last name</span>
+                                    <input
+                                        type="text"
+                                        value={lastName}
+                                        onChange={(e) =>
+                                            setLastName(e.target.value)
+                                        }
+                                        placeholder="Last name"
+                                        autoComplete="family-name"
+                                    />
+                                </label>
+                            </div>
 
                             <label className={styles.field}>
                                 <span>Email</span>

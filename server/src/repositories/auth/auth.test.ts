@@ -39,24 +39,26 @@ describe("auth repository", () => {
     const row = {
       id,
       email: "u@example.com",
+      first_name: "Test",
+      last_name: "User",
       created_at: new Date(),
       updated_at: new Date(),
     };
     mockQuery.mockResolvedValueOnce(mockResult([row]));
 
-    const result = await authRepo.createUser("u@example.com", "password123");
+    const result = await authRepo.createUser("u@example.com", "password123", "Test", "User");
 
     expect(result).toEqual(row);
     expect(mockQuery).toHaveBeenCalledWith(
       expect.stringContaining("INSERT INTO users"),
-      ["u@example.com", "hashed"],
+      ["u@example.com", "hashed", "Test", "User"],
       undefined,
     );
   });
 
   it("createUser throws when insert returns no row", async () => {
     mockQuery.mockResolvedValueOnce(mockResult([], 0));
-    await expect(authRepo.createUser("u@example.com", "pwd")).rejects.toThrow(
+    await expect(authRepo.createUser("u@example.com", "pwd", "Test", "User")).rejects.toThrow(
       "Insert returned no row",
     );
   });
@@ -65,6 +67,8 @@ describe("auth repository", () => {
     const row = {
       id: id,
       email: "u@example.com",
+      first_name: "Test",
+      last_name: "User",
       password_hash: "hashed",
       created_at: new Date(),
       updated_at: null,
@@ -87,6 +91,8 @@ describe("auth repository", () => {
     const row = {
       id: id,
       email: "u@example.com",
+      first_name: "Test",
+      last_name: "User",
       created_at: new Date(),
       updated_at: null,
     };
@@ -128,6 +134,8 @@ describe("auth repository", () => {
     const row = {
       id: id,
       email: "u@example.com",
+      first_name: "Test",
+      last_name: "User",
       created_at: new Date(),
       updated_at: null,
     };
@@ -170,18 +178,20 @@ describe("auth repository", () => {
     const userRow = {
       id,
       email: "u@example.com",
+      first_name: "Test",
+      last_name: "User",
       created_at: new Date(),
       updated_at: null,
     };
     mockQuery.mockResolvedValueOnce(mockResult([userRow])).mockResolvedValueOnce(mockResult([], 1));
-    const result = await authRepo.createUserAndSession("u@example.com", "pwd");
+    const result = await authRepo.createUserAndSession("u@example.com", "pwd", "Test", "User");
     expect(result.user).toEqual(userRow);
     expect(typeof result.sessionId).toBe("string");
     expect(result.sessionId).toHaveLength(64);
     expect(mockQuery).toHaveBeenNthCalledWith(
       1,
       expect.stringContaining("INSERT INTO users"),
-      ["u@example.com", "hashed"],
+      ["u@example.com", "hashed", "Test", "User"],
       mockClient,
     );
     expect(mockQuery).toHaveBeenNthCalledWith(

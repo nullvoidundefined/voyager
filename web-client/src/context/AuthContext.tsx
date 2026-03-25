@@ -14,6 +14,8 @@ import { ApiError, get, post } from '@/lib/api';
 export interface User {
     id: string;
     email: string;
+    first_name: string | null;
+    last_name: string | null;
     created_at: string;
     updated_at: string | null;
 }
@@ -22,7 +24,12 @@ interface AuthContextValue {
     user: User | null;
     isLoading: boolean;
     login: (email: string, password: string) => Promise<void>;
-    signup: (email: string, password: string) => Promise<void>;
+    signup: (
+        email: string,
+        password: string,
+        firstName: string,
+        lastName: string,
+    ) => Promise<void>;
     loginWithGoogle: () => Promise<void>;
     logout: () => void;
 }
@@ -65,11 +72,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
 
     const signup = useCallback(
-        async (email: string, password: string) => {
+        async (
+            email: string,
+            password: string,
+            firstName: string,
+            lastName: string,
+        ) => {
             setAuthError(null);
             const res = await post<{ user: User }>('/auth/register', {
                 email,
                 password,
+                first_name: firstName,
+                last_name: lastName,
             });
             queryClient.setQueryData(['auth', 'me'], res.user);
         },

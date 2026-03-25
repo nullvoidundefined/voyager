@@ -17,7 +17,14 @@ interface Trip {
     id: string;
 }
 
-function initials(email: string): string {
+function initials(
+    firstName: string | null,
+    lastName: string | null,
+    email: string,
+): string {
+    if (firstName && lastName) {
+        return (firstName[0] + lastName[0]).toUpperCase();
+    }
     return email.slice(0, 2).toUpperCase();
 }
 
@@ -49,12 +56,21 @@ export default function AccountPage() {
                 <h2>Profile</h2>
                 <div className={styles.card}>
                     <div className={styles.avatar}>
-                        {user ? initials(user.email) : '??'}
+                        {user
+                            ? initials(
+                                  user.first_name,
+                                  user.last_name,
+                                  user.email,
+                              )
+                            : '??'}
                     </div>
                     <div className={styles.info}>
                         <p className={styles.name}>
-                            {user?.email ?? 'Loading...'}
+                            {user?.first_name && user?.last_name
+                                ? `${user.first_name} ${user.last_name}`
+                                : (user?.email ?? 'Loading...')}
                         </p>
+                        <p className={styles.email}>{user?.email}</p>
                         <p className={styles.email}>
                             Member since{' '}
                             {user?.created_at

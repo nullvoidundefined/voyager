@@ -3,18 +3,33 @@ import { describe, expect, it } from "vitest";
 import { loginSchema, registerSchema, userSchema } from "app/schemas/auth.js";
 
 describe("registerSchema", () => {
-  it("accepts valid email and password", () => {
-    const result = registerSchema.safeParse({ email: "a@b.com", password: "12345678" });
+  it("accepts valid email, password, first_name, and last_name", () => {
+    const result = registerSchema.safeParse({
+      email: "a@b.com",
+      password: "12345678",
+      first_name: "Test",
+      last_name: "User",
+    });
     expect(result.success).toBe(true);
   });
 
   it("rejects invalid email", () => {
-    const result = registerSchema.safeParse({ email: "not-email", password: "12345678" });
+    const result = registerSchema.safeParse({
+      email: "not-email",
+      password: "12345678",
+      first_name: "Test",
+      last_name: "User",
+    });
     expect(result.success).toBe(false);
   });
 
   it("rejects password shorter than 8 characters", () => {
-    const result = registerSchema.safeParse({ email: "a@b.com", password: "short" });
+    const result = registerSchema.safeParse({
+      email: "a@b.com",
+      password: "short",
+      first_name: "Test",
+      last_name: "User",
+    });
     expect(result.success).toBe(false);
     expect(result.error!.issues[0]!.message).toBe("Password must be at least 8 characters");
   });
@@ -23,6 +38,13 @@ describe("registerSchema", () => {
     expect(registerSchema.safeParse({}).success).toBe(false);
     expect(registerSchema.safeParse({ email: "a@b.com" }).success).toBe(false);
     expect(registerSchema.safeParse({ password: "12345678" }).success).toBe(false);
+    expect(registerSchema.safeParse({ email: "a@b.com", password: "12345678" }).success).toBe(
+      false,
+    );
+    expect(
+      registerSchema.safeParse({ email: "a@b.com", password: "12345678", first_name: "Test" })
+        .success,
+    ).toBe(false);
   });
 });
 
@@ -47,6 +69,8 @@ describe("userSchema", () => {
   const validUser = {
     id: "550e8400-e29b-41d4-a716-446655440000",
     email: "a@b.com",
+    first_name: "Test",
+    last_name: "User",
     created_at: "2025-01-01T00:00:00.000Z",
     updated_at: "2025-01-02T00:00:00.000Z",
   };

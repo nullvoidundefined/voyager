@@ -19,6 +19,8 @@ const id = uuid();
 const mockUser: User = {
   id,
   email: "user@example.com",
+  first_name: "Test",
+  last_name: "User",
   created_at: new Date("2025-01-01"),
   updated_at: null,
 };
