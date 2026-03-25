@@ -1,5 +1,5 @@
 .page {
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 48px 24px;
 }
@@ -25,10 +25,10 @@
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.15s;
+    transition: background 0.15s;
 
     &:hover {
-        opacity: 0.9;
+        background: var(--accent-hover);
     }
 }
 
