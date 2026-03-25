@@ -38,5 +38,8 @@ The agent loop runs synchronously on the API server (not BullMQ). The agent need
 - Use **TanStack Query** (React Query) for all server state — data fetching, caching, mutations, and optimistic updates. No raw useEffect + fetch patterns.
 - Use **Toast** component for API/server errors — never show raw error messages or stack traces inline. Keep inline `{error}` only for form validation messages.
 
+## Vercel deploy caveat
+Do NOT set `outputFileTracingRoot` in `next.config.ts`. It causes a double-nested path error on Vercel (`/vercel/path0/path0/.next/routes-manifest.json` ENOENT) because Vercel already resolves the project root correctly. The web-client deploys as a standalone Next.js app via `vercel --prod` from the `web-client/` directory.
+
 ## Commit conventions
 - Make **separate commits** for unrelated tasks — do not bundle unrelated changes into one commit.
