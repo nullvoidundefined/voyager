@@ -46,7 +46,7 @@ railway up --detach
 - Railway CLI is linked to the monorepo root, where `Dockerfile.server` lives
 - `railway.toml` sets `dockerfilePath = "Dockerfile.server"`
 - Railway dashboard Build → Dockerfile Path must be `Dockerfile.server`
-- `CORS_ORIGIN` env var is comma-separated: `https://interviewiangreenough.xyz,https://web-client-green-ten.vercel.app`
+- `CORS_ORIGIN` env var is comma-separated: `https://interviewiangreenough.xyz,https://agentic-travel-agent.vercel.app`
 
 ### Deploy pitfalls
 - **Wrong directory:** Railway must run from the monorepo root, not `server/`. Vercel must run from `web-client/`, not the root.
