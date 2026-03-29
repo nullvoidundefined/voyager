@@ -9,19 +9,20 @@
   "scripts": {
     "dev": "pnpm --parallel run dev",
     "build": "pnpm --filter agentic-travel-agent-server build && pnpm --filter agentic-travel-agent-web build",
-    "lint": "pnpm -r run lint",
-    "lint:fix": "pnpm -r run lint:fix",
-    "format": "pnpm -r run format",
-    "format:check": "pnpm -r run format:check",
+    "lint": "eslint --config eslint.config.bottomlessmargaritas.js .",
+    "lint:fix": "eslint --config eslint.config.bottomlessmargaritas.js . --fix",
+    "format": "prettier --config prettier.config.bottomlessmargaritas.js --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+    "format:check": "prettier --config prettier.config.bottomlessmargaritas.js --check \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "test": "pnpm --filter agentic-travel-agent-server run test",
     "test:coverage": "pnpm --filter agentic-travel-agent-server run test:coverage",
-    "prepare": "git rev-parse --git-dir > /dev/null 2>&1 && lefthook install || true",
-    "bottomlessmargaritas:format": "prettier --config prettier.config.bottomlessmargaritas.js --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
-    "bottomlessmargaritas:format:check": "prettier --config prettier.config.bottomlessmargaritas.js --check \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
-    "bottomlessmargaritas:lint": "eslint --config eslint.config.bottomlessmargaritas.js .",
-    "bottomlessmargaritas:lint:fix": "eslint --config eslint.config.bottomlessmargaritas.js . --fix"
+    "prepare": "git rev-parse --git-dir > /dev/null 2>&1 && lefthook install || true"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.28.6",
+    "@bottomlessmargaritas/claude-architecture-prompts": "^2.1.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "lefthook": "^2.1.1"
   },
   "dependencies": {

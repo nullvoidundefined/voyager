@@ -11,7 +11,17 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config([
   {
-    ignores: ['build', 'dist', 'node_modules', '**/*.d.ts', '.turbo'],
+    ignores: [
+      '**/build',
+      '**/dist',
+      '**/node_modules',
+      '**/*.d.ts',
+      '**/.turbo',
+      '**/.next',
+      '**/out',
+      '**/coverage',
+      '**/server/dist/**',
+    ],
   },
   {
     linterOptions: {
@@ -66,7 +76,7 @@ export default tseslint.config([
     },
   },
   {
-    files: ['**/*.ts', '**/*.tsx'],
+    files: ['**/server/**/*.ts', '**/server/**/*.tsx'],
     extends: [...tseslint.configs.recommended],
     languageOptions: {
       ...react.configs.flat.recommended.languageOptions,
@@ -75,7 +85,7 @@ export default tseslint.config([
       parserOptions: {
         ecmaFeatures: { jsx: true },
         ecmaVersion: 'latest',
-        project: ['./tsconfig.json'],
+        project: ['./server/tsconfig.json'],
         sourceType: 'module',
       },
     },
@@ -104,6 +114,100 @@ export default tseslint.config([
       '@typescript-eslint/no-require-imports': 'warn',
       '@typescript-eslint/no-unsafe-assignment': 'warn',
       '@typescript-eslint/no-unused-expressions': 'warn',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
+      '@typescript-eslint/require-await': 'off',
+      'no-undef': 'off',
+      'no-var': 'warn',
+      'prefer-const': 'warn',
+    },
+  },
+  {
+    files: ['**/web-client/**/*.ts', '**/web-client/**/*.tsx'],
+    extends: [...tseslint.configs.recommended],
+    languageOptions: {
+      ...react.configs.flat.recommended.languageOptions,
+      ecmaVersion: 'latest',
+      parser: tsEslintParser,
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+        ecmaVersion: 'latest',
+        project: ['./web-client/tsconfig.json'],
+        sourceType: 'module',
+      },
+    },
+    rules: {
+      '@typescript-eslint/ban-ts-comment': [
+        'warn',
+        { 'ts-ignore': 'allow-with-description' },
+      ],
+      '@typescript-eslint/consistent-type-definitions': 'off',
+      '@typescript-eslint/consistent-type-imports': [
+        'warn',
+        {
+          fixStyle: 'inline-type-imports',
+          prefer: 'type-imports',
+        },
+      ],
+      '@typescript-eslint/no-empty-object-type': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-floating-promises': 'warn',
+      '@typescript-eslint/no-misused-promises': [
+        'warn',
+        {
+          checksVoidReturn: { attributes: false },
+        },
+      ],
+      '@typescript-eslint/no-require-imports': 'warn',
+      '@typescript-eslint/no-unsafe-assignment': 'warn',
+      '@typescript-eslint/no-unused-expressions': 'warn',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
+      '@typescript-eslint/require-await': 'off',
+      'no-undef': 'off',
+      'no-var': 'warn',
+      'prefer-const': 'warn',
+    },
+  },
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    extends: [...tseslint.configs.recommended],
+    languageOptions: {
+      ...react.configs.flat.recommended.languageOptions,
+      ecmaVersion: 'latest',
+      parser: tsEslintParser,
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+    },
+    rules: {
+      '@typescript-eslint/ban-ts-comment': [
+        'warn',
+        { 'ts-ignore': 'allow-with-description' },
+      ],
+      '@typescript-eslint/consistent-type-definitions': 'off',
+      '@typescript-eslint/consistent-type-imports': [
+        'warn',
+        {
+          fixStyle: 'inline-type-imports',
+          prefer: 'type-imports',
+        },
+      ],
+      '@typescript-eslint/no-empty-object-type': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-require-imports': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
