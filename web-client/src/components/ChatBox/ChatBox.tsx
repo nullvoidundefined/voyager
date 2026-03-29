@@ -301,6 +301,7 @@ export function ChatBox({ tripId }: ChatBoxProps) {
           type='text'
           className={styles.input}
           placeholder='Ask the agent to plan your trip...'
+          aria-label='Ask the agent to plan your trip...'
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={isSending}

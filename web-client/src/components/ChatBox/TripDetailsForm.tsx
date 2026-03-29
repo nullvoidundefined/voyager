@@ -77,9 +77,10 @@ export function TripDetailsForm({
     <form onSubmit={handleSubmit} className={styles.form}>
       {fields.map((field) => (
         <div key={field.type} className={styles.field}>
-          <label className={styles.label}>{field.label}</label>
+          <label htmlFor={field.type} className={styles.label}>{field.label}</label>
           {field.type === 'origin' && (
             <input
+              id='origin'
               type='text'
               className={styles.input}
               placeholder='e.g. New York, San Francisco'
@@ -90,6 +91,7 @@ export function TripDetailsForm({
           )}
           {field.type === 'departure_date' && (
             <input
+              id='departure_date'
               type='date'
               className={styles.input}
               min={today}
@@ -100,6 +102,7 @@ export function TripDetailsForm({
           )}
           {field.type === 'return_date' && (
             <input
+              id='return_date'
               type='date'
               className={styles.input}
               min={values.departure_date || today}
@@ -112,6 +115,7 @@ export function TripDetailsForm({
             <div className={styles.budgetInput}>
               <span className={styles.prefix}>$</span>
               <input
+                id='budget'
                 type='number'
                 className={styles.input}
                 placeholder='3000'
@@ -124,6 +128,7 @@ export function TripDetailsForm({
           )}
           {field.type === 'travelers' && (
             <input
+              id='travelers'
               type='number'
               className={styles.input}
               placeholder='2'
