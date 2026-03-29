@@ -1,3 +1,4 @@
+import { ErrorBoundary } from '@/components/ErrorBoundary/ErrorBoundary';
 import { Footer } from '@/components/Footer/Footer';
 import { Header } from '@/components/Header/Header';
 import { AuthProvider } from '@/context/AuthContext';
@@ -39,7 +40,9 @@ export default function RootLayout({
           <AuthProvider>
             <div className={styles.appShell}>
               <Header />
-              <main className={styles.main}>{children}</main>
+              <main className={styles.main}>
+                <ErrorBoundary>{children}</ErrorBoundary>
+              </main>
               <Footer />
             </div>
           </AuthProvider>

@@ -211,6 +211,7 @@ export function MockChatBox() {
           type='text'
           className={styles.input}
           placeholder='Where do you want to go?'
+          aria-label='Where do you want to go?'
           disabled
           readOnly
         />

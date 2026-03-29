@@ -1,191 +1,191 @@
 .page {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 32px 24px 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
 }
 
 .back {
-    display: inline-block;
-    font-size: 14px;
-    color: var(--foreground-muted);
-    margin-bottom: 24px;
-    transition: color 0.15s;
+  display: inline-block;
+  font-size: 14px;
+  color: var(--foreground-muted);
+  margin-bottom: 24px;
+  transition: color 0.15s;
 
-    &:hover {
-        color: var(--accent);
-    }
+  &:hover {
+    color: var(--accent);
+  }
 }
 
 .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 40px;
 
-    h1 {
-        font-size: 32px;
-        font-weight: 700;
-    }
+  h1 {
+    font-size: 32px;
+    font-weight: 700;
+  }
 }
 
 .dates {
-    font-size: 15px;
-    color: var(--foreground-muted);
-    margin-top: 4px;
+  font-size: 15px;
+  color: var(--foreground-muted);
+  margin-top: 4px;
 }
 
 .budgetCard {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    padding: 16px 20px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
 }
 
 .budgetLabel {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--foreground-muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--foreground-muted);
 }
 
 .budgetAmount {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--foreground);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--foreground);
 }
 
 .budgetSpent {
-    font-size: 13px;
-    color: var(--accent);
-    margin-top: 2px;
+  font-size: 13px;
+  color: var(--accent);
+  margin-top: 2px;
 }
 
 .breakdown {
-    margin-bottom: 40px;
+  margin-bottom: 40px;
 
-    h2 {
-        font-size: 20px;
-        font-weight: 600;
-        margin-bottom: 16px;
-    }
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
 }
 
 .costs {
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .costRow {
-    display: flex;
-    justify-content: space-between;
-    padding: 12px 20px;
-    font-size: 14px;
-    border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 20px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border);
 
-    &:last-child {
-        border-bottom: none;
-    }
+  &:last-child {
+    border-bottom: none;
+  }
 
-    &.remaining {
-        font-weight: 700;
-        background: var(--surface);
-        color: var(--accent);
-    }
+  &.remaining {
+    font-weight: 700;
+    background: var(--surface);
+    color: var(--accent);
+  }
 }
 
 .itinerary {
-    margin-bottom: 40px;
+  margin-bottom: 40px;
 
-    h2 {
-        font-size: 20px;
-        font-weight: 600;
-        margin-bottom: 16px;
-    }
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
 }
 
 .days {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .dayCard {
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .dayHeader {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 20px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
 }
 
 .dayNumber {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--accent);
-    padding: 2px 10px;
-    background: var(--accent-light);
-    border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  padding: 2px 10px;
+  background: var(--accent-light);
+  border-radius: 20px;
 }
 
 .dayTitle {
-    font-size: 15px;
-    font-weight: 600;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .dayItems {
-    list-style: none;
-    padding: 16px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  list-style: none;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 
-    li {
-        font-size: 14px;
-        line-height: 1.5;
-        color: var(--foreground);
-    }
+  li {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--foreground);
+  }
 }
 
 .emptyState {
-    text-align: center;
-    padding: 40px 0;
-    color: var(--foreground-muted);
-    font-size: 15px;
+  text-align: center;
+  padding: 40px 0;
+  color: var(--foreground-muted);
+  font-size: 15px;
 }
 
 .chatSection {
-    margin-top: 40px;
+  margin-top: 40px;
 
-    h2 {
-        font-size: 20px;
-        font-weight: 600;
-        margin-bottom: 16px;
-    }
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
 }
 
 @media (max-width: 600px) {
-    .header {
-        flex-direction: column;
-        gap: 16px;
+  .header {
+    flex-direction: column;
+    gap: 16px;
 
-        h1 {
-            font-size: 24px;
-        }
+    h1 {
+      font-size: 24px;
     }
+  }
 
-    .budgetCard {
-        align-items: flex-start;
-        width: 100%;
-    }
+  .budgetCard {
+    align-items: flex-start;
+    width: 100%;
+  }
 }

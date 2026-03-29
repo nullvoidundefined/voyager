@@ -9,17 +9,17 @@ A travel planning assistant powered by an agentic tool-use loop. Users describe 
 
 ## Hosting & Infrastructure
 
-| Service | Provider | Notes |
-|---------|----------|-------|
-| Frontend | Vercel | Next.js |
-| API Server | Railway | Express + TypeScript |
-| Worker | Railway | BullMQ (cache warming, PDF generation) |
-| Database | Neon | PostgreSQL |
-| Cache/Queue | Railway Redis | BullMQ + API response cache |
-| Auth | Supabase Auth | Via `@supabase/ssr` |
-| LLM | Anthropic Claude API | Tool use / function calling, streaming |
+| Service          | Provider                 | Notes                                    |
+| ---------------- | ------------------------ | ---------------------------------------- |
+| Frontend         | Vercel                   | Next.js                                  |
+| API Server       | Railway                  | Express + TypeScript                     |
+| Worker           | Railway                  | BullMQ (cache warming, PDF generation)   |
+| Database         | Neon                     | PostgreSQL                               |
+| Cache/Queue      | Railway Redis            | BullMQ + API response cache              |
+| Auth             | Supabase Auth            | Via `@supabase/ssr`                      |
+| LLM              | Anthropic Claude API     | Tool use / function calling, streaming   |
 | Flights + Hotels | Amadeus Self-Service API | Flight Offers Search v2, Hotel Search v3 |
-| Experiences | Google Places API (New) | Text Search, Place Details |
+| Experiences      | Google Places API (New)  | Text Search, Place Details               |
 
 **Amadeus:** The self-service tier is free and provides a test environment with realistic data. Authentication is OAuth2 client credentials (client_id + client_secret -> access token with 30-minute TTL). Rate limits are strict (10 requests/second on test), so aggressive caching is essential.
 
@@ -28,6 +28,7 @@ A travel planning assistant powered by an agentic tool-use loop. Users describe 
 ## Project Setup
 
 Monorepo: `packages/api`, `packages/worker`, `packages/web`, `packages/common`. Start from **Express + Next.js templates**. Reuse from prior apps:
+
 - Streaming SSE pattern from App 2
 - BullMQ worker pattern from App 3
 - Tool calling pattern from App 3 (expanded to multi-turn agentic loop)
@@ -159,6 +160,7 @@ Redis (Railway)
 - `get_destination_info(city_name)` — Returns IATA code, country, timezone, currency, current weather summary, and best time to visit. Combines cached data with Google Places for geocoding.
 
 **Agent loop implementation:**
+
 1. Express endpoint receives user message + trip context
 2. Build messages array: system prompt + conversation history + current message
 3. Call `anthropic.messages.create()` with tools and `max_tokens`
@@ -168,6 +170,7 @@ Redis (Railway)
 5. Safety: max 15 tool calls per turn to prevent infinite loops
 
 **Progress streaming:** During the agent loop, the server sends SSE events for each tool call:
+
 ```
 event: tool_start
 data: {"tool": "search_flights", "input": {"origin": "SFO", "destination": "BCN", ...}}
@@ -180,6 +183,7 @@ data: {"delta": "Based on the flight options..."}
 ```
 
 **System prompt design:** The system prompt defines the agent's persona (helpful travel planner), instructs it to always check budget before making selections, explains the tool capabilities, and provides guidelines:
+
 - Always search flights first (largest variable cost)
 - Calculate remaining budget after each major booking category
 - Present options with price transparency

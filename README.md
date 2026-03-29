@@ -4,7 +4,7 @@
 
 The Agentic Travel Agent is a full-stack AI-powered travel planning application that demonstrates **agentic tool-use loops** — the capstone pattern in a portfolio of eight progressive AI applications. Users describe a trip in natural language (destination, dates, budget, preferences), and an AI agent autonomously searches live flight, hotel, and experience APIs, reasons about budget constraints between each step, and assembles a complete itinerary — all streamed to the frontend in real time.
 
-Unlike simple chatbot wrappers, the agent makes **3–8 sequential tool calls per turn**, examining results, adjusting strategy, and proactively suggesting alternatives when a selection exceeds the budget. This is the key differentiator: the AI is not just answering questions — it is *acting* on the user's behalf across multiple external systems.
+Unlike simple chatbot wrappers, the agent makes **3–8 sequential tool calls per turn**, examining results, adjusting strategy, and proactively suggesting alternatives when a selection exceeds the budget. This is the key differentiator: the AI is not just answering questions — it is _acting_ on the user's behalf across multiple external systems.
 
 ---
 
@@ -12,7 +12,7 @@ Unlike simple chatbot wrappers, the agent makes **3–8 sequential tool calls pe
 
 ### 1. Conversational Trip Planning
 
-Users interact through a chat interface. A message like *"Plan a week in Barcelona for two, $4,000 budget, we love food and architecture"* kicks off a multi-step agent loop that searches flights, hotels, and experiences without further prompting.
+Users interact through a chat interface. A message like _"Plan a week in Barcelona for two, $4,000 budget, we love food and architecture"_ kicks off a multi-step agent loop that searches flights, hotels, and experiences without further prompting.
 
 ### 2. Agentic Tool-Use Loop
 
@@ -54,10 +54,10 @@ The frontend renders animated progress indicators for each tool, giving users vi
 
 Conversations persist in the database. Users can follow up with refinements:
 
-- *"Find cheaper flights"*
-- *"Switch the hotel to something beachfront"*
-- *"Add a cooking class"*
-- *"What if we fly out a day later?"*
+- _"Find cheaper flights"_
+- _"Switch the hotel to something beachfront"_
+- _"Add a cooking class"_
+- _"What if we fly out a day later?"_
 
 The agent receives the full conversation history plus the current trip state (selected flights, hotels, experiences) injected into the system prompt, so it always knows what has been chosen and can modify the plan intelligently.
 
@@ -127,18 +127,18 @@ agentic-travel-agent/
 
 ### Tech Stack
 
-| Layer | Technology | Deployment |
-|-------|-----------|------------|
-| Frontend | Next.js 15, React 19, TypeScript, SCSS, TanStack React Query v5 | Vercel |
-| API Server | Express 5, TypeScript, Pino logging | Railway |
-| Database | PostgreSQL (Neon), 10 tables, pgvector-ready | Neon |
-| Cache | Redis (ioredis), 1-hour TTL | Railway |
-| AI | Anthropic Claude API (claude-sonnet-4-20250514), tool use | Anthropic |
-| Flight/Hotel Search | SerpApi (Google Flights + Google Hotels engines) | SerpApi |
-| Experiences Search | Google Places API (New) — Text Search | Google Cloud |
-| Auth | Custom session-based (bcrypt + HTTP-only cookies) | — |
-| Testing | Vitest (unit/integration), Playwright (e2e) | — |
-| Dev Tools | ESLint, Prettier, Lefthook (git hooks), pnpm workspaces | — |
+| Layer               | Technology                                                      | Deployment   |
+| ------------------- | --------------------------------------------------------------- | ------------ |
+| Frontend            | Next.js 15, React 19, TypeScript, SCSS, TanStack React Query v5 | Vercel       |
+| API Server          | Express 5, TypeScript, Pino logging                             | Railway      |
+| Database            | PostgreSQL (Neon), 10 tables, pgvector-ready                    | Neon         |
+| Cache               | Redis (ioredis), 1-hour TTL                                     | Railway      |
+| AI                  | Anthropic Claude API (claude-sonnet-4-20250514), tool use       | Anthropic    |
+| Flight/Hotel Search | SerpApi (Google Flights + Google Hotels engines)                | SerpApi      |
+| Experiences Search  | Google Places API (New) — Text Search                           | Google Cloud |
+| Auth                | Custom session-based (bcrypt + HTTP-only cookies)               | —            |
+| Testing             | Vitest (unit/integration), Playwright (e2e)                     | —            |
+| Dev Tools           | ESLint, Prettier, Lefthook (git hooks), pnpm workspaces         | —            |
 
 ### Database Schema (10 Tables)
 

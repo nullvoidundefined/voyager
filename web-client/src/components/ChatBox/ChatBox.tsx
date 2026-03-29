@@ -1,6 +1,12 @@
 'use client';
 
-import { type FormEvent, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  type FormEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { get } from '@/lib/api';
 import { APP_NAME } from '@/lib/constants';
@@ -301,6 +307,7 @@ export function ChatBox({ tripId }: ChatBoxProps) {
           type='text'
           className={styles.input}
           placeholder='Ask the agent to plan your trip...'
+          aria-label='Ask the agent to plan your trip...'
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={isSending}
