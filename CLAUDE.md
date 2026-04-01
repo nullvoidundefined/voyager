@@ -55,7 +55,7 @@ railway up --detach
 - Railway CLI is linked to the monorepo root, where `Dockerfile.server` lives
 - `railway.toml` sets `dockerfilePath = "Dockerfile.server"`
 - Railway dashboard Build → Dockerfile Path must be `Dockerfile.server`
-- `CORS_ORIGIN` env var is comma-separated: `https://interviewiangreenough.xyz,https://agentic-travel-agent.vercel.app`
+- `CORS_ORIGIN` env var is comma-separated: `https://interviewiangreenough.xyz,https://agentic-travel-agent-dmvmh3529-nullvoidundefineds-projects.vercel.app`
 
 ### Deploy pitfalls
 
@@ -66,3 +66,13 @@ railway up --detach
 ## Commit conventions
 
 - Make **separate commits** for unrelated tasks — do not bundle unrelated changes into one commit.
+
+## Shared convention files
+
+Read the relevant file in `.claude/bottomlessmargaritas/` **before writing code** in that layer:
+
+- **Backend:** `.claude/bottomlessmargaritas/CLAUDE-BACKEND.md`
+- **Frontend:** `.claude/bottomlessmargaritas/CLAUDE-FRONTEND.md`
+- **Database:** `.claude/bottomlessmargaritas/CLAUDE-DATABASE.md`
+- **Styling:** `.claude/bottomlessmargaritas/CLAUDE-STYLING.md`
+- **Deployment:** `.claude/bottomlessmargaritas/CLOUD-DEPLOYMENT.md`
