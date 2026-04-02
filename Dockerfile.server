@@ -5,14 +5,16 @@ WORKDIR /app
 # Copy workspace config
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
 
-# Copy server package.json for dependency resolution
+# Copy server and shared-types package.json for dependency resolution
 COPY server/package.json server/package.json
+COPY packages/shared-types/package.json packages/shared-types/package.json
 
 # Install dependencies (production + dev for build)
 RUN pnpm install --frozen-lockfile --filter agentic-travel-agent-server --ignore-scripts
 
-# Copy server source
+# Copy server source and shared-types
 COPY server/ server/
+COPY packages/shared-types/ packages/shared-types/
 
 # Build
 RUN pnpm --filter agentic-travel-agent-server run build
@@ -24,6 +26,8 @@ WORKDIR /app
 
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
 COPY server/package.json server/package.json
+COPY packages/shared-types/package.json packages/shared-types/package.json
+COPY packages/shared-types/ packages/shared-types/
 RUN pnpm install --frozen-lockfile --filter agentic-travel-agent-server --ignore-scripts --prod
 
 COPY --from=base /app/server/dist server/dist
