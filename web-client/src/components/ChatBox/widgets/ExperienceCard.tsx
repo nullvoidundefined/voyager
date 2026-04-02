@@ -1,4 +1,5 @@
 import styles from "./ExperienceCard.module.scss";
+import { MapPreviewCard } from "./MapPreviewCard";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
@@ -8,6 +9,8 @@ interface ExperienceCardProps {
     photoRef: string | null;
     rating: number | null;
     estimatedCost: number | null;
+    latitude?: number | null;
+    longitude?: number | null;
     selected?: boolean;
     onClick?: () => void;
 }
@@ -18,6 +21,8 @@ export function ExperienceCard({
     photoRef,
     rating,
     estimatedCost,
+    latitude,
+    longitude,
     selected = false,
     onClick,
 }: ExperienceCardProps) {
@@ -58,6 +63,14 @@ export function ExperienceCard({
                     <span className={styles.cost}>~${estimatedCost}</span>
                 )}
             </div>
+
+            {latitude != null && longitude != null && (
+                <MapPreviewCard
+                    latitude={latitude}
+                    longitude={longitude}
+                    name={name}
+                />
+            )}
         </button>
     );
 }

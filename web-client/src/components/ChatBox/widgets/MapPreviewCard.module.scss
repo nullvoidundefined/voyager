@@ -1,0 +1,32 @@
+.card {
+    max-width: 300px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.mapImage {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.fallback {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 300px;
+    padding: 10px 14px;
+    margin-top: 8px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-alt);
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--foreground-muted);
+}
+
+.fallbackIcon {
+    font-size: 16px;
+}

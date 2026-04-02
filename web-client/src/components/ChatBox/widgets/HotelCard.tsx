@@ -1,4 +1,5 @@
 import styles from "./HotelCard.module.scss";
+import { MapPreviewCard } from "./MapPreviewCard";
 
 interface HotelCardProps {
     name: string;
@@ -10,6 +11,8 @@ interface HotelCardProps {
     currency: string;
     checkIn: string;
     checkOut: string;
+    latitude?: number | null;
+    longitude?: number | null;
     selected?: boolean;
     onClick?: () => void;
 }
@@ -24,6 +27,8 @@ export function HotelCard({
     currency,
     checkIn,
     checkOut,
+    latitude,
+    longitude,
     selected = false,
     onClick,
 }: HotelCardProps) {
@@ -82,6 +87,14 @@ export function HotelCard({
                     </span>
                 </div>
             </div>
+
+            {latitude != null && longitude != null && (
+                <MapPreviewCard
+                    latitude={latitude}
+                    longitude={longitude}
+                    name={name}
+                />
+            )}
         </button>
     );
 }

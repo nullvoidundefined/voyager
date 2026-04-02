@@ -23,6 +23,11 @@ import { HotelCard } from "./widgets/HotelCard";
 import { ExperienceCard } from "./widgets/ExperienceCard";
 import { SelectableCardGroup } from "./widgets/SelectableCardGroup";
 import { QuickReplyChips, parseQuickReplies } from "./widgets/QuickReplyChips";
+import { InlineBudgetBar } from "./widgets/InlineBudgetBar";
+import {
+    ItineraryTimeline,
+    parseItinerary,
+} from "./widgets/ItineraryTimeline";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
@@ -43,6 +48,9 @@ interface ChatBoxProps {
     hasFlights?: boolean;
     tripStatus?: string;
     onBookTrip?: () => void;
+    budgetTotal?: number | null;
+    budgetAllocated?: number | null;
+    budgetCurrency?: string;
 }
 
 export function ChatBox({
@@ -50,6 +58,9 @@ export function ChatBox({
     hasFlights,
     tripStatus,
     onBookTrip,
+    budgetTotal,
+    budgetAllocated,
+    budgetCurrency,
 }: ChatBoxProps) {
     const queryClient = useQueryClient();
     const [input, setInput] = useState("");
@@ -268,6 +279,11 @@ export function ChatBox({
                             ? parseTripFormFields(msg.content)
                             : null;
 
+                    const itineraryData =
+                        msg.role === "assistant"
+                            ? parseItinerary(msg.content)
+                            : null;
+
                     let formSubmitted = false;
                     let formInitialValues:
                         | Record<string, string>
@@ -302,6 +318,14 @@ export function ChatBox({
                                             submitted={formSubmitted}
                                         />
                                         {renderText(formData.after)}
+                                    </>
+                                ) : itineraryData ? (
+                                    <>
+                                        {renderText(itineraryData.before)}
+                                        <ItineraryTimeline
+                                            days={itineraryData.days}
+                                        />
+                                        {renderText(itineraryData.after)}
                                     </>
                                 ) : (
                                     renderText(msg.content)
@@ -455,6 +479,14 @@ export function ChatBox({
                                                     (h.check_out as string) ??
                                                     ""
                                                 }
+                                                latitude={
+                                                    (h.latitude as number) ??
+                                                    null
+                                                }
+                                                longitude={
+                                                    (h.longitude as number) ??
+                                                    null
+                                                }
                                                 selected={selected}
                                                 onClick={onClick}
                                             />
@@ -509,6 +541,14 @@ export function ChatBox({
                                                     (e.estimated_cost as number) ??
                                                     null
                                                 }
+                                                latitude={
+                                                    (e.latitude as number) ??
+                                                    null
+                                                }
+                                                longitude={
+                                                    (e.longitude as number) ??
+                                                    null
+                                                }
                                                 selected={selected}
                                                 onClick={onClick}
                                             />
@@ -535,6 +575,16 @@ export function ChatBox({
                                 return null;
                             },
                         )}
+
+                        {budgetTotal != null &&
+                            budgetTotal > 0 &&
+                            budgetAllocated != null && (
+                                <InlineBudgetBar
+                                    allocated={budgetAllocated}
+                                    total={budgetTotal}
+                                    currency={budgetCurrency ?? "USD"}
+                                />
+                            )}
                     </div>
                 )}
 

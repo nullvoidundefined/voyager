@@ -381,6 +381,9 @@ export default function TripDetailPage() {
                     hasFlights={hasFlights}
                     tripStatus={trip.status}
                     onBookTrip={() => setShowConfirmation(true)}
+                    budgetTotal={trip.budget_total}
+                    budgetAllocated={allocated}
+                    budgetCurrency={trip.budget_currency}
                 />
             </div>
 
