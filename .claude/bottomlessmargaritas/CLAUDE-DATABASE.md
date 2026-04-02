@@ -46,26 +46,35 @@ export const shorthands = undefined;
  * @param pgm {import("node-pg-migrate").MigrationBuilder}
  */
 export const up = (pgm) => {
-    pgm.createTable("jobs", {
-        id: { type: "uuid", primaryKey: true, default: pgm.func("gen_random_uuid()") },
-        user_id: { type: "uuid", notNull: true, references: "users", onDelete: "CASCADE" },
-        title: { type: "varchar(255)" },
-        status: { type: "varchar(50)", notNull: true, default: "saved" },
-        requirements: { type: "text[]", default: pgm.func("'{}'::text[]") },
-        preferences: { type: "jsonb", default: pgm.func("'{}'::jsonb") },
-        created_at: { type: "timestamptz", default: pgm.func("NOW()") },
-        updated_at: { type: "timestamptz", default: pgm.func("NOW()") },
-    });
+  pgm.createTable('jobs', {
+    id: {
+      type: 'uuid',
+      primaryKey: true,
+      default: pgm.func('gen_random_uuid()'),
+    },
+    user_id: {
+      type: 'uuid',
+      notNull: true,
+      references: 'users',
+      onDelete: 'CASCADE',
+    },
+    title: { type: 'varchar(255)' },
+    status: { type: 'varchar(50)', notNull: true, default: 'saved' },
+    requirements: { type: 'text[]', default: pgm.func("'{}'::text[]") },
+    preferences: { type: 'jsonb', default: pgm.func("'{}'::jsonb") },
+    created_at: { type: 'timestamptz', default: pgm.func('NOW()') },
+    updated_at: { type: 'timestamptz', default: pgm.func('NOW()') },
+  });
 
-    pgm.createIndex("jobs", "user_id");
-    pgm.createIndex("jobs", "created_at");
+  pgm.createIndex('jobs', 'user_id');
+  pgm.createIndex('jobs', 'created_at');
 };
 
 /**
  * @param pgm {import("node-pg-migrate").MigrationBuilder}
  */
 export const down = (pgm) => {
-    pgm.dropTable("jobs");
+  pgm.dropTable('jobs');
 };
 ```
 
@@ -104,6 +113,7 @@ export const down = (pgm) => {
 ### Timestamps
 
 Every table includes:
+
 ```javascript
 created_at: { type: "timestamptz", default: pgm.func("NOW()") },
 updated_at: { type: "timestamptz", default: pgm.func("NOW()") },
@@ -205,11 +215,11 @@ pgm.dropType("trip_status");
 
 ```javascript
 // Single column
-pgm.createIndex("jobs", "user_id");
-pgm.createIndex("jobs", "created_at");
+pgm.createIndex('jobs', 'user_id');
+pgm.createIndex('jobs', 'created_at');
 
 // Multi-column
-pgm.createIndex("messages", ["conversation_id", "created_at"]);
+pgm.createIndex('messages', ['conversation_id', 'created_at']);
 
 // Create indexes in the same migration as the table
 ```
@@ -248,11 +258,11 @@ export async function withTransaction<T>(
 
 ```typescript
 const result = await query<Job>(
-    `SELECT * FROM jobs
+  `SELECT * FROM jobs
      WHERE user_id = $1
      ORDER BY created_at DESC
      LIMIT $2 OFFSET $3`,
-    [userId, limit, offset],
+  [userId, limit, offset],
 );
 ```
 
@@ -306,17 +316,17 @@ const result = await query<Job>(
 
 ## Type Mapping
 
-| PostgreSQL | TypeScript | Zod |
-|-----------|-----------|-----|
-| `uuid` | `string` | `z.string().uuid()` |
-| `varchar(n)` | `string \| null` | `z.string().max(n).nullable()` |
-| `text` | `string \| null` | `z.string().nullable()` |
-| `text[]` | `string[]` | `z.array(z.string())` |
-| `integer` | `number` | `z.number().int()` |
-| `boolean` | `boolean` | `z.boolean()` |
-| `jsonb` | `Record<string, unknown>` | `z.record(z.unknown())` |
-| `timestamptz` | `Date` or `string` | `z.coerce.date()` |
-| custom enum | string union | `z.enum(["a", "b", "c"])` |
+| PostgreSQL    | TypeScript                | Zod                            |
+| ------------- | ------------------------- | ------------------------------ |
+| `uuid`        | `string`                  | `z.string().uuid()`            |
+| `varchar(n)`  | `string \| null`          | `z.string().max(n).nullable()` |
+| `text`        | `string \| null`          | `z.string().nullable()`        |
+| `text[]`      | `string[]`                | `z.array(z.string())`          |
+| `integer`     | `number`                  | `z.number().int()`             |
+| `boolean`     | `boolean`                 | `z.boolean()`                  |
+| `jsonb`       | `Record<string, unknown>` | `z.record(z.unknown())`        |
+| `timestamptz` | `Date` or `string`        | `z.coerce.date()`              |
+| custom enum   | string union              | `z.enum(["a", "b", "c"])`      |
 
 ---
 

@@ -6,16 +6,17 @@ This directory contains standardized architecture and coding conventions for ful
 
 **Read the relevant file(s) before writing any code or running any deployment.** Use the guide that matches what you are working on — do not skip this step.
 
-| File | When to read | Covers |
-|------|-------------|--------|
-| `CLAUDE-FRONTEND.md` | Any frontend work | Components, hooks, state, API calls, Next.js patterns, formatting |
-| `CLAUDE-BACKEND.md` | Any backend work | Express layers, handlers, repos, services, validation, formatting |
-| `CLAUDE-DATABASE.md` | Writing or modifying migrations, queries, or schema | Schema design, migrations, SQL patterns, type mapping |
-| `CLAUDE-STYLING.md` | Any frontend styling work | SCSS modules, CSS custom properties, responsive, typography |
-| `CLOUD-DEPLOYMENT.md` | Any deployment task | Deploy workflow, env var management, secrets, staging vs production |
-| `CLAUDE-MULTI-REPO.md` | Work spanning multiple repos or using parallel agents | Audit-first workflow, prompt minimization, agent batching |
+| File                   | When to read                                          | Covers                                                              |
+| ---------------------- | ----------------------------------------------------- | ------------------------------------------------------------------- |
+| `CLAUDE-FRONTEND.md`   | Any frontend work                                     | Components, hooks, state, API calls, Next.js patterns, formatting   |
+| `CLAUDE-BACKEND.md`    | Any backend work                                      | Express layers, handlers, repos, services, validation, formatting   |
+| `CLAUDE-DATABASE.md`   | Writing or modifying migrations, queries, or schema   | Schema design, migrations, SQL patterns, type mapping               |
+| `CLAUDE-STYLING.md`    | Any frontend styling work                             | SCSS modules, CSS custom properties, responsive, typography         |
+| `CLOUD-DEPLOYMENT.md`  | Any deployment task                                   | Deploy workflow, env var management, secrets, staging vs production |
+| `CLAUDE-MULTI-REPO.md` | Work spanning multiple repos or using parallel agents | Audit-first workflow, prompt minimization, agent batching           |
 
 **Quick reference — which file applies:**
+
 - Writing a React component or page → `CLAUDE-FRONTEND.md` + `CLAUDE-STYLING.md`
 - Writing an Express route, service, or repo → `CLAUDE-BACKEND.md`
 - Writing a BullMQ worker → `CLAUDE-BACKEND.md`

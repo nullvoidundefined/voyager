@@ -69,12 +69,12 @@ Railway Project
 
 ### Environment Variables — Required for Every Service
 
-| Variable | Value | Notes |
-|----------|-------|-------|
-| `NODE_ENV` | `production` or `staging` | **Always set. Never omit.** |
-| `PORT` | Railway injects this | Do not hardcode |
+| Variable       | Value                        | Notes                                                 |
+| -------------- | ---------------------------- | ----------------------------------------------------- |
+| `NODE_ENV`     | `production` or `staging`    | **Always set. Never omit.**                           |
+| `PORT`         | Railway injects this         | Do not hardcode                                       |
 | `DATABASE_URL` | PostgreSQL connection string | Use pooled URL for the API, direct URL for migrations |
-| `REDIS_URL` | Redis URL | Required if using BullMQ or caching |
+| `REDIS_URL`    | Redis URL                    | Required if using BullMQ or caching                   |
 
 Add app-specific vars (e.g., `CLOUDFLARE_ACCOUNT_ID`, `CORS_ORIGIN`) directly as Railway env vars. Store sensitive API keys in a secret manager.
 
@@ -134,6 +134,7 @@ Sensitive API keys should be stored in a secret manager and fetched at process s
 ### How It Works
 
 Each service loads secrets at startup via a secrets config module:
+
 - In **development** (`NODE_ENV !== "production"`): skipped — use `.env` file values
 - In **production** without secret manager credentials: logs a warning and falls back to env vars
 - In **production** with credentials configured: fetches all secrets before any app code initializes
@@ -170,13 +171,13 @@ All user-uploaded files and generated documents should be stored in Cloudflare R
 
 ### Required Variables (API service)
 
-| Variable | Notes |
-|----------|-------|
-| `CLOUDFLARE_ACCOUNT_ID` | From Cloudflare dashboard |
-| `CLOUDFLARE_R2_BUCKET` | Bucket name |
-| `CLOUDFLARE_R2_ACCESS_KEY_ID` | R2 API token — use separate tokens per environment |
-| `CLOUDFLARE_R2_SECRET_ACCESS_KEY` | R2 API token secret (store in secret manager) |
-| `CLOUDFLARE_R2_PUBLIC_URL` | Public bucket URL or custom domain (if bucket is public) |
+| Variable                          | Notes                                                    |
+| --------------------------------- | -------------------------------------------------------- |
+| `CLOUDFLARE_ACCOUNT_ID`           | From Cloudflare dashboard                                |
+| `CLOUDFLARE_R2_BUCKET`            | Bucket name                                              |
+| `CLOUDFLARE_R2_ACCESS_KEY_ID`     | R2 API token — use separate tokens per environment       |
+| `CLOUDFLARE_R2_SECRET_ACCESS_KEY` | R2 API token secret (store in secret manager)            |
+| `CLOUDFLARE_R2_PUBLIC_URL`        | Public bucket URL or custom domain (if bucket is public) |
 
 ### Bucket Naming Convention
 
@@ -214,18 +215,18 @@ Before promoting a staging deploy to production:
 
 ## Common Mistakes
 
-| Mistake | Fix |
-|---------|-----|
-| Forgetting `NODE_ENV` | Always set it explicitly — never rely on a default |
-| Using the same storage bucket for staging and prod | Use separate buckets per environment |
-| Running migrations from the worker | Always run from the API service |
-| Hardcoding `PORT` | Use `process.env.PORT` — Railway injects it |
-| Deploying without a healthcheck | Add `/health` and configure it in Railway before first production deploy |
-| Using the pooled DB URL for migrations | Use the direct (non-pooled) URL for migrations only |
-| Setting API keys as Railway env vars | Put them in a secret manager |
-| `rejectUnauthorized: false` in db pool | Always use the env-var-controlled pattern — see Security Rules above |
-| `CORS_ORIGIN` pointing to `localhost` in production | Set `CORS_ORIGIN` to the Vercel stable URL before first deploy |
-| `CORS_ORIGIN` containing a preview hash URL | Use the stable project alias, not a per-deployment hash URL |
+| Mistake                                             | Fix                                                                      |
+| --------------------------------------------------- | ------------------------------------------------------------------------ |
+| Forgetting `NODE_ENV`                               | Always set it explicitly — never rely on a default                       |
+| Using the same storage bucket for staging and prod  | Use separate buckets per environment                                     |
+| Running migrations from the worker                  | Always run from the API service                                          |
+| Hardcoding `PORT`                                   | Use `process.env.PORT` — Railway injects it                              |
+| Deploying without a healthcheck                     | Add `/health` and configure it in Railway before first production deploy |
+| Using the pooled DB URL for migrations              | Use the direct (non-pooled) URL for migrations only                      |
+| Setting API keys as Railway env vars                | Put them in a secret manager                                             |
+| `rejectUnauthorized: false` in db pool              | Always use the env-var-controlled pattern — see Security Rules above     |
+| `CORS_ORIGIN` pointing to `localhost` in production | Set `CORS_ORIGIN` to the Vercel stable URL before first deploy           |
+| `CORS_ORIGIN` containing a preview hash URL         | Use the stable project alias, not a per-deployment hash URL              |
 
 ---
 

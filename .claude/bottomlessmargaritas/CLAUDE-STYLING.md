@@ -44,19 +44,19 @@ Define all design tokens as CSS custom properties in `globals.scss`:
 
 ```scss
 :root {
-    // Colors
-    --background: #ffffff;
-    --foreground: #222222;
-    --foreground-muted: #717171;
-    --border: #ebebeb;
-    --surface: #f7f7f7;
-    --surface-alt: #f0f0f0;
-    --surface-hover: #f0f0f0;
-    --surface-active: #e0e0e0;
-    --accent: #3b82f6;
-    --accent-hover: #2563eb;
-    --accent-light: #eff6ff;
-    --background-translucent: rgba(255, 255, 255, 0.92);
+  // Colors
+  --background: #ffffff;
+  --foreground: #222222;
+  --foreground-muted: #717171;
+  --border: #ebebeb;
+  --surface: #f7f7f7;
+  --surface-alt: #f0f0f0;
+  --surface-hover: #f0f0f0;
+  --surface-active: #e0e0e0;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-light: #eff6ff;
+  --background-translucent: rgba(255, 255, 255, 0.92);
 }
 ```
 
@@ -116,6 +116,7 @@ Use separate class names and compose them in JSX:
 ## SCSS Nesting
 
 Use SCSS nesting for:
+
 1. **Pseudo-classes and pseudo-elements** (`&:hover`, `&::before`)
 2. **State modifiers via parent selector** (`.user &`, `.assistant &`)
 3. **Direct child elements** (`p`, `span`, `input` inside a scoped class)
@@ -123,40 +124,42 @@ Use SCSS nesting for:
 
 ```scss
 .bubble {
-    padding: 12px 16px;
-    border-radius: 12px;
-    font-size: 14px;
-    line-height: 1.6;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.6;
 
-    p {
-        margin: 0;
+  p {
+    margin: 0;
 
-        &:empty {
-            height: 8px;
-        }
+    &:empty {
+      height: 8px;
     }
+  }
 }
 
 .user .bubble {
-    background: var(--accent);
-    color: #fff;
-    border-bottom-right-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  border-bottom-right-radius: 4px;
 }
 
 .navLink {
-    padding: 8px 16px;
-    color: var(--foreground-muted);
-    transition: background 0.15s, color 0.15s;
+  padding: 8px 16px;
+  color: var(--foreground-muted);
+  transition:
+    background 0.15s,
+    color 0.15s;
 
-    &:hover {
-        background: var(--surface-hover);
-        color: var(--foreground);
-    }
+  &:hover {
+    background: var(--surface-hover);
+    color: var(--foreground);
+  }
 
-    &.active {
-        background: var(--surface-active);
-        font-weight: 600;
-    }
+  &.active {
+    background: var(--surface-active);
+    font-weight: 600;
+  }
 }
 ```
 
@@ -175,22 +178,22 @@ Use `@media` queries nested inside the class they modify:
 
 ```scss
 .features {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
 }
 
 @media (max-width: 800px) {
-    .features {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-    }
+  .features {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
 }
 
 @media (max-width: 480px) {
-    .features {
-        grid-template-columns: 1fr;
-    }
+  .features {
+    grid-template-columns: 1fr;
+  }
 }
 ```
 
@@ -248,25 +251,25 @@ $bp-desktop: 1200px;
 
 ```scss
 .primaryButton {
-    padding: 12px 28px;
-    border: none;
-    border-radius: 10px;
-    background: var(--accent);
-    color: #fff;
-    font-size: 15px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: background 0.15s;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
 
-    &:hover:not(:disabled) {
-        background: var(--accent-hover);
-    }
+  &:hover:not(:disabled) {
+    background: var(--accent-hover);
+  }
 
-    &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 ```
 
@@ -274,24 +277,24 @@ $bp-desktop: 1200px;
 
 ```scss
 .input {
-    padding: 10px 14px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
-    color: var(--foreground);
-    font-size: 14px;
-    font-family: inherit;
-    outline: none;
-    transition: border-color 0.15s;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--foreground);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
 
-    &::placeholder {
-        color: var(--foreground-muted);
-        opacity: 0.6;
-    }
+  &::placeholder {
+    color: var(--foreground-muted);
+    opacity: 0.6;
+  }
 
-    &:focus {
-        border-color: var(--accent);
-    }
+  &:focus {
+    border-color: var(--accent);
+  }
 }
 ```
 
@@ -309,32 +312,32 @@ $bp-desktop: 1200px;
 
 ```scss
 :root {
-    // Design tokens here
+  // Design tokens here
 }
 
 html,
 body {
-    max-width: 100vw;
-    overflow-x: hidden;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 body {
-    color: var(--foreground);
-    background: var(--background);
-    font-family: var(--font-geist-sans), system-ui, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
 a {
-    color: inherit;
-    text-decoration: none;
+  color: inherit;
+  text-decoration: none;
 }
 ```
 
