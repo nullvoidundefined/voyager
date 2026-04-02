@@ -42,6 +42,17 @@
         opacity: 0.5;
         cursor: not-allowed;
     }
+
+    .locked &:disabled {
+        opacity: 0.8;
+        cursor: default;
+        border-color: transparent;
+        background: var(--surface-alt);
+    }
+}
+
+.locked {
+    opacity: 1;
 }
 
 .budgetInput {

@@ -13,7 +13,11 @@ import { APP_NAME } from "@/lib/constants";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import styles from "./ChatBox.module.scss";
-import { TripDetailsForm, parseTripFormFields } from "./TripDetailsForm";
+import {
+    TripDetailsForm,
+    parseTripFormFields,
+    parseSubmittedValues,
+} from "./TripDetailsForm";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
@@ -228,9 +232,20 @@ export function ChatBox({ tripId }: ChatBoxProps) {
             </div>
           </div>
         )}
-        {allMessages.map((msg) => {
+        {allMessages.map((msg, idx) => {
           const formData =
             msg.role === "assistant" ? parseTripFormFields(msg.content) : null;
+
+          // Check if the form was already submitted by looking at the next message
+          let formSubmitted = false;
+          let formInitialValues: Record<string, string> | undefined;
+          if (formData) {
+            const nextMsg = allMessages[idx + 1];
+            if (nextMsg?.role === "user") {
+              formSubmitted = true;
+              formInitialValues = parseSubmittedValues(nextMsg.content);
+            }
+          }
 
           return (
             <div
@@ -248,6 +263,8 @@ export function ChatBox({ tripId }: ChatBoxProps) {
                       fields={formData.fields}
                       onSubmit={sendMessage}
                       disabled={isSending}
+                      initialValues={formInitialValues}
+                      submitted={formSubmitted}
                     />
                     {renderText(formData.after)}
                   </>
