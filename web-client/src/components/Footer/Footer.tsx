@@ -8,7 +8,7 @@ export function Footer() {
     <footer className={styles.footer}>
       <div className={styles.inner}>
         <div className={styles.brand}>
-          <p className={styles.logo}>{APP_NAME}.</p>
+          <p className={styles.logo}>{APP_NAME}</p>
           <p className={styles.tagline}>AI-powered travel concierge</p>
         </div>
         <nav className={styles.links} aria-label="Footer navigation">

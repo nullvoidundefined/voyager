@@ -31,8 +31,15 @@
     }
 }
 
-.logoAccent {
+.logoIcon {
+    margin-left: 6px;
+    vertical-align: -2px;
     color: var(--accent);
+    transition: transform var(--transition-fast);
+
+    .logo:hover & {
+        transform: translate(2px, -2px);
+    }
 }
 
 .nav {
