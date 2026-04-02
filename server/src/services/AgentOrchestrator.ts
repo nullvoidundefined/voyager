@@ -118,7 +118,11 @@ export class AgentOrchestrator {
           (block): block is Anthropic.TextBlock => block.type === 'text',
         );
         const text = textBlock?.text ?? '';
-        onEvent?.({ type: 'text_delta', content: text });
+        // Only emit text_delta if format_response wasn't already captured
+        // (Claude may respond with minimal text like "true" after format_response)
+        if (!formatResponseData && text) {
+          onEvent?.({ type: 'text_delta', content: text });
+        }
         return {
           response: text,
           toolCallsUsed: toolCalls,
