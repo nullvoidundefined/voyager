@@ -15,20 +15,9 @@ interface ChatBoxProps {
   hasFlights?: boolean;
   tripStatus?: string;
   onBookTrip?: () => void;
-  budgetTotal?: number | null;
-  budgetAllocated?: number | null;
-  budgetCurrency?: string;
 }
 
-export function ChatBox({
-  tripId,
-  hasFlights,
-  tripStatus,
-  onBookTrip,
-  budgetTotal: _budgetTotal,
-  budgetAllocated: _budgetAllocated,
-  budgetCurrency: _budgetCurrency,
-}: ChatBoxProps) {
+export function ChatBox({ tripId, hasFlights, tripStatus, onBookTrip }: ChatBoxProps) {
   const queryClient = useQueryClient();
   const [input, setInput] = useState('');
 

@@ -4,7 +4,7 @@
 
 ## System Architecture
 
-Voyager follows a standard client-server architecture with a conversational AI agent at its core. The frontend is a Next.js 15 App Router application deployed to Vercel. The backend is an Express 5 API deployed to Railway via Docker. PostgreSQL on Neon provides persistence, and Redis on Railway provides caching for external API responses.
+Voyager follows a standard client-server architecture with a conversational AI agent at its core. The frontend is a Next.js 15 App Router application deployed to Vercel. The backend is an Express 5 API deployed to Railway via Docker. PostgreSQL on Neon provides persistence, and Redis on Railway provides caching for external API responses. A `packages/shared-types` workspace package publishes the `ChatNode` discriminated union and supporting interfaces, which are imported by both the server and the frontend.
 
 ```
                     +-------------------+
@@ -13,8 +13,10 @@ Voyager follows a standard client-server architecture with a conversational AI a
                     |                   |
                     |  App Router       |
                     |  TanStack Query   |
+                    |  TanStack Virtual |
                     |  AuthContext      |
-                    |  ChatBox + SSE    |
+                    |  useSSEChat hook  |
+                    |  NodeRenderer     |
                     +--------+----------+
                              |
                     HTTPS (credentials: include)
@@ -27,7 +29,8 @@ Voyager follows a standard client-server architecture with a conversational AI a
                     |  Auth middleware   |
                     |  Chat handler     |
                     |  AgentOrchestrator|
-                    |  Tool executor    |
+                    |  Node Builder     |
+                    |  Enrichment Svc   |
                     +--+------+------+--+
                        |      |      |
             +----------+  +---+---+  +----------+
@@ -35,9 +38,29 @@ Voyager follows a standard client-server architecture with a conversational AI a
       +-----v-----+ +----v----+ +v---------+ +-v--------+
       | PostgreSQL | | Redis   | | SerpApi  | | Google   |
       | (Neon)     | | (Rly)   | | Flights/ | | Places   |
-      |            | | 1hr TTL | | Hotels   | | API      |
-      +------------+ +---------+ +----------+ +----------+
+      |            | | 1hr TTL | | Hotels/  | | API      |
+      +------------+ +---------+ | Cars     | +----------+
+                                 +----------+
+                                       |
+                               +-------v-------+
+                               | State Dept    |
+                               | FCDO          |
+                               | Open-Meteo    |
+                               | Visa Matrix   |
+                               +---------------+
 ```
+
+## Monorepo Packages
+
+```
+/
+  packages/
+    shared-types/       -- ChatNode union, Flight, Hotel, CarRental, Experience, SSEEvent
+  server/               -- Express 5 API
+  web-client/           -- Next.js 15 frontend
+```
+
+`packages/shared-types` is a TypeScript-only package (`@agentic-travel-agent/shared-types`) imported by both `server/` and `web-client/`. It is the single source of truth for the typed chat protocol. Changes to `ChatNode` are immediately reflected in both packages, and TypeScript enforces that every node type has a corresponding component in the frontend's `NodeRenderer`.
 
 ## Backend Architecture
 
@@ -48,12 +71,14 @@ The server follows a strict layered architecture:
 ```
 Routes  -->  Handlers  -->  Services  -->  Repositories  -->  Database
                                |
+                  Node Builder + Enrichment
+                               |
                             Tools  -->  External APIs
 ```
 
 - **Routes** (`server/src/routes/`): Define Express routers, attach middleware like `requireAuth`. Files: `auth.ts`, `trips.ts`, `places.ts`, `userPreferences.ts`.
-- **Handlers** (`server/src/handlers/`): Parse/validate requests, call services or repos, format responses. The `chat` handler (`handlers/chat/chat.ts`) is the most complex -- it loads trip context, sets up SSE, runs the agent loop, and persists messages.
-- **Services** (`server/src/services/`): Business logic. `AgentOrchestrator.ts` is the core service -- a generic agentic loop class. `agent.service.ts` is a legacy wrapper. `serpapi.service.ts` wraps fetch calls to SerpApi. `cache.service.ts` wraps Redis get/set/del.
+- **Handlers** (`server/src/handlers/`): Parse/validate requests, call services or repos, format responses. The `chat` handler (`handlers/chat/chat.ts`) is the most complex -- it loads trip context, sets up SSE, runs the agent loop, appends enrichment nodes, and persists messages.
+- **Services** (`server/src/services/`): Business logic. `AgentOrchestrator.ts` is the core service. `node-builder.ts` maps tool results to ChatNodes. `enrichment.ts` orchestrates auto-enrichment. `serpapi.service.ts` wraps fetch calls to SerpApi. `cache.service.ts` wraps Redis get/set/del.
 - **Repositories** (`server/src/repositories/`): Raw SQL queries via `pg`. No ORM. Files: `auth/auth.ts`, `trips/trips.ts`, `conversations/conversations.ts`, `tool-call-log/tool-call-log.ts`, `userPreferences/userPreferences.ts`.
 - **Tools** (`server/src/tools/`): Each tool file exports a function that the executor dispatches to. `definitions.ts` exports the Anthropic tool schemas. `executor.ts` maps tool names to implementation functions.
 
@@ -97,6 +122,12 @@ Progress events (`tool_start`, `tool_result`, `assistant`) are emitted via callb
 - Filters by star rating and max price per night
 - Caches results in Redis for 1 hour
 
+**search_car_rentals** (`server/src/tools/car-rentals.tool.ts`):
+
+- Calls SerpApi `google_car_rental` engine with pickup location, dates, optional car type
+- Normalizes `SerpApiCarResult` responses into `CarRentalResult` objects (provider, car name, type, price per day, total, features)
+- Returns top 5 results; caches in Redis for 1 hour
+
 **search_experiences** (`server/src/tools/experiences.tool.ts`):
 
 - Calls Google Places Text Search API with location + category keywords
@@ -120,6 +151,75 @@ Progress events (`tool_start`, `tool_result`, `assistant`) are emitted via callb
 
 - Updates trip record in PostgreSQL with destination, dates, origin, budget
 - Requires `ToolContext` (tripId + userId) for authorization
+
+**format_response** (handled in chat handler):
+
+- Required as the agent's final tool call every turn
+- Accepts `text` (markdown), `citations`, `quick_replies`, and optional `advisory` escalation
+- All agent text output goes through this tool -- Claude does not produce free-form text outside it
+- The handler converts this into `text`, `quick_replies`, and `advisory` ChatNodes
+
+### Node Builder Layer
+
+`server/src/services/node-builder.ts` maps raw tool results to `ChatNode` objects:
+
+| Tool result         | ChatNode produced  |
+| ------------------- | ------------------ |
+| `search_flights`    | `flight_tiles`     |
+| `search_hotels`     | `hotel_tiles`      |
+| `search_car_rentals`| `car_rental_tiles` |
+| `search_experiences`| `experience_tiles` |
+| `calculate_remaining_budget` | `budget_bar` |
+| Other tools         | `null` (no node)   |
+
+The node builder also normalizes raw API response shapes into the clean `Flight`, `Hotel`, `CarRental`, and `Experience` interfaces from `shared-types`, assigning UUIDs in the process.
+
+### Auto-Enrichment Service
+
+`server/src/services/enrichment.ts` is called by the chat handler after a destination is resolved. It returns a `ChatNode[]` that is appended to the message stream automatically, without any agent tool calls:
+
+| Source | Output |
+| ------ | ------ |
+| US State Dept advisory API | `advisory` node (severity: info/warning/critical) |
+| UK FCDO advisory API | `advisory` node |
+| Open-Meteo forecast API | `weather_forecast` node (7-day) |
+| Visa matrix (static lookup) | `advisory` node with visa requirements |
+| Driving requirements (static lookup) | `advisory` node with traffic side, license info |
+
+The service uses `Promise.allSettled` for the async sources, so a failure from any single source does not block the others. Coordinates for 25 cities are embedded in the service; destinations not in the list silently skip enrichment.
+
+### Typed Chat Protocol
+
+`packages/shared-types/src/nodes.ts` defines the `ChatNode` discriminated union with 12 variants:
+
+| Type | Description |
+| ---- | ----------- |
+| `text` | Markdown content with optional citations array |
+| `flight_tiles` | Flight search results, selectable |
+| `hotel_tiles` | Hotel search results, selectable |
+| `car_rental_tiles` | Car rental search results, selectable |
+| `experience_tiles` | Experience/activity search results, selectable |
+| `travel_plan_form` | Structured form for collecting trip details |
+| `itinerary` | Day-by-day plan (array of `DayPlan`) |
+| `advisory` | Travel advisory, visa info, driving rules (severity: info/warning/critical) |
+| `weather_forecast` | 7-day weather outlook (array of `WeatherDay`) |
+| `budget_bar` | Budget allocation tracker (allocated, total, currency) |
+| `quick_replies` | Suggested next action buttons |
+| `tool_progress` | Tool execution status indicator (running/done) |
+
+The `ChatNodeOfType<T>` helper type extracts a specific variant for narrowly-typed component props.
+
+### SSE Protocol
+
+The chat endpoint emits these typed SSE event shapes (defined in `SSEEvent` in shared-types):
+
+| Event type | Payload | Purpose |
+| ---------- | ------- | ------- |
+| `node` | `{ node: ChatNode }` | A complete node ready to display |
+| `text_delta` | `{ content: string }` | Streaming text fragment |
+| `tool_progress` | `{ tool_id, tool_name, status }` | Tool execution start/completion |
+| `done` | `{}` | Stream complete |
+| `error` | `{ error: string }` | Error condition |
 
 ### Middleware Stack
 
@@ -149,7 +249,7 @@ Custom session-based auth (not Supabase):
 
 ### Database Schema
 
-11 migrations in `server/migrations/` create:
+13 migrations in `server/migrations/` create:
 
 | Table              | Purpose                                                                 |
 | ------------------ | ----------------------------------------------------------------------- |
@@ -159,19 +259,23 @@ Custom session-based auth (not Supabase):
 | `trip_flights`     | Selected flights for a trip (origin, destination, airline, price, etc.) |
 | `trip_hotels`      | Selected hotels (name, city, star rating, prices, dates)                |
 | `trip_experiences` | Selected experiences (name, category, rating, estimated cost)           |
+| `trip_car_rentals` | Selected car rentals (provider, car name, type, price, dates)           |
 | `conversations`    | One conversation per trip (1:1 relationship, UPSERT on trip_id)         |
-| `messages`         | Conversation messages (role, content, tool_calls_json, token_count)     |
+| `messages`         | Dual-column: `nodes` JSONB for UI + `content`/`tool_calls_json` for agent |
 | `api_cache`        | Unused (caching moved to Redis)                                         |
 | `tool_call_log`    | Observability: tool name, input/result JSON, latency, cache hit, error  |
 | `user_preferences` | Dietary restrictions, travel intensity, social style per user           |
 
+The `messages` table uses a **dual-column pattern**: `nodes` (JSONB `ChatNode[]`) is the display representation; `content` + `tool_calls_json` are the API conversation representation. These evolve independently. Two new columns support the typed protocol: `schema_version` (INTEGER) for forward-compatible rendering, and `sequence` (INTEGER, unique per conversation) for strict ordering.
+
 ### System Prompt
 
-`server/src/prompts/system-prompt.ts` builds a detailed system prompt that:
+`server/src/prompts/system-prompt.ts` builds a consolidated system prompt that:
 
-- Instructs Claude to search flights first (largest cost), then hotels, then experiences
+- Instructs Claude to search flights first (largest cost), then car rentals (if appropriate), then hotels, then experiences
 - Requires `calculate_remaining_budget` after each booking category
 - Requires `update_trip` as the first tool call when user provides destination/dates/budget
+- Requires `format_response` as the LAST tool call every turn (all agent text goes through this tool)
 - Includes a topic guardrail (travel-only)
 - Injects the current date to prevent past-date searches
 - Appends `TripContext` with current trip details, selected bookings, and user preferences
@@ -201,24 +305,34 @@ web-client/src/app/
 ### Key Components
 
 **ChatBox** (`web-client/src/components/ChatBox/ChatBox.tsx`):
-The main conversational interface. Handles:
+The main conversational interface. Coordinates the `useSSEChat` hook, `VirtualizedChat`, and booking action buttons. Handles the `TripDetailsForm` detection and confirmation flow.
 
-- SSE stream reading from `POST /trips/:id/chat`
-- Tool progress indicators (hourglass/checkmark per tool)
-- Message rendering with inline widgets
-- Trip details form detection and rendering
-- Booking actions ("Book This Trip" / "Try Again")
+**useSSEChat** (`web-client/src/components/ChatBox/useSSEChat.ts`):
+Custom hook that manages the SSE stream lifecycle. Reads typed `SSEEvent` objects from the stream and accumulates `streamingNodes` (complete ChatNodes ready to render), `toolProgress` (running/done tool indicators), and `streamingText` (partial text delta). On stream completion, invalidates TanStack Query caches for messages and the trip.
+
+**VirtualizedChat** (`web-client/src/components/ChatBox/VirtualizedChat.tsx`):
+Renders the message list using `@tanstack/react-virtual`. Each `ChatMessage` contains a `nodes: ChatNode[]` array. The virtualizer estimates row heights by node type (e.g., `flight_tiles` = 240px, `budget_bar` = 48px) and measures actual heights after render. Streaming messages are composed into a synthetic `__streaming__` message appended to the list during active turns.
+
+**NodeRenderer** (`web-client/src/components/ChatBox/NodeRenderer.tsx`):
+Component registry -- a switch statement over `ChatNode['type']` that renders the appropriate component. TypeScript's exhaustiveness check ensures every node type in the discriminated union has a registered component. Accepts a `NodeRendererCallbacks` interface for selection/confirmation handlers.
+
+**Node Components** (`web-client/src/components/ChatBox/nodes/`):
+
+- `FlightTiles` -- Renders airline, route, departure time, price. Selectable.
+- `HotelTiles` -- Renders hotel image, name, star rating, price per night, total. Selectable.
+- `CarRentalTiles` -- Renders provider logo, car name, type, price per day, features. Selectable.
+- `ExperienceTiles` -- Renders name, category, rating, estimated cost. Selectable.
+- `AdvisoryCard` -- Renders travel advisories with severity styling (info/warning/critical).
+- `WeatherForecast` -- Renders 7-day forecast with high/low temperatures and condition icons.
+- `BudgetBar` -- Visual progress bar showing allocated vs. total budget with over-budget state.
+- `MarkdownText` -- Renders agent text with `react-markdown` and inline citations.
+- `ToolProgressIndicator` -- Hourglass/checkmark per tool call.
 
 **Widget Components** (`web-client/src/components/ChatBox/widgets/`):
 
-- `FlightCard` -- Displays airline logo, route, departure time, price. Renders as a `<button>` with `aria-pressed`.
-- `HotelCard` -- Displays hotel image, name, star rating, price per night, total. Includes static map preview.
-- `ExperienceCard` -- Displays experience name, category, rating, estimated cost. Includes photo proxy.
-- `SelectableCardGroup` -- Wraps card arrays with select/confirm flow. Horizontal scroll container.
-- `QuickReplyChips` -- Parses assistant text for yes/no questions and renders clickable chip buttons.
-- `InlineBudgetBar` -- Visual progress bar showing allocated vs. total budget with color-coded over-budget state.
-- `ItineraryTimeline` -- Parses and renders day-by-day itinerary from assistant markdown.
-- `TripDetailsForm` -- Detects numbered lists asking for trip details and renders an inline form (origin, dates, budget, travelers).
+- `QuickReplyChips` -- Renders clickable chip buttons for suggested next actions.
+- `ItineraryTimeline` -- Renders day-by-day itinerary.
+- `TripDetailsForm` -- Inline form for collecting origin, dates, budget, travelers.
 
 **BookingConfirmation** (`web-client/src/components/BookingConfirmation/BookingConfirmation.tsx`):
 Modal overlay with three stages: review (cost breakdown + confirm/cancel), booking (spinner animation), confirmed (checkmark animation). Auto-advances between stages.
@@ -226,9 +340,10 @@ Modal overlay with three stages: review (cost breakdown + confirm/cancel), booki
 ### State Management
 
 - **TanStack Query** handles all server state. Query keys: `["auth", "me"]`, `["trips"]`, `["trips", id]`, `["messages", tripId]`, `["preferences"]`.
+- **`useSSEChat`** manages streaming state (nodes, tool progress, streaming text) as component-local state.
+- **`VirtualizedChat`** receives all rendering inputs as props from the ChatBox parent.
 - **AuthContext** (`web-client/src/context/AuthContext.tsx`): Wraps the app. Uses TanStack Query internally for `/auth/me`. Provides `user`, `isLoading`, `login`, `signup`, `logout`.
-- **QueryProvider** (`web-client/src/providers/QueryProvider.tsx`): Configures TanStack QueryClient.
-- Component-local state for: chat input, streaming text, tool progress, selected cards, booking confirmation stage.
+- No client-side store (no Redux, no Zustand) -- all state is server-derived or component-local.
 
 ### API Client
 
@@ -239,7 +354,7 @@ Modal overlay with three stages: review (cost breakdown + confirm/cancel), booki
 - Include `X-Requested-With: XMLHttpRequest` for CSRF
 - Throw `ApiError` with status code and error message on non-2xx responses
 
-The chat endpoint is called directly with `fetch` (not via the API client) because it requires SSE stream reading.
+The chat endpoint is called directly via `fetch` (inside `useSSEChat`, not the API client) because it requires SSE stream reading.
 
 ### Styling
 

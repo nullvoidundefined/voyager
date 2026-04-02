@@ -30,15 +30,10 @@ export interface NodeRendererCallbacks {
 interface NodeRendererProps {
   node: ChatNode;
   callbacks?: NodeRendererCallbacks;
-  // Convenience shorthand — forwarded from VirtualizedChat before full callback wiring
-  onQuickReply?: (text: string) => void;
 }
 
-export function NodeRenderer({ node, callbacks = {}, onQuickReply }: NodeRendererProps) {
-  // Merge top-level onQuickReply shorthand into callbacks
-  const cb: NodeRendererCallbacks = onQuickReply
-    ? { ...callbacks, onQuickReply: callbacks.onQuickReply ?? onQuickReply }
-    : callbacks;
+export function NodeRenderer({ node, callbacks = {} }: NodeRendererProps) {
+  const cb: NodeRendererCallbacks = callbacks;
 
   switch (node.type) {
     case 'text':

@@ -2,8 +2,26 @@ import { cacheGet, cacheSet } from 'app/services/cache.service.js';
 import type { ChatNode } from '@agentic-travel-agent/shared-types';
 
 const CACHE_TTL = 86400; // 24 hours
+const FEED_CACHE_KEY = 'enrichment:state_dept:feed';
 const STATE_DEPT_URL =
   'https://travel.state.gov/content/travel/en/traveladvisories/traveladvisories.json';
+
+async function getAdvisoryFeed(): Promise<Record<string, unknown>[] | null> {
+  const cached = await cacheGet<Record<string, unknown>[]>(FEED_CACHE_KEY);
+  if (cached) return cached;
+
+  try {
+    const response = await fetch(STATE_DEPT_URL);
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    const advisories = (data.advisories ?? data) as Record<string, unknown>[];
+    await cacheSet(FEED_CACHE_KEY, advisories, CACHE_TTL);
+    return advisories;
+  } catch {
+    return null;
+  }
+}
 
 export async function fetchStateDeptAdvisory(
   countryCode: string,
@@ -13,11 +31,8 @@ export async function fetchStateDeptAdvisory(
   if (cached) return cached;
 
   try {
-    const response = await fetch(STATE_DEPT_URL);
-    if (!response.ok) return null;
-
-    const data = await response.json();
-    const advisories = (data.advisories ?? data) as Record<string, unknown>[];
+    const advisories = await getAdvisoryFeed();
+    if (!advisories) return null;
 
     const match = advisories.find(
       (a) =>

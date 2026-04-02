@@ -1,10 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import type { ChatMessage, ChatNode } from '@agentic-travel-agent/shared-types';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
+import { APP_NAME } from '@/lib/constants';
 import { NodeRenderer } from './NodeRenderer';
 import styles from './VirtualizedChat.module.scss';
 
@@ -53,22 +54,29 @@ export function VirtualizedChat({
   const wasAtBottomRef = useRef(true);
 
   // Build a temporary streaming message to append during active turns
-  const streamingMessage: ChatMessage | null =
-    isSending && (streamingNodes.length > 0 || toolProgress.length > 0 || streamingText)
-      ? {
-          id: '__streaming__',
-          role: 'assistant',
-          nodes: [
-            ...toolProgress,
-            ...streamingNodes,
-            ...(streamingText ? [{ type: 'text' as const, content: streamingText }] : []),
-          ],
-          sequence: messages.length + 1,
-          created_at: new Date().toISOString(),
-        }
-      : null;
+  const streamingMessage = useMemo<ChatMessage | null>(
+    () =>
+      isSending && (streamingNodes.length > 0 || toolProgress.length > 0 || streamingText)
+        ? {
+            id: '__streaming__',
+            role: 'assistant',
+            nodes: [
+              ...toolProgress,
+              ...streamingNodes,
+              ...(streamingText ? [{ type: 'text' as const, content: streamingText }] : []),
+            ],
+            sequence: messages.length + 1,
+            created_at: new Date().toISOString(),
+          }
+        : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isSending, streamingNodes, toolProgress, streamingText, messages.length],
+  );
 
-  const allMessages = streamingMessage ? [...messages, streamingMessage] : messages;
+  const allMessages = useMemo(
+    () => (streamingMessage ? [...messages, streamingMessage] : messages),
+    [messages, streamingMessage],
+  );
 
   const virtualizer = useVirtualizer({
     count: allMessages.length,
@@ -123,7 +131,7 @@ export function VirtualizedChat({
               }}
             >
               <div className={styles.roleBadge}>
-                {message.role === 'user' ? 'You' : 'TripGenie'}
+                {message.role === 'user' ? 'You' : APP_NAME}
               </div>
               <div className={styles.bubble}>
                 {message.nodes.map((node, nodeIdx) => (

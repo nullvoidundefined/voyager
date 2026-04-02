@@ -57,18 +57,27 @@ The codebase follows consistent patterns throughout:
 - Every frontend page uses TanStack Query with consistent query key patterns
 - SCSS modules are co-located with their components
 
+### Typed Chat Protocol (Post-Refactor Addition)
+
+The move from regex-based text parsing to a typed `ChatNode` discriminated union is the single most significant architectural improvement in the codebase. The original implementation had the frontend running `parseTripFormFields()`, `parseQuickReplies()`, and `parseItinerary()` against freeform assistant text -- a fragile approach where any change to Claude's phrasing could silently break widget rendering.
+
+The refactored approach inverts this: the server is now responsible for all UI structure decisions. The agent routes all its text through the `format_response` tool (making structured intent explicit), and tool results are converted to typed nodes by the `node-builder` service before they reach the frontend. The frontend's `NodeRenderer` is a pure switch statement over a TypeScript discriminated union -- TypeScript's exhaustiveness check means a new node type added to `shared-types` will produce a compile error until a component is registered.
+
+This is server-driven UI done correctly: the server controls the content shape, the types are shared in a single package (`@agentic-travel-agent/shared-types`), and the frontend is reduced to a rendering layer with no structural inference work.
+
+The `schema_version` column on the `messages` table is a thoughtful addition that enables forward-compatible rendering as the node schema evolves over time. The dual-column pattern (separate `nodes` for the frontend and `content`/`tool_calls_json` for the agent) correctly recognizes that display state and conversation state are different concerns with different consumers and different evolution rates.
+
+### Auto-Enrichment Service
+
+The enrichment service is a well-executed feature addition. By running outside the agent loop (triggered by the server rather than by Claude), it avoids burning tool calls on information that is always useful for any international trip. The `Promise.allSettled` pattern is the right choice -- a failure from any single enrichment source (e.g., a transient FCDO API error) does not block the others or the main agent response.
+
 ---
 
 ## Constructive Suggestions
 
-### ChatBox Component Size
+### ChatBox Composition
 
-`ChatBox.tsx` is the largest component in the frontend at around 560 lines. It handles SSE stream reading, message rendering, tool progress tracking, card rendering, booking actions, and form submission. Consider extracting some of these concerns:
-
-- The SSE stream reading logic (lines 110-235) could become a custom hook like `useChatStream(tripId)` that returns `{ messages, tools, toolResults, streamingText, isSending, sendMessage }`
-- The tool result rendering (lines 365-498) could be extracted into a `ToolResultCards` component
-
-This would make each piece easier to test in isolation and the main ChatBox easier to read.
+The `useSSEChat` hook extraction addressed most of the earlier complexity in `ChatBox.tsx`. The SSE stream reading and node accumulation now live in `useSSEChat`, and `VirtualizedChat` handles all message rendering. `ChatBox` itself is now a coordinator that wires these pieces together with booking confirmation and form submission. This is a good decomposition.
 
 ### Hardcoded Destination Database
 
@@ -88,7 +97,7 @@ The `handleConfirmBooking` function in the trip detail page calls `put(/trips/${
 
 ### Type Safety in Tool Results
 
-The `ChatBox` component uses `Record<string, unknown>` for tool results and casts individual fields with `as string`, `as number`, etc. (e.g., `(f.airline as string) ?? ""`). Consider defining shared TypeScript interfaces for `FlightResult`, `HotelResult`, and `ExperienceResult` that match the server-side types, and importing them in both packages. This would catch shape mismatches at compile time.
+The `packages/shared-types` package now provides `Flight`, `Hotel`, `CarRental`, and `Experience` interfaces shared between server and frontend. The `NodeRenderer` and tile components use these directly from `@agentic-travel-agent/shared-types`, eliminating the previous pattern of `(f.airline as string) ?? ""` casts. This suggestion from the original review has been addressed.
 
 ### Error Messages in Chat
 
@@ -106,16 +115,20 @@ The `cache.service.ts` creates a Redis client lazily on first use (`getRedis()`)
 
 ## Architecture Strengths Summary
 
-| Area             | Strength                                                                           |
-| ---------------- | ---------------------------------------------------------------------------------- |
-| Agent design     | Configurable, testable orchestrator with clean separation of concerns              |
-| Tool system      | Each tool is independently testable with consistent cache/normalize/return pattern |
-| SSE streaming    | Real-time tool progress gives users visibility into what the agent is doing        |
-| Frontend widgets | Rich interactive cards transform plain chat into a visual planning experience      |
-| Security         | Hashed sessions, transactions, rate limiting, CSRF, Helmet -- all present          |
-| Testing          | Comprehensive unit tests for orchestrator, tools, handlers, and middleware         |
-| Deployment       | Multi-stage Docker build, monorepo workspace isolation, clear Railway/Vercel split |
+| Area                  | Strength                                                                                  |
+| --------------------- | ----------------------------------------------------------------------------------------- |
+| Agent design          | Configurable, testable orchestrator with clean separation of concerns                     |
+| Tool system           | Each tool is independently testable with consistent cache/normalize/return pattern        |
+| Typed chat protocol   | Server-driven UI via shared `ChatNode` union; exhaustiveness-checked in `NodeRenderer`    |
+| Shared types package  | Single source of truth for protocol types; TypeScript enforces consistency across packages |
+| Auto-enrichment       | Server-driven context (advisories, weather, visa) without burning agent tool calls        |
+| SSE streaming         | Typed `SSEEvent` protocol gives real-time, structured updates for every turn              |
+| Node builder          | Clean separation between raw tool output and typed UI nodes                               |
+| Frontend architecture | `useSSEChat` + `VirtualizedChat` + `NodeRenderer` -- each layer has a clear responsibility |
+| Security              | Hashed sessions, transactions, rate limiting, CSRF, Helmet -- all present                 |
+| Testing               | Comprehensive unit tests for orchestrator, tools, handlers, and middleware                |
+| Deployment            | Multi-stage Docker build, monorepo workspace isolation, clear Railway/Vercel split        |
 
 ## Final Thoughts
 
-Voyager is a polished demonstration of agentic AI in a real application context. The combination of Claude's tool-use capabilities with live travel APIs, budget-aware reasoning, and an interactive frontend creates a genuinely useful product experience. The code quality is consistently high, the architecture decisions are well-reasoned, and the testing coverage gives confidence in correctness. The suggestions above are refinements to an already strong foundation -- they would improve maintainability and user experience but do not represent fundamental issues.
+Voyager is a polished demonstration of agentic AI in a real application context. The combination of Claude's tool-use capabilities with live travel APIs, budget-aware reasoning, and an interactive frontend creates a genuinely useful product experience. The typed chat protocol refactor elevated the codebase from a working demo to a well-architected system: the server now controls all UI structure decisions, types are shared and enforced across packages, and the frontend is a clean rendering layer with no structural inference work. The code quality is consistently high, the architecture decisions are well-reasoned, and the testing coverage gives confidence in correctness.

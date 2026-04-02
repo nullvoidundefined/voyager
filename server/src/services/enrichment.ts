@@ -48,19 +48,19 @@ export async function getEnrichmentNodes(
   const city = lookupCity(destination);
   if (!city) return [];
 
-  const enrichments = await Promise.allSettled([
+  // Synchronous sources — compute before the async fan-out
+  const drivingNode = getDrivingRequirements(city.country);
+  const visaNode = originCountry ? getVisaRequirement(originCountry, city.country) : null;
+
+  const asyncResults = await Promise.allSettled([
     fetchStateDeptAdvisory(city.country),
     fetchFCDOAdvisory(city.country),
     fetchWeatherForecast(city.lat, city.lon),
-    Promise.resolve(getDrivingRequirements(city.country)),
-    Promise.resolve(
-      originCountry ? getVisaRequirement(originCountry, city.country) : null,
-    ),
   ]);
 
   const nodes: ChatNode[] = [];
 
-  for (const result of enrichments) {
+  for (const result of asyncResults) {
     if (result.status === 'fulfilled' && result.value) {
       if (Array.isArray(result.value)) {
         nodes.push(...result.value);
@@ -69,6 +69,9 @@ export async function getEnrichmentNodes(
       }
     }
   }
+
+  if (drivingNode) nodes.push(drivingNode);
+  if (visaNode) nodes.push(visaNode);
 
   return nodes;
 }

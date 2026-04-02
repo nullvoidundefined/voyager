@@ -23,7 +23,7 @@
 - B) 5
 - C) 6
 - D) 8
-  > **C)** Six tools are defined: `search_flights`, `search_hotels`, `search_experiences`, `calculate_remaining_budget`, `update_trip`, and `get_destination_info`.
+  > **D)** Eight tools are defined: `search_flights`, `search_hotels`, `search_car_rentals`, `search_experiences`, `calculate_remaining_budget`, `update_trip`, `get_destination_info`, and `format_response`.
   > [difficulty:easy]
 
 ---
@@ -107,7 +107,7 @@
 - B) Server-Sent Events (SSE) via text/event-stream
 - C) Long polling with 2-second intervals
 - D) GraphQL subscriptions
-  > **B)** The chat handler in `server/src/handlers/chat/chat.ts` sets `Content-Type: text/event-stream` and writes SSE events (`tool_start`, `tool_result`, `assistant`, `done`, `error`). The frontend reads the stream using `res.body.getReader()` and a `TextDecoder`.
+  > **B)** The chat handler sets `Content-Type: text/event-stream` and emits typed SSE events (`node`, `text_delta`, `tool_progress`, `done`, `error`). The `useSSEChat` hook in the frontend reads the stream using `res.body.getReader()`, parses each event as a typed `SSEEvent`, and accumulates `streamingNodes`, `toolProgress`, and `streamingText` state accordingly.
   > [difficulty:medium]
 
 ---
@@ -196,14 +196,14 @@
 
 ---
 
-**Q17. How does the `TripDetailsForm` component detect when to render inside a chat message?**
-? The parseTripFormFields function analyzes assistant message content.
+**Q17. How does the `TripDetailsForm` component get triggered to render inside a chat message?**
+? Look at the ChatNode type that drives TripDetailsForm rendering.
 
-- A) The assistant sends a special JSON payload with form fields
-- B) The ChatBox checks for a metadata flag on the message object
-- C) The `parseTripFormFields()` function scans for consecutive numbered list items containing keywords like "origin", "budget", "travel dates", and "travelers"
+- A) The frontend scans assistant text for numbered lists with trip-detail keywords
+- B) The backend sends a `travel_plan_form` ChatNode containing a `fields` array; the NodeRenderer renders TripDetailsForm when it encounters this node type
+- C) The ChatBox checks for a metadata flag on the message object
 - D) The backend adds a `form_required: true` field to assistant messages
-  > **C)** `parseTripFormFields()` in `TripDetailsForm.tsx` finds consecutive numbered list lines (`/^\d+\.\s/`), then checks each line for keywords like "origin", "budget", "travel dates", "traveler". If at least 2 fields match, it returns the fields and surrounding text, and `ChatBox` renders the form inline.
+  > **B)** In the refactored typed chat protocol, the agent (via the `format_response` tool) signals that a trip details form is needed by including a `travel_plan_form` ChatNode in the message's `nodes` array. The `NodeRenderer` switch case for `travel_plan_form` hands off to `TripDetailsForm`. The old text-parsing approach (`parseTripFormFields()`) has been replaced by this server-driven mechanism.
   > [difficulty:hard]
 
 ---
@@ -281,14 +281,14 @@
 ---
 
 **Q24. How does the `QuickReplyChips` component decide which chips to show?**
-? The parseQuickReplies function analyzes the assistant's last message.
+? Look at how quick replies are delivered in the typed chat protocol.
 
-- A) The backend sends a list of suggested replies
-- B) It always shows "Yes" and "No" buttons
-- C) `parseQuickReplies()` checks if the text ends with "?" and matches patterns like "Would you like", "Shall I", or "X or Y?" to generate contextual chips
+- A) It always shows "Yes" and "No" buttons
+- B) `parseQuickReplies()` checks if the text ends with "?" and generates contextual chips from the assistant text
+- C) The agent provides them explicitly via the `format_response` tool's `quick_replies` field; they arrive as a `quick_replies` ChatNode
 - D) It shows chips based on the current trip status
-  > **C)** `parseQuickReplies()` returns `null` if the text does not end with `?`. If it matches patterns like `/would you like/i`, `/shall i/i`, `/do you want/i`, it returns `["Yes, please", "No thanks"]`. If it matches an "X or Y?" pattern, it returns the two options as separate chips.
-  > [difficulty:hard]
+  > **C)** In the typed chat protocol, the agent populates the `quick_replies` field in its `format_response` tool call. The chat handler converts this into a `{ type: "quick_replies", options: string[] }` ChatNode. `NodeRenderer` renders it via `QuickReplyChips`, passing the `options` array directly. No text parsing is involved.
+  > [difficulty:medium]
 
 ---
 
@@ -400,14 +400,14 @@
 
 ---
 
-**Q34. How does the `parseTripFormFields` function determine the boundary between "before" text, form fields, and "after" text?**
-? This function splits assistant content into three sections for mixed rendering.
+**Q34. How does the typed chat protocol eliminate the need for text parsing in the frontend?**
+? Consider the old approach (parseTripFormFields, parseQuickReplies, parseItinerary) vs. the new approach.
 
-- A) It looks for special delimiter markers like `---`
-- B) It finds the first and last consecutive numbered list lines, extracts the list block as form fields, and returns everything before the list as "before" and everything after as "after"
-- C) It uses regex to find a JSON block embedded in the text
-- D) The backend marks sections with HTML comments
-  > **B)** The function iterates through lines, tracks `listStart` and `listEnd` indices for consecutive numbered list items (`/^\d+\.\s/`), then returns `{ before: lines[0..listStart], fields: parsed_keywords, after: lines[listEnd+1..end] }`. This allows the ChatBox to render text, then the form, then more text.
+- A) The frontend now uses AI to parse the assistant's text client-side
+- B) The agent uses the `format_response` tool to explicitly declare its response structure (text, citations, quick replies, advisory); other structured data (flight tiles, budget bar, form fields) comes from the node builder mapping tool results to ChatNodes
+- C) The backend sends structured data as HTTP response headers
+- D) The frontend checks for HTML tags injected by the agent
+  > **B)** Previously, the frontend used `parseTripFormFields()`, `parseQuickReplies()`, and `parseItinerary()` to extract structure from assistant freeform text via regex. After the refactor, the server produces an explicit `ChatNode[]` array. The agent's text goes through `format_response` (producing a `text` node and optionally `quick_replies`/`advisory` nodes). Tool results go through the node builder (producing `flight_tiles`, `hotel_tiles`, etc.). The frontend's `NodeRenderer` just switches on node type -- no parsing required.
   > [difficulty:hard]
 
 ---
@@ -481,3 +481,123 @@
 - D) It excludes node_modules entirely and runs from source
   > **B)** The Dockerfile has two stages. The `base` stage installs all dependencies (including devDependencies for TypeScript compilation) and runs `pnpm run build`. The `production` stage starts fresh from `node:22-slim`, installs only production dependencies (`--prod`), and copies just `server/dist` and `server/migrations` from the base stage.
   > [difficulty:hard]
+
+---
+
+**Q41. How many variants does the `ChatNode` discriminated union have?**
+? Count the type branches in packages/shared-types/src/nodes.ts.
+
+- A) 6
+- B) 8
+- C) 10
+- D) 12
+  > **D)** The `ChatNode` union has 12 variants: `text`, `flight_tiles`, `hotel_tiles`, `car_rental_tiles`, `experience_tiles`, `travel_plan_form`, `itinerary`, `advisory`, `weather_forecast`, `budget_bar`, `quick_replies`, and `tool_progress`. TypeScript's exhaustiveness check in `NodeRenderer` ensures all 12 are handled.
+  > [difficulty:easy]
+
+---
+
+**Q42. What is the purpose of the `format_response` tool?**
+? Look at the tool's description in server/src/tools/definitions.ts and the system prompt.
+
+- A) It formats tool results into pretty JSON before logging them
+- B) It is the agent's mandatory final tool call every turn -- all agent text, citations, quick replies, and advisory escalations go through this tool's input fields
+- C) It converts markdown to HTML for the frontend
+- D) It formats the system prompt before sending it to Claude
+  > **B)** `format_response` is required as the agent's last tool call every turn. All of the agent's text goes in the `text` field (no freeform text outside this tool). The `citations`, `quick_replies`, and `advisory` fields let the agent declare structured UI elements. The chat handler converts the `format_response` input into the corresponding ChatNodes (`text`, `quick_replies`, `advisory`).
+  > [difficulty:medium]
+
+---
+
+**Q43. What external sources does the auto-enrichment service use, and which are async vs. synchronous?**
+? Look at server/src/services/enrichment.ts.
+
+- A) All five sources are fetched asynchronously in parallel
+- B) US State Dept, FCDO, and Open-Meteo are fetched asynchronously with Promise.allSettled; visa matrix and driving requirements are synchronous local lookups
+- C) Open-Meteo is synchronous; the advisory sources are async
+- D) All five sources are fetched sequentially to respect rate limits
+  > **B)** `getEnrichmentNodes()` computes `drivingNode` and `visaNode` synchronously from static in-memory tables before the async fan-out. It then calls `Promise.allSettled([fetchStateDeptAdvisory, fetchFCDOAdvisory, fetchWeatherForecast])`. Using `allSettled` means a single source failure does not block the others -- all fulfilled results are collected and a single source error is silently skipped.
+  > [difficulty:hard]
+
+---
+
+**Q44. What is TanStack Virtual used for in this application?**
+? Look at VirtualizedChat.tsx and the useVirtualizer import.
+
+- A) Virtual scrolling for the trip list page
+- B) Virtualizing the chat message list so only the visible messages are in the DOM -- each message's height is estimated by node type and measured after render
+- C) Lazy loading components outside the viewport
+- D) Server-side rendering of the message list
+  > **B)** `VirtualizedChat` uses `useVirtualizer` from `@tanstack/react-virtual` to render only the chat messages currently in the viewport. Each message's estimated height is computed by summing per-node-type estimates (e.g., `flight_tiles = 240px`, `budget_bar = 48px`). After render, actual heights are measured via `measureElement`. This keeps the DOM small even in long conversations with many rich nodes.
+  > [difficulty:medium]
+
+---
+
+**Q45. What is the dual-column pattern in the `messages` table and why is it used?**
+? Look at server/migrations/README.md.
+
+- A) Two columns store the same data in different formats for redundancy
+- B) `nodes` (JSONB ChatNode[]) stores the UI display state; `content` + `tool_calls_json` store the Claude API conversation state. These are separate concerns consumed by different parts of the system and evolve independently.
+- C) One column stores user messages; the other stores assistant messages
+- D) One column stores compressed data; the other stores the decompressed version for fast reads
+  > **B)** The frontend only reads `nodes` -- it never needs to see raw Claude API format. The agent service only reads `content` and `tool_calls_json` -- it reconstructs the API conversation from these. Keeping them separate means the node schema can evolve (new node types, new fields) without touching the conversation reconstruction logic, and vice versa. The `schema_version` column tracks which node shape version a given message was written with.
+  > [difficulty:hard]
+
+---
+
+**Q46. How does the `NodeRenderer` enforce that every `ChatNode` variant has a UI component?**
+? Look at the default case in NodeRenderer.tsx.
+
+- A) It has a runtime check that throws if a node type is unregistered
+- B) It uses TypeScript's `never` type in the default case -- if a node variant is added to the union but not handled in the switch, the TypeScript compiler will error
+- C) It uses a Map of registered components that throws a missing key error
+- D) It relies on ESLint to catch unhandled cases
+  > **B)** The `default` branch in `NodeRenderer` assigns `node` to a `never`-typed variable: `const _exhaustive: never = node`. If a new `ChatNode` variant is added to `shared-types` without a corresponding `case` in the switch, TypeScript will produce a compile error because the unhandled variant cannot be assigned to `never`. This is the exhaustive check pattern.
+  > [difficulty:hard]
+
+---
+
+**Q47. How does the `search_car_rentals` tool differ from `search_flights` in terms of its SerpApi engine parameter?**
+? Look at the serpApiGet calls in flights.tool.ts and car-rentals.tool.ts.
+
+- A) Car rentals use a different API provider entirely (Amadeus)
+- B) Flights use `google_flights`; car rentals use `google_car_rental`
+- C) Both use `google_travel` with a `type` parameter to distinguish
+- D) Car rentals use the same `google_flights` engine with a `vehicle_type=car` parameter
+  > **B)** `searchFlights()` calls `serpApiGet("google_flights", params)` and `searchCarRentals()` calls `serpApiGet("google_car_rental", params)`. Both go through the same `serpApiGet` wrapper and the same Redis cache layer, but they query different SerpApi search engines and normalize different response shapes.
+  > [difficulty:easy]
+
+---
+
+**Q48. What happens to the `schema_version` and `sequence` columns when a new message is inserted?**
+? Look at server/migrations/README.md and the messages table structure.
+
+- A) `schema_version` is set by the frontend; `sequence` is set by a database trigger
+- B) `schema_version` is set by the server at write time to indicate the current node shape version; `sequence` is auto-incremented per conversation and has a unique constraint on `(conversation_id, sequence)` to enforce strict ordering
+- C) Both columns are auto-populated by PostgreSQL defaults
+- D) `sequence` is the same as the message's UUID converted to an integer
+  > **B)** The server sets `schema_version` when persisting a message, allowing the frontend to render older messages gracefully if the node schema changes. `sequence` is incremented by the application on insert (not a database auto-increment) and the unique constraint on `(conversation_id, sequence)` prevents ordering conflicts. Messages are queried and displayed in sequence order, not by `created_at`.
+  > [difficulty:medium]
+
+---
+
+**Q49. What does `useSSEChat` do when the stream ends successfully?**
+? Look at the finally block in useSSEChat.ts.
+
+- A) It triggers a page reload
+- B) It clears streaming state, then invalidates the `["messages", tripId]` and `["trips", tripId]` TanStack Query caches so the persisted message is loaded from the server
+- C) It stores the completed message in localStorage
+- D) It emits a custom DOM event that the ChatBox listens for
+  > **B)** The `finally` block in `sendMessage` clears `isSending`, `toolProgress`, `streamingNodes`, and `streamingText`, then calls `queryClient.invalidateQueries({ queryKey: ["messages", tripId] })` and `queryClient.invalidateQueries({ queryKey: ["trips", tripId] })`. This causes TanStack Query to refetch the conversation, replacing the transient streaming state with the permanently persisted `ChatNode[]` array from the database.
+  > [difficulty:medium]
+
+---
+
+**Q50. What is the `packages/shared-types` workspace package's primary role in the architecture?**
+? Consider what it exports and who imports it.
+
+- A) It provides shared test utilities for both server and frontend test suites
+- B) It is the single source of truth for the typed chat protocol -- it exports the `ChatNode` discriminated union, tile data interfaces, and `SSEEvent` types used by both the Express server (when building and persisting nodes) and the Next.js frontend (when rendering them)
+- C) It provides shared ESLint and Prettier configuration
+- D) It re-exports the Anthropic SDK with preconfigured defaults
+  > **B)** `@agentic-travel-agent/shared-types` exports `ChatNode`, `Flight`, `Hotel`, `CarRental`, `Experience`, `FormField`, `DayPlan`, `WeatherDay`, `Citation`, `SSEEvent`, and helper types like `ChatNodeOfType<T>`. The server imports these types when building nodes in `node-builder.ts` and `enrichment.ts`. The frontend imports them in `NodeRenderer`, `VirtualizedChat`, and `useSSEChat`. Changes to the protocol are made in one place and immediately enforced by the TypeScript compiler in both packages.
+  > [difficulty:medium]

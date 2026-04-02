@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { ChatNode, SSEEvent } from '@agentic-travel-agent/shared-types';
 import { useQueryClient } from '@tanstack/react-query';
@@ -25,6 +25,13 @@ export function useSSEChat({ tripId }: UseSSEChatOptions): UseSSEChatReturn {
   const [toolProgress, setToolProgress] = useState<ChatNode[]>([]);
   const [streamingText, setStreamingText] = useState('');
   const queryClient = useQueryClient();
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   function handleEvent(event: SSEEvent) {
     switch (event.type) {
@@ -57,9 +64,7 @@ export function useSSEChat({ tripId }: UseSSEChatOptions): UseSSEChatReturn {
         break;
 
       case 'done':
-        // Replace streaming state with canonical message from server
-        setStreamingNodes([]);
-        setStreamingText('');
+        // Cleanup is handled in the finally block
         break;
 
       case 'error':
@@ -77,6 +82,11 @@ export function useSSEChat({ tripId }: UseSSEChatOptions): UseSSEChatReturn {
       setToolProgress([]);
       setStreamingText('');
 
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
+      let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+
       try {
         const res = await fetch(`${API_BASE}/trips/${tripId}/chat`, {
           method: 'POST',
@@ -86,13 +96,14 @@ export function useSSEChat({ tripId }: UseSSEChatOptions): UseSSEChatReturn {
             'X-Requested-With': 'XMLHttpRequest',
           },
           body: JSON.stringify({ message }),
+          signal: controller.signal,
         });
 
         if (!res.ok || !res.body) {
           throw new Error(`Chat request failed: ${res.status}`);
         }
 
-        const reader = res.body.getReader();
+        reader = res.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
 
@@ -119,15 +130,23 @@ export function useSSEChat({ tripId }: UseSSEChatOptions): UseSSEChatReturn {
           }
         }
       } catch (err) {
-        console.error('SSE chat error:', err);
-        setStreamingText('Something went wrong. Please try again.');
+        if ((err as Error).name !== 'AbortError') {
+          console.error('SSE chat error:', err);
+          setStreamingText('Something went wrong. Please try again.');
+        }
       } finally {
+        try {
+          await reader?.cancel();
+        } catch {
+          // ignore cancel errors
+        }
+        abortControllerRef.current = null;
         setIsSending(false);
         setToolProgress([]);
-        await queryClient.invalidateQueries({ queryKey: ['messages', tripId] });
-        queryClient.invalidateQueries({ queryKey: ['trips', tripId] });
         setStreamingNodes([]);
         setStreamingText('');
+        await queryClient.invalidateQueries({ queryKey: ['messages', tripId] });
+        queryClient.invalidateQueries({ queryKey: ['trips', tripId] });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

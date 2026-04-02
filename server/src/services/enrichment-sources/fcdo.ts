@@ -32,6 +32,10 @@ const COUNTRY_SLUGS: Record<string, string> = {
   GB: 'uk',
 };
 
+function truncate(text: string, maxLen = 500): string {
+  return text.length > maxLen ? text.slice(0, maxLen - 3) + '...' : text;
+}
+
 function stripHtml(html: string): string {
   return html
     .replace(/<[^>]+>/g, '')
@@ -78,7 +82,7 @@ export async function fetchFCDOAdvisory(
           type: 'advisory',
           severity: 'info',
           title: 'Entry & Visa Requirements',
-          body: body.length > 500 ? body.slice(0, 497) + '...' : body,
+          body: truncate(body),
         });
       }
     }
@@ -92,7 +96,7 @@ export async function fetchFCDOAdvisory(
           type: 'advisory',
           severity: 'info',
           title: 'Health & Vaccination Info',
-          body: body.length > 500 ? body.slice(0, 497) + '...' : body,
+          body: truncate(body),
         });
       }
     }
@@ -113,7 +117,7 @@ export async function fetchFCDOAdvisory(
           type: 'advisory',
           severity: hasDanger ? 'warning' : 'info',
           title: 'Safety & Security',
-          body: body.length > 500 ? body.slice(0, 497) + '...' : body,
+          body: truncate(body),
         });
       }
     }

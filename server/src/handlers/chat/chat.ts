@@ -110,9 +110,11 @@ export async function chat(req: Request, res: Response) {
     nodes: userNodes,
   });
 
-  // Fetch enrichment nodes if trip has a destination
+  // Fetch enrichment nodes only on the first message (no prior history).
+  // Subsequent turns reuse the enrichment already present in the conversation.
+  const isFirstMessage = history.length === 0;
   let enrichmentNodes: ChatNode[] = [];
-  if (trip.destination) {
+  if (trip.destination && isFirstMessage) {
     try {
       enrichmentNodes = await getEnrichmentNodes(
         trip.destination,
