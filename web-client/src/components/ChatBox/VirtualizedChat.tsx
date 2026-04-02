@@ -147,7 +147,7 @@ export function VirtualizedChat({
                     <NodeRenderer
                       key={`${message.id}-${nodeIdx}`}
                       node={node}
-                      callbacks={{ onQuickReply }}
+                      callbacks={{ onQuickReply, onFormSubmit: onQuickReply }}
                     />
                   ))}
                 </div>

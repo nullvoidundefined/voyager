@@ -75,6 +75,12 @@ describe('chat handlers', () => {
         id: tripId,
         user_id: userId,
         destination: 'Barcelona',
+        origin: 'JFK',
+        departure_date: '2026-07-01',
+        return_date: '2026-07-06',
+        budget_total: 3000,
+        budget_currency: 'USD',
+        travelers: 2,
         flights: [],
         hotels: [],
         experiences: [],
@@ -92,6 +98,8 @@ describe('chat handlers', () => {
         conversation_id: convId,
         role: 'user',
         content: 'Plan my trip',
+        sequence: 1,
+        created_at: '2026-01-01T00:00:00Z',
       } as never);
 
       vi.mocked(agentService.runAgentLoop).mockImplementationOnce(
@@ -154,6 +162,12 @@ describe('chat handlers', () => {
         id: tripId,
         user_id: userId,
         destination: 'Barcelona',
+        origin: 'JFK',
+        departure_date: '2026-07-01',
+        return_date: '2026-07-06',
+        budget_total: 3000,
+        budget_currency: 'USD',
+        travelers: 2,
         flights: [],
         hotels: [],
         experiences: [],
@@ -171,6 +185,8 @@ describe('chat handlers', () => {
         conversation_id: convId,
         role: 'user',
         content: 'Hello',
+        sequence: 1,
+        created_at: '2026-01-01T00:00:00Z',
       } as never);
 
       vi.mocked(agentService.runAgentLoop).mockResolvedValueOnce({

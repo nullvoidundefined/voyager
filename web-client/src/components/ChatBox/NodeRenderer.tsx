@@ -2,6 +2,7 @@
 
 import type { ChatNode } from '@agentic-travel-agent/shared-types';
 
+import { TripDetailsForm } from './TripDetailsForm';
 import { ItineraryTimeline } from './widgets/ItineraryTimeline';
 import { QuickReplyChips } from './widgets/QuickReplyChips';
 import { AdvisoryCard } from './nodes/AdvisoryCard';
@@ -20,6 +21,7 @@ export interface NodeRendererCallbacks {
   onConfirmCarRental?: (label: string) => void;
   onConfirmExperience?: (label: string) => void;
   onQuickReply?: (text: string) => void;
+  onFormSubmit?: (message: string) => void;
   disabled?: boolean;
   confirmedFlightId?: string | null;
   confirmedHotelId?: string | null;
@@ -110,10 +112,20 @@ export function NodeRenderer({ node, callbacks = {} }: NodeRendererProps) {
     case 'tool_progress':
       return <ToolProgressIndicator node={node} />;
 
-    case 'travel_plan_form':
-      // travel_plan_form rendering is handled by TripDetailsForm elsewhere;
-      // return null here to avoid double-rendering
-      return null;
+    case 'travel_plan_form': {
+      // Map FormField to TripField for the TripDetailsForm component
+      const tripFields = node.fields.map((f) => ({
+        type: f.name as 'origin' | 'departure_date' | 'return_date' | 'budget' | 'travelers',
+        label: f.label,
+      }));
+      return (
+        <TripDetailsForm
+          fields={tripFields}
+          onSubmit={cb.onFormSubmit ?? (() => {})}
+          disabled={cb.disabled}
+        />
+      );
+    }
 
     default: {
       // Exhaustive check — TypeScript will error if a node type is unhandled

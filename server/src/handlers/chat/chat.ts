@@ -125,6 +125,21 @@ export async function chat(req: Request, res: Response) {
     }
   }
 
+  // Inject a trip details form when key fields are missing
+  const missingFields: Array<{ name: string; label: string; field_type: string; required: boolean }> = [];
+  if (!trip.origin) missingFields.push({ name: 'origin', label: 'Where are you traveling from?', field_type: 'text', required: true });
+  if (!trip.departure_date) missingFields.push({ name: 'departure_date', label: 'Departure date', field_type: 'date', required: true });
+  if (!trip.return_date) missingFields.push({ name: 'return_date', label: 'Return date', field_type: 'date', required: true });
+  if (!trip.budget_total) missingFields.push({ name: 'budget', label: 'Total budget (USD)', field_type: 'number', required: true });
+  if (!trip.travelers || trip.travelers <= 1) missingFields.push({ name: 'travelers', label: 'Number of travelers', field_type: 'number', required: true });
+
+  if (missingFields.length > 0 && isFirstMessage) {
+    enrichmentNodes.push({
+      type: 'travel_plan_form',
+      fields: missingFields,
+    });
+  }
+
   // Typed SSE event emitter
   const onEvent = (event: SSEEvent) => {
     res.write(`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`);

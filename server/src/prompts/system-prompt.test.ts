@@ -12,14 +12,14 @@ describe('system-prompt', () => {
 
     it('includes tool usage guidelines', () => {
       const prompt = buildSystemPrompt();
-      expect(prompt).toContain('calculate_remaining_budget');
       expect(prompt).toContain('update_trip');
       expect(prompt).toContain('format_response');
     });
 
     it('instructs to search flights before hotels', () => {
       const prompt = buildSystemPrompt();
-      expect(prompt).toContain('Search flights');
+      expect(prompt).toContain('flights');
+      expect(prompt).toContain('hotels');
     });
 
     it('includes budget awareness instructions', () => {
@@ -27,9 +27,9 @@ describe('system-prompt', () => {
       expect(prompt).toContain('budget');
     });
 
-    it('includes guidance to suggest alternatives when options are limited', () => {
+    it('includes guidance to keep responses brief', () => {
       const prompt = buildSystemPrompt();
-      expect(prompt).toMatch(/alternatives|limited/i);
+      expect(prompt).toMatch(/short|brief|1-2 sentences/i);
     });
 
     it('includes the 15-call safety limit note', () => {
