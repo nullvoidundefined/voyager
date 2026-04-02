@@ -6,6 +6,7 @@ import { BookingConfirmation } from "@/components/BookingConfirmation/BookingCon
 import { ChatBox } from "@/components/ChatBox/ChatBox";
 import { get, put } from "@/lib/api";
 import { APP_NAME } from "@/lib/constants";
+import { formatCurrency, formatShortDate } from "@/lib/format";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -55,31 +56,6 @@ interface Trip {
     flights: TripFlight[];
     hotels: TripHotel[];
     experiences: TripExperience[];
-}
-
-function formatDate(d: string | null): string {
-    if (!d) {
-        return "TBD";
-    }
-    return new Date(d).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    });
-}
-
-function formatCurrency(
-    amount: number | null,
-    currency: string = "USD",
-): string {
-    if (amount == null) {
-        return "-";
-    }
-    return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency,
-        maximumFractionDigits: 0,
-    }).format(amount);
 }
 
 export default function TripDetailPage() {
@@ -161,8 +137,8 @@ export default function TripDetailPage() {
                 <div>
                     <h1>{trip.destination}</h1>
                     <p className={styles.dates}>
-                        {formatDate(trip.departure_date)} &ndash;{" "}
-                        {formatDate(trip.return_date)}
+                        {formatShortDate(trip.departure_date)} &ndash;{" "}
+                        {formatShortDate(trip.return_date)}
                     </p>
                 </div>
                 <div className={styles.headerRight}>
@@ -300,12 +276,12 @@ export default function TripDetailPage() {
                                 <ul className={styles.dayItems}>
                                     {h.check_in && (
                                         <li>
-                                            Check-in: {formatDate(h.check_in)}
+                                            Check-in: {formatShortDate(h.check_in)}
                                         </li>
                                     )}
                                     {h.check_out && (
                                         <li>
-                                            Check-out: {formatDate(h.check_out)}
+                                            Check-out: {formatShortDate(h.check_out)}
                                         </li>
                                     )}
                                     {h.price_per_night != null && (

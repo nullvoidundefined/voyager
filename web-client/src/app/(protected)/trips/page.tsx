@@ -1,6 +1,7 @@
 "use client";
 
 import { del, get } from "@/lib/api";
+import { formatCurrency, formatShortDate } from "@/lib/format";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 
@@ -23,27 +24,17 @@ function formatDates(
   if (!departure) {
     return "Dates TBD";
   }
-  const fmt = (d: string) =>
-    new Date(d).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
   if (!returnDate) {
-    return fmt(departure);
+    return formatShortDate(departure);
   }
-  return `${fmt(departure)} - ${fmt(returnDate)}`;
+  return `${formatShortDate(departure)} - ${formatShortDate(returnDate)}`;
 }
 
 function formatBudget(amount: number | null, currency: string): string {
   if (amount == null) {
     return "No budget set";
   }
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: 0,
-  }).format(amount);
+  return formatCurrency(amount, currency);
 }
 
 function statusLabel(status: string): string {

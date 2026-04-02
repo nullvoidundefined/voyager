@@ -1,7 +1,7 @@
+import { API_BASE } from "@/lib/api";
+
 import styles from "./ExperienceCard.module.scss";
 import { MapPreviewCard } from "./MapPreviewCard";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 interface ExperienceCardProps {
     name: string;

@@ -1,3 +1,5 @@
+import { formatCurrency } from "@/lib/format";
+
 import styles from "./InlineBudgetBar.module.scss";
 
 interface InlineBudgetBarProps {
@@ -11,14 +13,6 @@ export function InlineBudgetBar({ allocated, total, currency }: InlineBudgetBarP
     const overBudget = allocated > total;
     const remaining = total - allocated;
 
-    const fmt = (n: number) =>
-        new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency,
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-        }).format(Math.abs(n));
-
     return (
         <div className={styles.wrapper}>
             <div className={styles.track}>
@@ -28,9 +22,9 @@ export function InlineBudgetBar({ allocated, total, currency }: InlineBudgetBarP
                 />
             </div>
             <div className={styles.labels}>
-                <span className={styles.allocated}>{fmt(allocated)} allocated</span>
+                <span className={styles.allocated}>{formatCurrency(allocated, currency)} allocated</span>
                 <span className={`${styles.remaining} ${overBudget ? styles.over : ""}`}>
-                    {fmt(Math.abs(remaining))} {overBudget ? "over" : "remaining"}
+                    {formatCurrency(Math.abs(remaining), currency)} {overBudget ? "over" : "remaining"}
                 </span>
             </div>
         </div>

@@ -1,4 +1,6 @@
 import type { Request, Response } from 'express';
+import { Readable } from 'node:stream';
+import type { ReadableStream as WebReadableStream } from 'node:stream/web';
 
 const GOOGLE_API_KEY = process.env.GOOGLE_PLACES_API_KEY ?? '';
 
@@ -24,8 +26,7 @@ export async function photoProxyHandler(req: Request, res: Response) {
         res.setHeader('Content-Type', contentType);
         res.setHeader('Cache-Control', 'public, max-age=86400');
 
-        const buffer = Buffer.from(await response.arrayBuffer());
-        res.send(buffer);
+        Readable.fromWeb(response.body as WebReadableStream).pipe(res);
     } catch {
         res.status(502).json({ error: 'PHOTO_PROXY_ERROR' });
     }

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { formatCurrency, formatShortDate } from "@/lib/format";
+
 import styles from "./BookingConfirmation.module.scss";
 
 interface FlightSummary {
@@ -35,24 +37,6 @@ interface BookingConfirmationProps {
     budgetCurrency: string;
     onConfirm: () => void;
     onCancel: () => void;
-}
-
-function formatCurrency(amount: number | null, currency: string = "USD") {
-    if (amount == null) return "-";
-    return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency,
-        maximumFractionDigits: 0,
-    }).format(amount);
-}
-
-function formatDate(d: string | null) {
-    if (!d) return "TBD";
-    return new Date(d).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    });
 }
 
 export function BookingConfirmation({
@@ -102,8 +86,8 @@ export function BookingConfirmation({
                             Confirm Your Trip to {destination}
                         </h2>
                         <p className={styles.dates}>
-                            {formatDate(departureDate)} &ndash;{" "}
-                            {formatDate(returnDate)}
+                            {formatShortDate(departureDate)} &ndash;{" "}
+                            {formatShortDate(returnDate)}
                         </p>
 
                         <div className={styles.sections}>

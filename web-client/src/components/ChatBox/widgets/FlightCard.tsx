@@ -1,3 +1,5 @@
+import { formatCurrency } from "@/lib/format";
+
 import styles from "./FlightCard.module.scss";
 
 interface FlightCardProps {
@@ -26,13 +28,6 @@ export function FlightCard({
     onClick,
 }: FlightCardProps) {
     const fallbackCode = airline.slice(0, 2).toUpperCase();
-
-    const formattedPrice = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency,
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-    }).format(price);
 
     return (
         <button
@@ -63,7 +58,7 @@ export function FlightCard({
                 <span className={styles.time}>{departureTime}</span>
             </div>
 
-            <div className={styles.price}>{formattedPrice}</div>
+            <div className={styles.price}>{formatCurrency(price, currency)}</div>
         </button>
     );
 }

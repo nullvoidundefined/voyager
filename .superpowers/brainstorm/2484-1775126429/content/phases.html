@@ -1,0 +1,72 @@
+<h2>Implementation Phases</h2>
+<p class="subtitle">I've grouped the 7 features into 3 phases by dependency. Does this ordering feel right?</p>
+
+<div class="section">
+  <h3>Phase 1: Rich Message Rendering</h3>
+  <p class="subtitle">Foundation — parse agent responses into structured components instead of raw text</p>
+
+  <div class="mockup">
+    <div class="mockup-header">What changes</div>
+    <div class="mockup-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+      <div style="background: #1a2133; border: 1px solid #1e2a3f; border-radius: 12px; padding: 16px;">
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #7b8599; margin-bottom: 8px;">Feature F — Rich Flight/Hotel Cards</div>
+        <p style="color: #e4e8ef; font-size: 14px;">Parse tool_result events. When flights/hotels/experiences come back, render structured cards with airline logos, star ratings, prices, and photos instead of letting Claude describe them in text.</p>
+      </div>
+      <div style="background: #1a2133; border: 1px solid #1e2a3f; border-radius: 12px; padding: 16px;">
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #7b8599; margin-bottom: 8px;">Feature C — Quick Reply Chips</div>
+        <p style="color: #e4e8ef; font-size: 14px;">Parse agent text for yes/no and multiple-choice questions. Render clickable chips below the message. Clicking sends the response automatically.</p>
+      </div>
+      <div style="background: #1a2133; border: 1px solid #1e2a3f; border-radius: 12px; padding: 16px;">
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #7b8599; margin-bottom: 8px;">Feature A — Clickable Option Cards</div>
+        <p style="color: #e4e8ef; font-size: 14px;">When agent presents numbered options (3 flights, 2 hotels), render as selectable cards. User clicks to select, submit button to confirm. No typing.</p>
+      </div>
+      <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 12px; color: #7dd3fc; font-size: 13px;">
+        Backend: Add airline_logo to FlightResult, photos to ExperienceResult, images to HotelResult
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Phase 2: Visual Media</h3>
+  <p class="subtitle">Depends on Phase 1 cards — adds images and maps to the card components</p>
+
+  <div class="mockup">
+    <div class="mockup-header">What changes</div>
+    <div class="mockup-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+      <div style="background: #1a2133; border: 1px solid #1e2a3f; border-radius: 12px; padding: 16px;">
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #7b8599; margin-bottom: 8px;">Feature B — Google Places Photos</div>
+        <p style="color: #e4e8ef; font-size: 14px;">Add places.photos to Google Places field mask. Proxy photo URLs through the backend (API key protection). Render in experience/restaurant cards.</p>
+      </div>
+      <div style="background: #1a2133; border: 1px solid #1e2a3f; border-radius: 12px; padding: 16px;">
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #7b8599; margin-bottom: 8px;">Feature E — Map Preview Cards</div>
+        <p style="color: #e4e8ef; font-size: 14px;">When a location has lat/lng (from Places API), render a static Google Maps image. Small card with a pin showing where the hotel/restaurant is.</p>
+      </div>
+      <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 12px; color: #7dd3fc; font-size: 13px;">
+        Backend: Add photo proxy endpoint, include lat/lng in ExperienceResult, add Google Maps Static API key
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Phase 3: Inline Widgets</h3>
+  <p class="subtitle">Polish layer — widgets that appear within the chat flow</p>
+
+  <div class="mockup">
+    <div class="mockup-header">What changes</div>
+    <div class="mockup-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+      <div style="background: #1a2133; border: 1px solid #1e2a3f; border-radius: 12px; padding: 16px;">
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #7b8599; margin-bottom: 8px;">Feature D — Inline Budget Tracker</div>
+        <p style="color: #e4e8ef; font-size: 14px;">After each tool_result that adds a cost, inject a mini budget bar into the chat. Shows allocated vs. remaining as a visual progress bar with labels.</p>
+      </div>
+      <div style="background: #1a2133; border: 1px solid #1e2a3f; border-radius: 12px; padding: 16px;">
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #7b8599; margin-bottom: 8px;">Feature G — Day-by-Day Timeline</div>
+        <p style="color: #e4e8ef; font-size: 14px;">When the agent builds a full itinerary, parse the day-by-day structure and render as a visual timeline with collapsible day cards and time slots.</p>
+      </div>
+      <div style="background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.2); border-radius: 8px; padding: 12px; color: #34d399; font-size: 13px;">
+        Frontend only — no backend changes needed
+      </div>
+    </div>
+  </div>
+</div>

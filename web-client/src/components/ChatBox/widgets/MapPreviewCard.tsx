@@ -20,12 +20,10 @@ export function MapPreviewCard({ latitude, longitude, name }: MapPreviewCardProp
         );
     }
 
-    const lat = latitude;
-    const lng = longitude;
     const src =
-        `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}` +
+        `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}` +
         `&zoom=15&size=300x160&scale=2` +
-        `&markers=color:0x38bdf8|${lat},${lng}` +
+        `&markers=color:0x38bdf8|${latitude},${longitude}` +
         `&style=feature:all|element:geometry|color:0x131926` +
         `&style=feature:water|color:0x0a0e17` +
         `&style=feature:road|color:0x1e2a3f` +

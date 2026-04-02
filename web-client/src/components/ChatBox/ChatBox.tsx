@@ -4,11 +4,12 @@ import {
     type FormEvent,
     useCallback,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from "react";
 
-import { get } from "@/lib/api";
+import { API_BASE, get } from "@/lib/api";
 import { APP_NAME } from "@/lib/constants";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -29,8 +30,6 @@ import {
     parseItinerary,
 } from "./widgets/ItineraryTimeline";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
-
 interface Message {
     id: string;
     role: "user" | "assistant";
@@ -41,6 +40,24 @@ interface ToolProgress {
     tool_name: string;
     tool_id: string;
     status: "running" | "done";
+}
+
+function toolLabel(name: string) {
+    return name.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function renderText(text: string) {
+    if (!text.trim()) return null;
+    return text.split("\n").map((line, i) => (
+        <p key={i}>
+            {line.split(/(\*\*.*?\*\*)/).map((part, j) => {
+                if (part.startsWith("**") && part.endsWith("**")) {
+                    return <strong key={j}>{part.slice(2, -2)}</strong>;
+                }
+                return part;
+            })}
+        </p>
+    ));
 }
 
 interface ChatBoxProps {
@@ -81,7 +98,10 @@ export function ChatBox({
             ),
     });
 
-    const allMessages = [...(serverMessages ?? []), ...localMessages];
+    const allMessages = useMemo(
+        () => [...(serverMessages ?? []), ...localMessages],
+        [serverMessages, localMessages],
+    );
 
     const showBookingActions =
         hasFlights && tripStatus === "planning" && !isSending;
@@ -236,25 +256,6 @@ export function ChatBox({
         },
         [input, sendMessage],
     );
-
-    const toolLabel = (name: string) =>
-        name.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-
-    function renderText(text: string) {
-        if (!text.trim()) {
-            return null;
-        }
-        return text.split("\n").map((line, i) => (
-            <p key={i}>
-                {line.split(/(\*\*.*?\*\*)/).map((part, j) => {
-                    if (part.startsWith("**") && part.endsWith("**")) {
-                        return <strong key={j}>{part.slice(2, -2)}</strong>;
-                    }
-                    return part;
-                })}
-            </p>
-        ));
-    }
 
     return (
         <div className={styles.chatBox}>
@@ -617,8 +618,6 @@ export function ChatBox({
                         </div>
                     </div>
                 )}
-
-                {/* QuickReplyChips render inside message bubbles — see message loop */}
 
                 {showBookingActions && (
                     <div className={styles.bookingActions}>

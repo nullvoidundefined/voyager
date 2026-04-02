@@ -1,3 +1,5 @@
+import { formatCurrency, formatShortDate } from "@/lib/format";
+
 import styles from "./HotelCard.module.scss";
 import { MapPreviewCard } from "./MapPreviewCard";
 
@@ -32,22 +34,6 @@ export function HotelCard({
     selected = false,
     onClick,
 }: HotelCardProps) {
-    const fmtPrice = (n: number) =>
-        new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency,
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-        }).format(n);
-
-    const fmtDate = (d: string) => {
-        const date = new Date(d + "T00:00:00");
-        return date.toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-        });
-    };
-
     const stars =
         starRating != null ? "\u2605".repeat(Math.round(starRating)) : null;
 
@@ -75,15 +61,15 @@ export function HotelCard({
                 {stars && <span className={styles.stars}>{stars}</span>}
                 <span className={styles.city}>{city}</span>
                 <span className={styles.dates}>
-                    {fmtDate(checkIn)} &ndash; {fmtDate(checkOut)}
+                    {formatShortDate(checkIn)} &ndash; {formatShortDate(checkOut)}
                 </span>
                 <div className={styles.pricing}>
                     <span className={styles.perNight}>
-                        {fmtPrice(pricePerNight)}
+                        {formatCurrency(pricePerNight, currency)}
                         <small>/night</small>
                     </span>
                     <span className={styles.total}>
-                        {fmtPrice(totalPrice)} total
+                        {formatCurrency(totalPrice, currency)} total
                     </span>
                 </div>
             </div>
