@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
-import { post } from "@/lib/api";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { post } from '@/lib/api';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-import styles from "./newTrip.module.scss";
+import styles from './newTrip.module.scss';
 
 interface Trip {
   id: string;
@@ -14,7 +14,7 @@ interface Trip {
 
 export default function NewTripPage() {
   const router = useRouter();
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const creating = useRef(false);
 
   useEffect(() => {
@@ -23,12 +23,12 @@ export default function NewTripPage() {
     }
     creating.current = true;
 
-    post<{ trip: Trip }>("/trips", { destination: "Planning..." })
+    post<{ trip: Trip }>('/trips', { destination: 'Planning...' })
       .then(({ trip }) => {
         router.replace(`/trips/${trip.id}`);
       })
       .catch(() => {
-        setError("Failed to start a new trip. Please try again.");
+        setError('Failed to start a new trip. Please try again.');
         creating.current = false;
       });
   }, [router]);
@@ -36,7 +36,7 @@ export default function NewTripPage() {
   if (error) {
     return (
       <div className={styles.page}>
-        <Link href="/trips" className={styles.back}>
+        <Link href='/trips' className={styles.back}>
           &larr; Back to trips
         </Link>
         <p>{error}</p>

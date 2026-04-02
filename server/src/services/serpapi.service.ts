@@ -1,9 +1,9 @@
-import { logger } from "app/utils/logs/logger.js";
+import { logger } from 'app/utils/logs/logger.js';
 
 function getApiKey(): string {
   const key = process.env.SERPAPI_API_KEY;
   if (!key) {
-    throw new Error("SERPAPI_API_KEY is required");
+    throw new Error('SERPAPI_API_KEY is required');
   }
   return key;
 }
@@ -19,11 +19,11 @@ export async function serpApiGet(
     .map(
       ([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`,
     )
-    .join("&");
+    .join('&');
 
   const url = `https://serpapi.com/search.json?${query}`;
 
-  logger.debug({ engine, params }, "SerpApi request");
+  logger.debug({ engine, params }, 'SerpApi request');
 
   const response = await fetch(url);
 
@@ -31,7 +31,7 @@ export async function serpApiGet(
     const text = await response.text();
     logger.error(
       { status: response.status, body: text },
-      "SerpApi request failed",
+      'SerpApi request failed',
     );
     throw new Error(`SerpApi error: ${response.status} ${text}`);
   }

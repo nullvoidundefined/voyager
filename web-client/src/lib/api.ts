@@ -1,5 +1,5 @@
 export const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 export class ApiError extends Error {
   constructor(
@@ -8,17 +8,17 @@ export class ApiError extends Error {
     public code?: string,
   ) {
     super(message);
-    this.name = "ApiError";
+    this.name = 'ApiError';
   }
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
-    credentials: "include",
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
-      "X-Requested-With": "XMLHttpRequest",
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
       ...options.headers,
     },
   });
@@ -39,23 +39,23 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 export function get<T>(path: string): Promise<T> {
-  return request<T>(path, { method: "GET" });
+  return request<T>(path, { method: 'GET' });
 }
 
 export function post<T>(path: string, body?: unknown): Promise<T> {
   return request<T>(path, {
-    method: "POST",
+    method: 'POST',
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 }
 
 export function put<T>(path: string, body?: unknown): Promise<T> {
   return request<T>(path, {
-    method: "PUT",
+    method: 'PUT',
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 }
 
 export function del<T>(path: string): Promise<T> {
-  return request<T>(path, { method: "DELETE" });
+  return request<T>(path, { method: 'DELETE' });
 }

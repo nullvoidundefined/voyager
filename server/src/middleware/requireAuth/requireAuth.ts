@@ -1,6 +1,6 @@
-import { SESSION_COOKIE_NAME } from "app/constants/session.js";
-import * as authRepo from "app/repositories/auth/auth.js";
-import type { NextFunction, Request, Response } from "express";
+import { SESSION_COOKIE_NAME } from 'app/constants/session.js';
+import * as authRepo from 'app/repositories/auth/auth.js';
+import type { NextFunction, Request, Response } from 'express';
 
 export async function loadSession(
   req: Request,
@@ -8,7 +8,7 @@ export async function loadSession(
   next: NextFunction,
 ): Promise<void> {
   const token = req.cookies?.[SESSION_COOKIE_NAME];
-  if (!token || typeof token !== "string") {
+  if (!token || typeof token !== 'string') {
     next();
     return;
   }
@@ -30,7 +30,7 @@ export function requireAuth(
   if (!req.user) {
     res
       .status(401)
-      .json({ error: "UNAUTHORIZED", message: "Authentication required" });
+      .json({ error: 'UNAUTHORIZED', message: 'Authentication required' });
     return;
   }
   next();

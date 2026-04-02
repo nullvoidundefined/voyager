@@ -1,10 +1,10 @@
-import { isProduction } from "app/config/env.js";
-import rateLimit from "express-rate-limit";
+import { isProduction } from 'app/config/env.js';
+import rateLimit from 'express-rate-limit';
 
 if (isProduction() && !process.env.RATE_LIMIT_STORAGE_URI) {
   console.warn(
-    "WARNING: rate limiter is using in-memory storage in production. " +
-      "Set RATE_LIMIT_STORAGE_URI for a persistent store.",
+    'WARNING: rate limiter is using in-memory storage in production. ' +
+      'Set RATE_LIMIT_STORAGE_URI for a persistent store.',
   );
 }
 

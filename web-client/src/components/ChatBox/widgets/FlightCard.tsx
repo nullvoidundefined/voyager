@@ -1,6 +1,6 @@
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency } from '@/lib/format';
 
-import styles from "./FlightCard.module.scss";
+import styles from './FlightCard.module.scss';
 
 interface FlightCardProps {
   airline: string;
@@ -31,8 +31,8 @@ export function FlightCard({
 
   return (
     <button
-      type="button"
-      className={`${styles.card} ${selected ? styles.selected : ""}`}
+      type='button'
+      className={`${styles.card} ${selected ? styles.selected : ''}`}
       aria-pressed={selected}
       onClick={onClick}
     >

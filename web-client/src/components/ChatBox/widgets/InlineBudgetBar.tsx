@@ -1,6 +1,6 @@
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency } from '@/lib/format';
 
-import styles from "./InlineBudgetBar.module.scss";
+import styles from './InlineBudgetBar.module.scss';
 
 interface InlineBudgetBarProps {
   allocated: number;
@@ -21,7 +21,7 @@ export function InlineBudgetBar({
     <div className={styles.wrapper}>
       <div className={styles.track}>
         <div
-          className={`${styles.fill} ${overBudget ? styles.over : ""}`}
+          className={`${styles.fill} ${overBudget ? styles.over : ''}`}
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -30,10 +30,10 @@ export function InlineBudgetBar({
           {formatCurrency(allocated, currency)} allocated
         </span>
         <span
-          className={`${styles.remaining} ${overBudget ? styles.over : ""}`}
+          className={`${styles.remaining} ${overBudget ? styles.over : ''}`}
         >
-          {formatCurrency(Math.abs(remaining), currency)}{" "}
-          {overBudget ? "over" : "remaining"}
+          {formatCurrency(Math.abs(remaining), currency)}{' '}
+          {overBudget ? 'over' : 'remaining'}
         </span>
       </div>
     </div>

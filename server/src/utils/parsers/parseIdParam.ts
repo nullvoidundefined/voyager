@@ -7,6 +7,6 @@ const UUID_REGEX =
  */
 export function parseIdParam(id: string | string[] | undefined): string | null {
   const raw = Array.isArray(id) ? id[0] : id;
-  const s = typeof raw === "string" ? raw.trim() : "";
+  const s = typeof raw === 'string' ? raw.trim() : '';
   return s && UUID_REGEX.test(s) ? s : null;
 }

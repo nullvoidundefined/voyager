@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   type FormEvent,
@@ -7,48 +7,48 @@ import {
   useMemo,
   useRef,
   useState,
-} from "react";
+} from 'react';
 
-import { API_BASE, get } from "@/lib/api";
-import { APP_NAME } from "@/lib/constants";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { API_BASE, get } from '@/lib/api';
+import { APP_NAME } from '@/lib/constants';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-import styles from "./ChatBox.module.scss";
+import styles from './ChatBox.module.scss';
 import {
   TripDetailsForm,
-  parseTripFormFields,
   parseSubmittedValues,
-} from "./TripDetailsForm";
-import { FlightCard } from "./widgets/FlightCard";
-import { HotelCard } from "./widgets/HotelCard";
-import { ExperienceCard } from "./widgets/ExperienceCard";
-import { SelectableCardGroup } from "./widgets/SelectableCardGroup";
-import { QuickReplyChips, parseQuickReplies } from "./widgets/QuickReplyChips";
-import { InlineBudgetBar } from "./widgets/InlineBudgetBar";
-import { ItineraryTimeline, parseItinerary } from "./widgets/ItineraryTimeline";
+  parseTripFormFields,
+} from './TripDetailsForm';
+import { ExperienceCard } from './widgets/ExperienceCard';
+import { FlightCard } from './widgets/FlightCard';
+import { HotelCard } from './widgets/HotelCard';
+import { InlineBudgetBar } from './widgets/InlineBudgetBar';
+import { ItineraryTimeline, parseItinerary } from './widgets/ItineraryTimeline';
+import { QuickReplyChips, parseQuickReplies } from './widgets/QuickReplyChips';
+import { SelectableCardGroup } from './widgets/SelectableCardGroup';
 
 interface Message {
   id: string;
-  role: "user" | "assistant";
+  role: 'user' | 'assistant';
   content: string;
 }
 
 interface ToolProgress {
   tool_name: string;
   tool_id: string;
-  status: "running" | "done";
+  status: 'running' | 'done';
 }
 
 function toolLabel(name: string) {
-  return name.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return name.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function renderText(text: string) {
   if (!text.trim()) return null;
-  return text.split("\n").map((line, i) => (
+  return text.split('\n').map((line, i) => (
     <p key={i}>
       {line.split(/(\*\*.*?\*\*)/).map((part, j) => {
-        if (part.startsWith("**") && part.endsWith("**")) {
+        if (part.startsWith('**') && part.endsWith('**')) {
           return <strong key={j}>{part.slice(2, -2)}</strong>;
         }
         return part;
@@ -77,9 +77,9 @@ export function ChatBox({
   budgetCurrency,
 }: ChatBoxProps) {
   const queryClient = useQueryClient();
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
   const [localMessages, setLocalMessages] = useState<Message[]>([]);
-  const [streamingText, setStreamingText] = useState("");
+  const [streamingText, setStreamingText] = useState('');
   const [tools, setTools] = useState<ToolProgress[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [toolResults, setToolResults] = useState<
@@ -88,7 +88,7 @@ export function ChatBox({
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { data: serverMessages } = useQuery({
-    queryKey: ["messages", tripId],
+    queryKey: ['messages', tripId],
     queryFn: () =>
       get<{ messages: Message[] }>(`/trips/${tripId}/messages`).then(
         (r) => r.messages,
@@ -101,10 +101,10 @@ export function ChatBox({
   );
 
   const showBookingActions =
-    hasFlights && tripStatus === "planning" && !isSending;
+    hasFlights && tripStatus === 'planning' && !isSending;
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [allMessages.length, streamingText]);
 
   const sendMessage = useCallback(
@@ -118,17 +118,17 @@ export function ChatBox({
         data: Record<string, unknown>,
       ) {
         switch (eventType) {
-          case "tool_start":
+          case 'tool_start':
             setTools((prev) => [
               ...prev,
               {
                 tool_name: data.tool_name as string,
                 tool_id: data.tool_id as string,
-                status: "running",
+                status: 'running',
               },
             ]);
             break;
-          case "tool_result":
+          case 'tool_result':
             setTools((prev) => {
               const matched = prev.find((t) => t.tool_id === data.tool_id);
               if (matched) {
@@ -142,56 +142,56 @@ export function ChatBox({
               }
               return prev.map((t) =>
                 t.tool_id === data.tool_id
-                  ? { ...t, status: "done" as const }
+                  ? { ...t, status: 'done' as const }
                   : t,
               );
             });
             queryClient.invalidateQueries({
-              queryKey: ["trips", tripId],
+              queryKey: ['trips', tripId],
             });
             break;
-          case "assistant":
+          case 'assistant':
             setStreamingText(data.text as string);
             break;
-          case "done":
+          case 'done':
             setStreamingText(data.response as string);
             break;
-          case "error":
-            setStreamingText((data.error as string) ?? "An error occurred.");
+          case 'error':
+            setStreamingText((data.error as string) ?? 'An error occurred.');
             break;
         }
       }
 
       setIsSending(true);
-      setStreamingText("");
+      setStreamingText('');
       setTools([]);
       setToolResults({});
 
       const userMsg: Message = {
         id: `local-${Date.now()}`,
-        role: "user",
+        role: 'user',
         content: msg,
       };
       setLocalMessages((prev) => [...prev, userMsg]);
 
       try {
         const res = await fetch(`${API_BASE}/trips/${tripId}/chat`, {
-          method: "POST",
-          credentials: "include",
+          method: 'POST',
+          credentials: 'include',
           headers: {
-            "Content-Type": "application/json",
-            "X-Requested-With": "XMLHttpRequest",
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
           },
           body: JSON.stringify({ message: msg }),
         });
 
         if (!res.ok || !res.body) {
-          throw new Error("Chat request failed");
+          throw new Error('Chat request failed');
         }
 
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
-        let buffer = "";
+        let buffer = '';
 
         while (true) {
           const { done, value } = await reader.read();
@@ -200,14 +200,14 @@ export function ChatBox({
           }
 
           buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split("\n");
-          buffer = lines.pop() ?? "";
+          const lines = buffer.split('\n');
+          buffer = lines.pop() ?? '';
 
-          let eventType = "";
+          let eventType = '';
           for (const line of lines) {
-            if (line.startsWith("event: ")) {
+            if (line.startsWith('event: ')) {
               eventType = line.slice(7);
-            } else if (line.startsWith("data: ")) {
+            } else if (line.startsWith('data: ')) {
               const data = JSON.parse(line.slice(6));
               handleSSEEvent(eventType, data);
             }
@@ -218,19 +218,19 @@ export function ChatBox({
           ...prev,
           {
             id: `error-${Date.now()}`,
-            role: "assistant",
-            content: "Something went wrong. Please try again.",
+            role: 'assistant',
+            content: 'Something went wrong. Please try again.',
           },
         ]);
       } finally {
         setIsSending(false);
         await queryClient.invalidateQueries({
-          queryKey: ["messages", tripId],
+          queryKey: ['messages', tripId],
         });
         setLocalMessages([]);
-        setStreamingText("");
+        setStreamingText('');
         queryClient.invalidateQueries({
-          queryKey: ["trips", tripId],
+          queryKey: ['trips', tripId],
         });
       }
     },
@@ -244,7 +244,7 @@ export function ChatBox({
       if (!msg) {
         return;
       }
-      setInput("");
+      setInput('');
       sendMessage(msg);
     },
     [input, sendMessage],
@@ -268,23 +268,23 @@ export function ChatBox({
         )}
         {allMessages.map((msg, idx) => {
           const formData =
-            msg.role === "assistant" ? parseTripFormFields(msg.content) : null;
+            msg.role === 'assistant' ? parseTripFormFields(msg.content) : null;
 
           const itineraryData =
-            msg.role === "assistant" ? parseItinerary(msg.content) : null;
+            msg.role === 'assistant' ? parseItinerary(msg.content) : null;
 
           let formSubmitted = false;
           let formInitialValues: Record<string, string> | undefined;
           if (formData) {
             const nextMsg = allMessages[idx + 1];
-            if (nextMsg?.role === "user") {
+            if (nextMsg?.role === 'user') {
               formSubmitted = true;
               formInitialValues = parseSubmittedValues(nextMsg.content);
             }
           }
 
           const isLastAssistant =
-            msg.role === "assistant" &&
+            msg.role === 'assistant' &&
             idx === allMessages.length - 1 &&
             !isSending;
           const quickReplies = isLastAssistant
@@ -297,7 +297,7 @@ export function ChatBox({
               className={`${styles.message} ${styles[msg.role]}`}
             >
               <div className={styles.roleBadge}>
-                {msg.role === "user" ? "You" : APP_NAME}
+                {msg.role === 'user' ? 'You' : APP_NAME}
               </div>
               <div className={styles.bubble}>
                 {formData ? (
@@ -353,7 +353,7 @@ export function ChatBox({
               {tools.map((t) => (
                 <div key={t.tool_id} className={styles.toolRow}>
                   <span className={styles.toolIcon}>
-                    {t.status === "running" ? "\u23F3" : "\u2705"}
+                    {t.status === 'running' ? '\u23F3' : '\u2705'}
                   </span>
                   <span>{toolLabel(t.tool_name)}</span>
                 </div>
@@ -368,22 +368,22 @@ export function ChatBox({
               ([toolId, { tool_name, result }]) => {
                 if (!Array.isArray(result) || result.length === 0) return null;
 
-                if (tool_name === "search_flights") {
+                if (tool_name === 'search_flights') {
                   const items = (result as Array<Record<string, unknown>>).map(
                     (f, i) => ({
                       id: String(i),
-                      label: `${f.airline ?? "Flight"} ${f.flight_number ?? ""} (${f.origin ?? ""}→${f.destination ?? ""}) - $${f.price ?? "?"}`,
+                      label: `${f.airline ?? 'Flight'} ${f.flight_number ?? ''} (${f.origin ?? ''}→${f.destination ?? ''}) - $${f.price ?? '?'}`,
                       node: (selected: boolean, onClick: () => void) => (
                         <FlightCard
                           key={i}
-                          airline={(f.airline as string) ?? ""}
+                          airline={(f.airline as string) ?? ''}
                           airlineLogo={(f.airline_logo as string) ?? null}
-                          flightNumber={(f.flight_number as string) ?? ""}
-                          origin={(f.origin as string) ?? ""}
-                          destination={(f.destination as string) ?? ""}
-                          departureTime={(f.departure_time as string) ?? ""}
+                          flightNumber={(f.flight_number as string) ?? ''}
+                          origin={(f.origin as string) ?? ''}
+                          destination={(f.destination as string) ?? ''}
+                          departureTime={(f.departure_time as string) ?? ''}
                           price={(f.price as number) ?? 0}
-                          currency={(f.currency as string) ?? "USD"}
+                          currency={(f.currency as string) ?? 'USD'}
                           selected={selected}
                           onClick={onClick}
                         />
@@ -405,23 +405,23 @@ export function ChatBox({
                   );
                 }
 
-                if (tool_name === "search_hotels") {
+                if (tool_name === 'search_hotels') {
                   const items = (result as Array<Record<string, unknown>>).map(
                     (h, i) => ({
                       id: String(i),
-                      label: `${h.name ?? "Hotel"} - $${h.price_per_night ?? "?"}/night`,
+                      label: `${h.name ?? 'Hotel'} - $${h.price_per_night ?? '?'}/night`,
                       node: (selected: boolean, onClick: () => void) => (
                         <HotelCard
                           key={i}
-                          name={(h.name as string) ?? ""}
-                          city={(h.city as string) ?? ""}
+                          name={(h.name as string) ?? ''}
+                          city={(h.city as string) ?? ''}
                           imageUrl={(h.image_url as string) ?? null}
                           starRating={(h.star_rating as number) ?? null}
                           pricePerNight={(h.price_per_night as number) ?? 0}
                           totalPrice={(h.total_price as number) ?? 0}
-                          currency={(h.currency as string) ?? "USD"}
-                          checkIn={(h.check_in as string) ?? ""}
-                          checkOut={(h.check_out as string) ?? ""}
+                          currency={(h.currency as string) ?? 'USD'}
+                          checkIn={(h.check_in as string) ?? ''}
+                          checkOut={(h.check_out as string) ?? ''}
                           latitude={(h.latitude as number) ?? null}
                           longitude={(h.longitude as number) ?? null}
                           selected={selected}
@@ -445,15 +445,15 @@ export function ChatBox({
                   );
                 }
 
-                if (tool_name === "search_experiences") {
+                if (tool_name === 'search_experiences') {
                   const items = (result as Array<Record<string, unknown>>).map(
                     (e, i) => ({
                       id: String(i),
-                      label: `${e.name ?? "Experience"} (~$${e.estimated_cost ?? "?"})`,
+                      label: `${e.name ?? 'Experience'} (~$${e.estimated_cost ?? '?'})`,
                       node: (selected: boolean, onClick: () => void) => (
                         <ExperienceCard
                           key={i}
-                          name={(e.name as string) ?? ""}
+                          name={(e.name as string) ?? ''}
                           category={(e.category as string) ?? null}
                           photoRef={(e.photo_ref as string) ?? null}
                           rating={(e.rating as number) ?? null}
@@ -491,7 +491,7 @@ export function ChatBox({
                 <InlineBudgetBar
                   allocated={budgetAllocated}
                   total={budgetTotal}
-                  currency={budgetCurrency ?? "USD"}
+                  currency={budgetCurrency ?? 'USD'}
                 />
               )}
           </div>
@@ -501,7 +501,7 @@ export function ChatBox({
           <div className={`${styles.message} ${styles.assistant}`}>
             <div className={styles.roleBadge}>{APP_NAME}</div>
             <div className={styles.bubble}>
-              {streamingText.split("\n").map((line, i) => (
+              {streamingText.split('\n').map((line, i) => (
                 <p key={i}>{line}</p>
               ))}
             </div>
@@ -511,14 +511,14 @@ export function ChatBox({
         {showBookingActions && (
           <div className={styles.bookingActions}>
             <button
-              type="button"
+              type='button'
               className={styles.bookButton}
               onClick={onBookTrip}
             >
               Book This Trip
             </button>
             <button
-              type="button"
+              type='button'
               className={styles.tryAgainButton}
               onClick={() =>
                 sendMessage(
@@ -536,20 +536,20 @@ export function ChatBox({
 
       <form onSubmit={handleSubmit} className={styles.inputArea}>
         <input
-          type="text"
+          type='text'
           className={styles.input}
-          placeholder="Ask the agent to plan your trip..."
-          aria-label="Ask the agent to plan your trip..."
+          placeholder='Ask the agent to plan your trip...'
+          aria-label='Ask the agent to plan your trip...'
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={isSending}
         />
         <button
-          type="submit"
+          type='submit'
           className={styles.sendButton}
           disabled={isSending || !input.trim()}
         >
-          {isSending ? "..." : "Send"}
+          {isSending ? '...' : 'Send'}
         </button>
       </form>
     </div>

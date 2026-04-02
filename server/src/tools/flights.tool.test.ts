@@ -1,82 +1,82 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock("app/services/serpapi.service.js");
-vi.mock("app/services/cache.service.js");
-vi.mock("app/utils/logs/logger.js", () => ({
+vi.mock('app/services/serpapi.service.js');
+vi.mock('app/services/cache.service.js');
+vi.mock('app/utils/logs/logger.js', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
-let searchFlights: typeof import("app/tools/flights.tool.js").searchFlights;
-let serpApiService: typeof import("app/services/serpapi.service.js");
-let cacheService: typeof import("app/services/cache.service.js");
+let searchFlights: typeof import('app/tools/flights.tool.js').searchFlights;
+let serpApiService: typeof import('app/services/serpapi.service.js');
+let cacheService: typeof import('app/services/cache.service.js');
 
 const mockFlightsResponse = {
   best_flights: [
     {
       flights: [
         {
-          departure_airport: { id: "SFO", time: "2026-07-01 08:00" },
-          arrival_airport: { id: "BCN", time: "2026-07-01 20:00" },
-          airline: "United Airlines",
-          airline_logo: "",
-          flight_number: "UA 123",
+          departure_airport: { id: 'SFO', time: '2026-07-01 08:00' },
+          arrival_airport: { id: 'BCN', time: '2026-07-01 20:00' },
+          airline: 'United Airlines',
+          airline_logo: '',
+          flight_number: 'UA 123',
         },
       ],
       total_duration: 720,
       price: 450,
-      type: "Round trip",
+      type: 'Round trip',
     },
   ],
   other_flights: [
     {
       flights: [
         {
-          departure_airport: { id: "SFO", time: "2026-07-01 10:00" },
-          arrival_airport: { id: "BCN", time: "2026-07-02 01:00" },
-          airline: "Iberia",
-          airline_logo: "",
-          flight_number: "IB 456",
+          departure_airport: { id: 'SFO', time: '2026-07-01 10:00' },
+          arrival_airport: { id: 'BCN', time: '2026-07-02 01:00' },
+          airline: 'Iberia',
+          airline_logo: '',
+          flight_number: 'IB 456',
         },
       ],
       total_duration: 900,
       price: 380,
-      type: "Round trip",
+      type: 'Round trip',
     },
   ],
 };
 
-describe("flights.tool", () => {
+describe('flights.tool', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     vi.resetModules();
 
-    vi.doMock("app/services/serpapi.service.js", () => ({
+    vi.doMock('app/services/serpapi.service.js', () => ({
       serpApiGet: vi.fn(),
     }));
-    vi.doMock("app/services/cache.service.js", () => ({
+    vi.doMock('app/services/cache.service.js', () => ({
       cacheGet: vi.fn(),
       cacheSet: vi.fn(),
-      normalizeCacheKey: vi.fn().mockReturnValue("test-cache-key"),
+      normalizeCacheKey: vi.fn().mockReturnValue('test-cache-key'),
     }));
-    vi.doMock("app/utils/logs/logger.js", () => ({
+    vi.doMock('app/utils/logs/logger.js', () => ({
       logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
     }));
 
-    const flightsMod = await import("app/tools/flights.tool.js");
+    const flightsMod = await import('app/tools/flights.tool.js');
     searchFlights = flightsMod.searchFlights;
-    serpApiService = await import("app/services/serpapi.service.js");
-    cacheService = await import("app/services/cache.service.js");
+    serpApiService = await import('app/services/serpapi.service.js');
+    cacheService = await import('app/services/cache.service.js');
   });
 
-  describe("searchFlights", () => {
-    it("returns cached results when available", async () => {
-      const cached = [{ origin: "SFO", destination: "BCN", price: 450 }];
+  describe('searchFlights', () => {
+    it('returns cached results when available', async () => {
+      const cached = [{ origin: 'SFO', destination: 'BCN', price: 450 }];
       vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(cached);
 
       const result = await searchFlights({
-        origin: "SFO",
-        destination: "BCN",
-        departure_date: "2026-07-01",
+        origin: 'SFO',
+        destination: 'BCN',
+        departure_date: '2026-07-01',
         passengers: 1,
       });
 
@@ -84,97 +84,97 @@ describe("flights.tool", () => {
       expect(serpApiService.serpApiGet).not.toHaveBeenCalled();
     });
 
-    it("calls SerpApi and returns normalized results", async () => {
+    it('calls SerpApi and returns normalized results', async () => {
       vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
       vi.mocked(serpApiService.serpApiGet).mockResolvedValueOnce(
         mockFlightsResponse,
       );
 
       const result = await searchFlights({
-        origin: "SFO",
-        destination: "BCN",
-        departure_date: "2026-07-01",
+        origin: 'SFO',
+        destination: 'BCN',
+        departure_date: '2026-07-01',
         passengers: 1,
       });
 
       expect(serpApiService.serpApiGet).toHaveBeenCalledWith(
-        "google_flights",
+        'google_flights',
         expect.objectContaining({
-          departure_id: "SFO",
-          arrival_id: "BCN",
-          outbound_date: "2026-07-01",
+          departure_id: 'SFO',
+          arrival_id: 'BCN',
+          outbound_date: '2026-07-01',
           adults: 1,
         }),
       );
 
       expect(result).toHaveLength(2);
-      expect(result[0]).toHaveProperty("origin", "SFO");
-      expect(result[0]).toHaveProperty("destination", "BCN");
-      expect(result[0]).toHaveProperty("price");
-      expect(result[0]).toHaveProperty("airline");
-      expect(result[0]).toHaveProperty("airline_logo");
+      expect(result[0]).toHaveProperty('origin', 'SFO');
+      expect(result[0]).toHaveProperty('destination', 'BCN');
+      expect(result[0]).toHaveProperty('price');
+      expect(result[0]).toHaveProperty('airline');
+      expect(result[0]).toHaveProperty('airline_logo');
     });
 
-    it("sorts results by price ascending", async () => {
+    it('sorts results by price ascending', async () => {
       vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
       vi.mocked(serpApiService.serpApiGet).mockResolvedValueOnce(
         mockFlightsResponse,
       );
 
       const result = await searchFlights({
-        origin: "SFO",
-        destination: "BCN",
-        departure_date: "2026-07-01",
+        origin: 'SFO',
+        destination: 'BCN',
+        departure_date: '2026-07-01',
         passengers: 1,
       });
 
       expect(result[0]!.price).toBeLessThanOrEqual(result[1]!.price);
     });
 
-    it("caches results after fetching", async () => {
+    it('caches results after fetching', async () => {
       vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
       vi.mocked(serpApiService.serpApiGet).mockResolvedValueOnce(
         mockFlightsResponse,
       );
 
       await searchFlights({
-        origin: "SFO",
-        destination: "BCN",
-        departure_date: "2026-07-01",
+        origin: 'SFO',
+        destination: 'BCN',
+        departure_date: '2026-07-01',
         passengers: 1,
       });
 
       expect(cacheService.cacheSet).toHaveBeenCalledWith(
-        "test-cache-key",
+        'test-cache-key',
         expect.any(Array),
         3600,
       );
     });
 
-    it("handles empty results gracefully", async () => {
+    it('handles empty results gracefully', async () => {
       vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
       vi.mocked(serpApiService.serpApiGet).mockResolvedValueOnce({});
 
       const result = await searchFlights({
-        origin: "SFO",
-        destination: "XYZ",
-        departure_date: "2026-07-01",
+        origin: 'SFO',
+        destination: 'XYZ',
+        departure_date: '2026-07-01',
         passengers: 1,
       });
 
       expect(result).toEqual([]);
     });
 
-    it("filters by max_price", async () => {
+    it('filters by max_price', async () => {
       vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
       vi.mocked(serpApiService.serpApiGet).mockResolvedValueOnce(
         mockFlightsResponse,
       );
 
       const result = await searchFlights({
-        origin: "SFO",
-        destination: "BCN",
-        departure_date: "2026-07-01",
+        origin: 'SFO',
+        destination: 'BCN',
+        departure_date: '2026-07-01',
         passengers: 1,
         max_price: 400,
       });
@@ -183,20 +183,20 @@ describe("flights.tool", () => {
       expect(result[0]!.price).toBe(380);
     });
 
-    it("handles API errors gracefully", async () => {
+    it('handles API errors gracefully', async () => {
       vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
       vi.mocked(serpApiService.serpApiGet).mockRejectedValueOnce(
-        new Error("API timeout"),
+        new Error('API timeout'),
       );
 
       await expect(
         searchFlights({
-          origin: "SFO",
-          destination: "BCN",
-          departure_date: "2026-07-01",
+          origin: 'SFO',
+          destination: 'BCN',
+          departure_date: '2026-07-01',
           passengers: 1,
         }),
-      ).rejects.toThrow("API timeout");
+      ).rejects.toThrow('API timeout');
     });
   });
 });

@@ -1,23 +1,23 @@
-import { isProduction } from "app/config/env.js";
-import { SESSION_COOKIE_NAME, SESSION_TTL_MS } from "app/constants/session.js";
-import * as authRepo from "app/repositories/auth/auth.js";
-import { loginSchema, registerSchema } from "app/schemas/auth.js";
-import { logger } from "app/utils/logs/logger.js";
-import type { Request, Response } from "express";
+import { isProduction } from 'app/config/env.js';
+import { SESSION_COOKIE_NAME, SESSION_TTL_MS } from 'app/constants/session.js';
+import * as authRepo from 'app/repositories/auth/auth.js';
+import { loginSchema, registerSchema } from 'app/schemas/auth.js';
+import { logger } from 'app/utils/logs/logger.js';
+import type { Request, Response } from 'express';
 
 const SESSION_COOKIE_OPTIONS = {
   httpOnly: true,
   maxAge: SESSION_TTL_MS,
-  path: "/",
-  sameSite: (isProduction() ? "none" : "lax") as "none" | "lax",
+  path: '/',
+  sameSite: (isProduction() ? 'none' : 'lax') as 'none' | 'lax',
   secure: isProduction(),
 };
 
 export async function register(req: Request, res: Response): Promise<void> {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) {
-    const message = parsed.error.issues.map((e) => e.message).join("; ");
-    res.status(400).json({ error: "VALIDATION_ERROR", message });
+    const message = parsed.error.issues.map((e) => e.message).join('; ');
+    res.status(400).json({ error: 'VALIDATION_ERROR', message });
     return;
   }
   const { email, password, first_name, last_name } = parsed.data;
@@ -29,8 +29,8 @@ export async function register(req: Request, res: Response): Promise<void> {
       last_name,
     );
     logger.info(
-      { event: "register_success", userId: user.id, ip: req.ip },
-      "User registered",
+      { event: 'register_success', userId: user.id, ip: req.ip },
+      'User registered',
     );
     res.cookie(SESSION_COOKIE_NAME, sessionId, SESSION_COOKIE_OPTIONS);
     res.status(201).json({
@@ -44,17 +44,17 @@ export async function register(req: Request, res: Response): Promise<void> {
     });
   } catch (err) {
     const code =
-      err && typeof err === "object" && "code" in err
+      err && typeof err === 'object' && 'code' in err
         ? (err as { code: string }).code
         : undefined;
-    if (code === "23505") {
+    if (code === '23505') {
       logger.warn(
-        { event: "register_duplicate_email", ip: req.ip },
-        "Registration failed: email already registered",
+        { event: 'register_duplicate_email', ip: req.ip },
+        'Registration failed: email already registered',
       );
       res
         .status(409)
-        .json({ error: "CONFLICT", message: "Email already registered" });
+        .json({ error: 'CONFLICT', message: 'Email already registered' });
       return;
     }
     throw err;
@@ -64,42 +64,42 @@ export async function register(req: Request, res: Response): Promise<void> {
 export async function login(req: Request, res: Response): Promise<void> {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
-    const message = parsed.error.issues.map((e) => e.message).join("; ");
-    res.status(400).json({ error: "VALIDATION_ERROR", message });
+    const message = parsed.error.issues.map((e) => e.message).join('; ');
+    res.status(400).json({ error: 'VALIDATION_ERROR', message });
     return;
   }
   const { email, password } = parsed.data;
   const user = await authRepo.findUserByEmail(email);
   if (!user) {
     logger.warn(
-      { event: "login_failure", reason: "user_not_found", ip: req.ip },
-      "Login failed: user not found",
+      { event: 'login_failure', reason: 'user_not_found', ip: req.ip },
+      'Login failed: user not found',
     );
     res
       .status(401)
-      .json({ error: "UNAUTHORIZED", message: "Invalid email or password" });
+      .json({ error: 'UNAUTHORIZED', message: 'Invalid email or password' });
     return;
   }
   const valid = await authRepo.verifyPassword(password, user.password_hash);
   if (!valid) {
     logger.warn(
       {
-        event: "login_failure",
-        reason: "wrong_password",
+        event: 'login_failure',
+        reason: 'wrong_password',
         userId: user.id,
         ip: req.ip,
       },
-      "Login failed: wrong password",
+      'Login failed: wrong password',
     );
     res
       .status(401)
-      .json({ error: "UNAUTHORIZED", message: "Invalid email or password" });
+      .json({ error: 'UNAUTHORIZED', message: 'Invalid email or password' });
     return;
   }
   const sessionId = await authRepo.loginUser(user.id);
   logger.info(
-    { event: "login_success", userId: user.id, ip: req.ip },
-    "User logged in",
+    { event: 'login_success', userId: user.id, ip: req.ip },
+    'User logged in',
   );
   res.cookie(SESSION_COOKIE_NAME, sessionId, SESSION_COOKIE_OPTIONS);
   res.json({
@@ -115,16 +115,16 @@ export async function login(req: Request, res: Response): Promise<void> {
 
 export async function logout(req: Request, res: Response): Promise<void> {
   const token = req.cookies?.[SESSION_COOKIE_NAME];
-  if (token && typeof token === "string") {
+  if (token && typeof token === 'string') {
     try {
       await authRepo.deleteSession(token);
     } catch (err) {
-      logger.error({ err }, "Failed to delete session on logout");
+      logger.error({ err }, 'Failed to delete session on logout');
     }
   }
   const userId = req.user?.id;
-  logger.info({ event: "logout", userId, ip: req.ip }, "User logged out");
-  res.clearCookie(SESSION_COOKIE_NAME, { path: "/" });
+  logger.info({ event: 'logout', userId, ip: req.ip }, 'User logged out');
+  res.clearCookie(SESSION_COOKIE_NAME, { path: '/' });
   res.status(204).send();
 }
 

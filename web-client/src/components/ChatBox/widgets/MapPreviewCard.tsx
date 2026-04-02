@@ -1,4 +1,4 @@
-import styles from "./MapPreviewCard.module.scss";
+import styles from './MapPreviewCard.module.scss';
 
 interface MapPreviewCardProps {
   latitude: number;
@@ -16,8 +16,8 @@ export function MapPreviewCard({
   if (!apiKey) {
     return (
       <div className={styles.fallback}>
-        <span className={styles.fallbackIcon} aria-hidden="true">
-          {"\uD83D\uDCCD"}
+        <span className={styles.fallbackIcon} aria-hidden='true'>
+          {'\uD83D\uDCCD'}
         </span>
         <span>{name}</span>
       </div>

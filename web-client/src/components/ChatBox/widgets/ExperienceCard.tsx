@@ -1,7 +1,7 @@
-import { API_BASE } from "@/lib/api";
+import { API_BASE } from '@/lib/api';
 
-import styles from "./ExperienceCard.module.scss";
-import { MapPreviewCard } from "./MapPreviewCard";
+import styles from './ExperienceCard.module.scss';
+import { MapPreviewCard } from './MapPreviewCard';
 
 interface ExperienceCardProps {
   name: string;
@@ -32,8 +32,8 @@ export function ExperienceCard({
 
   return (
     <button
-      type="button"
-      className={`${styles.card} ${selected ? styles.selected : ""}`}
+      type='button'
+      className={`${styles.card} ${selected ? styles.selected : ''}`}
       aria-pressed={selected}
       onClick={onClick}
     >
@@ -50,7 +50,7 @@ export function ExperienceCard({
         {category && <span className={styles.category}>{category}</span>}
         {rating != null && (
           <span className={styles.rating}>
-            {"\u2605"} {rating.toFixed(1)}
+            {'\u2605'} {rating.toFixed(1)}
           </span>
         )}
         {estimatedCost != null && (

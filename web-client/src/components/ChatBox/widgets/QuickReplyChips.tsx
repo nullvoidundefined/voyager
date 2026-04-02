@@ -1,4 +1,4 @@
-import styles from "./QuickReplyChips.module.scss";
+import styles from './QuickReplyChips.module.scss';
 
 interface QuickReplyChipsProps {
   chips: string[];
@@ -12,11 +12,11 @@ export function QuickReplyChips({
   disabled = false,
 }: QuickReplyChipsProps) {
   return (
-    <div className={styles.row} role="group" aria-label="Quick replies">
+    <div className={styles.row} role='group' aria-label='Quick replies'>
       {chips.map((chip) => (
         <button
           key={chip}
-          type="button"
+          type='button'
           className={styles.chip}
           onClick={() => onSelect(chip)}
           disabled={disabled}
@@ -35,7 +35,7 @@ export function QuickReplyChips({
 export function parseQuickReplies(text: string): string[] | null {
   const trimmed = text.trim();
 
-  if (!trimmed.endsWith("?")) {
+  if (!trimmed.endsWith('?')) {
     return null;
   }
 
@@ -49,12 +49,12 @@ export function parseQuickReplies(text: string): string[] | null {
     /want me to/i.test(lower) ||
     /ready to/i.test(lower)
   ) {
-    return ["Yes, please", "No thanks"];
+    return ['Yes, please', 'No thanks'];
   }
 
   const orMatch = trimmed.match(/(.{3,30}) or (.{3,30})\?$/);
   if (orMatch) {
-    return [orMatch[1].trim(), orMatch[2].replace(/\?$/, "").trim()];
+    return [orMatch[1].trim(), orMatch[2].replace(/\?$/, '').trim()];
   }
 
   return null;

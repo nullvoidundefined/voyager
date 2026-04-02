@@ -51,6 +51,7 @@ The test coverage is impressive. The `AgentOrchestrator.test.ts` file is especia
 ### Code Consistency
 
 The codebase follows consistent patterns throughout:
+
 - Every handler validates with Zod, calls a repo, and returns a structured response
 - Every tool file follows the same pattern: check cache, call API, normalize response, filter/sort, cache result
 - Every frontend page uses TanStack Query with consistent query key patterns
@@ -105,15 +106,15 @@ The `cache.service.ts` creates a Redis client lazily on first use (`getRedis()`)
 
 ## Architecture Strengths Summary
 
-| Area | Strength |
-|---|---|
-| Agent design | Configurable, testable orchestrator with clean separation of concerns |
-| Tool system | Each tool is independently testable with consistent cache/normalize/return pattern |
-| SSE streaming | Real-time tool progress gives users visibility into what the agent is doing |
-| Frontend widgets | Rich interactive cards transform plain chat into a visual planning experience |
-| Security | Hashed sessions, transactions, rate limiting, CSRF, Helmet -- all present |
-| Testing | Comprehensive unit tests for orchestrator, tools, handlers, and middleware |
-| Deployment | Multi-stage Docker build, monorepo workspace isolation, clear Railway/Vercel split |
+| Area             | Strength                                                                           |
+| ---------------- | ---------------------------------------------------------------------------------- |
+| Agent design     | Configurable, testable orchestrator with clean separation of concerns              |
+| Tool system      | Each tool is independently testable with consistent cache/normalize/return pattern |
+| SSE streaming    | Real-time tool progress gives users visibility into what the agent is doing        |
+| Frontend widgets | Rich interactive cards transform plain chat into a visual planning experience      |
+| Security         | Hashed sessions, transactions, rate limiting, CSRF, Helmet -- all present          |
+| Testing          | Comprehensive unit tests for orchestrator, tools, handlers, and middleware         |
+| Deployment       | Multi-stage Docker build, monorepo workspace isolation, clear Railway/Vercel split |
 
 ## Final Thoughts
 

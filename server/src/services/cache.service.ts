@@ -1,5 +1,5 @@
-import { logger } from "app/utils/logs/logger.js";
-import { Redis } from "ioredis";
+import { logger } from 'app/utils/logs/logger.js';
+import { Redis } from 'ioredis';
 
 let redis: Redis | null = null;
 
@@ -7,14 +7,14 @@ export function getRedis(): Redis {
   if (!redis) {
     const url = process.env.REDIS_URL;
     if (!url) {
-      throw new Error("REDIS_URL is not set");
+      throw new Error('REDIS_URL is not set');
     }
     redis = new Redis(url, {
       maxRetriesPerRequest: 3,
       lazyConnect: true,
     });
-    redis.on("error", (err: Error) => {
-      logger.error({ err }, "Redis connection error");
+    redis.on('error', (err: Error) => {
+      logger.error({ err }, 'Redis connection error');
     });
   }
   return redis;
@@ -23,7 +23,7 @@ export function getRedis(): Redis {
 export async function connectRedis(): Promise<void> {
   const client = getRedis();
   await client.connect();
-  logger.info("Redis connected");
+  logger.info('Redis connected');
 }
 
 export async function disconnectRedis(): Promise<void> {
@@ -46,7 +46,7 @@ export async function cacheSet(
   ttlSeconds: number,
 ): Promise<void> {
   const client = getRedis();
-  await client.set(key, JSON.stringify(value), "EX", ttlSeconds);
+  await client.set(key, JSON.stringify(value), 'EX', ttlSeconds);
 }
 
 export async function cacheDel(key: string): Promise<void> {
@@ -64,7 +64,7 @@ export function normalizeCacheKey(
     .reduce(
       (acc, key) => {
         const val = params[key];
-        acc[key] = typeof val === "string" ? val.toLowerCase().trim() : val;
+        acc[key] = typeof val === 'string' ? val.toLowerCase().trim() : val;
         return acc;
       },
       {} as Record<string, unknown>,

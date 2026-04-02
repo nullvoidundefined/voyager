@@ -40,7 +40,7 @@ export interface TripContext {
 export function formatTripContext(ctx: TripContext): string {
   const lines: string[] = [];
 
-  lines.push("## Current Trip Plan");
+  lines.push('## Current Trip Plan');
   lines.push(`- **Destination:** ${ctx.destination}`);
   if (ctx.origin) lines.push(`- **Origin:** ${ctx.origin}`);
   if (ctx.departure_date) lines.push(`- **Departure:** ${ctx.departure_date}`);
@@ -53,29 +53,29 @@ export function formatTripContext(ctx: TripContext): string {
     ctx.preferences.pace ||
     ctx.preferences.interests?.length
   ) {
-    lines.push("\n### Preferences");
+    lines.push('\n### Preferences');
     if (ctx.preferences.style) lines.push(`- Style: ${ctx.preferences.style}`);
     if (ctx.preferences.pace) lines.push(`- Pace: ${ctx.preferences.pace}`);
     if (ctx.preferences.interests?.length) {
-      lines.push(`- Interests: ${ctx.preferences.interests.join(", ")}`);
+      lines.push(`- Interests: ${ctx.preferences.interests.join(', ')}`);
     }
   }
 
   if (ctx.user_preferences) {
     const up = ctx.user_preferences;
-    lines.push("\n### User Preferences");
+    lines.push('\n### User Preferences');
     if (
       up.dietary.length > 0 &&
-      !(up.dietary.length === 1 && up.dietary[0] === "none")
+      !(up.dietary.length === 1 && up.dietary[0] === 'none')
     ) {
-      lines.push(`- Dietary: ${up.dietary.join(", ")}`);
+      lines.push(`- Dietary: ${up.dietary.join(', ')}`);
     }
     lines.push(`- Travel intensity: ${up.intensity}`);
     lines.push(`- Traveling: ${up.social}`);
   }
 
   if (ctx.selected_flights.length > 0) {
-    lines.push("\n### Selected Flights");
+    lines.push('\n### Selected Flights');
     for (const f of ctx.selected_flights) {
       lines.push(
         `- ${f.airline} ${f.flight_number}: $${f.price} (${f.departure_time} → ${f.arrival_time})`,
@@ -84,7 +84,7 @@ export function formatTripContext(ctx: TripContext): string {
   }
 
   if (ctx.selected_hotels.length > 0) {
-    lines.push("\n### Selected Hotels");
+    lines.push('\n### Selected Hotels');
     for (const h of ctx.selected_hotels) {
       lines.push(
         `- ${h.name}: $${h.price_per_night}/night ($${h.total_price} total), ${h.star_rating}★`,
@@ -93,7 +93,7 @@ export function formatTripContext(ctx: TripContext): string {
   }
 
   if (ctx.selected_experiences.length > 0) {
-    lines.push("\n### Selected Experiences");
+    lines.push('\n### Selected Experiences');
     for (const e of ctx.selected_experiences) {
       lines.push(`- ${e.name} (${e.category}): ~$${e.estimated_cost}`);
     }
@@ -104,5 +104,5 @@ export function formatTripContext(ctx: TripContext): string {
   lines.push(`- Spent: $${ctx.total_spent} / $${ctx.budget_total}`);
   lines.push(`- Remaining: $${remaining}`);
 
-  return lines.join("\n");
+  return lines.join('\n');
 }

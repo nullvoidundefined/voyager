@@ -1,4 +1,4 @@
-import { query } from "app/db/pool/pool.js";
+import { query } from 'app/db/pool/pool.js';
 
 export interface Conversation {
   id: string;
@@ -10,7 +10,7 @@ export interface Conversation {
 export interface Message {
   id: string;
   conversation_id: string;
-  role: "user" | "assistant" | "tool";
+  role: 'user' | 'assistant' | 'tool';
   content: string | null;
   tool_calls_json: unknown;
   token_count: number | null;
@@ -19,7 +19,7 @@ export interface Message {
 
 export interface InsertMessageInput {
   conversation_id: string;
-  role: "user" | "assistant" | "tool";
+  role: 'user' | 'assistant' | 'tool';
   content: string | null;
   tool_calls_json?: unknown;
   token_count?: number | null;
@@ -36,7 +36,7 @@ export async function getOrCreateConversation(
     [tripId],
   );
   const row = result.rows[0];
-  if (!row) throw new Error("Failed to get or create conversation");
+  if (!row) throw new Error('Failed to get or create conversation');
   return row;
 }
 
@@ -56,7 +56,7 @@ export async function insertMessage(
     ],
   );
   const row = result.rows[0];
-  if (!row) throw new Error("Failed to insert message");
+  if (!row) throw new Error('Failed to insert message');
   return row;
 }
 

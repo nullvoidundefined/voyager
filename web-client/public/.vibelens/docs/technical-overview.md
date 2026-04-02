@@ -84,34 +84,40 @@ Progress events (`tool_start`, `tool_result`, `assistant`) are emitted via callb
 ### Tool Implementations
 
 **search_flights** (`server/src/tools/flights.tool.ts`):
+
 - Calls SerpApi `google_flights` engine with IATA codes, dates, passengers
 - Normalizes `SerpApiFlight` responses into `FlightResult` objects
 - Filters by `max_price`, sorts by price, returns top 5
 - Caches results in Redis for 1 hour
 
 **search_hotels** (`server/src/tools/hotels.tool.ts`):
+
 - Calls SerpApi `google_hotels` engine with city name, dates, guests
 - Normalizes `SerpApiHotel` responses into `HotelResult` objects
 - Filters by star rating and max price per night
 - Caches results in Redis for 1 hour
 
 **search_experiences** (`server/src/tools/experiences.tool.ts`):
+
 - Calls Google Places Text Search API with location + category keywords
 - Uses field mask for efficient responses: id, displayName, address, rating, priceLevel, photos, location
 - Maps `priceLevel` enums to estimated USD costs ($0-$150 range)
 - Caches results in Redis for 1 hour
 
 **calculate_remaining_budget** (`server/src/tools/budget.tool.ts`):
+
 - Pure computation -- no external API calls
 - Calculates total spent, remaining, percentage breakdowns by category
 - Returns `over_budget` flag and warning message when applicable
 
 **get_destination_info** (`server/src/tools/destination.tool.ts`):
+
 - Local lookup table with 24 major cities
 - Returns IATA code, country, timezone, currency, best time to visit
 - Returns error message for unknown cities
 
 **update_trip** (dispatched in `server/src/tools/executor.ts`):
+
 - Updates trip record in PostgreSQL with destination, dates, origin, budget
 - Requires `ToolContext` (tripId + userId) for authorization
 
@@ -145,19 +151,19 @@ Custom session-based auth (not Supabase):
 
 11 migrations in `server/migrations/` create:
 
-| Table | Purpose |
-|---|---|
-| `users` | Email, password hash, first/last name |
-| `sessions` | Session ID (SHA-256 hash), user_id, expires_at |
-| `trips` | Destination, origin, dates, budget, travelers, preferences, status |
-| `trip_flights` | Selected flights for a trip (origin, destination, airline, price, etc.) |
-| `trip_hotels` | Selected hotels (name, city, star rating, prices, dates) |
-| `trip_experiences` | Selected experiences (name, category, rating, estimated cost) |
-| `conversations` | One conversation per trip (1:1 relationship, UPSERT on trip_id) |
-| `messages` | Conversation messages (role, content, tool_calls_json, token_count) |
-| `api_cache` | Unused (caching moved to Redis) |
-| `tool_call_log` | Observability: tool name, input/result JSON, latency, cache hit, error |
-| `user_preferences` | Dietary restrictions, travel intensity, social style per user |
+| Table              | Purpose                                                                 |
+| ------------------ | ----------------------------------------------------------------------- |
+| `users`            | Email, password hash, first/last name                                   |
+| `sessions`         | Session ID (SHA-256 hash), user_id, expires_at                          |
+| `trips`            | Destination, origin, dates, budget, travelers, preferences, status      |
+| `trip_flights`     | Selected flights for a trip (origin, destination, airline, price, etc.) |
+| `trip_hotels`      | Selected hotels (name, city, star rating, prices, dates)                |
+| `trip_experiences` | Selected experiences (name, category, rating, estimated cost)           |
+| `conversations`    | One conversation per trip (1:1 relationship, UPSERT on trip_id)         |
+| `messages`         | Conversation messages (role, content, tool_calls_json, token_count)     |
+| `api_cache`        | Unused (caching moved to Redis)                                         |
+| `tool_call_log`    | Observability: tool name, input/result JSON, latency, cache hit, error  |
+| `user_preferences` | Dietary restrictions, travel intensity, social style per user           |
 
 ### System Prompt
 
@@ -196,6 +202,7 @@ web-client/src/app/
 
 **ChatBox** (`web-client/src/components/ChatBox/ChatBox.tsx`):
 The main conversational interface. Handles:
+
 - SSE stream reading from `POST /trips/:id/chat`
 - Tool progress indicators (hourglass/checkmark per tool)
 - Message rendering with inline widgets
@@ -203,6 +210,7 @@ The main conversational interface. Handles:
 - Booking actions ("Book This Trip" / "Try Again")
 
 **Widget Components** (`web-client/src/components/ChatBox/widgets/`):
+
 - `FlightCard` -- Displays airline logo, route, departure time, price. Renders as a `<button>` with `aria-pressed`.
 - `HotelCard` -- Displays hotel image, name, star rating, price per night, total. Includes static map preview.
 - `ExperienceCard` -- Displays experience name, category, rating, estimated cost. Includes photo proxy.
@@ -225,6 +233,7 @@ Modal overlay with three stages: review (cost breakdown + confirm/cancel), booki
 ### API Client
 
 `web-client/src/lib/api.ts` exports `get`, `post`, `put`, `del` functions that:
+
 - Prepend `NEXT_PUBLIC_API_URL` (defaults to `http://localhost:3001`)
 - Include `credentials: "include"` for session cookies
 - Include `X-Requested-With: XMLHttpRequest` for CSRF

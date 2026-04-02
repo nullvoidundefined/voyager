@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-import { formatCurrency, formatShortDate } from "@/lib/format";
+import { formatCurrency, formatShortDate } from '@/lib/format';
 
-import styles from "./BookingConfirmation.module.scss";
+import styles from './BookingConfirmation.module.scss';
 
 interface FlightSummary {
   airline: string | null;
@@ -51,8 +51,8 @@ export function BookingConfirmation({
   onConfirm,
   onCancel,
 }: BookingConfirmationProps) {
-  const [stage, setStage] = useState<"review" | "booking" | "confirmed">(
-    "review",
+  const [stage, setStage] = useState<'review' | 'booking' | 'confirmed'>(
+    'review',
   );
 
   const flightTotal = flights.reduce((s, f) => s + (f.price ?? 0), 0);
@@ -61,14 +61,14 @@ export function BookingConfirmation({
   const grandTotal = flightTotal + hotelTotal + expTotal;
 
   useEffect(() => {
-    if (stage === "booking") {
-      const timer = setTimeout(() => setStage("confirmed"), 2200);
+    if (stage === 'booking') {
+      const timer = setTimeout(() => setStage('confirmed'), 2200);
       return () => clearTimeout(timer);
     }
   }, [stage]);
 
   useEffect(() => {
-    if (stage === "confirmed") {
+    if (stage === 'confirmed') {
       const timer = setTimeout(onConfirm, 1500);
       return () => clearTimeout(timer);
     }
@@ -77,11 +77,11 @@ export function BookingConfirmation({
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
-        {stage === "review" && (
+        {stage === 'review' && (
           <>
             <h2 className={styles.title}>Confirm Your Trip to {destination}</h2>
             <p className={styles.dates}>
-              {formatShortDate(departureDate)} &ndash;{" "}
+              {formatShortDate(departureDate)} &ndash;{' '}
               {formatShortDate(returnDate)}
             </p>
 
@@ -92,7 +92,7 @@ export function BookingConfirmation({
                   {flights.map((f, i) => (
                     <div key={i} className={styles.item}>
                       <span>
-                        {f.airline} {f.flight_number} &middot; {f.origin} &rarr;{" "}
+                        {f.airline} {f.flight_number} &middot; {f.origin} &rarr;{' '}
                         {f.destination}
                       </span>
                       <span className={styles.price}>
@@ -108,7 +108,7 @@ export function BookingConfirmation({
                   <h3>Hotels</h3>
                   {hotels.map((h, i) => (
                     <div key={i} className={styles.item}>
-                      <span>{h.name ?? "Hotel"}</span>
+                      <span>{h.name ?? 'Hotel'}</span>
                       <span className={styles.price}>
                         {formatCurrency(h.total_price, h.currency)}
                       </span>
@@ -122,7 +122,7 @@ export function BookingConfirmation({
                   <h3>Experiences</h3>
                   {experiences.map((e, i) => (
                     <div key={i} className={styles.item}>
-                      <span>{e.name ?? "Experience"}</span>
+                      <span>{e.name ?? 'Experience'}</span>
                       <span className={styles.price}>
                         ~{formatCurrency(e.estimated_cost)}
                       </span>
@@ -149,14 +149,14 @@ export function BookingConfirmation({
 
             <div className={styles.actions}>
               <button
-                type="button"
+                type='button'
                 className={styles.confirmButton}
-                onClick={() => setStage("booking")}
+                onClick={() => setStage('booking')}
               >
                 Confirm Booking
               </button>
               <button
-                type="button"
+                type='button'
                 className={styles.cancelButton}
                 onClick={onCancel}
               >
@@ -166,7 +166,7 @@ export function BookingConfirmation({
           </>
         )}
 
-        {stage === "booking" && (
+        {stage === 'booking' && (
           <div className={styles.bookingState}>
             <div className={styles.spinner} />
             <h2>Booking your trip...</h2>
@@ -174,7 +174,7 @@ export function BookingConfirmation({
           </div>
         )}
 
-        {stage === "confirmed" && (
+        {stage === 'confirmed' && (
           <div className={styles.bookingState}>
             <div className={styles.checkmark}>&#10003;</div>
             <h2>Trip Booked!</h2>

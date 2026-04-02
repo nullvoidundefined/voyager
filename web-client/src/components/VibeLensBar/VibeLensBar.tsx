@@ -1,8 +1,11 @@
-"use client";
+'use client';
 
-import VibeLens from "vibelens";
-import "vibelens/styles.css";
+import 'vibelens/styles.css';
+
+import VibeLens from 'vibelens';
 
 export function VibeLensBar() {
-  return <VibeLens appName="Voyager" position="top" theme="dark" fixed={false} />;
+  return (
+    <VibeLens appName='Voyager' position='top' theme='dark' fixed={false} />
+  );
 }

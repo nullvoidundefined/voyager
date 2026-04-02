@@ -1,8 +1,8 @@
-import type { Request, Response } from "express";
-import { Readable } from "node:stream";
-import type { ReadableStream as WebReadableStream } from "node:stream/web";
+import type { Request, Response } from 'express';
+import { Readable } from 'node:stream';
+import type { ReadableStream as WebReadableStream } from 'node:stream/web';
 
-const GOOGLE_API_KEY = process.env.GOOGLE_PLACES_API_KEY ?? "";
+const GOOGLE_API_KEY = process.env.GOOGLE_PLACES_API_KEY ?? '';
 
 export async function photoProxyHandler(req: Request, res: Response) {
   const ref = req.query.ref as string;
@@ -11,7 +11,7 @@ export async function photoProxyHandler(req: Request, res: Response) {
   if (!ref) {
     res
       .status(400)
-      .json({ error: "MISSING_PARAM", message: "ref is required" });
+      .json({ error: 'MISSING_PARAM', message: 'ref is required' });
     return;
   }
 
@@ -20,16 +20,16 @@ export async function photoProxyHandler(req: Request, res: Response) {
     const response = await fetch(url);
 
     if (!response.ok) {
-      res.status(response.status).json({ error: "PHOTO_FETCH_FAILED" });
+      res.status(response.status).json({ error: 'PHOTO_FETCH_FAILED' });
       return;
     }
 
-    const contentType = response.headers.get("content-type") ?? "image/jpeg";
-    res.setHeader("Content-Type", contentType);
-    res.setHeader("Cache-Control", "public, max-age=86400");
+    const contentType = response.headers.get('content-type') ?? 'image/jpeg';
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
 
     Readable.fromWeb(response.body as WebReadableStream).pipe(res);
   } catch {
-    res.status(502).json({ error: "PHOTO_PROXY_ERROR" });
+    res.status(502).json({ error: 'PHOTO_PROXY_ERROR' });
   }
 }

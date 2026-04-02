@@ -33,14 +33,14 @@ The orchestrator emits `ProgressEvent`s (`tool_start`, `tool_result`, `assistant
 
 Six tools are registered with Claude via `TOOL_DEFINITIONS` in `server/src/tools/definitions.ts`:
 
-| Tool | Implementation | External API |
-|---|---|---|
-| `search_flights` | `flights.tool.ts` | SerpApi `google_flights` engine |
-| `search_hotels` | `hotels.tool.ts` | SerpApi `google_hotels` engine |
-| `search_experiences` | `experiences.tool.ts` | Google Places Text Search |
-| `calculate_remaining_budget` | `budget.tool.ts` | Local computation (no API) |
-| `get_destination_info` | `destination.tool.ts` | Local lookup table (24 cities) |
-| `update_trip` | `executor.ts` -> `trips.ts` repo | PostgreSQL update |
+| Tool                         | Implementation                   | External API                    |
+| ---------------------------- | -------------------------------- | ------------------------------- |
+| `search_flights`             | `flights.tool.ts`                | SerpApi `google_flights` engine |
+| `search_hotels`              | `hotels.tool.ts`                 | SerpApi `google_hotels` engine  |
+| `search_experiences`         | `experiences.tool.ts`            | Google Places Text Search       |
+| `calculate_remaining_budget` | `budget.tool.ts`                 | Local computation (no API)      |
+| `get_destination_info`       | `destination.tool.ts`            | Local lookup table (24 cities)  |
+| `update_trip`                | `executor.ts` -> `trips.ts` repo | PostgreSQL update               |
 
 ### Data Flow for a Chat Turn
 

@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { useCallback, useState } from "react";
+import { useCallback, useState } from 'react';
 
-import { BookingConfirmation } from "@/components/BookingConfirmation/BookingConfirmation";
-import { ChatBox } from "@/components/ChatBox/ChatBox";
-import { get, put } from "@/lib/api";
-import { APP_NAME } from "@/lib/constants";
-import { formatCurrency, formatShortDate } from "@/lib/format";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
-import { useParams } from "next/navigation";
+import { BookingConfirmation } from '@/components/BookingConfirmation/BookingConfirmation';
+import { ChatBox } from '@/components/ChatBox/ChatBox';
+import { get, put } from '@/lib/api';
+import { APP_NAME } from '@/lib/constants';
+import { formatCurrency, formatShortDate } from '@/lib/format';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
-import styles from "./tripDetail.module.scss";
+import styles from './tripDetail.module.scss';
 
 interface TripFlight {
   id: string;
@@ -68,20 +68,20 @@ export default function TripDetailPage() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["trips", id],
+    queryKey: ['trips', id],
     queryFn: () => get<{ trip: Trip }>(`/trips/${id}`).then((r) => r.trip),
   });
 
   const handleConfirmBooking = useCallback(async () => {
     try {
-      await put(`/trips/${id}`, { status: "saved" });
+      await put(`/trips/${id}`, { status: 'saved' });
     } catch {
       // Mock: update cache directly if no endpoint exists
     }
-    queryClient.setQueryData<Trip>(["trips", id], (old) =>
-      old ? { ...old, status: "saved" } : old,
+    queryClient.setQueryData<Trip>(['trips', id], (old) =>
+      old ? { ...old, status: 'saved' } : old,
     );
-    await queryClient.invalidateQueries({ queryKey: ["trips", id] });
+    await queryClient.invalidateQueries({ queryKey: ['trips', id] });
     setShowConfirmation(false);
   }, [id, queryClient]);
 
@@ -100,7 +100,7 @@ export default function TripDetailPage() {
   if (error || !trip) {
     return (
       <div className={styles.page}>
-        <Link href="/trips" className={styles.back}>
+        <Link href='/trips' className={styles.back}>
           &larr; Back to trips
         </Link>
         <p>Trip not found.</p>
@@ -125,7 +125,7 @@ export default function TripDetailPage() {
 
   return (
     <div className={styles.page}>
-      <Link href="/trips" className={styles.back}>
+      <Link href='/trips' className={styles.back}>
         &larr; Back to trips
       </Link>
 
@@ -133,12 +133,12 @@ export default function TripDetailPage() {
         <div>
           <h1>{trip.destination}</h1>
           <p className={styles.dates}>
-            {formatShortDate(trip.departure_date)} &ndash;{" "}
+            {formatShortDate(trip.departure_date)} &ndash;{' '}
             {formatShortDate(trip.return_date)}
           </p>
         </div>
         <div className={styles.headerRight}>
-          {trip.status === "saved" && (
+          {trip.status === 'saved' && (
             <span className={styles.bookedBadge}>Booked</span>
           )}
           {trip.budget_total != null && (
@@ -226,7 +226,7 @@ export default function TripDetailPage() {
             {trip.hotels.map((h) => (
               <div key={h.id} className={styles.dayCard}>
                 <div className={styles.dayHeader}>
-                  <span className={styles.dayNumber}>{h.name ?? "Hotel"}</span>
+                  <span className={styles.dayNumber}>{h.name ?? 'Hotel'}</span>
                   <span className={styles.dayTitle}>{h.city}</span>
                 </div>
                 <ul className={styles.dayItems}>
@@ -260,7 +260,7 @@ export default function TripDetailPage() {
               <div key={exp.id} className={styles.dayCard}>
                 <div className={styles.dayHeader}>
                   <span className={styles.dayNumber}>
-                    {exp.name ?? "Experience"}
+                    {exp.name ?? 'Experience'}
                   </span>
                   {exp.category && (
                     <span className={styles.dayTitle}>{exp.category}</span>

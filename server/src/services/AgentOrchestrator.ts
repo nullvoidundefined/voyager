@@ -1,8 +1,8 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { logger } from "app/utils/logs/logger.js";
+import Anthropic from '@anthropic-ai/sdk';
+import { logger } from 'app/utils/logs/logger.js';
 
 const DEFAULT_MAX_ITERATIONS = 15;
-const DEFAULT_MODEL = "claude-sonnet-4-20250514";
+const DEFAULT_MODEL = 'claude-sonnet-4-20250514';
 const DEFAULT_MAX_TOKENS = 4096;
 
 export interface ToolCallRecord {
@@ -21,13 +21,13 @@ export interface OrchestratorResult {
 
 export type ProgressEvent =
   | {
-      type: "tool_start";
+      type: 'tool_start';
       tool_name: string;
       tool_id: string;
       input: Record<string, unknown>;
     }
-  | { type: "tool_result"; tool_id: string; result: unknown }
-  | { type: "assistant"; text: string };
+  | { type: 'tool_result'; tool_id: string; result: unknown }
+  | { type: 'assistant'; text: string };
 
 export type ToolExecutor = (
   toolName: string,
@@ -106,12 +106,12 @@ export class AgentOrchestrator {
       tokensUsed.input += response.usage.input_tokens;
       tokensUsed.output += response.usage.output_tokens;
 
-      if (response.stop_reason === "end_turn") {
+      if (response.stop_reason === 'end_turn') {
         const textBlock = response.content.find(
-          (block): block is Anthropic.TextBlock => block.type === "text",
+          (block): block is Anthropic.TextBlock => block.type === 'text',
         );
-        const text = textBlock?.text ?? "";
-        onEvent?.({ type: "assistant", text });
+        const text = textBlock?.text ?? '';
+        onEvent?.({ type: 'assistant', text });
         return {
           response: text,
           toolCallsUsed: toolCalls,
@@ -120,9 +120,9 @@ export class AgentOrchestrator {
         };
       }
 
-      if (response.stop_reason === "tool_use") {
+      if (response.stop_reason === 'tool_use') {
         const toolUseBlocks = response.content.filter(
-          (block): block is Anthropic.ToolUseBlock => block.type === "tool_use",
+          (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use',
         );
 
         // Check tool call limit before executing
@@ -138,7 +138,7 @@ export class AgentOrchestrator {
 
         // Add assistant message with tool use blocks
         conversationMessages.push({
-          role: "assistant",
+          role: 'assistant',
           content: response.content,
         });
 
@@ -147,7 +147,7 @@ export class AgentOrchestrator {
         for (const block of toolUseBlocks) {
           const input = block.input as Record<string, unknown>;
           onEvent?.({
-            type: "tool_start",
+            type: 'tool_start',
             tool_name: block.name,
             tool_id: block.id,
             input,
@@ -166,7 +166,7 @@ export class AgentOrchestrator {
             result = `Error: ${errorMessage}`;
             logger.error(
               { err, toolName: block.name },
-              "Tool execution failed",
+              'Tool execution failed',
             );
           }
           const latencyMs = Date.now() - startTime;
@@ -179,7 +179,7 @@ export class AgentOrchestrator {
           };
           toolCalls.push(record);
 
-          onEvent?.({ type: "tool_result", tool_id: block.id, result });
+          onEvent?.({ type: 'tool_result', tool_id: block.id, result });
 
           this.onToolExecuted?.({
             ...record,
@@ -189,15 +189,15 @@ export class AgentOrchestrator {
           });
 
           toolResults.push({
-            type: "tool_result",
+            type: 'tool_result',
             tool_use_id: block.id,
             content:
-              typeof result === "string" ? result : JSON.stringify(result),
+              typeof result === 'string' ? result : JSON.stringify(result),
             ...(isError && { is_error: true }),
           });
         }
 
-        conversationMessages.push({ role: "user", content: toolResults });
+        conversationMessages.push({ role: 'user', content: toolResults });
       }
     }
   }

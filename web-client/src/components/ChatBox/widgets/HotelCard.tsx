@@ -1,7 +1,7 @@
-import { formatCurrency, formatShortDate } from "@/lib/format";
+import { formatCurrency, formatShortDate } from '@/lib/format';
 
-import styles from "./HotelCard.module.scss";
-import { MapPreviewCard } from "./MapPreviewCard";
+import styles from './HotelCard.module.scss';
+import { MapPreviewCard } from './MapPreviewCard';
 
 interface HotelCardProps {
   name: string;
@@ -35,12 +35,12 @@ export function HotelCard({
   onClick,
 }: HotelCardProps) {
   const stars =
-    starRating != null ? "\u2605".repeat(Math.round(starRating)) : null;
+    starRating != null ? '\u2605'.repeat(Math.round(starRating)) : null;
 
   return (
     <button
-      type="button"
-      className={`${styles.card} ${selected ? styles.selected : ""}`}
+      type='button'
+      className={`${styles.card} ${selected ? styles.selected : ''}`}
       aria-pressed={selected}
       onClick={onClick}
     >

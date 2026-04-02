@@ -1,9 +1,9 @@
-import { calculateRemainingBudget } from "app/tools/budget.tool.js";
-import { describe, expect, it } from "vitest";
+import { calculateRemainingBudget } from 'app/tools/budget.tool.js';
+import { describe, expect, it } from 'vitest';
 
-describe("budget.tool", () => {
-  describe("calculateRemainingBudget", () => {
-    it("calculates remaining budget with all categories", () => {
+describe('budget.tool', () => {
+  describe('calculateRemainingBudget', () => {
+    it('calculates remaining budget with all categories', () => {
       const result = calculateRemainingBudget({
         total_budget: 3000,
         flight_cost: 900,
@@ -19,7 +19,7 @@ describe("budget.tool", () => {
       expect(result.breakdown.experiences.amount).toBe(225);
     });
 
-    it("returns correct percentages", () => {
+    it('returns correct percentages', () => {
       const result = calculateRemainingBudget({
         total_budget: 1000,
         flight_cost: 500,
@@ -33,7 +33,7 @@ describe("budget.tool", () => {
       expect(result.remaining_percentage).toBe(10);
     });
 
-    it("flags over-budget scenarios", () => {
+    it('flags over-budget scenarios', () => {
       const result = calculateRemainingBudget({
         total_budget: 1000,
         flight_cost: 600,
@@ -43,10 +43,10 @@ describe("budget.tool", () => {
 
       expect(result.remaining).toBe(-200);
       expect(result.over_budget).toBe(true);
-      expect(result.warning).toContain("over budget");
+      expect(result.warning).toContain('over budget');
     });
 
-    it("handles zero experience costs", () => {
+    it('handles zero experience costs', () => {
       const result = calculateRemainingBudget({
         total_budget: 2000,
         flight_cost: 500,
@@ -59,7 +59,7 @@ describe("budget.tool", () => {
       expect(result.breakdown.experiences.percentage).toBe(0);
     });
 
-    it("handles zero costs (beginning of planning)", () => {
+    it('handles zero costs (beginning of planning)', () => {
       const result = calculateRemainingBudget({
         total_budget: 3000,
         flight_cost: 0,
@@ -72,7 +72,7 @@ describe("budget.tool", () => {
       expect(result.remaining_percentage).toBe(100);
     });
 
-    it("rounds amounts to 2 decimal places", () => {
+    it('rounds amounts to 2 decimal places', () => {
       const result = calculateRemainingBudget({
         total_budget: 1000,
         flight_cost: 333.333,

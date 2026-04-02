@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { del, get } from "@/lib/api";
-import { formatCurrency, formatShortDate } from "@/lib/format";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
+import { del, get } from '@/lib/api';
+import { formatCurrency, formatShortDate } from '@/lib/format';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import Link from 'next/link';
 
-import styles from "./trips.module.scss";
+import styles from './trips.module.scss';
 
 interface Trip {
   id: string;
@@ -14,7 +14,7 @@ interface Trip {
   return_date: string | null;
   budget_total: number | null;
   budget_currency: string;
-  status: "planning" | "saved" | "archived";
+  status: 'planning' | 'saved' | 'archived';
 }
 
 function formatDates(
@@ -22,7 +22,7 @@ function formatDates(
   returnDate: string | null,
 ): string {
   if (!departure) {
-    return "Dates TBD";
+    return 'Dates TBD';
   }
   if (!returnDate) {
     return formatShortDate(departure);
@@ -32,7 +32,7 @@ function formatDates(
 
 function formatBudget(amount: number | null, currency: string): string {
   if (amount == null) {
-    return "No budget set";
+    return 'No budget set';
   }
   return formatCurrency(amount, currency);
 }
@@ -49,27 +49,27 @@ export default function TripsPage() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["trips"],
-    queryFn: () => get<{ trips: Trip[] }>("/trips").then((r) => r.trips),
+    queryKey: ['trips'],
+    queryFn: () => get<{ trips: Trip[] }>('/trips').then((r) => r.trips),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (tripId: string) => del(`/trips/${tripId}`),
     onMutate: async (tripId: string) => {
-      await queryClient.cancelQueries({ queryKey: ["trips"] });
-      const previous = queryClient.getQueryData<Trip[]>(["trips"]);
-      queryClient.setQueryData<Trip[]>(["trips"], (old) =>
+      await queryClient.cancelQueries({ queryKey: ['trips'] });
+      const previous = queryClient.getQueryData<Trip[]>(['trips']);
+      queryClient.setQueryData<Trip[]>(['trips'], (old) =>
         old ? old.filter((t) => t.id !== tripId) : [],
       );
       return { previous };
     },
     onError: (_err, _tripId, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(["trips"], context.previous);
+        queryClient.setQueryData(['trips'], context.previous);
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["trips"] });
+      queryClient.invalidateQueries({ queryKey: ['trips'] });
     },
   });
 
@@ -77,7 +77,7 @@ export default function TripsPage() {
     <div className={styles.page}>
       <div className={styles.header}>
         <h1>My Trips</h1>
-        <Link href="/trips/new" className={styles.newTrip}>
+        <Link href='/trips/new' className={styles.newTrip}>
           + New Trip
         </Link>
       </div>
@@ -109,9 +109,9 @@ export default function TripsPage() {
                 </div>
               </Link>
               <button
-                type="button"
+                type='button'
                 className={styles.deleteBtn}
-                aria-label="Delete trip"
+                aria-label='Delete trip'
                 onClick={() => deleteMutation.mutate(trip.id)}
               >
                 &times;
@@ -124,7 +124,7 @@ export default function TripsPage() {
       {trips && trips.length === 0 && (
         <div className={styles.empty}>
           <p>No trips yet. Start planning your first adventure!</p>
-          <Link href="/trips/new" className={styles.newTrip}>
+          <Link href='/trips/new' className={styles.newTrip}>
             + New Trip
           </Link>
         </div>

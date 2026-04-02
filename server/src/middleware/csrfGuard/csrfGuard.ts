@@ -1,6 +1,6 @@
-import type { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from 'express';
 
-const STATE_CHANGING_METHODS = ["POST", "PUT", "PATCH", "DELETE"];
+const STATE_CHANGING_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];
 
 /**
  * Rejects state-changing requests that lack X-Requested-With.
@@ -16,11 +16,11 @@ export function csrfGuard(
     next();
     return;
   }
-  const value = req.get("X-Requested-With");
+  const value = req.get('X-Requested-With');
   if (!value) {
     res
       .status(403)
-      .json({ error: "FORBIDDEN", message: "Missing X-Requested-With header" });
+      .json({ error: 'FORBIDDEN', message: 'Missing X-Requested-With header' });
     return;
   }
   next();

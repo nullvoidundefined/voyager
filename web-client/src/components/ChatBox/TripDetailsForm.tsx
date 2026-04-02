@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useState } from 'react';
 
-import styles from "./TripDetailsForm.module.scss";
+import styles from './TripDetailsForm.module.scss';
 
 export interface TripField {
-  type: "origin" | "departure_date" | "return_date" | "budget" | "travelers";
+  type: 'origin' | 'departure_date' | 'return_date' | 'budget' | 'travelers';
   label: string;
 }
 
@@ -48,20 +48,20 @@ export function TripDetailsForm({
     }
     if (values.departure_date && values.return_date) {
       const fmt = (d: string) =>
-        new Date(d + "T00:00:00").toLocaleDateString("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
+        new Date(d + 'T00:00:00').toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
         });
       parts.push(
         `from ${fmt(values.departure_date)} to ${fmt(values.return_date)}`,
       );
     } else if (values.departure_date) {
       const fmt = (d: string) =>
-        new Date(d + "T00:00:00").toLocaleDateString("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
+        new Date(d + 'T00:00:00').toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
         });
       parts.push(`departing ${fmt(values.departure_date)}`);
     }
@@ -70,89 +70,89 @@ export function TripDetailsForm({
     }
     if (values.travelers) {
       parts.push(
-        values.travelers === "1"
-          ? "for 1 traveler"
+        values.travelers === '1'
+          ? 'for 1 traveler'
           : `for ${values.travelers} travelers`,
       );
     }
 
-    onSubmit(parts.join(", ") + ".");
+    onSubmit(parts.join(', ') + '.');
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toISOString().split('T')[0];
 
   return (
     <form
       onSubmit={handleSubmit}
-      className={`${styles.form} ${isLocked ? styles.locked : ""}`}
+      className={`${styles.form} ${isLocked ? styles.locked : ''}`}
     >
       {fields.map((field) => (
         <div key={field.type} className={styles.field}>
           <label htmlFor={field.type} className={styles.label}>
             {field.label}
           </label>
-          {field.type === "origin" && (
+          {field.type === 'origin' && (
             <input
-              id="origin"
-              type="text"
+              id='origin'
+              type='text'
               className={styles.input}
-              placeholder="e.g. New York, San Francisco"
-              value={values.origin ?? ""}
-              onChange={(e) => set("origin", e.target.value)}
+              placeholder='e.g. New York, San Francisco'
+              value={values.origin ?? ''}
+              onChange={(e) => set('origin', e.target.value)}
               disabled={disabled || isLocked}
               readOnly={isLocked}
             />
           )}
-          {field.type === "departure_date" && (
+          {field.type === 'departure_date' && (
             <input
-              id="departure_date"
-              type="date"
+              id='departure_date'
+              type='date'
               className={styles.input}
               min={today}
-              value={values.departure_date ?? ""}
-              onChange={(e) => set("departure_date", e.target.value)}
+              value={values.departure_date ?? ''}
+              onChange={(e) => set('departure_date', e.target.value)}
               disabled={disabled || isLocked}
               readOnly={isLocked}
             />
           )}
-          {field.type === "return_date" && (
+          {field.type === 'return_date' && (
             <input
-              id="return_date"
-              type="date"
+              id='return_date'
+              type='date'
               className={styles.input}
               min={values.departure_date || today}
-              value={values.return_date ?? ""}
-              onChange={(e) => set("return_date", e.target.value)}
+              value={values.return_date ?? ''}
+              onChange={(e) => set('return_date', e.target.value)}
               disabled={disabled || isLocked}
               readOnly={isLocked}
             />
           )}
-          {field.type === "budget" && (
+          {field.type === 'budget' && (
             <div className={styles.budgetInput}>
               <span className={styles.prefix}>$</span>
               <input
-                id="budget"
-                type="number"
+                id='budget'
+                type='number'
                 className={styles.input}
-                placeholder="3000"
+                placeholder='3000'
                 min={100}
-                value={values.budget ?? ""}
-                onChange={(e) => set("budget", e.target.value)}
+                value={values.budget ?? ''}
+                onChange={(e) => set('budget', e.target.value)}
                 disabled={disabled || isLocked}
                 readOnly={isLocked}
               />
             </div>
           )}
-          {field.type === "travelers" && (
+          {field.type === 'travelers' && (
             <input
-              id="travelers"
-              type="number"
+              id='travelers'
+              type='number'
               className={styles.input}
-              placeholder="2"
+              placeholder='2'
               min={1}
               max={10}
-              value={values.travelers ?? ""}
-              onChange={(e) => set("travelers", e.target.value)}
+              value={values.travelers ?? ''}
+              onChange={(e) => set('travelers', e.target.value)}
               disabled={disabled || isLocked}
               readOnly={isLocked}
             />
@@ -161,7 +161,7 @@ export function TripDetailsForm({
       ))}
       {!isLocked && (
         <button
-          type="submit"
+          type='submit'
           className={styles.submit}
           disabled={disabled || !allFilled}
         >
@@ -194,8 +194,8 @@ export function parseSubmittedValues(
   if (dateMatch) {
     const parseDate = (s: string) => {
       const d = new Date(s);
-      if (isNaN(d.getTime())) return "";
-      return d.toISOString().split("T")[0];
+      if (isNaN(d.getTime())) return '';
+      return d.toISOString().split('T')[0];
     };
     values.departure_date = parseDate(dateMatch[1]);
     values.return_date = parseDate(dateMatch[2]);
@@ -203,7 +203,7 @@ export function parseSubmittedValues(
 
   const budgetMatch = userMessage.match(/\$(\d[\d,]*)\s*budget/i);
   if (budgetMatch) {
-    values.budget = budgetMatch[1].replace(/,/g, "");
+    values.budget = budgetMatch[1].replace(/,/g, '');
   }
 
   const travelerMatch = userMessage.match(/for\s+(\d+)\s+traveler/i);
@@ -220,7 +220,7 @@ export function parseTripFormFields(content: string): {
   fields: TripField[];
   after: string;
 } | null {
-  const lines = content.split("\n");
+  const lines = content.split('\n');
   let listStart = -1;
   let listEnd = -1;
 
@@ -247,14 +247,14 @@ export function parseTripFormFields(content: string): {
   for (const line of listLines) {
     const lower = line.toLowerCase();
     if (/travel(ing|l?)\s+from|origin|departure\s+(city|airport)/.test(lower)) {
-      fields.push({ type: "origin", label: "Origin city" });
+      fields.push({ type: 'origin', label: 'Origin city' });
     } else if (/travel\s+dates|departure.*return|when.*travel/.test(lower)) {
-      fields.push({ type: "departure_date", label: "Departure date" });
-      fields.push({ type: "return_date", label: "Return date" });
+      fields.push({ type: 'departure_date', label: 'Departure date' });
+      fields.push({ type: 'return_date', label: 'Return date' });
     } else if (/budget/.test(lower)) {
-      fields.push({ type: "budget", label: "Budget (USD)" });
+      fields.push({ type: 'budget', label: 'Budget (USD)' });
     } else if (/traveler|passenger|how\s+many\s+(people|guest)/.test(lower)) {
-      fields.push({ type: "travelers", label: "Travelers" });
+      fields.push({ type: 'travelers', label: 'Travelers' });
     }
   }
 
@@ -263,10 +263,10 @@ export function parseTripFormFields(content: string): {
     return null;
   }
 
-  const before = lines.slice(0, listStart).join("\n").trimEnd();
+  const before = lines.slice(0, listStart).join('\n').trimEnd();
   const after = lines
     .slice(listEnd + 1)
-    .join("\n")
+    .join('\n')
     .trimStart();
 
   return { before, fields, after };

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 
-import styles from "./ItineraryTimeline.module.scss";
+import styles from './ItineraryTimeline.module.scss';
 
 interface DayPlan {
   dayNumber: number;
@@ -38,7 +38,7 @@ export function ItineraryTimeline({ days }: ItineraryTimelineProps) {
         return (
           <div key={day.dayNumber} className={styles.dayCard}>
             <button
-              type="button"
+              type='button'
               className={styles.dayHeader}
               onClick={() => toggle(day.dayNumber)}
               aria-expanded={expanded}
@@ -46,16 +46,16 @@ export function ItineraryTimeline({ days }: ItineraryTimelineProps) {
               <span className={styles.dayBadge}>Day {day.dayNumber}</span>
               <span className={styles.dayTitle}>{day.title}</span>
               <span className={styles.chevron}>
-                {expanded ? "\u2212" : "+"}
+                {expanded ? '\u2212' : '+'}
               </span>
             </button>
             <div
-              className={`${styles.itemList} ${expanded ? styles.expanded : ""}`}
+              className={`${styles.itemList} ${expanded ? styles.expanded : ''}`}
             >
               <ul>
                 {day.items.map((item, i) => (
                   <li key={i} className={styles.item}>
-                    <span className={styles.bullet} aria-hidden="true" />
+                    <span className={styles.bullet} aria-hidden='true' />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -71,13 +71,13 @@ export function ItineraryTimeline({ days }: ItineraryTimelineProps) {
 export function parseItinerary(
   text: string,
 ): { before: string; days: DayPlan[]; after: string } | null {
-  const lines = text.split("\n");
+  const lines = text.split('\n');
   const dayPattern = /^\**Day\s+(\d+)\s*(?:[:\u2014\u2013-])\s*(.*?)\**$/i;
 
   const dayIndices: { index: number; dayNumber: number; title: string }[] = [];
 
   for (let i = 0; i < lines.length; i++) {
-    const stripped = lines[i].replace(/\*\*/g, "").trim();
+    const stripped = lines[i].replace(/\*\*/g, '').trim();
     const match = stripped.match(dayPattern);
     if (match) {
       dayIndices.push({
@@ -92,7 +92,7 @@ export function parseItinerary(
     return null;
   }
 
-  const before = lines.slice(0, dayIndices[0].index).join("\n").trim();
+  const before = lines.slice(0, dayIndices[0].index).join('\n').trim();
 
   const days: DayPlan[] = dayIndices.map((d, di) => {
     const start = d.index + 1;
@@ -108,7 +108,7 @@ export function parseItinerary(
       if (itemMatch) {
         items.push(itemMatch[1]);
         afterStart = j + 1;
-      } else if (trimmed === "") {
+      } else if (trimmed === '') {
         // skip blank lines
       } else {
         // non-item, non-blank line after items means we've left the item list
@@ -141,7 +141,7 @@ export function parseItinerary(
             const trimmed = lines[j].trim();
             if (trimmed.match(/^[\u2022\-*]\s+/)) {
               lastItemIdx = j + 1;
-            } else if (trimmed !== "" && lastItemIdx > start) {
+            } else if (trimmed !== '' && lastItemIdx > start) {
               break;
             }
           }
@@ -149,7 +149,7 @@ export function parseItinerary(
         })()
       : lines.length;
 
-  const after = lines.slice(lastDayEnd).join("\n").trim();
+  const after = lines.slice(lastDayEnd).join('\n').trim();
 
   return { before, days, after };
 }

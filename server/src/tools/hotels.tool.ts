@@ -2,9 +2,9 @@ import {
   cacheGet,
   cacheSet,
   normalizeCacheKey,
-} from "app/services/cache.service.js";
-import { serpApiGet } from "app/services/serpapi.service.js";
-import { logger } from "app/utils/logs/logger.js";
+} from 'app/services/cache.service.js';
+import { serpApiGet } from 'app/services/serpapi.service.js';
+import { logger } from 'app/utils/logs/logger.js';
 
 const CACHE_TTL = 3600;
 
@@ -54,8 +54,8 @@ interface SerpApiHotelsResponse {
 }
 
 function parseStarRating(hotelClass: number | string | undefined): number {
-  if (typeof hotelClass === "number") return hotelClass;
-  if (typeof hotelClass === "string") {
+  if (typeof hotelClass === 'number') return hotelClass;
+  if (typeof hotelClass === 'string') {
     const match = hotelClass.match(/(\d)/);
     return match ? Number(match[1]) : 0;
   }
@@ -71,7 +71,7 @@ function normalizeHotel(
     hotel_id: `serpapi-hotel-${index}`,
     offer_id: `serpapi-hotel-offer-${index}`,
     name: entry.name,
-    address: "",
+    address: '',
     city: input.city,
     star_rating: parseStarRating(entry.hotel_class),
     total_price:
@@ -79,7 +79,7 @@ function normalizeHotel(
       entry.rate_per_night?.extracted_lowest ??
       0,
     price_per_night: entry.rate_per_night?.extracted_lowest ?? 0,
-    currency: "USD",
+    currency: 'USD',
     check_in: input.check_in,
     check_out: input.check_out,
     image_url: entry.images?.[0]?.thumbnail ?? null,
@@ -91,7 +91,7 @@ function normalizeHotel(
 export async function searchHotels(
   input: HotelSearchInput,
 ): Promise<HotelResult[]> {
-  const cacheKey = normalizeCacheKey("serpapi", "google-hotels", {
+  const cacheKey = normalizeCacheKey('serpapi', 'google-hotels', {
     city: input.city,
     checkIn: input.check_in,
     checkOut: input.check_out,
@@ -101,7 +101,7 @@ export async function searchHotels(
 
   const cached = await cacheGet<HotelResult[]>(cacheKey);
   if (cached) {
-    logger.debug({ cacheKey }, "Hotel search cache hit");
+    logger.debug({ cacheKey }, 'Hotel search cache hit');
     return cached;
   }
 
@@ -110,12 +110,12 @@ export async function searchHotels(
     check_in_date: input.check_in,
     check_out_date: input.check_out,
     adults: input.guests,
-    currency: "USD",
-    hl: "en",
+    currency: 'USD',
+    hl: 'en',
   };
 
   const response = (await serpApiGet(
-    "google_hotels",
+    'google_hotels',
     params,
   )) as SerpApiHotelsResponse;
 
@@ -138,7 +138,7 @@ export async function searchHotels(
   await cacheSet(cacheKey, results, CACHE_TTL);
   logger.info(
     { count: results.length, city: input.city },
-    "Hotel search complete",
+    'Hotel search complete',
   );
 
   return results;

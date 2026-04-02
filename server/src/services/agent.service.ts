@@ -1,21 +1,21 @@
-import type Anthropic from "@anthropic-ai/sdk";
-import { buildSystemPrompt } from "app/prompts/system-prompt.js";
-import type { TripContext } from "app/prompts/trip-context.js";
-import { insertToolCallLog } from "app/repositories/tool-call-log/tool-call-log.js";
+import type Anthropic from '@anthropic-ai/sdk';
+import { buildSystemPrompt } from 'app/prompts/system-prompt.js';
+import type { TripContext } from 'app/prompts/trip-context.js';
+import { insertToolCallLog } from 'app/repositories/tool-call-log/tool-call-log.js';
 import {
   AgentOrchestrator,
   type OrchestratorResult,
   type ProgressEvent,
-} from "app/services/AgentOrchestrator.js";
-import { TOOL_DEFINITIONS } from "app/tools/definitions.js";
-import { type ToolContext, executeTool } from "app/tools/executor.js";
-import { logger } from "app/utils/logs/logger.js";
+} from 'app/services/AgentOrchestrator.js';
+import { TOOL_DEFINITIONS } from 'app/tools/definitions.js';
+import { type ToolContext, executeTool } from 'app/tools/executor.js';
+import { logger } from 'app/utils/logs/logger.js';
 
 /** @deprecated Use AgentOrchestrator directly for new code. */
 interface AgentResult {
   response: string;
-  tool_calls: OrchestratorResult["toolCallsUsed"];
-  total_tokens: OrchestratorResult["tokensUsed"];
+  tool_calls: OrchestratorResult['toolCallsUsed'];
+  total_tokens: OrchestratorResult['tokensUsed'];
 }
 
 /**
@@ -45,7 +45,7 @@ export async function runAgentLoop(
         cache_hit: false,
         error: record.errorMessage,
       }).catch((logErr) => {
-        logger.warn({ err: logErr }, "Failed to log tool call");
+        logger.warn({ err: logErr }, 'Failed to log tool call');
       });
     },
   });

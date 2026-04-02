@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useState } from 'react';
 
-import styles from "./SelectableCardGroup.module.scss";
+import styles from './SelectableCardGroup.module.scss';
 
 interface SelectableCardGroupProps {
   items: Array<{
@@ -53,12 +53,12 @@ export function SelectableCardGroup({
 
       {isConfirmed && confirmedLabel ? (
         <span className={styles.confirmed}>
-          {"\u2713"} {confirmedLabel}
+          {'\u2713'} {confirmedLabel}
         </span>
       ) : (
         selectedId && (
           <button
-            type="button"
+            type='button'
             className={styles.confirmButton}
             onClick={handleConfirm}
             disabled={disabled}

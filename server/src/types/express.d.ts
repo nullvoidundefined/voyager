@@ -1,4 +1,4 @@
-import type { User } from "app/schemas/auth.js";
+import type { User } from 'app/schemas/auth.js';
 
 declare global {
   namespace Express {

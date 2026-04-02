@@ -1,4 +1,4 @@
-import { query } from "app/db/pool/pool.js";
+import { query } from 'app/db/pool/pool.js';
 import type {
   CreateTripInput,
   Trip,
@@ -6,7 +6,7 @@ import type {
   TripFlight,
   TripHotel,
   TripWithDetails,
-} from "app/schemas/trips.js";
+} from 'app/schemas/trips.js';
 
 export async function createTrip(
   userId: string,
@@ -30,7 +30,7 @@ export async function createTrip(
     ],
   );
   const row = result.rows[0];
-  if (!row) throw new Error("Insert returned no row");
+  if (!row) throw new Error('Insert returned no row');
   return row;
 }
 
@@ -105,7 +105,7 @@ export async function updateTrip(
 
   values.push(tripId, userId);
   const result = await query<Trip>(
-    `UPDATE trips SET ${setClauses.join(", ")} WHERE id = $${paramIndex} AND user_id = $${paramIndex + 1} RETURNING *`,
+    `UPDATE trips SET ${setClauses.join(', ')} WHERE id = $${paramIndex} AND user_id = $${paramIndex + 1} RETURNING *`,
     values,
   );
   return result.rows[0] ?? null;

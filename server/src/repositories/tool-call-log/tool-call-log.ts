@@ -1,4 +1,4 @@
-import { query } from "app/db/pool/pool.js";
+import { query } from 'app/db/pool/pool.js';
 
 export interface ToolCallLogEntry {
   id: string;
@@ -46,7 +46,7 @@ export async function insertToolCallLog(
     ],
   );
   const row = result.rows[0];
-  if (!row) throw new Error("Insert returned no row");
+  if (!row) throw new Error('Insert returned no row');
   return row;
 }
 

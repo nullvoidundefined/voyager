@@ -1,7 +1,7 @@
-import cors from "cors";
+import cors from 'cors';
 
-const allowedOrigins = (process.env.CORS_ORIGIN ?? "http://localhost:5173")
-  .split(",")
+const allowedOrigins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173')
+  .split(',')
   .map((o) => o.trim());
 
 export const corsConfig = cors({
@@ -13,7 +13,7 @@ export const corsConfig = cors({
       callback(new Error(`Origin ${origin} not allowed by CORS`));
     }
   },
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   maxAge: 7200,
 });

@@ -1,5 +1,5 @@
-import { logger } from "app/utils/logs/logger.js";
-import pg from "pg";
+import { logger } from 'app/utils/logs/logger.js';
+import pg from 'pg';
 
 const { Pool } = pg;
 
@@ -12,14 +12,14 @@ const pool = new Pool({
   connectionTimeoutMillis: 5_000,
   statement_timeout: 10_000,
   ssl:
-    process.env.NODE_ENV === "production"
+    process.env.NODE_ENV === 'production'
       ? {
           rejectUnauthorized:
-            process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== "false",
+            process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false',
         }
       : {
           rejectUnauthorized:
-            process.env.DATABASE_SSL_REJECT_UNAUTHORIZED === "true",
+            process.env.DATABASE_SSL_REJECT_UNAUTHORIZED === 'true',
         },
 });
 
@@ -36,8 +36,8 @@ export async function query<T extends pg.QueryResultRow>(
       ? await target.query<T>(text, values)
       : await target.query<T>(text);
   const duration = Date.now() - start;
-  if (process.env.NODE_ENV !== "production") {
-    logger.debug({ query: text, duration_ms: duration }, "db query");
+  if (process.env.NODE_ENV !== 'production') {
+    logger.debug({ query: text, duration_ms: duration }, 'db query');
   }
   return result;
 }
@@ -51,12 +51,12 @@ export async function withTransaction<T>(
 ): Promise<T> {
   const client = await pool.connect();
   try {
-    await query("BEGIN", undefined, client);
+    await query('BEGIN', undefined, client);
     const result = await fn(client);
-    await query("COMMIT", undefined, client);
+    await query('COMMIT', undefined, client);
     return result;
   } catch (err) {
-    await query("ROLLBACK", undefined, client);
+    await query('ROLLBACK', undefined, client);
     throw err;
   } finally {
     client.release();

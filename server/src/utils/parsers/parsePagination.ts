@@ -6,7 +6,7 @@ export function parsePagination(
   offsetParam: unknown,
 ): { limit: number; offset: number } {
   const rawLimit =
-    limitParam === undefined || limitParam === ""
+    limitParam === undefined || limitParam === ''
       ? undefined
       : Number(limitParam);
   const limit =
@@ -14,7 +14,7 @@ export function parsePagination(
       ? DEFAULT_LIMIT
       : Math.min(Math.max(1, Math.floor(rawLimit)), MAX_LIMIT);
   const rawOffset =
-    offsetParam === undefined || offsetParam === "" ? 0 : Number(offsetParam);
+    offsetParam === undefined || offsetParam === '' ? 0 : Number(offsetParam);
   const offset = Math.max(
     0,
     Number.isNaN(rawOffset) ? 0 : Math.floor(rawOffset),

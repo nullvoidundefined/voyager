@@ -42,14 +42,17 @@ All new components live in `web-client/src/components/ChatBox/widgets/`.
 ### 1A. Backend: Expose Visual Data in Tool Results
 
 **Flights** (`server/src/tools/flights.tool.ts`):
+
 - Add `airline_logo: string | null` to `FlightResult` interface
 - Pass through from SerpApi's `airline_logo` field (already in raw response, currently discarded)
 
 **Hotels** (`server/src/tools/hotels.tool.ts`):
+
 - Add `image_url: string | null` to `HotelResult` interface
 - Extract from SerpApi response's image/thumbnail field
 
 **Experiences** (`server/src/tools/experiences.tool.ts`):
+
 - Add `places.photos` to the `FIELD_MASK` string
 - Add `photo_url: string | null` to `ExperienceResult` interface
 - Add a backend photo proxy endpoint `GET /places/photo?ref=PHOTO_REF&maxwidth=400` that calls Google Places Photo API server-side (protects API key)
@@ -57,6 +60,7 @@ All new components live in `web-client/src/components/ChatBox/widgets/`.
 - Include `places.location` in `FIELD_MASK`
 
 **Tool definitions** (`server/src/tools/definitions.ts`):
+
 - Update return type descriptions to include new fields
 
 ### 1B. Frontend: Tool Result Cards
@@ -64,6 +68,7 @@ All new components live in `web-client/src/components/ChatBox/widgets/`.
 **Data flow:** ChatBox currently ignores `tool_result` event payloads. Change: store tool results in state keyed by `tool_id`. When the tool progress section renders, also render the result data as rich cards.
 
 **New state in ChatBox:**
+
 ```typescript
 const [toolResults, setToolResults] = useState<Record<string, unknown>>({});
 ```
@@ -71,21 +76,25 @@ const [toolResults, setToolResults] = useState<Record<string, unknown>>({});
 On `tool_result` SSE event, store: `setToolResults(prev => ({ ...prev, [data.tool_id]: data.result }))`.
 
 **FlightCard** (`widgets/FlightCard.tsx`):
+
 - Displays: airline logo (img), airline name, flight number, route (origin → dest), departure time, price badge
 - Styled as a horizontal card with the logo on the left, details center, price right
 - Selectable: click highlights with accent border, stores selection
 
 **HotelCard** (`widgets/HotelCard.tsx`):
+
 - Displays: hotel image (if available, fallback gradient), name, city, star rating (dots or stars), price per night, total price
 - Styled as a vertical card with image on top, details below
 - Selectable: click highlights
 
 **ExperienceCard** (`widgets/ExperienceCard.tsx`):
+
 - Displays: place photo (if available), name, category badge, rating, estimated cost
 - Styled similar to HotelCard
 - Selectable: click highlights
 
 **SelectableCardGroup** (`widgets/SelectableCardGroup.tsx`):
+
 - Wrapper that manages single-select state across a group of cards
 - Shows a "Confirm Selection" button when an item is selected
 - On confirm, sends a chat message like "I'll go with [selected item name]"
@@ -93,6 +102,7 @@ On `tool_result` SSE event, store: `setToolResults(prev => ({ ...prev, [data.too
 ### 1C. Frontend: Quick Reply Chips
 
 **QuickReplyChips** (`widgets/QuickReplyChips.tsx`):
+
 - Parses the last assistant message for common patterns:
   - Yes/No questions → "Yes" / "No" chips
   - "Would you like to..." → "Yes, please" / "No thanks" chips
@@ -104,6 +114,7 @@ On `tool_result` SSE event, store: `setToolResults(prev => ({ ...prev, [data.too
 - Only shown on the LAST assistant message (not historical ones)
 
 **Detection heuristics** (in `parseQuickReplies(text: string)`):
+
 - Ends with `?` → candidate for quick replies
 - Contains "would you like", "shall I", "do you want", "should I" → yes/no chips
 - Contains "or" connecting two short phrases → option chips
@@ -134,12 +145,14 @@ When tool results arrive, they render between the tool progress indicator and th
 ### 2A. Google Places Photos
 
 **Backend endpoint:** `GET /places/photo`
+
 - Query params: `ref` (photo reference string), `maxwidth` (default 400)
 - Calls Google Places Photo API: `https://places.googleapis.com/v1/{ref}/media?maxWidthPx={maxwidth}`
 - Returns the image binary with proper content-type headers
 - Caches responses in Redis for 24 hours (photos don't change often)
 
 **PlacePhotoCarousel** (`widgets/PlacePhotoCarousel.tsx`):
+
 - Receives array of photo references from ExperienceResult
 - Renders up to 3 photos in a horizontal scroll container
 - Lazy loads images as they scroll into view
@@ -148,6 +161,7 @@ When tool results arrive, they render between the tool progress indicator and th
 ### 2B. Map Preview Cards
 
 **MapPreviewCard** (`widgets/MapPreviewCard.tsx`):
+
 - Receives `latitude`, `longitude`, and `name`
 - Renders a static Google Maps image: `https://maps.googleapis.com/maps/api/staticmap?center={lat},{lng}&zoom=15&size=300x200&markers={lat},{lng}&key={key}`
 - The API key is exposed client-side (Google Maps Static API keys are restricted by HTTP referrer, not secret)
@@ -161,6 +175,7 @@ When tool results arrive, they render between the tool progress indicator and th
 ### 3A. Inline Budget Tracker
 
 **InlineBudgetBar** (`widgets/InlineBudgetBar.tsx`):
+
 - Renders after tool_result events that modify costs (search_flights, search_hotels, search_experiences when user confirms a selection)
 - Shows a horizontal progress bar: allocated (accent color) vs. remaining (surface color)
 - Labels: "$X allocated of $Y budget — $Z remaining"
@@ -170,6 +185,7 @@ When tool results arrive, they render between the tool progress indicator and th
 ### 3B. Itinerary Timeline
 
 **ItineraryTimeline** (`widgets/ItineraryTimeline.tsx`):
+
 - Parses assistant messages that contain day-by-day itinerary structure
 - Detection: messages with "Day 1", "Day 2" etc. patterns with sub-items
 - Renders as a vertical timeline with:
