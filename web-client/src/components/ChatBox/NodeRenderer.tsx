@@ -1,0 +1,130 @@
+'use client';
+
+import type { ChatNode } from '@agentic-travel-agent/shared-types';
+
+import { ItineraryTimeline } from './widgets/ItineraryTimeline';
+import { QuickReplyChips } from './widgets/QuickReplyChips';
+import { AdvisoryCard } from './nodes/AdvisoryCard';
+import { BudgetBar } from './nodes/BudgetBar';
+import { CarRentalTiles } from './nodes/CarRentalTiles';
+import { ExperienceTiles } from './nodes/ExperienceTiles';
+import { FlightTiles } from './nodes/FlightTiles';
+import { HotelTiles } from './nodes/HotelTiles';
+import { MarkdownText } from './nodes/MarkdownText';
+import { ToolProgressIndicator } from './nodes/ToolProgressIndicator';
+import { WeatherForecast } from './nodes/WeatherForecast';
+
+export interface NodeRendererCallbacks {
+  onConfirmFlight?: (label: string) => void;
+  onConfirmHotel?: (label: string) => void;
+  onConfirmCarRental?: (label: string) => void;
+  onConfirmExperience?: (label: string) => void;
+  onQuickReply?: (text: string) => void;
+  disabled?: boolean;
+  confirmedFlightId?: string | null;
+  confirmedHotelId?: string | null;
+  confirmedCarRentalId?: string | null;
+  confirmedExperienceId?: string | null;
+}
+
+interface NodeRendererProps {
+  node: ChatNode;
+  callbacks?: NodeRendererCallbacks;
+  // Convenience shorthand — forwarded from VirtualizedChat before full callback wiring
+  onQuickReply?: (text: string) => void;
+}
+
+export function NodeRenderer({ node, callbacks = {}, onQuickReply }: NodeRendererProps) {
+  // Merge top-level onQuickReply shorthand into callbacks
+  const cb: NodeRendererCallbacks = onQuickReply
+    ? { ...callbacks, onQuickReply: callbacks.onQuickReply ?? onQuickReply }
+    : callbacks;
+
+  switch (node.type) {
+    case 'text':
+      return <MarkdownText node={node} />;
+
+    case 'flight_tiles':
+      return (
+        <FlightTiles
+          node={node}
+          onConfirm={cb.onConfirmFlight}
+          disabled={cb.disabled}
+          confirmedId={cb.confirmedFlightId}
+        />
+      );
+
+    case 'hotel_tiles':
+      return (
+        <HotelTiles
+          node={node}
+          onConfirm={cb.onConfirmHotel}
+          disabled={cb.disabled}
+          confirmedId={cb.confirmedHotelId}
+        />
+      );
+
+    case 'car_rental_tiles':
+      return (
+        <CarRentalTiles
+          node={node}
+          onConfirm={cb.onConfirmCarRental}
+          disabled={cb.disabled}
+          confirmedId={cb.confirmedCarRentalId}
+        />
+      );
+
+    case 'experience_tiles':
+      return (
+        <ExperienceTiles
+          node={node}
+          onConfirm={cb.onConfirmExperience}
+          disabled={cb.disabled}
+          confirmedId={cb.confirmedExperienceId}
+        />
+      );
+
+    case 'itinerary': {
+      // Adapt shared-types DayPlan (field: day) to ItineraryTimeline (field: dayNumber)
+      const adaptedDays = node.days.map((d) => ({
+        dayNumber: d.day,
+        title: d.title,
+        items: d.items,
+      }));
+      return <ItineraryTimeline days={adaptedDays} />;
+    }
+
+    case 'advisory':
+      return <AdvisoryCard node={node} />;
+
+    case 'weather_forecast':
+      return <WeatherForecast node={node} />;
+
+    case 'budget_bar':
+      return <BudgetBar node={node} />;
+
+    case 'quick_replies':
+      return (
+        <QuickReplyChips
+          chips={node.options}
+          onSelect={cb.onQuickReply ?? (() => {})}
+          disabled={cb.disabled}
+        />
+      );
+
+    case 'tool_progress':
+      return <ToolProgressIndicator node={node} />;
+
+    case 'travel_plan_form':
+      // travel_plan_form rendering is handled by TripDetailsForm elsewhere;
+      // return null here to avoid double-rendering
+      return null;
+
+    default: {
+      // Exhaustive check — TypeScript will error if a node type is unhandled
+      const _exhaustive: never = node;
+      void _exhaustive;
+      return null;
+    }
+  }
+}
