@@ -1,0 +1,143 @@
+'use client';
+
+import { useCallback, useEffect, useRef } from 'react';
+
+import type { ChatMessage, ChatNode } from '@agentic-travel-agent/shared-types';
+import { useVirtualizer } from '@tanstack/react-virtual';
+
+import { NodeRenderer } from './NodeRenderer';
+import styles from './VirtualizedChat.module.scss';
+
+interface VirtualizedChatProps {
+  messages: ChatMessage[];
+  streamingNodes: ChatNode[];
+  toolProgress: ChatNode[];
+  streamingText: string;
+  isSending: boolean;
+  onQuickReply: (text: string) => void;
+}
+
+// Height estimates by node type for initial virtualized sizing
+const NODE_HEIGHT_ESTIMATES: Partial<Record<ChatNode['type'], number>> = {
+  text: 60,
+  flight_tiles: 240,
+  hotel_tiles: 240,
+  car_rental_tiles: 240,
+  experience_tiles: 200,
+  travel_plan_form: 300,
+  itinerary: 200,
+  advisory: 80,
+  weather_forecast: 120,
+  budget_bar: 48,
+  quick_replies: 48,
+  tool_progress: 32,
+};
+
+function estimateMessageHeight(nodes: ChatNode[]): number {
+  if (nodes.length === 0) return 40;
+  return nodes.reduce(
+    (sum, node) => sum + (NODE_HEIGHT_ESTIMATES[node.type] ?? 60),
+    16, // base padding
+  );
+}
+
+export function VirtualizedChat({
+  messages,
+  streamingNodes,
+  toolProgress,
+  streamingText,
+  isSending,
+  onQuickReply,
+}: VirtualizedChatProps) {
+  const parentRef = useRef<HTMLDivElement>(null);
+  const wasAtBottomRef = useRef(true);
+
+  // Build a temporary streaming message to append during active turns
+  const streamingMessage: ChatMessage | null =
+    isSending && (streamingNodes.length > 0 || toolProgress.length > 0 || streamingText)
+      ? {
+          id: '__streaming__',
+          role: 'assistant',
+          nodes: [
+            ...toolProgress,
+            ...streamingNodes,
+            ...(streamingText ? [{ type: 'text' as const, content: streamingText }] : []),
+          ],
+          sequence: messages.length + 1,
+          created_at: new Date().toISOString(),
+        }
+      : null;
+
+  const allMessages = streamingMessage ? [...messages, streamingMessage] : messages;
+
+  const virtualizer = useVirtualizer({
+    count: allMessages.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: (index) => estimateMessageHeight(allMessages[index]?.nodes ?? []),
+    overscan: 3,
+    measureElement:
+      typeof window !== 'undefined' && navigator.userAgent.indexOf('Firefox') === -1
+        ? (element) => element.getBoundingClientRect().height
+        : undefined,
+  });
+
+  // Auto-scroll to bottom on new messages, but only if user was already at bottom
+  useEffect(() => {
+    if (wasAtBottomRef.current && allMessages.length > 0) {
+      virtualizer.scrollToIndex(allMessages.length - 1, { align: 'end' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allMessages.length, streamingText]);
+
+  const handleScroll = useCallback(() => {
+    const el = parentRef.current;
+    if (!el) return;
+    wasAtBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 50;
+  }, []);
+
+  return (
+    <div ref={parentRef} className={styles.chatContainer} onScroll={handleScroll}>
+      <div
+        style={{
+          height: `${virtualizer.getTotalSize()}px`,
+          width: '100%',
+          position: 'relative',
+        }}
+      >
+        {virtualizer.getVirtualItems().map((virtualItem) => {
+          const message = allMessages[virtualItem.index];
+          if (!message) return null;
+
+          return (
+            <div
+              key={virtualItem.key}
+              ref={virtualizer.measureElement}
+              data-index={virtualItem.index}
+              className={`${styles.message} ${styles[message.role]}`}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                transform: `translateY(${virtualItem.start}px)`,
+              }}
+            >
+              <div className={styles.roleBadge}>
+                {message.role === 'user' ? 'You' : 'TripGenie'}
+              </div>
+              <div className={styles.bubble}>
+                {message.nodes.map((node, nodeIdx) => (
+                  <NodeRenderer
+                    key={`${message.id}-${nodeIdx}`}
+                    node={node}
+                    callbacks={{ onQuickReply }}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

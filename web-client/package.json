@@ -20,11 +20,13 @@
   "dependencies": {
     "@agentic-travel-agent/shared-types": "workspace:*",
     "@tanstack/react-query": "^5.95.2",
+    "@tanstack/react-virtual": "^3.13.23",
     "@vercel/analytics": "^1",
     "@vercel/speed-insights": "^2.0.0",
     "next": "15.5.14",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0",
     "sass": "^1.86.0",
     "vibelens": "^2.1.3"
   },
