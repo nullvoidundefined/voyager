@@ -298,6 +298,14 @@ export function ChatBox({
                         }
                     }
 
+                    const isLastAssistant =
+                        msg.role === "assistant" &&
+                        idx === allMessages.length - 1 &&
+                        !isSending;
+                    const quickReplies = isLastAssistant
+                        ? parseQuickReplies(msg.content)
+                        : null;
+
                     return (
                         <div
                             key={msg.id}
@@ -329,6 +337,13 @@ export function ChatBox({
                                     </>
                                 ) : (
                                     renderText(msg.content)
+                                )}
+                                {quickReplies && (
+                                    <QuickReplyChips
+                                        chips={quickReplies}
+                                        onSelect={sendMessage}
+                                        disabled={isSending}
+                                    />
                                 )}
                             </div>
                         </div>
@@ -603,22 +618,7 @@ export function ChatBox({
                     </div>
                 )}
 
-                {!isSending &&
-                    allMessages.length > 0 &&
-                    allMessages[allMessages.length - 1].role ===
-                        "assistant" &&
-                    (() => {
-                        const chips = parseQuickReplies(
-                            allMessages[allMessages.length - 1].content,
-                        );
-                        return chips ? (
-                            <QuickReplyChips
-                                chips={chips}
-                                onSelect={sendMessage}
-                                disabled={isSending}
-                            />
-                        ) : null;
-                    })()}
+                {/* QuickReplyChips render inside message bubbles — see message loop */}
 
                 {showBookingActions && (
                     <div className={styles.bookingActions}>

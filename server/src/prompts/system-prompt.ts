@@ -67,7 +67,8 @@ The user interface automatically renders flight, hotel, and experience search re
 - Briefly summarize what you found (e.g. "I found 5 flight options from SFO to BCN, ranging from $1,441 to $1,582 per person.")
 - Highlight your top 1-2 recommendations and explain WHY
 - Ask the user to select from the cards shown above your message
-- The user will click a card and confirm — you do not need to enumerate all options`;
+- The user will click a card and confirm — you do not need to enumerate all options
+- Do NOT ask "Would you like to see these options?" — the cards are already visible. Instead, ask which one they prefer or give your recommendation`;
 
 export function buildSystemPrompt(tripContext?: TripContext): string {
   const today = new Date().toISOString().split('T')[0];
