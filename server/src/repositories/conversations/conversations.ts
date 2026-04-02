@@ -1,3 +1,4 @@
+import type { ChatNode } from '@agentic-travel-agent/shared-types';
 import { query } from 'app/db/pool/pool.js';
 
 export interface Conversation {
@@ -10,18 +11,23 @@ export interface Conversation {
 export interface Message {
   id: string;
   conversation_id: string;
-  role: 'user' | 'assistant' | 'tool';
+  role: 'user' | 'assistant';
   content: string | null;
   tool_calls_json: unknown;
+  nodes: ChatNode[];
+  schema_version: number;
+  sequence: number;
   token_count: number | null;
   created_at: string;
 }
 
 export interface InsertMessageInput {
   conversation_id: string;
-  role: 'user' | 'assistant' | 'tool';
+  role: 'user' | 'assistant';
   content: string | null;
   tool_calls_json?: unknown;
+  nodes: ChatNode[];
+  schema_version?: number;
   token_count?: number | null;
 }
 
@@ -40,18 +46,20 @@ export async function getOrCreateConversation(
   return row;
 }
 
-export async function insertMessage(
-  input: InsertMessageInput,
-): Promise<Message> {
+export async function insertMessage(input: InsertMessageInput): Promise<Message> {
   const result = await query<Message>(
-    `INSERT INTO messages (conversation_id, role, content, tool_calls_json, token_count)
-     VALUES ($1, $2, $3, $4, $5)
+    `INSERT INTO messages (conversation_id, role, content, tool_calls_json, nodes, schema_version, sequence, token_count)
+     VALUES ($1, $2, $3, $4, $5, $6,
+       (SELECT COALESCE(MAX(sequence), 0) + 1 FROM messages WHERE conversation_id = $1),
+       $7)
      RETURNING *`,
     [
       input.conversation_id,
       input.role,
       input.content,
       input.tool_calls_json ? JSON.stringify(input.tool_calls_json) : null,
+      JSON.stringify(input.nodes),
+      input.schema_version ?? 1,
       input.token_count ?? null,
     ],
   );
