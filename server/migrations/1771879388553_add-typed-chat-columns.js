@@ -1,4 +1,4 @@
-exports.up = (pgm) => {
+export const up = (pgm) => {
   pgm.addColumns('messages', {
     nodes: {
       type: 'jsonb',
@@ -44,7 +44,7 @@ exports.up = (pgm) => {
   });
 };
 
-exports.down = (pgm) => {
+export const down = (pgm) => {
   pgm.dropIndex('messages', ['conversation_id', 'sequence'], {
     name: 'messages_conversation_sequence',
   });

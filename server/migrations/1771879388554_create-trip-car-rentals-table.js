@@ -1,4 +1,4 @@
-exports.up = (pgm) => {
+export const up = (pgm) => {
   pgm.createTable('trip_car_rentals', {
     id: {
       type: 'uuid',
@@ -35,6 +35,6 @@ exports.up = (pgm) => {
   pgm.createIndex('trip_car_rentals', 'trip_id');
 };
 
-exports.down = (pgm) => {
+export const down = (pgm) => {
   pgm.dropTable('trip_car_rentals');
 };
