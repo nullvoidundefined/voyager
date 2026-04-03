@@ -23,6 +23,7 @@ export interface FormatResponseData {
     title: string;
     body: string;
   };
+  skip_category?: boolean;
 }
 
 export interface OrchestratorResult {

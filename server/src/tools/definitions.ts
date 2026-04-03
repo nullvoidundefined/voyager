@@ -289,6 +289,11 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
           },
           required: ['severity', 'title', 'body'],
         },
+        skip_category: {
+          type: 'boolean',
+          description:
+            'Set to true when the user declines the current category (e.g., "No, I don\'t need a hotel"). The system will skip this category and move to the next.',
+        },
       },
       required: ['text'],
     },
