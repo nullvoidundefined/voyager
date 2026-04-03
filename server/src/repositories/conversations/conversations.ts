@@ -4,6 +4,7 @@ import { query } from 'app/db/pool/pool.js';
 export interface Conversation {
   id: string;
   trip_id: string;
+  booking_state: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -76,4 +77,14 @@ export async function getMessagesByConversation(
     [conversationId],
   );
   return result.rows;
+}
+
+export async function updateBookingState(
+  conversationId: string,
+  bookingState: Record<string, unknown>,
+): Promise<void> {
+  await query(
+    `UPDATE conversations SET booking_state = $1, updated_at = NOW() WHERE id = $2`,
+    [JSON.stringify(bookingState), conversationId],
+  );
 }
