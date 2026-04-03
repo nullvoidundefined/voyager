@@ -23,6 +23,13 @@ interface HotelSummary {
   currency: string;
 }
 
+interface CarRentalSummary {
+  provider: string;
+  car_name: string;
+  total_price: number;
+  currency: string;
+}
+
 interface ExperienceSummary {
   name: string | null;
   estimated_cost: number | null;
@@ -34,6 +41,7 @@ interface BookingConfirmationProps {
   returnDate: string | null;
   flights: FlightSummary[];
   hotels: HotelSummary[];
+  carRentals: CarRentalSummary[];
   experiences: ExperienceSummary[];
   budgetTotal: number | null;
   budgetCurrency: string;
@@ -47,6 +55,7 @@ export function BookingConfirmation({
   returnDate,
   flights,
   hotels,
+  carRentals,
   experiences,
   budgetTotal,
   budgetCurrency,
@@ -59,8 +68,9 @@ export function BookingConfirmation({
 
   const flightTotal = flights.reduce((s, f) => s + (f.price ?? 0), 0);
   const hotelTotal = hotels.reduce((s, h) => s + (h.total_price ?? 0), 0);
+  const carRentalTotal = carRentals.reduce((s, c) => s + c.total_price, 0);
   const expTotal = experiences.reduce((s, e) => s + (e.estimated_cost ?? 0), 0);
-  const grandTotal = flightTotal + hotelTotal + expTotal;
+  const grandTotal = flightTotal + hotelTotal + carRentalTotal + expTotal;
 
   useEffect(() => {
     if (stage === 'booking') {
@@ -138,6 +148,22 @@ export function BookingConfirmation({
                       <span>{h.name ?? 'Hotel'}</span>
                       <span className={styles.price}>
                         {formatCurrency(h.total_price, h.currency)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {carRentals.length > 0 && (
+                <div className={styles.section}>
+                  <h3>Car Rentals</h3>
+                  {carRentals.map((c, i) => (
+                    <div key={i} className={styles.item}>
+                      <span>
+                        {c.provider} &middot; {c.car_name}
+                      </span>
+                      <span className={styles.price}>
+                        {formatCurrency(c.total_price, c.currency)}
                       </span>
                     </div>
                   ))}

@@ -52,10 +52,18 @@ export function ChatBox({
 
   const showBookingActions =
     hasFlights && tripStatus === 'planning' && !isSending;
+  const isBooked = tripStatus === 'saved';
 
   const handleSend = useCallback(
     (msg: string) => {
       if (!msg.trim()) return;
+
+      // Intercept booking confirmation — open modal instead of sending chat message
+      if (msg.trim() === 'Confirm booking') {
+        onBookTrip?.();
+        return;
+      }
+
       // Optimistic: show user message immediately
       setPendingUserMessage({
         id: `pending-${Date.now()}`,
@@ -66,7 +74,7 @@ export function ChatBox({
       });
       sendMessage(msg);
     },
-    [sendMessage, serverMessages?.length],
+    [sendMessage, serverMessages?.length, onBookTrip],
   );
 
   const handleSubmit = useCallback(
@@ -152,16 +160,24 @@ export function ChatBox({
         <input
           type='text'
           className={styles.input}
-          placeholder='Ask the agent to plan your trip...'
-          aria-label='Ask the agent to plan your trip...'
+          placeholder={
+            isBooked
+              ? 'Trip booked! Enjoy your adventure.'
+              : 'Ask the agent to plan your trip...'
+          }
+          aria-label={
+            isBooked
+              ? 'Trip booked! Enjoy your adventure.'
+              : 'Ask the agent to plan your trip...'
+          }
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          disabled={isSending}
+          disabled={isSending || isBooked}
         />
         <button
           type='submit'
           className={styles.sendButton}
-          disabled={isSending || !input.trim()}
+          disabled={isSending || isBooked || !input.trim()}
         >
           {isSending ? '...' : 'Send'}
         </button>

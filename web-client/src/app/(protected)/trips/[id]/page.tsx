@@ -40,6 +40,15 @@ interface TripHotel {
   check_out: string | null;
 }
 
+interface TripCarRental {
+  id: string;
+  provider: string;
+  car_name: string;
+  car_type: string;
+  total_price: number;
+  currency: string;
+}
+
 interface TripExperience {
   id: string;
   name: string | null;
@@ -60,6 +69,7 @@ interface Trip {
   status: string;
   flights: TripFlight[];
   hotels: TripHotel[];
+  car_rentals: TripCarRental[];
   experiences: TripExperience[];
 }
 
@@ -118,11 +128,15 @@ export default function TripDetailPage() {
     (sum, h) => sum + (h.total_price ?? 0),
     0,
   );
+  const carRentalTotal = trip.car_rentals.reduce(
+    (sum, c) => sum + c.total_price,
+    0,
+  );
   const experienceTotal = trip.experiences.reduce(
     (sum, e) => sum + (e.estimated_cost ?? 0),
     0,
   );
-  const allocated = flightTotal + hotelTotal + experienceTotal;
+  const allocated = flightTotal + hotelTotal + carRentalTotal + experienceTotal;
   const remaining =
     trip.budget_total != null ? trip.budget_total - allocated : null;
 
@@ -180,7 +194,10 @@ export default function TripDetailPage() {
         </div>
       </div>
 
-      {(flightTotal > 0 || hotelTotal > 0 || experienceTotal > 0) && (
+      {(flightTotal > 0 ||
+        hotelTotal > 0 ||
+        carRentalTotal > 0 ||
+        experienceTotal > 0) && (
         <div className={styles.breakdown}>
           <h2>Cost Breakdown</h2>
           <div className={styles.costs}>
@@ -194,6 +211,14 @@ export default function TripDetailPage() {
               <div className={styles.costRow}>
                 <span>Hotels</span>
                 <span>{formatCurrency(hotelTotal, trip.budget_currency)}</span>
+              </div>
+            )}
+            {carRentalTotal > 0 && (
+              <div className={styles.costRow}>
+                <span>Car Rentals</span>
+                <span>
+                  {formatCurrency(carRentalTotal, trip.budget_currency)}
+                </span>
               </div>
             )}
             {experienceTotal > 0 && (
@@ -328,6 +353,7 @@ export default function TripDetailPage() {
           returnDate={trip.return_date}
           flights={trip.flights}
           hotels={trip.hotels}
+          carRentals={trip.car_rentals}
           experiences={trip.experiences}
           budgetTotal={trip.budget_total}
           budgetCurrency={trip.budget_currency}
