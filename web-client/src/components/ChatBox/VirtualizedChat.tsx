@@ -147,7 +147,14 @@ export function VirtualizedChat({
                     <NodeRenderer
                       key={`${message.id}-${nodeIdx}`}
                       node={node}
-                      callbacks={{ onQuickReply, onFormSubmit: onQuickReply }}
+                      callbacks={{
+                        onQuickReply,
+                        onFormSubmit: onQuickReply,
+                        onConfirmFlight: (label) => onQuickReply(`I've selected the ${label} flight`),
+                        onConfirmHotel: (label) => onQuickReply(`I've selected ${label}`),
+                        onConfirmCarRental: (label) => onQuickReply(`I've selected the ${label} rental`),
+                        onConfirmExperience: (label) => onQuickReply(`I've selected ${label}`),
+                      }}
                     />
                   ))}
                 </div>
