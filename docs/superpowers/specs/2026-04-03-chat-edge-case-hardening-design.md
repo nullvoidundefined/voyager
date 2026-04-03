@@ -122,11 +122,33 @@ After enrichment nodes are fetched on first message, check if any advisory has `
 
 This is prompt-level only — no server blocking. The user can always confirm and proceed.
 
-### 5b. Preference-Aware Safety Signals
+### 5b. Traveler Safety Preferences
 
-When building the trip context, check user preferences for signals worth flagging. Add prompt instructions when detected:
+Add two optional fields to the **Travel Party** step in the preferences wizard:
 
-- **`travel_party: 'partner'`** + destination with LGBTQ+ safety concerns in advisory text: Claude mentions "Some local laws may affect LGBTQ+ travelers — research current conditions before your trip."
+**LGBTQ+ travel safety toggle:**
+
+- Optional toggle: "Show LGBTQ+ travel safety information"
+- Framed as a feature opt-in, not identity declaration
+- Stored as `lgbtq_safety: boolean` in UserPreferences (default: false)
+- When enabled, the system prompt includes: "The user has opted into LGBTQ+ travel safety information. If the destination's travel advisories mention laws or attitudes affecting LGBTQ+ travelers, proactively surface this information. Be factual and helpful — mention specific risks (criminalization, local attitudes) without being preachy."
+
+**Gender field:**
+
+- Optional select: "How do you identify?" with options: "Prefer not to say", "Woman", "Man", "Non-binary"
+- Stored as `gender: 'prefer_not_to_say' | 'woman' | 'man' | 'non_binary' | null` in UserPreferences (default: null)
+- When `gender` is `'woman'` or `'non_binary'`, the system prompt includes: "The user identifies as [woman/non-binary]. If the destination has advisories mentioning restrictions or safety concerns for women or gender non-conforming travelers (dress codes, solo travel restrictions, harassment risks), proactively surface this information."
+
+**UI placement:** Both fields appear in the Travel Party step, below the existing travel companion options. Both are clearly marked as optional. A brief explanation appears above them:
+
+> "These optional questions help us surface relevant safety information for your destinations. Your answers are private and only used to personalize travel advisories."
+
+### 5c. Preference-Aware Prompt Injection
+
+When building the trip context, check these preference fields and inject prompt instructions:
+
+- **`lgbtq_safety: true`** + destination with LGBTQ+ safety concerns in advisory text: Claude surfaces specific risks from the advisory data.
+- **`gender: 'woman'` or `'non_binary'`** + destination with gender-related safety concerns: Claude surfaces relevant advisory information.
 - **`travel_party: 'solo'`** + relevant advisories: Claude mentions general solo travel safety tips for the destination.
 
 No separate database of unsafe countries needed. The FCDO and State Dept advisories already contain relevant language. The prompt instruction tells Claude to surface it if present in the advisory text.
@@ -187,6 +209,7 @@ This ensures no stale selections from a previous destination persist.
 | Budget optional in COLLECT_DETAILS              | `booking-steps.ts`                           |
 | Budget tool handles missing budget              | `budget.tool.ts`                             |
 | Category undo (re-search resets done→presented) | `chat.ts` (handler)                          |
+| Safety preferences: schema migration            | `userPreferences.ts` (schema), new migration |
 
 ### Prompt-Level Changes
 
@@ -202,15 +225,20 @@ This ensures no stale selections from a previous destination persist.
 | Budget advisory language             | `category-prompts.ts` (all categories)  |
 | Zero results within budget           | `category-prompts.ts` (all categories)  |
 | Level 4 warn-and-confirm             | `system-prompt.ts` (conditional)        |
-| Preference-aware safety              | `trip-context.ts` or `system-prompt.ts` |
+| LGBTQ+ safety prompt injection       | `trip-context.ts` or `system-prompt.ts` |
+| Gender-aware safety prompt injection | `trip-context.ts` or `system-prompt.ts` |
+| Solo traveler safety                 | `trip-context.ts` or `system-prompt.ts` |
 | Hotels "how many nights" for one-way | `category-prompts.ts` (hotels)          |
 | Destination change warning           | `system-prompt.ts`                      |
 
 ### Frontend Changes
 
-| Change                                | File(s)                                     |
-| ------------------------------------- | ------------------------------------------- |
-| Submitted form read-only              | `TripDetailsForm.tsx`                       |
-| Past date disabled in picker          | `TripDetailsForm.tsx`                       |
-| Trip type toggle (one-way/round-trip) | `TripDetailsForm.tsx`                       |
-| Budget bar hidden when no budget      | `NodeRenderer.tsx` or `VirtualizedChat.tsx` |
+| Change                                    | File(s)                                     |
+| ----------------------------------------- | ------------------------------------------- |
+| Submitted form read-only                  | `TripDetailsForm.tsx`                       |
+| Past date disabled in picker              | `TripDetailsForm.tsx`                       |
+| Trip type toggle (one-way/round-trip)     | `TripDetailsForm.tsx`                       |
+| Budget bar hidden when no budget          | `NodeRenderer.tsx` or `VirtualizedChat.tsx` |
+| LGBTQ+ safety toggle in Travel Party step | `TravelPartyStep.tsx`                       |
+| Gender select in Travel Party step        | `TravelPartyStep.tsx`                       |
+| Safety preferences privacy explanation    | `TravelPartyStep.tsx`                       |
