@@ -10,6 +10,22 @@ Track bugs here. Clear them in batches.
 
 Despite prompt constraints, Claude sometimes writes multi-paragraph responses. Per-category state machines are now implemented — monitor if this improves. May need further prompt iteration per category/status.
 
+### B10: Homepage hero images have side gutters
+
+Hero/feature images should be edge-to-edge with no side padding, max-width capped at 1600px.
+
+### B11: Unsplash images not responsive to device size
+
+Desktop-sized images (1600x800) load on mobile. Should use responsive Unsplash `w` parameter or Next.js `sizes` + `srcset` to serve appropriately sized assets per breakpoint.
+
+### B12: Stale trip metadata after updates
+
+Travel status, budget, and dates can appear invalid or stale after trip modifications. Need an end-to-end audit to ensure trip metadata stays in sync as the trip is modified via the chat agent.
+
+### B13: Chat suggests alternatives when user names a specific option
+
+When a user says "I want the InterContinental Plaza Hotel," Claude should book that exact option and confirm — not present alternatives. This applies across all bookable categories: hotels, cars, experiences, dining. The category prompts need to instruct Claude to honor explicit selections.
+
 ---
 
 ## Resolved
