@@ -410,7 +410,7 @@ describe('chat handlers', () => {
       }
     });
 
-    it('advances booking state after agent loop and persists it', async () => {
+    it('updates completion tracker after agent loop and persists it', async () => {
       const app = createApp();
 
       // Trip with all details filled, transport_mode: flying, no flights yet
@@ -427,6 +427,7 @@ describe('chat handlers', () => {
         transport_mode: 'flying',
         flights: [],
         hotels: [],
+        car_rentals: [],
         experiences: [],
         status: 'planning',
       } as never;
@@ -439,11 +440,13 @@ describe('chat handlers', () => {
         id: convId,
         trip_id: tripId,
         booking_state: {
-          version: 1,
-          flights: { status: 'asking' },
-          hotels: { status: 'idle' },
-          car_rental: { status: 'idle' },
-          experiences: { status: 'idle' },
+          version: 2,
+          transport: 'flying',
+          flights: 'pending',
+          hotels: 'pending',
+          car_rental: 'pending',
+          experiences: 'pending',
+          turns_since_last_progress: 0,
         },
       } as never);
 
@@ -484,10 +487,13 @@ describe('chat handlers', () => {
           res.on('end', () => callback(null, data));
         });
 
-      // NOTE: booking state persistence via updateCompletionTracker is wired in Task 4.
-      // Until then, the old CATEGORY-phase guard in chat.ts never fires (getFlowPosition
-      // now returns PLANNING, not CATEGORY), so updateBookingState is not called.
-      expect(convRepo.updateBookingState).toHaveBeenCalledTimes(0);
+      // updateCompletionTracker is now wired — updateBookingState is called whenever updatedTrip exists
+      expect(convRepo.updateBookingState).toHaveBeenCalledTimes(1);
+      // search_flights tool call should advance flights to 'searching'
+      expect(convRepo.updateBookingState).toHaveBeenCalledWith(
+        convId,
+        expect.objectContaining({ flights: 'searching' }),
+      );
     });
   });
 

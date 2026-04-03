@@ -1,4 +1,4 @@
-import { DEFAULT_BOOKING_STATE } from 'app/prompts/booking-steps.js';
+import { DEFAULT_COMPLETION_TRACKER } from 'app/prompts/booking-steps.js';
 import {
   getOrCreateConversation,
   updateBookingState,
@@ -134,7 +134,7 @@ export async function updateTrip(req: Request, res: Response): Promise<void> {
     const conversation = await getOrCreateConversation(tripId);
     await updateBookingState(
       conversation.id,
-      DEFAULT_BOOKING_STATE as unknown as Record<string, unknown>,
+      DEFAULT_COMPLETION_TRACKER as unknown as Record<string, unknown>,
     );
     logger.info(
       { event: 'selections_cleared', tripId, newDestination: destination },

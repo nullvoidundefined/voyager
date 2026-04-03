@@ -4,10 +4,12 @@ import type {
   SSEEvent,
 } from '@agentic-travel-agent/shared-types';
 import {
-  DEFAULT_BOOKING_STATE,
-  advanceBookingState,
+  DEFAULT_COMPLETION_TRACKER,
+  computeNudge,
   getFlowPosition,
-  normalizeBookingState,
+  hasAnySelection,
+  normalizeCompletionTracker,
+  updateCompletionTracker,
 } from 'app/prompts/booking-steps.js';
 import type { TripContext } from 'app/prompts/trip-context.js';
 import {
@@ -179,36 +181,26 @@ export async function chat(req: Request, res: Response) {
     (res as unknown as { flush?: () => void }).flush?.();
   };
 
-  const bookingState = normalizeBookingState(
+  const tracker = normalizeCompletionTracker(
     (conversation as unknown as Record<string, unknown>).booking_state ??
-      DEFAULT_BOOKING_STATE,
+      DEFAULT_COMPLETION_TRACKER,
   );
 
-  let flowPosition = getFlowPosition(
-    {
-      ...trip,
-      origin: trip.origin ?? null,
-      departure_date: trip.departure_date ?? null,
-      return_date: trip.return_date ?? null,
-      budget_total: trip.budget_total ?? null,
-      transport_mode: trip.transport_mode ?? null,
-      flights: (trip.flights ?? []).map((f) => ({ id: f.id })),
-      hotels: (trip.hotels ?? []).map((h) => ({ id: h.id })),
-      car_rentals: (trip.car_rentals ?? []).map((c) => ({ id: c.id })),
-      experiences: (trip.experiences ?? []).map((e) => ({ id: e.id })),
-      status: trip.status ?? 'planning',
-    },
-    bookingState,
-  );
+  const flowPosition = getFlowPosition({
+    ...trip,
+    origin: trip.origin ?? null,
+    departure_date: trip.departure_date ?? null,
+    return_date: trip.return_date ?? null,
+    budget_total: trip.budget_total ?? null,
+    transport_mode: trip.transport_mode ?? null,
+    flights: (trip.flights ?? []).map((f) => ({ id: f.id })),
+    hotels: (trip.hotels ?? []).map((h) => ({ id: h.id })),
+    car_rentals: (trip.car_rentals ?? []).map((c) => ({ id: c.id })),
+    experiences: (trip.experiences ?? []).map((e) => ({ id: e.id })),
+    status: trip.status ?? 'planning',
+  });
 
-  let currentBookingState = structuredClone(bookingState);
-  if (flowPosition.phase === 'CATEGORY' && flowPosition.status === 'idle') {
-    currentBookingState[flowPosition.category] = {
-      ...currentBookingState[flowPosition.category],
-      status: 'asking',
-    };
-    flowPosition = { ...flowPosition, status: 'asking' };
-  }
+  const nudge = computeNudge(tracker);
 
   try {
     const result = await runAgentLoop(
@@ -219,33 +211,31 @@ export async function chat(req: Request, res: Response) {
       { tripId, userId },
       enrichmentNodes,
       flowPosition,
-      { hasCriticalAdvisory },
+      { hasCriticalAdvisory, nudge },
+      tracker,
     );
 
     // After the agent loop (which may have called update_trip), reload the trip
     // to check if details are still missing. Append form for missing fields only.
     const updatedTrip = await getTripWithDetails(tripId, userId);
     if (updatedTrip) {
-      const updatedPosition = getFlowPosition(
-        {
-          ...updatedTrip,
-          origin: updatedTrip.origin ?? null,
-          departure_date: updatedTrip.departure_date ?? null,
-          return_date: updatedTrip.return_date ?? null,
-          budget_total: updatedTrip.budget_total ?? null,
-          transport_mode: updatedTrip.transport_mode ?? null,
-          flights: (updatedTrip.flights ?? []).map((f) => ({ id: f.id })),
-          hotels: (updatedTrip.hotels ?? []).map((h) => ({ id: h.id })),
-          car_rentals: (updatedTrip.car_rentals ?? []).map((c) => ({
-            id: c.id,
-          })),
-          experiences: (updatedTrip.experiences ?? []).map((e) => ({
-            id: e.id,
-          })),
-          status: updatedTrip.status ?? 'planning',
-        },
-        currentBookingState,
-      );
+      const updatedPosition = getFlowPosition({
+        ...updatedTrip,
+        origin: updatedTrip.origin ?? null,
+        departure_date: updatedTrip.departure_date ?? null,
+        return_date: updatedTrip.return_date ?? null,
+        budget_total: updatedTrip.budget_total ?? null,
+        transport_mode: updatedTrip.transport_mode ?? null,
+        flights: (updatedTrip.flights ?? []).map((f) => ({ id: f.id })),
+        hotels: (updatedTrip.hotels ?? []).map((h) => ({ id: h.id })),
+        car_rentals: (updatedTrip.car_rentals ?? []).map((c) => ({
+          id: c.id,
+        })),
+        experiences: (updatedTrip.experiences ?? []).map((e) => ({
+          id: e.id,
+        })),
+        status: updatedTrip.status ?? 'planning',
+      });
       if (updatedPosition.phase === 'COLLECT_DETAILS') {
         const isPlaceholder =
           !updatedTrip.destination || updatedTrip.destination === 'Planning...';
@@ -311,54 +301,42 @@ export async function chat(req: Request, res: Response) {
       }
     }
 
-    // Advance booking state after the agent loop
-    if (flowPosition.phase === 'CATEGORY' && updatedTrip) {
-      const newBookingState = advanceBookingState(
-        currentBookingState,
-        flowPosition.category,
-        flowPosition.status,
-        result,
-        {
-          ...updatedTrip,
-          transport_mode: updatedTrip.transport_mode ?? null,
-        },
-      );
+    // Update completion tracker after the agent loop
+    if (updatedTrip) {
+      const newTracker = updateCompletionTracker(tracker, result, {
+        ...updatedTrip,
+        transport_mode: updatedTrip.transport_mode ?? null,
+        flights: (updatedTrip.flights ?? []).map((f) => ({ id: f.id })),
+        hotels: (updatedTrip.hotels ?? []).map((h) => ({ id: h.id })),
+        car_rentals: (updatedTrip.car_rentals ?? []).map((c) => ({
+          id: c.id,
+        })),
+        experiences: (updatedTrip.experiences ?? []).map((e) => ({
+          id: e.id,
+        })),
+        status: updatedTrip.status ?? 'planning',
+      });
 
-      // Empty itinerary guard: if all categories are done/skipped but none are 'done',
-      // block advancement to CONFIRM by resetting the first skipped category to idle
-      const categories = [
-        'flights',
-        'hotels',
-        'car_rental',
-        'experiences',
-      ] as const;
-      const hasDone = categories.some(
-        (cat) => newBookingState[cat].status === 'done',
-      );
-      const allFinished = categories.every(
-        (cat) =>
-          newBookingState[cat].status === 'done' ||
-          newBookingState[cat].status === 'skipped',
-      );
-
-      if (allFinished && !hasDone) {
-        result.nodes.push({
-          type: 'text',
-          content:
-            "You haven't selected anything for your trip yet. Want to go back and explore some options?",
+      // Empty itinerary guard
+      if (!hasAnySelection(newTracker)) {
+        const allSkippedOrPending = (
+          ['flights', 'hotels', 'car_rental', 'experiences'] as const
+        ).every((cat) => {
+          const status = newTracker[cat];
+          return status === 'skipped' || status === 'pending';
         });
-        // Reset the first skipped category back to idle so the flow continues
-        for (const cat of categories) {
-          if (newBookingState[cat].status === 'skipped') {
-            newBookingState[cat] = { status: 'idle' };
-            break;
-          }
+        if (allSkippedOrPending) {
+          result.nodes.push({
+            type: 'text',
+            content:
+              "You haven't selected anything for your trip yet. Want to go back and explore some options?",
+          });
         }
       }
 
       await updateBookingState(
         conversation.id,
-        newBookingState as unknown as Record<string, unknown>,
+        newTracker as unknown as Record<string, unknown>,
       );
     }
 

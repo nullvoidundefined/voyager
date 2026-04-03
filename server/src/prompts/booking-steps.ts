@@ -131,11 +131,7 @@ export function normalizeCompletionTracker(raw: unknown): CompletionTracker {
 export type FlowPosition =
   | { phase: 'COLLECT_DETAILS' }
   | { phase: 'PLANNING' }
-  | { phase: 'COMPLETE' }
-  // v1 backward-compat phases — never returned by getFlowPosition but kept so
-  // chat.ts (not yet migrated in Task 4) still compiles.
-  | { phase: 'CATEGORY'; category: CategoryName; status: CategoryStatus }
-  | { phase: 'CONFIRM' };
+  | { phase: 'COMPLETE' };
 
 export interface TripState {
   destination: string;
@@ -294,98 +290,4 @@ export function allCategoriesResolved(tracker: CompletionTracker): boolean {
   return CATEGORIES.every(
     (cat) => tracker[cat] === 'selected' || tracker[cat] === 'skipped',
   );
-}
-
-// --- Temporary backward-compat exports (removed in Task 4) ---
-// These keep chat.ts and category-prompts.ts compiling without modification.
-// CategoryStatus includes v1 values for files not yet migrated.
-export type CategoryStatus =
-  | TrackerStatus
-  | 'idle'
-  | 'asking'
-  | 'presented'
-  | 'done';
-
-export interface CategoryState {
-  status: CategoryStatus;
-  meta?: Record<string, unknown>;
-}
-
-// v1 BookingState shape — used by chat.ts until Task 4 migrates it
-export interface BookingState {
-  version: number;
-  flights: CategoryState;
-  hotels: CategoryState;
-  car_rental: CategoryState;
-  experiences: CategoryState;
-}
-
-function trackerToCategoryState(status: TrackerStatus): CategoryState {
-  return { status };
-}
-
-function trackerToBookingState(tracker: CompletionTracker): BookingState {
-  return {
-    version: 1,
-    flights: trackerToCategoryState(tracker.flights),
-    hotels: trackerToCategoryState(tracker.hotels),
-    car_rental: trackerToCategoryState(tracker.car_rental),
-    experiences: trackerToCategoryState(tracker.experiences),
-  };
-}
-
-function bookingStateToTracker(bs: BookingState): CompletionTracker {
-  const map: Record<string, TrackerStatus> = {
-    idle: 'pending',
-    asking: 'pending',
-    presented: 'searching',
-    done: 'selected',
-    skipped: 'skipped',
-    pending: 'pending',
-    searching: 'searching',
-    selected: 'selected',
-  };
-  const toTracker = (s: CategoryStatus): TrackerStatus =>
-    (map[s as string] ?? 'pending') as TrackerStatus;
-  return {
-    ...DEFAULT_COMPLETION_TRACKER,
-    flights: toTracker(bs.flights.status),
-    hotels: toTracker(bs.hotels.status),
-    car_rental: toTracker(bs.car_rental.status),
-    experiences: toTracker(bs.experiences.status),
-  };
-}
-
-export const CURRENT_BOOKING_STATE_VERSION = 1;
-
-export const DEFAULT_BOOKING_STATE: BookingState = {
-  version: 1,
-  flights: { status: 'idle' },
-  hotels: { status: 'idle' },
-  car_rental: { status: 'idle' },
-  experiences: { status: 'idle' },
-};
-
-export function normalizeBookingState(raw: unknown): BookingState {
-  const tracker = normalizeCompletionTracker(raw);
-  return trackerToBookingState(tracker);
-}
-
-export const CATEGORY_ORDER: CategoryName[] = [
-  'flights',
-  'hotels',
-  'car_rental',
-  'experiences',
-];
-
-export function advanceBookingState(
-  bookingState: BookingState,
-  _category: CategoryName | string,
-  _currentStatus: CategoryStatus,
-  agentResult: AgentResultForTracker,
-  updatedTrip: TripState,
-): BookingState {
-  const tracker = bookingStateToTracker(bookingState);
-  const updated = updateCompletionTracker(tracker, agentResult, updatedTrip);
-  return trackerToBookingState(updated);
 }

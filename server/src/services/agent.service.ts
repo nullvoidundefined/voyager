@@ -4,7 +4,10 @@ import type {
   SSEEvent,
 } from '@agentic-travel-agent/shared-types';
 import type Anthropic from '@anthropic-ai/sdk';
-import { type FlowPosition } from 'app/prompts/booking-steps.js';
+import {
+  type CompletionTracker,
+  type FlowPosition,
+} from 'app/prompts/booking-steps.js';
 import { buildSystemPrompt } from 'app/prompts/system-prompt.js';
 import type { TripContext } from 'app/prompts/trip-context.js';
 import { insertToolCallLog } from 'app/repositories/tool-call-log/tool-call-log.js';
@@ -34,7 +37,8 @@ export async function runAgentLoop(
   toolContext?: ToolContext,
   enrichmentNodes?: ChatNode[],
   flowPosition?: FlowPosition,
-  promptOptions?: { hasCriticalAdvisory?: boolean },
+  promptOptions?: { hasCriticalAdvisory?: boolean; nudge?: string | null },
+  tracker?: CompletionTracker,
 ): Promise<AgentResult> {
   // Emit enrichment nodes first so the frontend can render them immediately
   if (enrichmentNodes) {
@@ -50,6 +54,7 @@ export async function runAgentLoop(
         ctx as TripContext | undefined,
         pos as FlowPosition | undefined,
         promptOptions,
+        tracker,
       ),
     toolExecutor: (toolName, input, meta) =>
       executeTool(toolName, input, meta as ToolContext | undefined),
