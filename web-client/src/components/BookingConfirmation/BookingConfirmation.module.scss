@@ -25,6 +25,49 @@
   overflow-y: auto;
 }
 
+/* — Image Header — */
+
+.imageHeader {
+  position: relative;
+  height: 180px;
+  margin: -36px -36px 24px;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  overflow: hidden;
+}
+
+.imageFallback {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent), var(--cta));
+}
+
+.imageOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent 30%, rgba(0, 0, 0, 0.6) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 20px 24px;
+  color: var(--cta-text);
+}
+
+.imageTitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.imageDestination {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.2;
+}
+
 .title {
   font-family: var(--font-display);
   font-size: 26px;

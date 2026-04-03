@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 
+import { getDestinationImage } from '@/lib/destinationImage';
 import { formatCurrency, formatShortDate } from '@/lib/format';
+import Image from 'next/image';
 
 import styles from './BookingConfirmation.module.scss';
 
@@ -77,6 +79,31 @@ export function BookingConfirmation({
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
+        <div className={styles.imageHeader}>
+          {(() => {
+            const { url } = getDestinationImage(destination);
+            return url ? (
+              <Image
+                src={url}
+                alt={destination}
+                fill
+                sizes='520px'
+                style={{ objectFit: 'cover' }}
+              />
+            ) : (
+              <div className={styles.imageFallback} />
+            );
+          })()}
+          <div className={styles.imageOverlay}>
+            <h2 className={styles.imageTitle}>
+              {stage === 'confirmed'
+                ? `You're going to`
+                : 'Confirm your trip to'}
+            </h2>
+            <p className={styles.imageDestination}>{destination}</p>
+          </div>
+        </div>
+
         {stage === 'review' && (
           <>
             <h2 className={styles.title}>Confirm Your Trip to {destination}</h2>

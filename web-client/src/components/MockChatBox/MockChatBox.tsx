@@ -2,116 +2,199 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+import { NodeRenderer } from '@/components/ChatBox/NodeRenderer';
 import { APP_NAME } from '@/lib/constants';
+import type { ChatNode } from '@agentic-travel-agent/shared-types';
 
 import styles from './MockChatBox.module.scss';
 
-interface MockMessage {
+interface DemoMessage {
   role: 'user' | 'assistant';
-  content: string;
+  nodes: ChatNode[];
+  delay: number;
 }
 
-const DEMO_MESSAGES: MockMessage[] = [
+const DEMO_MESSAGES: DemoMessage[] = [
   {
-    role: 'user',
-    content: 'Plan a trip to Barcelona for 5 days with a $3,000 budget.',
+    role: 'assistant',
+    delay: 800,
+    nodes: [
+      {
+        type: 'text',
+        content: "Great choice! Let's plan your trip to **Monterey**.",
+      },
+    ],
   },
   {
     role: 'assistant',
-    content:
-      "I'll help you plan a Barcelona trip! Let me search for flights and hotels within your budget...",
-  },
-  {
-    role: 'assistant',
-    content:
-      '**Searching flights** JFK → BCN, round-trip...\n**Searching hotels** in Gothic Quarter, 5 nights...',
-  },
-  {
-    role: 'assistant',
-    content:
-      "Here's what I found:\n\n✈️ **Flight:** Delta round-trip — $420\n🏨 **Hotel:** Hotel Colón (4★) — $850 for 5 nights\n🎯 **Remaining budget:** $1,730 for experiences",
-  },
-  {
-    role: 'user',
-    content:
-      'Nice! Find me some good tapas restaurants and a Sagrada Familia tour.',
-  },
-  {
-    role: 'assistant',
-    content:
-      'Great choices! Let me look those up...\n\n**Searching experiences** near Sagrada Familia...\n**Searching restaurants** tapas in Barcelona...',
-  },
-  {
-    role: 'assistant',
-    content:
-      '🎨 **Sagrada Familia Guided Tour** — $45/person\n🍷 **Cal Pep** (tapas bar, 4.7★) — ~$40/meal\n🍷 **Bar Cañete** (traditional tapas, 4.5★) — ~$35/meal',
-  },
-  {
-    role: 'user',
-    content: 'Love it. Can you build a day-by-day itinerary?',
-  },
-  {
-    role: 'assistant',
-    content:
-      '**Day 1 — Arrival & Gothic Quarter**\n• Arrive BCN, check in at Hotel Colón\n• Walk La Rambla & Boqueria Market\n• Dinner at Bar Cañete',
-  },
-  {
-    role: 'assistant',
-    content:
-      '**Day 2 — Gaudí Day**\n• Morning: Sagrada Familia guided tour\n• Afternoon: Park Güell\n• Dinner at Cal Pep',
-  },
-  {
-    role: 'user',
-    content: "What about the beach? I don't want to miss Barceloneta.",
-  },
-  {
-    role: 'assistant',
-    content:
-      "Absolutely! I'll work that in.\n\n**Day 3 — Beach & Seafood**\n• Morning: Barceloneta Beach\n• Lunch: La Mar Salada (seafood, 4.6★) — ~$30\n• Afternoon: W Hotel rooftop drinks\n• Evening: Stroll Port Olímpic",
+    delay: 1200,
+    nodes: [
+      {
+        type: 'travel_plan_form',
+        fields: [
+          {
+            name: 'origin',
+            label: 'Origin',
+            field_type: 'text',
+            placeholder: 'City or airport',
+            required: true,
+          },
+          {
+            name: 'departure_date',
+            label: 'Departure date',
+            field_type: 'date',
+            required: true,
+          },
+          {
+            name: 'return_date',
+            label: 'Return date',
+            field_type: 'date',
+            required: true,
+          },
+          {
+            name: 'budget',
+            label: 'Budget',
+            field_type: 'number',
+            placeholder: '$3000',
+            required: true,
+          },
+          {
+            name: 'travelers',
+            label: 'Travelers',
+            field_type: 'number',
+            placeholder: '2',
+            required: true,
+          },
+        ],
+      },
+    ],
   },
   {
     role: 'user',
-    content: 'How much budget do I have left?',
+    delay: 2000,
+    nodes: [
+      {
+        type: 'text',
+        content:
+          "I'm traveling from San Francisco, from April 15, 2026 to April 22, 2026, with a $3000 budget, for 2 travelers.",
+      },
+    ],
   },
   {
     role: 'assistant',
-    content:
-      '💰 **Budget Breakdown:**\n- Flights: $420\n- Hotel: $850\n- Experiences: $45\n- Dining (est.): $375\n- **Spent so far: $1,690**\n- **Remaining: $1,310**\n\nPlenty of room for shopping and nightlife!',
+    delay: 2400,
+    nodes: [
+      {
+        type: 'text',
+        content: 'Will you be flying or driving?',
+      },
+      {
+        type: 'quick_replies',
+        options: ["I'll be flying", "I'll drive"],
+      },
+    ],
   },
   {
     role: 'user',
-    content: 'Any nightlife recommendations?',
+    delay: 1800,
+    nodes: [
+      {
+        type: 'text',
+        content: "I'll drive",
+      },
+    ],
   },
   {
     role: 'assistant',
-    content:
-      '🎶 **Nightlife picks:**\n• **Razzmatazz** — 5 rooms, different genres\n• **Moog** — underground electronic club\n• **Paradiso** — speakeasy cocktail bar (hidden behind a pastrami shop!)\n\nAll are in El Born / Ciutat Vella — walking distance from your hotel.',
+    delay: 2200,
+    nodes: [
+      {
+        type: 'text',
+        content: 'Do you need a hotel?',
+      },
+      {
+        type: 'quick_replies',
+        options: ['Yes, find me a hotel', 'No, I have lodging'],
+      },
+    ],
   },
   {
     role: 'user',
-    content: 'Add Paradiso to Day 2 evening. What does Day 4 look like?',
+    delay: 1800,
+    nodes: [
+      {
+        type: 'text',
+        content: 'Yes, find me a hotel',
+      },
+    ],
   },
   {
     role: 'assistant',
-    content:
-      "Updated! Here's Day 4:\n\n**Day 4 — Montjuïc & Culture**\n• Morning: Montjuïc Cable Car & Castle\n• Afternoon: Joan Miró Foundation\n• Evening: Flamenco show at Tablao Cordobes (~$45)",
+    delay: 2800,
+    nodes: [
+      {
+        type: 'text',
+        content: 'Here are some hotels in Monterey.',
+      },
+      {
+        type: 'hotel_tiles',
+        selectable: false,
+        hotels: [
+          {
+            id: 'demo-hotel-1',
+            name: 'Monterey Plaza Hotel & Spa',
+            city: 'Monterey',
+            star_rating: 4,
+            price_per_night: 289,
+            total_price: 2023,
+            currency: 'USD',
+            check_in: '2026-04-15',
+            check_out: '2026-04-22',
+          },
+          {
+            id: 'demo-hotel-2',
+            name: 'InterContinental The Clement',
+            city: 'Monterey',
+            star_rating: 5,
+            price_per_night: 359,
+            total_price: 2513,
+            currency: 'USD',
+            check_in: '2026-04-15',
+            check_out: '2026-04-22',
+          },
+        ],
+      },
+    ],
   },
   {
     role: 'user',
-    content: 'Perfect. And Day 5 before my flight?',
+    delay: 2000,
+    nodes: [
+      {
+        type: 'text',
+        content: "I've selected Monterey Plaza Hotel",
+      },
+    ],
   },
   {
     role: 'assistant',
-    content:
-      '**Day 5 — Last Morning & Departure**\n• Brunch at Federal Café\n• Last-minute shopping on Passeig de Gràcia\n• Head to BCN airport\n\n✅ **Final budget: $1,810 spent / $1,190 remaining**\n\nYour full itinerary is saved — you can view and edit it anytime!',
+    delay: 2400,
+    nodes: [
+      {
+        type: 'text',
+        content: 'Great picks!',
+      },
+      {
+        type: 'budget_bar',
+        allocated: 2023,
+        total: 3000,
+        currency: 'USD',
+      },
+    ],
   },
 ];
 
-// Time before each message appears (ms)
-const USER_DELAY = 1800;
-const ASSISTANT_DELAY = 2400;
-// Pause before restarting the loop
-const RESTART_DELAY = 5000;
+const RESTART_DELAY = 4000;
 
 export function MockChatBox() {
   const [visibleCount, setVisibleCount] = useState(0);
@@ -120,7 +203,6 @@ export function MockChatBox() {
 
   useEffect(() => {
     if (visibleCount >= DEMO_MESSAGES.length) {
-      // Pause, then restart
       const t = setTimeout(() => {
         setVisibleCount(0);
         setShowTyping(false);
@@ -129,7 +211,7 @@ export function MockChatBox() {
     }
 
     const nextMsg = DEMO_MESSAGES[visibleCount];
-    const delay = nextMsg.role === 'user' ? USER_DELAY : ASSISTANT_DELAY;
+    const delay = nextMsg.delay;
 
     // Show typing indicator first
     const typingTimer = setTimeout(() => {
@@ -172,16 +254,15 @@ export function MockChatBox() {
               {msg.role === 'user' ? 'You' : APP_NAME}
             </div>
             <div className={styles.bubble}>
-              {msg.content.split('\n').map((line, li) => (
-                <p key={li}>
-                  {line.split(/(\*\*.*?\*\*)/).map((part, j) => {
-                    if (part.startsWith('**') && part.endsWith('**')) {
-                      return <strong key={j}>{part.slice(2, -2)}</strong>;
-                    }
-                    return part;
-                  })}
-                </p>
-              ))}
+              <div className={styles.demoOverlay}>
+                {msg.nodes.map((node, ni) => (
+                  <NodeRenderer
+                    key={ni}
+                    node={node}
+                    callbacks={{ disabled: true }}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         ))}

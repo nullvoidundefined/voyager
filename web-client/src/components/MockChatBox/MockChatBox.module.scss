@@ -60,6 +60,13 @@
   }
 }
 
+.demoOverlay {
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .user .bubble {
   background: var(--user-bubble);
   color: var(--foreground);
