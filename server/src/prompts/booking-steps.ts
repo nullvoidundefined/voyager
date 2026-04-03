@@ -137,6 +137,7 @@ export interface TripState {
   return_date: string | null;
   budget_total: number | null;
   transport_mode: 'flying' | 'driving' | null;
+  trip_type?: 'round_trip' | 'one_way';
   flights: Array<{ id: string }>;
   hotels: Array<{ id: string }>;
   car_rentals?: Array<{ id: string }>;
@@ -176,10 +177,10 @@ export function getFlowPosition(
     return { phase: 'COMPLETE' };
   }
 
+  const needsReturnDate = trip.trip_type !== 'one_way';
   if (
-    trip.budget_total === null ||
     trip.departure_date === null ||
-    trip.return_date === null ||
+    (needsReturnDate && trip.return_date === null) ||
     trip.origin === null
   ) {
     return { phase: 'COLLECT_DETAILS' };

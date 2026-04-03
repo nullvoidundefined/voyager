@@ -116,9 +116,9 @@ describe('normalizeBookingState', () => {
 });
 
 describe('getFlowPosition', () => {
-  it('returns COLLECT_DETAILS when budget is missing', () => {
+  it('does NOT return COLLECT_DETAILS when only budget is missing — budget is optional', () => {
     const pos = getFlowPosition(trip({ budget_total: null }), bs());
-    expect(pos).toEqual({ phase: 'COLLECT_DETAILS' });
+    expect(pos.phase).not.toBe('COLLECT_DETAILS');
   });
 
   it('returns COLLECT_DETAILS when origin is missing', () => {
@@ -248,6 +248,58 @@ describe('getFlowPosition', () => {
   it('returns COMPLETE when status is not planning', () => {
     const pos = getFlowPosition(trip({ status: 'saved' }), bs());
     expect(pos).toEqual({ phase: 'COMPLETE' });
+  });
+
+  it('should NOT require budget_total for COLLECT_DETAILS — proceeds to CATEGORY when budget is null', () => {
+    const trip: TripState = {
+      destination: 'Paris',
+      origin: 'JFK',
+      departure_date: '2026-06-01',
+      return_date: '2026-06-10',
+      budget_total: null,
+      transport_mode: null,
+      flights: [],
+      hotels: [],
+      experiences: [],
+      status: 'planning',
+    };
+    const result = getFlowPosition(trip, DEFAULT_BOOKING_STATE);
+    expect(result.phase).toBe('CATEGORY');
+  });
+
+  it('should require return_date only when trip_type is round_trip or not set', () => {
+    const trip: TripState = {
+      destination: 'Paris',
+      origin: 'JFK',
+      departure_date: '2026-06-01',
+      return_date: null,
+      budget_total: null,
+      transport_mode: null,
+      flights: [],
+      hotels: [],
+      experiences: [],
+      status: 'planning',
+    };
+    const result = getFlowPosition(trip, DEFAULT_BOOKING_STATE);
+    expect(result.phase).toBe('COLLECT_DETAILS');
+  });
+
+  it('should allow null return_date when trip_type is one_way', () => {
+    const trip: TripState = {
+      destination: 'Paris',
+      origin: 'JFK',
+      departure_date: '2026-06-01',
+      return_date: null,
+      budget_total: null,
+      transport_mode: null,
+      flights: [],
+      hotels: [],
+      experiences: [],
+      status: 'planning',
+      trip_type: 'one_way',
+    };
+    const result = getFlowPosition(trip, DEFAULT_BOOKING_STATE);
+    expect(result.phase).toBe('CATEGORY');
   });
 });
 
