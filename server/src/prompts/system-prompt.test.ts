@@ -4,12 +4,11 @@ import { DEFAULT_COMPLETION_TRACKER } from './booking-steps.js';
 import { buildSystemPrompt } from './system-prompt.js';
 
 describe('buildSystemPrompt', () => {
-  it('should include role and guidelines in every prompt', () => {
+  it('should include core prompt in every response', () => {
     const result = buildSystemPrompt();
     expect(result).toContain('Voyager');
-    expect(result).toContain('Response Guidelines');
-    expect(result).toContain('Tools');
-    expect(result).toContain('Guardrails');
+    expect(result).toContain('Rules');
+    expect(result).toContain('format_response');
   });
 
   it('should include COLLECT_DETAILS addendum when no flow position', () => {
@@ -91,10 +90,10 @@ describe('buildSystemPrompt', () => {
     expect(result).toContain(today);
   });
 
-  it('should include tool descriptions for agent autonomy', () => {
+  it('should include key tool references in core prompt', () => {
     const result = buildSystemPrompt();
-    expect(result).toContain('search_flights');
     expect(result).toContain('format_response');
     expect(result).toContain('skip_category');
+    expect(result).toContain('calculate_remaining_budget');
   });
 });
