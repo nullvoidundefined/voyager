@@ -63,6 +63,25 @@ railway up --detach
 - **Nixpacks conflict:** Never set `NIXPACKS_ROOT_DIR` or `NIXPACKS_CONFIG_FILE` env vars — they override the Dockerfile.
 - **Stale Railway link:** If build logs show the wrong directory, relink: `railway link -p d05e2e2b-d70f-4ea6-ae2c-4e0f61a928b4 -s 97a57f4c-65d1-403c-80cf-8c0b742af04f -e production` from the monorepo root.
 
+## Bug fix process — test first, not optimism
+
+When fixing any breaking issue, follow this exact process:
+
+1. **Write a test that reproduces the failure.** Create the exact conditions causing the bug. Run the test. Confirm it **FAILS**.
+2. **Fix the code.** Minimal change addressing the root cause.
+3. **Run the test again.** Confirm it **PASSES**.
+4. **Run the full verification chain:** `pnpm format:check && pnpm lint && pnpm test && pnpm build`
+5. **Only then commit and deploy.**
+
+Never claim something is fixed without a failing-then-passing test. Never deploy to "see if it works." Every bug fix commit must contain both the test and the fix.
+
+## Pre-commit / pre-push verification
+
+Lefthook hooks enforce `format:check`, `lint`, and `build` on every commit and push. If hooks aren't blocking bad code, check:
+
+- `git config --local core.hooksPath` — must not point to a stale directory
+- Run `npx lefthook install` to reinstall hooks if needed
+
 ## Commit conventions
 
 - Make **separate commits** for unrelated tasks — do not bundle unrelated changes into one commit.
