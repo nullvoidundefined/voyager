@@ -93,13 +93,23 @@ export async function chat(req: Request, res: Response) {
       total_price: h.total_price ?? 0,
       star_rating: h.star_rating ?? 0,
     })),
-    selected_car_rentals: [],
+    selected_car_rentals: (trip.car_rentals ?? []).map((c) => ({
+      provider: c.provider,
+      car_name: c.car_name,
+      car_type: c.car_type,
+      price_per_day: c.price_per_day,
+      total_price: c.total_price,
+    })),
     selected_experiences: (trip.experiences ?? []).map((e) => ({
       name: e.name ?? '',
       estimated_cost: e.estimated_cost ?? 0,
       category: e.category ?? '',
     })),
-    total_spent: 0,
+    total_spent:
+      (trip.flights ?? []).reduce((sum, f) => sum + (f.price ?? 0), 0) +
+      (trip.hotels ?? []).reduce((sum, h) => sum + (h.total_price ?? 0), 0) +
+      (trip.car_rentals ?? []).reduce((sum, c) => sum + (c.total_price ?? 0), 0) +
+      (trip.experiences ?? []).reduce((sum, e) => sum + (e.estimated_cost ?? 0), 0),
   };
 
   // Set up SSE
@@ -153,7 +163,7 @@ export async function chat(req: Request, res: Response) {
       transport_mode: trip.transport_mode ?? null,
       flights: (trip.flights ?? []).map((f) => ({ id: f.id })),
       hotels: (trip.hotels ?? []).map((h) => ({ id: h.id })),
-      car_rentals: [],
+      car_rentals: (trip.car_rentals ?? []).map((c) => ({ id: c.id })),
       experiences: (trip.experiences ?? []).map((e) => ({ id: e.id })),
       status: trip.status ?? 'planning',
     },
@@ -194,7 +204,7 @@ export async function chat(req: Request, res: Response) {
           transport_mode: updatedTrip.transport_mode ?? null,
           flights: (updatedTrip.flights ?? []).map((f) => ({ id: f.id })),
           hotels: (updatedTrip.hotels ?? []).map((h) => ({ id: h.id })),
-          car_rentals: [],
+          car_rentals: (updatedTrip.car_rentals ?? []).map((c) => ({ id: c.id })),
           experiences: (updatedTrip.experiences ?? []).map((e) => ({ id: e.id })),
           status: updatedTrip.status ?? 'planning',
         },
@@ -231,7 +241,6 @@ export async function chat(req: Request, res: Response) {
         {
           ...updatedTrip,
           transport_mode: updatedTrip.transport_mode ?? null,
-          car_rentals: [],
         },
       );
       await updateBookingState(

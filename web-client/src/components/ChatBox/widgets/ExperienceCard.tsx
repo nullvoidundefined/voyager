@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/lib/format';
 import { API_BASE } from '@/lib/api';
 
 import styles from './ExperienceCard.module.scss';
@@ -54,7 +55,7 @@ export function ExperienceCard({
           </span>
         )}
         {estimatedCost != null && (
-          <span className={styles.cost}>~${estimatedCost}</span>
+          <span className={styles.cost}>~{formatCurrency(estimatedCost)}</span>
         )}
       </div>
 

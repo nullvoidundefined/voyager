@@ -166,6 +166,7 @@ describe('trip handlers', () => {
         ...mockTrip,
         flights: [],
         hotels: [],
+        car_rentals: [],
         experiences: [],
       });
 

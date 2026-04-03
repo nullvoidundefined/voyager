@@ -87,8 +87,29 @@ export interface TripExperience {
   created_at: Date;
 }
 
+export interface TripCarRental {
+  id: string;
+  trip_id: string;
+  provider: string;
+  car_name: string;
+  car_type: string;
+  price_per_day: number;
+  total_price: number;
+  currency: string;
+  pickup_location: string | null;
+  dropoff_location: string | null;
+  pickup_date: string | null;
+  dropoff_date: string | null;
+  features: string[];
+  image_url: string | null;
+  data_json: Record<string, unknown> | null;
+  selected: boolean;
+  created_at: Date;
+}
+
 export interface TripWithDetails extends Trip {
   flights: TripFlight[];
   hotels: TripHotel[];
+  car_rentals: TripCarRental[];
   experiences: TripExperience[];
 }

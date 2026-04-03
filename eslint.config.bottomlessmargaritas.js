@@ -84,6 +84,7 @@ export default tseslint.config([
         ecmaFeatures: { jsx: true },
         ecmaVersion: 'latest',
         project: ['./server/tsconfig.json', './web-client/tsconfig.json'],
+        tsconfigRootDir: import.meta.dirname,
         sourceType: 'module',
       },
     },

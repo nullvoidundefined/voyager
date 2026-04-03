@@ -2,6 +2,7 @@ import { query } from 'app/db/pool/pool.js';
 import type {
   CreateTripInput,
   Trip,
+  TripCarRental,
   TripExperience,
   TripFlight,
   TripHotel,
@@ -53,13 +54,17 @@ export async function getTripWithDetails(
   const trip = tripResult.rows[0];
   if (!trip) return null;
 
-  const [flightsResult, hotelsResult, experiencesResult] = await Promise.all([
+  const [flightsResult, hotelsResult, carRentalsResult, experiencesResult] = await Promise.all([
     query<TripFlight>(
       `SELECT * FROM trip_flights WHERE trip_id = $1 ORDER BY created_at`,
       [tripId],
     ),
     query<TripHotel>(
       `SELECT * FROM trip_hotels WHERE trip_id = $1 ORDER BY created_at`,
+      [tripId],
+    ),
+    query<TripCarRental>(
+      `SELECT * FROM trip_car_rentals WHERE trip_id = $1 ORDER BY created_at`,
       [tripId],
     ),
     query<TripExperience>(
@@ -72,6 +77,7 @@ export async function getTripWithDetails(
     ...trip,
     flights: flightsResult.rows,
     hotels: hotelsResult.rows,
+    car_rentals: carRentalsResult.rows,
     experiences: experiencesResult.rows,
   };
 }
