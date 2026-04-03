@@ -318,6 +318,98 @@ describe('chat handlers', () => {
       expect(fieldNames).not.toContain('return_date');
       expect(fieldNames).not.toContain('travelers');
     });
+    it('does not show travelers field when travelers=1 (solo travel is valid)', async () => {
+      const app = createApp();
+
+      vi.mocked(tripRepo.getTripWithDetails)
+        .mockResolvedValueOnce({
+          id: tripId,
+          user_id: userId,
+          destination: 'Tokyo',
+          origin: 'SFO',
+          departure_date: '2026-04-15',
+          return_date: null,
+          budget_total: 2500,
+          budget_currency: 'USD',
+          travelers: 1,
+          transport_mode: null,
+          flights: [],
+          hotels: [],
+          car_rentals: [],
+          experiences: [],
+          status: 'planning',
+        } as never)
+        .mockResolvedValueOnce({
+          id: tripId,
+          user_id: userId,
+          destination: 'Tokyo',
+          origin: 'SFO',
+          departure_date: '2026-04-15',
+          return_date: null,
+          budget_total: 2500,
+          budget_currency: 'USD',
+          travelers: 1,
+          transport_mode: null,
+          flights: [],
+          hotels: [],
+          car_rentals: [],
+          experiences: [],
+          status: 'planning',
+        } as never);
+
+      vi.mocked(convRepo.getOrCreateConversation).mockResolvedValueOnce({
+        id: convId,
+        trip_id: tripId,
+      } as never);
+
+      vi.mocked(convRepo.getMessagesByConversation).mockResolvedValueOnce([
+        { id: uuid(3), role: 'user', content: 'prior message', sequence: 1 },
+      ] as never);
+
+      vi.mocked(convRepo.insertMessage).mockResolvedValue({
+        id: uuid(4),
+        conversation_id: convId,
+        role: 'user',
+        content: 'solo trip',
+        sequence: 2,
+        created_at: '2026-01-01T00:00:00Z',
+      } as never);
+
+      vi.mocked(agentService.runAgentLoop).mockResolvedValueOnce({
+        response: 'Got it!',
+        tool_calls: [],
+        total_tokens: { input: 50, output: 20 },
+        nodes: [{ type: 'text' as const, content: 'Got it!' }],
+      });
+
+      const res = await request(app)
+        .post(`/trips/${tripId}/chat`)
+        .send({ message: 'solo trip' })
+        .buffer(true)
+        .parse((res, callback) => {
+          let data = '';
+          res.on('data', (chunk: Buffer) => {
+            data += chunk.toString();
+          });
+          res.on('end', () => callback(null, data));
+        });
+
+      expect(res.status).toBe(200);
+      const doneMatch = res.body.match(/event: done\ndata: (.+)\n/);
+      expect(doneMatch).toBeTruthy();
+      const doneData = JSON.parse(doneMatch[1]);
+      const formNode = doneData.message.nodes.find(
+        (n: { type: string }) => n.type === 'travel_plan_form',
+      );
+
+      // Form should show return_date (missing) but NOT travelers (1 is valid for solo)
+      if (formNode) {
+        const fieldNames = formNode.fields.map((f: { name: string }) => f.name);
+        expect(fieldNames).not.toContain('travelers');
+        expect(fieldNames).toContain('return_date');
+      }
+    });
+
     it('advances booking state after agent loop and persists it', async () => {
       const app = createApp();
 

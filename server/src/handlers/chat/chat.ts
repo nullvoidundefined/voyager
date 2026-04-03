@@ -281,7 +281,7 @@ export async function chat(req: Request, res: Response) {
             field_type: 'number',
             required: true,
           });
-        if (!updatedTrip.travelers || updatedTrip.travelers <= 1)
+        if (!updatedTrip.travelers || updatedTrip.travelers < 1)
           missingFields.push({
             name: 'travelers',
             label: 'Number of travelers',
