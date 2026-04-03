@@ -316,6 +316,89 @@ describe('chat handlers', () => {
       expect(fieldNames).not.toContain('return_date');
       expect(fieldNames).not.toContain('travelers');
     });
+    it('advances booking state after agent loop and persists it', async () => {
+      const app = createApp();
+
+      // Trip with all details filled, transport_mode: flying, no flights yet
+      const tripData = {
+        id: tripId,
+        user_id: userId,
+        destination: 'Barcelona',
+        origin: 'JFK',
+        departure_date: '2026-07-01',
+        return_date: '2026-07-06',
+        budget_total: 3000,
+        budget_currency: 'USD',
+        travelers: 2,
+        transport_mode: 'flying',
+        flights: [],
+        hotels: [],
+        experiences: [],
+        status: 'planning',
+      } as never;
+
+      vi.mocked(tripRepo.getTripWithDetails)
+        .mockResolvedValueOnce(tripData) // initial load
+        .mockResolvedValueOnce(tripData); // reload after agent loop
+
+      vi.mocked(convRepo.getOrCreateConversation).mockResolvedValueOnce({
+        id: convId,
+        trip_id: tripId,
+        booking_state: {
+          version: 1,
+          flights: { status: 'asking' },
+          hotels: { status: 'idle' },
+          car_rental: { status: 'idle' },
+          experiences: { status: 'idle' },
+        },
+      } as never);
+
+      vi.mocked(convRepo.getMessagesByConversation).mockResolvedValueOnce([]);
+
+      vi.mocked(convRepo.insertMessage).mockResolvedValue({
+        id: uuid(3),
+        conversation_id: convId,
+        role: 'user',
+        content: 'Find flights',
+        sequence: 1,
+        created_at: '2026-01-01T00:00:00Z',
+      } as never);
+
+      vi.mocked(agentService.runAgentLoop).mockResolvedValueOnce({
+        response: 'Here are some flights.',
+        tool_calls: [
+          {
+            tool_name: 'search_flights',
+            tool_id: 't1',
+            input: {},
+            result: [],
+          },
+        ],
+        total_tokens: { input: 100, output: 50 },
+        nodes: [{ type: 'text', content: 'Here are some flights.' }],
+      });
+
+      await request(app)
+        .post(`/trips/${tripId}/chat`)
+        .send({ message: 'Find flights' })
+        .buffer(true)
+        .parse((res, callback) => {
+          let data = '';
+          res.on('data', (chunk: Buffer) => {
+            data += chunk.toString();
+          });
+          res.on('end', () => callback(null, data));
+        });
+
+      // updateBookingState should be called with flights advanced to 'presented'
+      expect(convRepo.updateBookingState).toHaveBeenCalledTimes(1);
+      expect(convRepo.updateBookingState).toHaveBeenCalledWith(
+        convId,
+        expect.objectContaining({
+          flights: expect.objectContaining({ status: 'presented' }),
+        }),
+      );
+    });
   });
 
   describe('GET /trips/:id/messages', () => {

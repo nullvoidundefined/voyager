@@ -5,6 +5,7 @@ import type {
 } from '@agentic-travel-agent/shared-types';
 import {
   getFlowPosition,
+  advanceBookingState,
   normalizeBookingState,
   DEFAULT_BOOKING_STATE,
 } from 'app/prompts/booking-steps.js';
@@ -13,6 +14,7 @@ import {
   getMessagesByConversation,
   getOrCreateConversation,
   insertMessage,
+  updateBookingState,
 } from 'app/repositories/conversations/conversations.js';
 import { getTripWithDetails } from 'app/repositories/trips/trips.js';
 import { findByUserId as findUserPreferences } from 'app/repositories/userPreferences/userPreferences.js';
@@ -136,11 +138,12 @@ export async function chat(req: Request, res: Response) {
     res.write(`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`);
   };
 
-  // TODO(Task 6): read booking_state from conversation and pass to getFlowPosition
   const bookingState = normalizeBookingState(
-    (conversation as unknown as Record<string, unknown>).booking_state ?? DEFAULT_BOOKING_STATE,
+    (conversation as unknown as Record<string, unknown>).booking_state ??
+      DEFAULT_BOOKING_STATE,
   );
-  const flowPosition = getFlowPosition(
+
+  let flowPosition = getFlowPosition(
     {
       ...trip,
       origin: trip.origin ?? null,
@@ -156,6 +159,15 @@ export async function chat(req: Request, res: Response) {
     },
     bookingState,
   );
+
+  let currentBookingState = structuredClone(bookingState);
+  if (flowPosition.phase === 'CATEGORY' && flowPosition.status === 'idle') {
+    currentBookingState[flowPosition.category] = {
+      ...currentBookingState[flowPosition.category],
+      status: 'asking',
+    };
+    flowPosition = { ...flowPosition, status: 'asking' };
+  }
 
   try {
     const result = await runAgentLoop(
@@ -186,7 +198,7 @@ export async function chat(req: Request, res: Response) {
           experiences: (updatedTrip.experiences ?? []).map((e) => ({ id: e.id })),
           status: updatedTrip.status ?? 'planning',
         },
-        bookingState,
+        currentBookingState,
       );
       if (updatedPosition.phase === 'COLLECT_DETAILS') {
         const isPlaceholder = !updatedTrip.destination || updatedTrip.destination === 'Planning...';
@@ -207,6 +219,25 @@ export async function chat(req: Request, res: Response) {
           result.nodes.push({ type: 'travel_plan_form', fields: missingFields });
         }
       }
+    }
+
+    // Advance booking state after the agent loop
+    if (flowPosition.phase === 'CATEGORY' && updatedTrip) {
+      const newBookingState = advanceBookingState(
+        currentBookingState,
+        flowPosition.category,
+        flowPosition.status,
+        result,
+        {
+          ...updatedTrip,
+          transport_mode: updatedTrip.transport_mode ?? null,
+          car_rentals: [],
+        },
+      );
+      await updateBookingState(
+        conversation.id,
+        newBookingState as unknown as Record<string, unknown>,
+      );
     }
 
     // Persist assistant message with dual columns (content + tool_calls_json + nodes)
