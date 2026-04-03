@@ -23,6 +23,7 @@ interface PreferencesWizardProps {
 type StepValue =
   | string
   | string[]
+  | boolean
   | { dietary: string[]; dining_style: string | null }
   | null;
 
@@ -64,6 +65,12 @@ export function PreferencesWizard({
   const [travelParty, setTravelParty] = useState<string | null>(
     initialPreferences?.travel_party ?? null,
   );
+  const [lgbtqSafety, setLgbtqSafety] = useState<boolean>(
+    initialPreferences?.lgbtq_safety ?? false,
+  );
+  const [gender, setGender] = useState<string | null>(
+    initialPreferences?.gender ?? null,
+  );
   const [budgetComfort, setBudgetComfort] = useState<string | null>(
     initialPreferences?.budget_comfort ?? null,
   );
@@ -79,6 +86,8 @@ export function PreferencesWizard({
       });
       setActivities(initialPreferences.activities ?? []);
       setTravelParty(initialPreferences.travel_party ?? null);
+      setLgbtqSafety(initialPreferences.lgbtq_safety ?? false);
+      setGender(initialPreferences.gender ?? null);
       setBudgetComfort(initialPreferences.budget_comfort ?? null);
     }
   }, [initialPreferences]);
@@ -103,7 +112,7 @@ export function PreferencesWizard({
       case 'activities':
         return { activities };
       case 'travel_party':
-        return { travel_party: travelParty };
+        return { travel_party: travelParty, lgbtq_safety: lgbtqSafety, gender };
       case 'budget_comfort':
         return { budget_comfort: budgetComfort };
       default:
@@ -140,6 +149,8 @@ export function PreferencesWizard({
     dining,
     activities,
     travelParty,
+    lgbtqSafety,
+    gender,
     budgetComfort,
     queryClient,
   ]);
@@ -254,7 +265,14 @@ export function PreferencesWizard({
           <ActivitiesStep value={activities} onChange={setActivities} />
         )}
         {currentStep.id === 'travel_party' && (
-          <TravelPartyStep value={travelParty} onChange={setTravelParty} />
+          <TravelPartyStep
+            value={travelParty}
+            onChange={setTravelParty}
+            lgbtqSafety={lgbtqSafety}
+            onLgbtqSafetyChange={setLgbtqSafety}
+            gender={gender}
+            onGenderChange={setGender}
+          />
         )}
         {currentStep.id === 'budget_comfort' && (
           <BudgetComfortStep

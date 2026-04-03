@@ -343,3 +343,66 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* — LGBTQ+ safety & gender — */
+
+.safetySection {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.safetyExplanation {
+  font-size: 13px;
+  color: var(--foreground-muted);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.toggleLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.toggleInput {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--cta);
+  cursor: pointer;
+}
+
+.genderField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.selectLabel {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.optional {
+  font-weight: 400;
+  color: var(--foreground-muted);
+}
+
+.select {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--foreground);
+  font-size: 14px;
+  font-family: var(--font-body);
+  max-width: 240px;
+
+  &:focus {
+    outline: none;
+    border-color: var(--cta);
+  }
+}
