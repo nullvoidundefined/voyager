@@ -138,6 +138,27 @@ export async function chat(req: Request, res: Response) {
     car_rentals: [],
   });
 
+  // Inject form for missing fields when still collecting details
+  if (bookingStep === 'COLLECT_DETAILS') {
+    const isPlaceholder = !trip.destination || trip.destination === 'Planning...';
+    const missingFields: Array<{
+      name: string;
+      label: string;
+      field_type: 'text' | 'date' | 'number' | 'select';
+      required: boolean;
+    }> = [];
+    if (isPlaceholder) missingFields.push({ name: 'destination', label: 'Where do you want to go?', field_type: 'text', required: true });
+    if (!trip.origin) missingFields.push({ name: 'origin', label: 'Where are you traveling from?', field_type: 'text', required: true });
+    if (!trip.departure_date) missingFields.push({ name: 'departure_date', label: 'Departure date', field_type: 'date', required: true });
+    if (!trip.return_date) missingFields.push({ name: 'return_date', label: 'Return date', field_type: 'date', required: true });
+    if (!trip.budget_total) missingFields.push({ name: 'budget', label: 'Total budget (USD)', field_type: 'number', required: true });
+    if (!trip.travelers || trip.travelers <= 1) missingFields.push({ name: 'travelers', label: 'Number of travelers', field_type: 'number', required: true });
+
+    if (missingFields.length > 0) {
+      enrichmentNodes.push({ type: 'travel_plan_form', fields: missingFields });
+    }
+  }
+
   try {
     const result = await runAgentLoop(
       claudeMessages,
@@ -207,31 +228,17 @@ export async function getMessages(req: Request, res: Response) {
       created_at: m.created_at,
     }));
 
-  // Generate a welcome message on-the-fly for new trips
+  // Generate a welcome message on-the-fly for new trips — text only, no form.
+  // The form appears in the agent's response after the user replies with partial info.
   if (messages.length === 0) {
     const isPlaceholder = !trip.destination || trip.destination === 'Planning...';
-    const missingFields: Array<{
-      name: string;
-      label: string;
-      field_type: 'text' | 'date' | 'number' | 'select';
-      required: boolean;
-    }> = [];
-    if (isPlaceholder) missingFields.push({ name: 'destination', label: 'Where do you want to go?', field_type: 'text', required: true });
-    if (!trip.origin) missingFields.push({ name: 'origin', label: 'Where are you traveling from?', field_type: 'text', required: true });
-    if (!trip.departure_date) missingFields.push({ name: 'departure_date', label: 'Departure date', field_type: 'date', required: true });
-    if (!trip.return_date) missingFields.push({ name: 'return_date', label: 'Return date', field_type: 'date', required: true });
-    if (!trip.budget_total) missingFields.push({ name: 'budget', label: 'Total budget (USD)', field_type: 'number', required: true });
-    if (!trip.travelers || trip.travelers <= 1) missingFields.push({ name: 'travelers', label: 'Number of travelers', field_type: 'number', required: true });
 
     const welcomeText = isPlaceholder
-      ? "Welcome! Let's plan your trip."
-      : `Let's plan your trip to **${trip.destination}**!`;
+      ? "Hi! I'd love to help plan your trip. Where would you like to go, when are you traveling, and what's your budget?"
+      : `Great choice! Let's plan your trip to **${trip.destination}**. When are you traveling, what's your budget, and where will you be coming from?`;
     const welcomeNodes: ChatNode[] = [
       { type: 'text', content: welcomeText },
     ];
-    if (missingFields.length > 0) {
-      welcomeNodes.push({ type: 'travel_plan_form', fields: missingFields });
-    }
 
     const welcomeMessage: ChatMessage = {
       id: 'welcome',

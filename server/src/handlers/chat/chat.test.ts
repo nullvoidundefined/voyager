@@ -217,6 +217,78 @@ describe('chat handlers', () => {
         expect.objectContaining({ role: 'assistant', content: 'Hi!' }),
       );
     });
+
+    it('injects travel_plan_form into response when trip details are still missing', async () => {
+      const app = createApp();
+
+      // Trip with destination set but missing origin, dates, budget
+      vi.mocked(tripRepo.getTripWithDetails).mockResolvedValueOnce({
+        id: tripId,
+        user_id: userId,
+        destination: 'Tokyo',
+        origin: null,
+        departure_date: null,
+        return_date: null,
+        budget_total: null,
+        budget_currency: 'USD',
+        travelers: 1,
+        transport_mode: null,
+        flights: [],
+        hotels: [],
+        experiences: [],
+        status: 'planning',
+      } as never);
+
+      vi.mocked(convRepo.getOrCreateConversation).mockResolvedValueOnce({
+        id: convId,
+        trip_id: tripId,
+      } as never);
+
+      // User already sent a first message (not first message anymore)
+      vi.mocked(convRepo.getMessagesByConversation).mockResolvedValueOnce([
+        { id: uuid(3), role: 'user', content: 'I want to go to Tokyo', sequence: 1 },
+      ] as never);
+
+      vi.mocked(convRepo.insertMessage).mockResolvedValue({
+        id: uuid(4),
+        conversation_id: convId,
+        role: 'user',
+        content: 'I want to go to Tokyo',
+        sequence: 2,
+        created_at: '2026-01-01T00:00:00Z',
+      } as never);
+
+      vi.mocked(agentService.runAgentLoop).mockImplementationOnce(
+        async (_messages, _ctx, _onEvent, _convId, _toolCtx, enrichmentNodes) => {
+          // The enrichment nodes should contain a travel_plan_form
+          const formNode = enrichmentNodes?.find(
+            (n) => n.type === 'travel_plan_form',
+          );
+          expect(formNode).toBeDefined();
+
+          return {
+            response: 'Great choice!',
+            tool_calls: [],
+            total_tokens: { input: 50, output: 20 },
+            nodes: [{ type: 'text' as const, content: 'Great choice!' }],
+          };
+        },
+      );
+
+      const res = await request(app)
+        .post(`/trips/${tripId}/chat`)
+        .send({ message: 'I want to go to Tokyo' })
+        .buffer(true)
+        .parse((res, callback) => {
+          let data = '';
+          res.on('data', (chunk: Buffer) => {
+            data += chunk.toString();
+          });
+          res.on('end', () => callback(null, data));
+        });
+
+      expect(res.status).toBe(200);
+    });
   });
 
   describe('GET /trips/:id/messages', () => {
@@ -262,7 +334,7 @@ describe('chat handlers', () => {
       expect(res.body.messages).toHaveLength(2);
     });
 
-    it('returns welcome message with destination field for placeholder trip', async () => {
+    it('returns welcome message as text only (no form) for new trips', async () => {
       const app = createApp();
 
       vi.mocked(tripRepo.getTripWithDetails).mockResolvedValueOnce({
@@ -292,25 +364,21 @@ describe('chat handlers', () => {
       expect(res.status).toBe(200);
       expect(res.body.messages).toHaveLength(1);
       expect(res.body.messages[0].id).toBe('welcome');
-      const formNode = res.body.messages[0].nodes.find(
-        (n: { type: string }) => n.type === 'travel_plan_form',
+      expect(res.body.messages[0].role).toBe('assistant');
+
+      // Welcome message should be text ONLY — no form
+      const nodeTypes = res.body.messages[0].nodes.map(
+        (n: { type: string }) => n.type,
       );
-      expect(formNode).toBeDefined();
-      const fieldNames = formNode.fields.map((f: { name: string }) => f.name);
-      expect(fieldNames).toContain('destination');
+      expect(nodeTypes).toEqual(['text']);
+      expect(nodeTypes).not.toContain('travel_plan_form');
+
+      // Text should be a friendly prompt asking for trip info
+      const textNode = res.body.messages[0].nodes[0];
+      expect(textNode.content).toMatch(/where|destination|trip/i);
     });
 
-    it('returns 404 when trip not found', async () => {
-      const app = createApp();
-
-      vi.mocked(tripRepo.getTripWithDetails).mockResolvedValueOnce(null);
-
-      const res = await request(app).get(`/trips/${tripId}/messages`);
-
-      expect(res.status).toBe(404);
-    });
-
-    it('returns welcome message with form for new trip', async () => {
+    it('returns welcome text for trip with destination set', async () => {
       const app = createApp();
 
       vi.mocked(tripRepo.getTripWithDetails).mockResolvedValueOnce({
@@ -340,17 +408,27 @@ describe('chat handlers', () => {
       expect(res.status).toBe(200);
       expect(res.body.messages).toHaveLength(1);
 
-      const welcome = res.body.messages[0];
-      expect(welcome.id).toBe('welcome');
-      expect(welcome.role).toBe('assistant');
-      expect(welcome.sequence).toBe(0);
-
-      const nodeTypes = welcome.nodes.map((n: { type: string }) => n.type);
-      expect(nodeTypes).toContain('text');
-      expect(nodeTypes).toContain('travel_plan_form');
-
-      const textNode = welcome.nodes.find((n: { type: string }) => n.type === 'text');
+      // Should mention the destination
+      const textNode = res.body.messages[0].nodes[0];
+      expect(textNode.type).toBe('text');
       expect(textNode.content).toContain('Tokyo');
+
+      // Still no form — text only
+      const nodeTypes = res.body.messages[0].nodes.map(
+        (n: { type: string }) => n.type,
+      );
+      expect(nodeTypes).not.toContain('travel_plan_form');
     });
+
+    it('returns 404 when trip not found', async () => {
+      const app = createApp();
+
+      vi.mocked(tripRepo.getTripWithDetails).mockResolvedValueOnce(null);
+
+      const res = await request(app).get(`/trips/${tripId}/messages`);
+
+      expect(res.status).toBe(404);
+    });
+
   });
 });
