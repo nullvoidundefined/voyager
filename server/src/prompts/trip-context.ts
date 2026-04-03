@@ -1,3 +1,5 @@
+import type { CompletionTracker } from './booking-steps.js';
+
 export interface TripContext {
   destination: string;
   origin: string | null;
@@ -168,6 +170,90 @@ export function formatTripContext(ctx: TripContext): string {
     lines.push(`- Spent: $${ctx.total_spent} / $${ctx.budget_total}`);
     lines.push(`- Remaining: $${remaining}`);
   }
+
+  return lines.join('\n');
+}
+
+export function formatChecklist(
+  tracker: CompletionTracker,
+  ctx: TripContext,
+): string {
+  const icon = (status: string) =>
+    status === 'selected' ? '✅' : status === 'skipped' ? '⏭️' : '⬜';
+
+  const lines: string[] = ['## Trip Planning Checklist'];
+
+  // Transport
+  if (tracker.transport === 'pending') {
+    lines.push('- ⬜ Transportation: Not yet decided (flying or driving?)');
+  } else {
+    lines.push(
+      `- ✅ Transportation: ${tracker.transport === 'flying' ? 'Flying' : 'Driving'}`,
+    );
+  }
+
+  // Flights
+  if (tracker.flights === 'selected' && ctx.selected_flights.length > 0) {
+    const f = ctx.selected_flights[0]!;
+    lines.push(`- ✅ Flights: ${f.airline} ${f.flight_number} — $${f.price}`);
+  } else {
+    lines.push(
+      `- ${icon(tracker.flights)} Flights: ${tracker.flights === 'skipped' ? 'Skipped' : tracker.flights === 'searching' ? 'Browsing options' : 'Not yet discussed'}`,
+    );
+  }
+
+  // Hotels
+  if (tracker.hotels === 'selected' && ctx.selected_hotels.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const h = ctx.selected_hotels[0]!;
+    lines.push(`- ✅ Hotels: ${h.name} — $${h.total_price} total`);
+  } else {
+    lines.push(
+      `- ${icon(tracker.hotels)} Hotels: ${tracker.hotels === 'skipped' ? 'Skipped' : tracker.hotels === 'searching' ? 'Browsing options' : 'Not yet discussed'}`,
+    );
+  }
+
+  // Car rental
+  if (
+    tracker.car_rental === 'selected' &&
+    ctx.selected_car_rentals.length > 0
+  ) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const c = ctx.selected_car_rentals[0]!;
+    lines.push(
+      `- ✅ Car Rental: ${c.car_name} from ${c.provider} — $${c.total_price}`,
+    );
+  } else {
+    lines.push(
+      `- ${icon(tracker.car_rental)} Car Rental: ${tracker.car_rental === 'skipped' ? 'Skipped' : tracker.car_rental === 'searching' ? 'Browsing options' : 'Not yet discussed'}`,
+    );
+  }
+
+  // Experiences
+  if (
+    tracker.experiences === 'selected' &&
+    ctx.selected_experiences.length > 0
+  ) {
+    lines.push(
+      `- ✅ Experiences: ${ctx.selected_experiences.length} selected ($${ctx.selected_experiences.reduce((s, e) => s + e.estimated_cost, 0)} total)`,
+    );
+  } else {
+    lines.push(
+      `- ${icon(tracker.experiences)} Experiences: ${tracker.experiences === 'skipped' ? 'Skipped' : tracker.experiences === 'searching' ? 'Browsing options' : 'Not yet discussed'}`,
+    );
+  }
+
+  // Budget
+  if (ctx.budget_total > 0) {
+    const remaining = ctx.budget_total - ctx.total_spent;
+    lines.push(
+      `- Budget: $${remaining.toFixed(0)} remaining of $${ctx.budget_total}`,
+    );
+  }
+
+  lines.push(
+    '\nAll categories must be addressed (selected or explicitly skipped) before the trip can be confirmed.',
+  );
 
   return lines.join('\n');
 }
