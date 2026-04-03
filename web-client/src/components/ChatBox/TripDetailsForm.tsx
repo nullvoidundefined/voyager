@@ -11,8 +11,10 @@ export interface TripField {
     | 'departure_date'
     | 'return_date'
     | 'budget'
-    | 'travelers';
+    | 'travelers'
+    | 'trip_type';
   label: string;
+  required?: boolean;
 }
 
 interface TripDetailsFormProps {
@@ -42,7 +44,10 @@ export function TripDetailsForm({
   const set = (key: string, val: string) =>
     setValues((prev) => ({ ...prev, [key]: val }));
 
-  const allFilled = fields.every((f) => values[f.type]?.trim());
+  const allFilled = fields.every(
+    (f) =>
+      f.type === 'trip_type' || f.required === false || values[f.type]?.trim(),
+  );
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -139,7 +144,27 @@ export function TripDetailsForm({
               readOnly={isLocked}
             />
           )}
-          {field.type === 'return_date' && (
+          {field.type === 'trip_type' && (
+            <div className={styles.tripTypeToggle}>
+              <button
+                type='button'
+                className={`${styles.tripTypeBtn} ${(values.trip_type ?? 'round_trip') === 'round_trip' ? styles.tripTypeBtnActive : ''}`}
+                onClick={() => set('trip_type', 'round_trip')}
+                disabled={disabled || isLocked}
+              >
+                Round Trip
+              </button>
+              <button
+                type='button'
+                className={`${styles.tripTypeBtn} ${values.trip_type === 'one_way' ? styles.tripTypeBtnActive : ''}`}
+                onClick={() => set('trip_type', 'one_way')}
+                disabled={disabled || isLocked}
+              >
+                One Way
+              </button>
+            </div>
+          )}
+          {field.type === 'return_date' && values.trip_type !== 'one_way' && (
             <input
               id='return_date'
               type='date'
