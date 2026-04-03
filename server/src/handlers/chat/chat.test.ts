@@ -218,66 +218,71 @@ describe('chat handlers', () => {
       );
     });
 
-    it('injects travel_plan_form into response when trip details are still missing', async () => {
+    it('appends form with only MISSING fields after agent updates trip', async () => {
       const app = createApp();
 
-      // Trip with destination set but missing origin, dates, budget
-      vi.mocked(tripRepo.getTripWithDetails).mockResolvedValueOnce({
-        id: tripId,
-        user_id: userId,
-        destination: 'Tokyo',
-        origin: null,
-        departure_date: null,
-        return_date: null,
-        budget_total: null,
-        budget_currency: 'USD',
-        travelers: 1,
-        transport_mode: null,
-        flights: [],
-        hotels: [],
-        experiences: [],
-        status: 'planning',
-      } as never);
+      // Initial trip state: only destination set, everything else missing
+      vi.mocked(tripRepo.getTripWithDetails)
+        .mockResolvedValueOnce({
+          id: tripId,
+          user_id: userId,
+          destination: 'Planning...',
+          origin: null,
+          departure_date: null,
+          return_date: null,
+          budget_total: null,
+          budget_currency: 'USD',
+          travelers: 1,
+          transport_mode: null,
+          flights: [],
+          hotels: [],
+          experiences: [],
+          status: 'planning',
+        } as never)
+        // Second call: after agent ran update_trip, trip now has destination + dates + travelers
+        .mockResolvedValueOnce({
+          id: tripId,
+          user_id: userId,
+          destination: 'Tokyo',
+          origin: null,
+          departure_date: '2026-04-15',
+          return_date: '2026-04-29',
+          budget_total: null,
+          budget_currency: 'USD',
+          travelers: 2,
+          transport_mode: null,
+          flights: [],
+          hotels: [],
+          experiences: [],
+          status: 'planning',
+        } as never);
 
       vi.mocked(convRepo.getOrCreateConversation).mockResolvedValueOnce({
         id: convId,
         trip_id: tripId,
       } as never);
 
-      // User already sent a first message (not first message anymore)
-      vi.mocked(convRepo.getMessagesByConversation).mockResolvedValueOnce([
-        { id: uuid(3), role: 'user', content: 'I want to go to Tokyo', sequence: 1 },
-      ] as never);
+      vi.mocked(convRepo.getMessagesByConversation).mockResolvedValueOnce([]);
 
       vi.mocked(convRepo.insertMessage).mockResolvedValue({
-        id: uuid(4),
+        id: uuid(3),
         conversation_id: convId,
         role: 'user',
-        content: 'I want to go to Tokyo',
-        sequence: 2,
+        content: 'Tokyo, 2 people, April 15, two weeks',
+        sequence: 1,
         created_at: '2026-01-01T00:00:00Z',
       } as never);
 
-      vi.mocked(agentService.runAgentLoop).mockImplementationOnce(
-        async (_messages, _ctx, _onEvent, _convId, _toolCtx, enrichmentNodes) => {
-          // The enrichment nodes should contain a travel_plan_form
-          const formNode = enrichmentNodes?.find(
-            (n) => n.type === 'travel_plan_form',
-          );
-          expect(formNode).toBeDefined();
-
-          return {
-            response: 'Great choice!',
-            tool_calls: [],
-            total_tokens: { input: 50, output: 20 },
-            nodes: [{ type: 'text' as const, content: 'Great choice!' }],
-          };
-        },
-      );
+      vi.mocked(agentService.runAgentLoop).mockResolvedValueOnce({
+        response: 'Tokyo sounds great!',
+        tool_calls: [],
+        total_tokens: { input: 50, output: 20 },
+        nodes: [{ type: 'text' as const, content: 'Tokyo sounds great!' }],
+      });
 
       const res = await request(app)
         .post(`/trips/${tripId}/chat`)
-        .send({ message: 'I want to go to Tokyo' })
+        .send({ message: 'Tokyo, 2 people, April 15, two weeks' })
         .buffer(true)
         .parse((res, callback) => {
           let data = '';
@@ -288,6 +293,28 @@ describe('chat handlers', () => {
         });
 
       expect(res.status).toBe(200);
+
+      // Parse the done event to check persisted nodes
+      const doneMatch = res.body.match(/event: done\ndata: (.+)\n/);
+      expect(doneMatch).toBeTruthy();
+      const doneData = JSON.parse(doneMatch[1]);
+      const nodeTypes = doneData.message.nodes.map((n: { type: string }) => n.type);
+
+      // Should have a form node
+      expect(nodeTypes).toContain('travel_plan_form');
+
+      // Form should only contain fields still missing (origin and budget)
+      // NOT destination, departure_date, return_date, or travelers
+      const formNode = doneData.message.nodes.find(
+        (n: { type: string }) => n.type === 'travel_plan_form',
+      );
+      const fieldNames = formNode.fields.map((f: { name: string }) => f.name);
+      expect(fieldNames).toContain('origin');
+      expect(fieldNames).toContain('budget');
+      expect(fieldNames).not.toContain('destination');
+      expect(fieldNames).not.toContain('departure_date');
+      expect(fieldNames).not.toContain('return_date');
+      expect(fieldNames).not.toContain('travelers');
     });
   });
 

@@ -138,27 +138,6 @@ export async function chat(req: Request, res: Response) {
     car_rentals: [],
   });
 
-  // Inject form for missing fields when still collecting details
-  if (bookingStep === 'COLLECT_DETAILS') {
-    const isPlaceholder = !trip.destination || trip.destination === 'Planning...';
-    const missingFields: Array<{
-      name: string;
-      label: string;
-      field_type: 'text' | 'date' | 'number' | 'select';
-      required: boolean;
-    }> = [];
-    if (isPlaceholder) missingFields.push({ name: 'destination', label: 'Where do you want to go?', field_type: 'text', required: true });
-    if (!trip.origin) missingFields.push({ name: 'origin', label: 'Where are you traveling from?', field_type: 'text', required: true });
-    if (!trip.departure_date) missingFields.push({ name: 'departure_date', label: 'Departure date', field_type: 'date', required: true });
-    if (!trip.return_date) missingFields.push({ name: 'return_date', label: 'Return date', field_type: 'date', required: true });
-    if (!trip.budget_total) missingFields.push({ name: 'budget', label: 'Total budget (USD)', field_type: 'number', required: true });
-    if (!trip.travelers || trip.travelers <= 1) missingFields.push({ name: 'travelers', label: 'Number of travelers', field_type: 'number', required: true });
-
-    if (missingFields.length > 0) {
-      enrichmentNodes.push({ type: 'travel_plan_form', fields: missingFields });
-    }
-  }
-
   try {
     const result = await runAgentLoop(
       claudeMessages,
@@ -169,6 +148,36 @@ export async function chat(req: Request, res: Response) {
       enrichmentNodes,
       bookingStep,
     );
+
+    // After the agent loop (which may have called update_trip), reload the trip
+    // to check if details are still missing. Append form for missing fields only.
+    const updatedTrip = await getTripWithDetails(tripId, userId);
+    if (updatedTrip) {
+      const updatedStep = getBookingStep({
+        ...updatedTrip,
+        transport_mode: updatedTrip.transport_mode ?? null,
+        car_rentals: [],
+      });
+      if (updatedStep === 'COLLECT_DETAILS') {
+        const isPlaceholder = !updatedTrip.destination || updatedTrip.destination === 'Planning...';
+        const missingFields: Array<{
+          name: string;
+          label: string;
+          field_type: 'text' | 'date' | 'number' | 'select';
+          required: boolean;
+        }> = [];
+        if (isPlaceholder) missingFields.push({ name: 'destination', label: 'Where do you want to go?', field_type: 'text', required: true });
+        if (!updatedTrip.origin) missingFields.push({ name: 'origin', label: 'Where are you traveling from?', field_type: 'text', required: true });
+        if (!updatedTrip.departure_date) missingFields.push({ name: 'departure_date', label: 'Departure date', field_type: 'date', required: true });
+        if (!updatedTrip.return_date) missingFields.push({ name: 'return_date', label: 'Return date', field_type: 'date', required: true });
+        if (!updatedTrip.budget_total) missingFields.push({ name: 'budget', label: 'Total budget (USD)', field_type: 'number', required: true });
+        if (!updatedTrip.travelers || updatedTrip.travelers <= 1) missingFields.push({ name: 'travelers', label: 'Number of travelers', field_type: 'number', required: true });
+
+        if (missingFields.length > 0) {
+          result.nodes.push({ type: 'travel_plan_form', fields: missingFields });
+        }
+      }
+    }
 
     // Persist assistant message with dual columns (content + tool_calls_json + nodes)
     const assistantMessage = await insertMessage({
