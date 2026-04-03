@@ -89,6 +89,7 @@ export interface UpdateTripInput {
   departure_date?: string;
   return_date?: string;
   budget_total?: number;
+  travelers?: number;
   transport_mode?: 'flying' | 'driving';
   status?: 'planning' | 'saved' | 'archived';
 }

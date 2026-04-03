@@ -2,7 +2,7 @@
 
 import { type FormEvent, useCallback, useState } from 'react';
 
-import { get } from '@/lib/api';
+import { get, put } from '@/lib/api';
 import type { ChatMessage } from '@agentic-travel-agent/shared-types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -80,6 +80,33 @@ export function ChatBox({
     [input, handleSend],
   );
 
+  const handleFormSubmit = useCallback(
+    async (structuredData: Record<string, string>, displayMessage: string) => {
+      const tripUpdate: Record<string, unknown> = {};
+      if (structuredData.destination)
+        tripUpdate.destination = structuredData.destination;
+      if (structuredData.origin) tripUpdate.origin = structuredData.origin;
+      if (structuredData.departure_date)
+        tripUpdate.departure_date = structuredData.departure_date;
+      if (structuredData.return_date)
+        tripUpdate.return_date = structuredData.return_date;
+      if (structuredData.budget)
+        tripUpdate.budget_total = Number(structuredData.budget);
+      if (structuredData.travelers)
+        tripUpdate.travelers = Number(structuredData.travelers);
+
+      try {
+        await put(`/trips/${tripId}`, tripUpdate);
+        void queryClient.invalidateQueries({ queryKey: ['trips', tripId] });
+      } catch (err) {
+        console.error('Failed to update trip:', err);
+      }
+
+      handleSend(displayMessage);
+    },
+    [tripId, queryClient, handleSend],
+  );
+
   // Invalidate trips query after booking-related actions
   const handleBookTrip = useCallback(() => {
     onBookTrip?.();
@@ -95,6 +122,7 @@ export function ChatBox({
         streamingText={streamingText}
         isSending={isSending}
         onQuickReply={handleSend}
+        onFormSubmit={handleFormSubmit}
       />
 
       {showBookingActions && (

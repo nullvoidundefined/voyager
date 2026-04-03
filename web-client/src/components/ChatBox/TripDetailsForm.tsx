@@ -17,7 +17,10 @@ export interface TripField {
 
 interface TripDetailsFormProps {
   fields: TripField[];
-  onSubmit: (message: string) => void;
+  onSubmit: (
+    structuredData: Record<string, string>,
+    displayMessage: string,
+  ) => void;
   disabled?: boolean;
   initialValues?: Record<string, string>;
   submitted?: boolean;
@@ -85,7 +88,7 @@ export function TripDetailsForm({
       );
     }
 
-    onSubmit(parts.join(', ') + '.');
+    onSubmit(values, parts.join(', ') + '.');
   }
 
   const today = new Date().toISOString().split('T')[0];

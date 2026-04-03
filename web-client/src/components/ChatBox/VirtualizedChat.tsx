@@ -16,6 +16,10 @@ interface VirtualizedChatProps {
   streamingText: string;
   isSending: boolean;
   onQuickReply: (text: string) => void;
+  onFormSubmit?: (
+    structuredData: Record<string, string>,
+    displayMessage: string,
+  ) => void;
 }
 
 // Height estimates by node type for initial virtualized sizing
@@ -49,6 +53,7 @@ export function VirtualizedChat({
   streamingText,
   isSending,
   onQuickReply,
+  onFormSubmit,
 }: VirtualizedChatProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const wasAtBottomRef = useRef(true);
@@ -159,7 +164,7 @@ export function VirtualizedChat({
                       node={node}
                       callbacks={{
                         onQuickReply,
-                        onFormSubmit: onQuickReply,
+                        onFormSubmit,
                         onConfirmFlight: (label) =>
                           onQuickReply(`I've selected the ${label} flight`),
                         onConfirmHotel: (label) =>

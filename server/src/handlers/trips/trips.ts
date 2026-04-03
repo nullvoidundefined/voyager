@@ -49,6 +49,7 @@ export async function updateTrip(req: Request, res: Response): Promise<void> {
     departure_date,
     return_date,
     budget_total,
+    travelers,
     transport_mode,
     status,
   } = req.body ?? {};
@@ -58,6 +59,7 @@ export async function updateTrip(req: Request, res: Response): Promise<void> {
   if (departure_date !== undefined) input.departure_date = departure_date;
   if (return_date !== undefined) input.return_date = return_date;
   if (budget_total !== undefined) input.budget_total = budget_total;
+  if (travelers !== undefined) input.travelers = travelers;
   if (transport_mode !== undefined) input.transport_mode = transport_mode;
   if (status !== undefined) input.status = status;
 

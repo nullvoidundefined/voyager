@@ -21,7 +21,10 @@ export interface NodeRendererCallbacks {
   onConfirmCarRental?: (label: string) => void;
   onConfirmExperience?: (label: string) => void;
   onQuickReply?: (text: string) => void;
-  onFormSubmit?: (message: string) => void;
+  onFormSubmit?: (
+    structuredData: Record<string, string>,
+    displayMessage: string,
+  ) => void;
   disabled?: boolean;
   confirmedFlightId?: string | null;
   confirmedHotelId?: string | null;
