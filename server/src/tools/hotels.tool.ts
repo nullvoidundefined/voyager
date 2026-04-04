@@ -94,9 +94,15 @@ export async function searchHotels(
   // Mock mode for eval runs
   if (process.env.EVAL_MOCK_SEARCH === 'true') {
     const mockHotels = [
-      { name: `${input.city} Grand Hotel`, stars: 4, pricePerNight: 150 },
-      { name: `${input.city} Budget Inn`, stars: 2, pricePerNight: 65 },
-      { name: `${input.city} Boutique Suites`, stars: 5, pricePerNight: 320 },
+      { name: `${input.city} Backpacker Hostel`, stars: 1, pricePerNight: 25 },
+      { name: `${input.city} Budget Inn`, stars: 2, pricePerNight: 55 },
+      { name: `${input.city} Central Hotel`, stars: 3, pricePerNight: 110 },
+      { name: `${input.city} Grand Hotel`, stars: 4, pricePerNight: 180 },
+      {
+        name: `${input.city} Luxury Resort & Spa`,
+        stars: 5,
+        pricePerNight: 350,
+      },
     ];
     return mockHotels.map((h, i) => ({
       hotel_id: `mock-hotel-${i}`,
