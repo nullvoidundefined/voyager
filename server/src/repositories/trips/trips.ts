@@ -1,4 +1,4 @@
-import { query } from 'app/db/pool/pool.js';
+import { query, withTransaction } from 'app/db/pool/pool.js';
 import type {
   CreateTripInput,
   Trip,
@@ -201,10 +201,24 @@ export async function insertTripExperience(
 }
 
 export async function clearSelectionsForTrip(tripId: string): Promise<void> {
-  await query('DELETE FROM trip_flights WHERE trip_id = $1', [tripId]);
-  await query('DELETE FROM trip_hotels WHERE trip_id = $1', [tripId]);
-  await query('DELETE FROM trip_car_rentals WHERE trip_id = $1', [tripId]);
-  await query('DELETE FROM trip_experiences WHERE trip_id = $1', [tripId]);
+  await withTransaction(async (client) => {
+    await query(
+      'DELETE FROM trip_flights WHERE trip_id = $1',
+      [tripId],
+      client,
+    );
+    await query('DELETE FROM trip_hotels WHERE trip_id = $1', [tripId], client);
+    await query(
+      'DELETE FROM trip_car_rentals WHERE trip_id = $1',
+      [tripId],
+      client,
+    );
+    await query(
+      'DELETE FROM trip_experiences WHERE trip_id = $1',
+      [tripId],
+      client,
+    );
+  });
 }
 
 export async function deleteTrip(
