@@ -29,7 +29,10 @@ export class CircuitBreaker {
     if (this.state === 'open') {
       if (Date.now() - this.lastFailureTime > this.cooldownMs) {
         this.state = 'half-open';
-        logger.info({ name: this.name }, 'Circuit breaker half-open — allowing probe');
+        logger.info(
+          { name: this.name },
+          'Circuit breaker half-open — allowing probe',
+        );
       } else {
         throw new Error(
           `${this.name} is temporarily unavailable (circuit open)`,
@@ -49,7 +52,10 @@ export class CircuitBreaker {
 
   private onSuccess(): void {
     if (this.state === 'half-open') {
-      logger.info({ name: this.name }, 'Circuit breaker closed — probe succeeded');
+      logger.info(
+        { name: this.name },
+        'Circuit breaker closed — probe succeeded',
+      );
     }
     this.failureCount = 0;
     this.state = 'closed';
@@ -63,7 +69,10 @@ export class CircuitBreaker {
 
     if (this.state === 'half-open') {
       this.state = 'open';
-      logger.warn({ name: this.name }, 'Circuit breaker re-opened — probe failed');
+      logger.warn(
+        { name: this.name },
+        'Circuit breaker re-opened — probe failed',
+      );
       return;
     }
 

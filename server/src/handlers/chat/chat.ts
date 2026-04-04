@@ -1,24 +1,24 @@
-import type { ChatMessage, ChatNode } from "@agentic-travel-agent/shared-types";
+import type { ChatMessage, ChatNode } from '@agentic-travel-agent/shared-types';
 import {
   DEFAULT_COMPLETION_TRACKER,
   computeNudge,
   hasAnySelection,
   normalizeCompletionTracker,
   updateCompletionTracker,
-} from "app/prompts/booking-steps.js";
+} from 'app/prompts/booking-steps.js';
 import {
   getMessagesByConversation,
   getOrCreateConversation,
   insertMessage,
   updateBookingState,
-} from "app/repositories/conversations/conversations.js";
-import { getTripWithDetails } from "app/repositories/trips/trips.js";
-import { findByUserId as findUserPreferences } from "app/repositories/userPreferences/userPreferences.js";
-import { runAgentLoop } from "app/services/agent.service.js";
-import { getEnrichmentNodes } from "app/services/enrichment.js";
-import { ApiError } from "app/utils/ApiError.js";
-import { logger } from "app/utils/logs/logger.js";
-import type { Request, Response } from "express";
+} from 'app/repositories/conversations/conversations.js';
+import { getTripWithDetails } from 'app/repositories/trips/trips.js';
+import { findByUserId as findUserPreferences } from 'app/repositories/userPreferences/userPreferences.js';
+import { runAgentLoop } from 'app/services/agent.service.js';
+import { getEnrichmentNodes } from 'app/services/enrichment.js';
+import { ApiError } from 'app/utils/ApiError.js';
+import { logger } from 'app/utils/logs/logger.js';
+import type { Request, Response } from 'express';
 
 import {
   buildClaudeMessages,
@@ -28,7 +28,7 @@ import {
   createSSEEmitter,
   flushSSE,
   toFlowInput,
-} from "./chat.helpers.js";
+} from './chat.helpers.js';
 
 // In-memory lock to prevent concurrent agent loops per conversation
 const activeConversations = new Set<string>();
@@ -43,13 +43,13 @@ export async function chat(req: Request, res: Response) {
   const userId = req.user!.id;
   const { message } = req.body;
 
-  if (!message || typeof message !== "string") {
-    throw ApiError.badRequest("message is required");
+  if (!message || typeof message !== 'string') {
+    throw ApiError.badRequest('message is required');
   }
 
   const trip = await getTripWithDetails(tripId, userId);
   if (!trip) {
-    throw ApiError.notFound("Trip not found");
+    throw ApiError.notFound('Trip not found');
   }
 
   const userPrefs = await findUserPreferences(userId);
@@ -58,8 +58,8 @@ export async function chat(req: Request, res: Response) {
   if (activeConversations.has(conversation.id)) {
     throw new ApiError(
       409,
-      "CONFLICT",
-      "A response is already being generated for this trip. Please wait.",
+      'CONFLICT',
+      'A response is already being generated for this trip. Please wait.',
     );
   }
   activeConversations.add(conversation.id);
@@ -70,25 +70,25 @@ export async function chat(req: Request, res: Response) {
 
   // Set up SSE
   res.writeHead(200, {
-    "Content-Type": "text/event-stream",
-    "Cache-Control": "no-cache",
-    Connection: "keep-alive",
-    "X-Accel-Buffering": "no",
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no',
   });
   res.flushHeaders();
   res.setTimeout(0);
   req.socket.setTimeout(150_000);
 
-  req.on("close", () => {
+  req.on('close', () => {
     activeConversations.delete(conversation.id);
   });
 
   // Persist user message
   await insertMessage({
     conversation_id: conversation.id,
-    role: "user",
+    role: 'user',
     content: message,
-    nodes: [{ type: "text", content: message }],
+    nodes: [{ type: 'text', content: message }],
   });
 
   // Fetch enrichment on first message only
@@ -102,13 +102,13 @@ export async function chat(req: Request, res: Response) {
           trip.origin ?? undefined,
         )) ?? [];
     } catch (err) {
-      logger.warn({ err, tripId }, "Failed to fetch enrichment nodes");
+      logger.warn({ err, tripId }, 'Failed to fetch enrichment nodes');
     }
   }
 
   const hasCriticalAdvisory = enrichmentNodes.some(
     (n) =>
-      n.type === "advisory" && "severity" in n && n.severity === "critical",
+      n.type === 'advisory' && 'severity' in n && n.severity === 'critical',
   );
 
   const onEvent = createSSEEmitter(res);
@@ -137,7 +137,7 @@ export async function chat(req: Request, res: Response) {
     const updatedTrip = await getTripWithDetails(tripId, userId);
     if (updatedTrip) {
       const updatedPosition = computeFlowPosition(updatedTrip);
-      if (updatedPosition.phase === "COLLECT_DETAILS") {
+      if (updatedPosition.phase === 'COLLECT_DETAILS') {
         const formNode = buildMissingFieldsForm(updatedTrip);
         if (formNode) result.nodes.push(formNode);
       }
@@ -151,14 +151,14 @@ export async function chat(req: Request, res: Response) {
       // Empty itinerary guard
       if (!hasAnySelection(newTracker)) {
         const allSkippedOrPending = (
-          ["flights", "hotels", "car_rental", "experiences"] as const
+          ['flights', 'hotels', 'car_rental', 'experiences'] as const
         ).every((cat) => {
           const status = newTracker[cat];
-          return status === "skipped" || status === "pending";
+          return status === 'skipped' || status === 'pending';
         });
         if (allSkippedOrPending) {
           result.nodes.push({
-            type: "text",
+            type: 'text',
             content:
               "You haven't selected anything for your trip yet. Want to go back and explore some options?",
           });
@@ -174,7 +174,7 @@ export async function chat(req: Request, res: Response) {
     // Persist assistant message
     const assistantMessage = await insertMessage({
       conversation_id: conversation.id,
-      role: "assistant",
+      role: 'assistant',
       content: result.response,
       tool_calls_json:
         result.tool_calls.length > 0 ? result.tool_calls : undefined,
@@ -184,19 +184,19 @@ export async function chat(req: Request, res: Response) {
 
     const chatMessage: ChatMessage = {
       id: assistantMessage.id,
-      role: "assistant",
+      role: 'assistant',
       nodes: result.nodes,
       sequence: assistantMessage.sequence,
       created_at: assistantMessage.created_at,
     };
     res.write(
-      `event: done\ndata: ${JSON.stringify({ type: "done", message: chatMessage })}\n\n`,
+      `event: done\ndata: ${JSON.stringify({ type: 'done', message: chatMessage })}\n\n`,
     );
     flushSSE(res);
   } catch (err) {
-    logger.error({ err, tripId }, "Agent loop failed");
+    logger.error({ err, tripId }, 'Agent loop failed');
     res.write(
-      `event: error\ndata: ${JSON.stringify({ type: "error", error: "Agent encountered an error" })}\n\n`,
+      `event: error\ndata: ${JSON.stringify({ type: 'error', error: 'Agent encountered an error' })}\n\n`,
     );
     flushSSE(res);
   } finally {
@@ -211,37 +211,37 @@ export async function getMessages(req: Request, res: Response) {
 
   const trip = await getTripWithDetails(tripId, userId);
   if (!trip) {
-    throw ApiError.notFound("Trip not found");
+    throw ApiError.notFound('Trip not found');
   }
 
   const conversation = await getOrCreateConversation(tripId);
   const dbMessages = await getMessagesByConversation(conversation.id);
 
   const messages: ChatMessage[] = dbMessages
-    .filter((m) => m.role !== ("tool" as string))
+    .filter((m) => m.role !== ('tool' as string))
     .map((m) => ({
       id: m.id,
-      role: m.role as "user" | "assistant",
+      role: m.role as 'user' | 'assistant',
       nodes:
         m.nodes && m.nodes.length > 0
           ? m.nodes
-          : [{ type: "text" as const, content: m.content ?? "" }],
+          : [{ type: 'text' as const, content: m.content ?? '' }],
       sequence: m.sequence,
       created_at: m.created_at,
     }));
 
   if (messages.length === 0) {
     const isPlaceholder =
-      !trip.destination || trip.destination === "Planning...";
+      !trip.destination || trip.destination === 'Planning...';
 
     const welcomeText = isPlaceholder
       ? "Hi! I'd love to help plan your trip. Where would you like to go, when are you traveling, and what's your budget?"
       : `Great choice! Let's plan your trip to **${trip.destination}**. When are you traveling, what's your budget, and where will you be coming from?`;
 
     messages.unshift({
-      id: "welcome",
-      role: "assistant",
-      nodes: [{ type: "text", content: welcomeText }],
+      id: 'welcome',
+      role: 'assistant',
+      nodes: [{ type: 'text', content: welcomeText }],
       sequence: 0,
       created_at: new Date().toISOString(),
     });

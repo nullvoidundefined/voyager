@@ -1,8 +1,8 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 const dateString = z
   .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD");
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD');
 
 export const searchFlightsSchema = z.object({
   origin: z.string().min(1),
@@ -12,7 +12,7 @@ export const searchFlightsSchema = z.object({
   passengers: z.number().int().min(1),
   max_price: z.number().positive().optional(),
   cabin_class: z
-    .enum(["ECONOMY", "PREMIUM_ECONOMY", "BUSINESS", "FIRST"])
+    .enum(['ECONOMY', 'PREMIUM_ECONOMY', 'BUSINESS', 'FIRST'])
     .optional(),
   one_way: z.boolean().optional(),
 });
@@ -50,7 +50,7 @@ export const updateTripSchema = z.object({
   departure_date: dateString.optional(),
   return_date: dateString.optional(),
   budget_total: z.number().positive().optional(),
-  transport_mode: z.enum(["flying", "driving"]).optional(),
+  transport_mode: z.enum(['flying', 'driving']).optional(),
 });
 
 export const searchCarRentalsSchema = z.object({
@@ -114,13 +114,13 @@ export const formatResponseSchema = z.object({
   quick_replies: z.array(z.string()).optional(),
   advisory: z
     .object({
-      severity: z.enum(["info", "warning", "critical"]),
+      severity: z.enum(['info', 'warning', 'critical']),
       title: z.string(),
       body: z.string(),
     })
     .optional(),
   skip_category: z
-    .enum(["flights", "hotels", "car_rental", "experiences"])
+    .enum(['flights', 'hotels', 'car_rental', 'experiences'])
     .optional(),
 });
 

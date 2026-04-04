@@ -3,12 +3,7 @@
     "slug": "tokyo",
     "name": "Tokyo",
     "country": "Japan",
-    "categories": [
-      "city",
-      "food-wine",
-      "culture",
-      "family"
-    ],
+    "categories": ["city", "food-wine", "culture", "family"],
     "price_level": 3,
     "best_season": "March - May",
     "description": "Tokyo is a city of electric contrasts, where neon-drenched Shibuya scramble crossings sit minutes from the serene gravel gardens of Meiji Shrine. Cherry blossom season transforms Ueno Park and the Meguro River into tunnels of pale pink, drawing millions of hanami picnickers each spring. From the tuna auctions at Toyosu Market to the Michelin-starred ramen counters of Shinjuku, every meal feels like a masterclass in precision and care.\n\nBeyond the famous districts, Tokyo rewards wandering. The backstreets of Shimokitazawa overflow with vintage clothing shops and tiny live-music venues. Yanaka retains the atmosphere of old Edo with its wooden temples and neighborhood cats. In Akihabara, eight-story arcades and manga megastores coexist with maid cafes and electronics bazaars that have supplied hobbyists for decades.\n\nThe transit system is a marvel in itself — clean, punctual, and comprehensive enough that you never need a car. A single Suica card opens up everything from the observation deck of Tokyo Skytree to the street-food stalls of Ameyoko market beneath the Yamanote Line tracks.",
@@ -211,12 +206,7 @@
     "slug": "paris",
     "name": "Paris",
     "country": "France",
-    "categories": [
-      "city",
-      "romantic",
-      "food-wine",
-      "culture"
-    ],
+    "categories": ["city", "romantic", "food-wine", "culture"],
     "price_level": 3,
     "best_season": "April - June",
     "description": "Paris earns its reputation not through grand gestures alone but through the accumulation of small, perfect moments: the first sip of a noisette at a zinc-topped bar, the way late-afternoon light catches the limestone facades along Rue de Rivoli, the sound of an accordion drifting across the Seine from a bateau-mouche. The city's beauty is architectural, culinary, and deeply atmospheric.\n\nThe great museums — the Louvre, Musee d'Orsay, Centre Pompidou — could consume weeks, but some of Paris's most rewarding art hides in smaller venues: the Orangerie's oval rooms built for Monet's water lilies, the Rodin Museum's sculpture garden, the medieval tapestries of Musee de Cluny. Between visits, the city's 400+ parks and gardens offer refuge, from the geometric perfection of the Tuileries to the wild slopes of Parc des Buttes-Chaumont.\n\nParis is also a food city without equal in Europe. A single arrondissement can contain a three-star tasting menu, a perfect croissant from a neighborhood boulangerie, and a bustling street market selling Comté aged 24 months. The wine bar renaissance of the Marais and the natural-wine caves of the 11th have made casual drinking as rewarding as formal dining.",
@@ -419,12 +409,7 @@
     "slug": "new-york",
     "name": "New York",
     "country": "United States",
-    "categories": [
-      "city",
-      "food-wine",
-      "culture",
-      "family"
-    ],
+    "categories": ["city", "food-wine", "culture", "family"],
     "price_level": 4,
     "best_season": "September - November",
     "description": "New York City needs no introduction, yet it still manages to surprise even lifelong residents. Autumn is the city at its most cinematic — Central Park erupts in amber and crimson, the light softens over the Hudson, and the cultural calendar hits full stride with Broadway openings, gallery shows in Chelsea, and the New York Film Festival at Lincoln Center. The energy on a crisp October morning in Manhattan is unlike anything else on Earth.\n\nThe five boroughs contain multitudes. Manhattan's density of world-class museums (the Met, MoMA, the Guggenheim, the Whitney) is unmatched, but Brooklyn has become a destination in its own right — DUMBO's waterfront parks, Williamsburg's dining scene, and Prospect Park's wilder, less crowded alternative to Central Park. Queens offers the most ethnically diverse eating in the Western Hemisphere: Flushing's Sichuan banquets, Jackson Heights' Nepalese momos, and Astoria's Greek tavernas.\n\nThe city's food culture ranges from $1 pizza slices to fourteen-course tasting menus with six-month waitlists. In between, you'll find smoked-fish platters at Russ & Daughters, hand-pulled noodles in Chinatown, and the pastrami sandwich at Katz's Deli that has anchored the Lower East Side since 1888.",
@@ -627,12 +612,7 @@
     "slug": "london",
     "name": "London",
     "country": "United Kingdom",
-    "categories": [
-      "city",
-      "culture",
-      "food-wine",
-      "family"
-    ],
+    "categories": ["city", "culture", "food-wine", "family"],
     "price_level": 4,
     "best_season": "May - September",
     "description": "London is a city that wears two thousand years of history without ever feeling like a museum. The Tower of London and Westminster Abbey anchor one end of the timeline; the Shard and the Tate Modern — housed in a repurposed power station on the South Bank — anchor the other. Between them, every era has left its mark: Georgian terraces in Bloomsbury, Victorian pubs in Bermondsey, Brutalist housing estates in the Barbican, and the glass-and-steel ambition of Canary Wharf.\n\nThe cultural offering is staggering and, remarkably, much of it is free. The British Museum, National Gallery, Natural History Museum, V&A, and Tate Britain charge no admission. West End theater rivals Broadway, and the fringe scene in venues like the Almeida and the Young Vic often surpasses it. On summer evenings, open-air performances at Regent's Park and Shakespeare's Globe bring thousands to picnic blankets and wooden benches.\n\nLondon's food scene has been transformed over the past two decades. Borough Market overflows with artisan producers. Brick Lane and Tooting serve curries that rival the subcontinent. Dishoom queues snake around blocks for its Bombay-cafe breakfasts. And the Sunday roast — ideally at a proper pub with Yorkshire pudding the size of your head — remains one of the world's great meals.",
@@ -835,12 +815,7 @@
     "slug": "barcelona",
     "name": "Barcelona",
     "country": "Spain",
-    "categories": [
-      "city",
-      "beach",
-      "food-wine",
-      "culture"
-    ],
+    "categories": ["city", "beach", "food-wine", "culture"],
     "price_level": 2,
     "best_season": "May - June",
     "description": "Barcelona is the rare city that offers both world-class urbanism and genuine beach life. Gaudi's fantastical architecture defines the skyline — the still-unfinished Sagrada Familia, the undulating balconies of Casa Batllo, the mosaic wonderland of Park Guell — but the city's appeal extends far beyond one visionary architect. The Gothic Quarter's labyrinthine medieval alleys hide Roman ruins, candlelit cocktail bars, and tiny plazas where buskers play flamenco guitar.\n\nLa Rambla may draw the tourists, but the real Barcelona lives in its barris. Gracia feels like a small Catalan village with its own plazas and festivals. El Born's narrow streets are packed with independent boutiques and some of the city's best pintxos bars. Barceloneta's seafront promenade leads from the old fishing quarter to Frank Gehry's golden fish sculpture, with chiringuitos serving cold cana and patatas bravas along the sand.\n\nThe food scene blends Catalan tradition with modern invention. Boqueria Market's counters overflow with jamon iberico, fresh seafood, and smoothie stands. In the Eixample, Michelin-starred kitchens reimagine fideuà and suquet. And every neighborhood bar serves pa amb tomaquet — bread rubbed with tomato, drizzled with olive oil — a dish so simple and so perfect it embodies the city's approach to life.",
@@ -1043,12 +1018,7 @@
     "slug": "rome",
     "name": "Rome",
     "country": "Italy",
-    "categories": [
-      "city",
-      "culture",
-      "food-wine",
-      "romantic"
-    ],
+    "categories": ["city", "culture", "food-wine", "romantic"],
     "price_level": 2,
     "best_season": "April - June",
     "description": "Rome is a city where you can lean against a column that Caesar might have touched, then walk thirty seconds to a gelateria that has been perfecting pistachio since your grandparents were young. The layers of history are not behind glass — they are the fabric of daily life. The Pantheon's 2,000-year-old dome still shelters a functioning church. Cats nap in the ruins of Largo di Torre Argentina where Julius Caesar was assassinated. Laundry dries on lines strung above Renaissance courtyards.\n\nThe Vatican alone could justify a trip: Michelangelo's Sistine Chapel ceiling, St. Peter's Basilica's impossible scale, and the Raphael Rooms would fill days. But Rome's genius is in its neighborhood life. Trastevere's cobblestone alleys come alive at night with trattorias, street musicians, and ivy-covered facades lit by lamplight. Testaccio — the old slaughterhouse district — has reinvented itself as the city's most authentic food quarter, where offal-based Roman classics like coda alla vaccinara are served without irony.\n\nEat cacio e pepe in a trattoria with paper tablecloths. Throw a coin into the Trevi Fountain at dawn before the crowds arrive. Watch the sunset from the Pincian Hill as the domes of the city catch the last golden light. Rome is not a city you visit — it is a city that claims you.",
@@ -1251,11 +1221,7 @@
     "slug": "santorini",
     "name": "Santorini",
     "country": "Greece",
-    "categories": [
-      "beach",
-      "romantic",
-      "adventure"
-    ],
+    "categories": ["beach", "romantic", "adventure"],
     "price_level": 3,
     "best_season": "May - October",
     "description": "Santorini is the volcanic crescescent that launched a thousand Instagram accounts, but the real island transcends its photogenic reputation. The caldera — a flooded volcanic crater rimmed by 300-meter cliffs — creates a natural amphitheater of staggering drama. White-washed villages cling to the cliff edge like sugar cubes, their blue-domed churches punctuating the Aegean sky. Watching the sunset from Oia as the sun drops into the caldera is one of travel's genuinely transcendent moments.\n\nBeyond the postcard views, Santorini has substance. The volcanic soil produces extraordinary Assyrtiko wine — mineral-driven whites from vines trained in ground-hugging baskets to survive the wind. Winery visits with caldera views are essential. The archaeological site at Akrotiri reveals a Minoan city preserved under volcanic ash since 1600 BC — the \"Greek Pompeii.\" Red Beach and White Beach offer dramatic geological settings for swimming, though they're no Caribbean sand.\n\nThe island rewards those who look past Oia and Fira. Pyrgos, the island's highest village, offers 360-degree views and far fewer crowds. Thirassia, the small island across the caldera, is reachable by boat and feels like Santorini fifty years ago.",
@@ -1448,12 +1414,7 @@
     "slug": "bali",
     "name": "Bali",
     "country": "Indonesia",
-    "categories": [
-      "beach",
-      "adventure",
-      "culture",
-      "budget"
-    ],
+    "categories": ["beach", "adventure", "culture", "budget"],
     "price_level": 1,
     "best_season": "April - October",
     "description": "Bali manages to be simultaneously spiritual and hedonistic, tranquil and exhilarating. Temple ceremonies unfold daily across the island — offerings of flowers and incense placed on every doorstep, gamelan orchestras accompanying elaborate cremation processions, and holy springs at Tirta Empul where Balinese Hindus undergo ritual purification. This is not heritage tourism; it is living culture observed with genuine devotion.\n\nThe geography shifts dramatically across a small area. Ubud's terraced rice paddies and monkey-filled ravines feel worlds away from the surf breaks of Uluwatu, where limestone cliffs drop into the Indian Ocean and the Kecak fire dance is performed at a clifftop temple at sunset. Seminyak and Canggu cater to the beach-club crowd with infinity pools, boutique shopping, and farm-to-table restaurants. Further afield, the black volcanic beaches of the north coast, the snorkeling reefs of Amed, and the twin crater lakes of Munduk offer adventure without the crowds.\n\nBali's cost of living makes it accessible to virtually every budget. A meal of nasi goreng from a warung costs a dollar. A private villa with a pool can be had for what you'd pay for a chain hotel room elsewhere. This value, combined with genuine warmth from the Balinese people, is why so many visitors come for a week and stay for a month.",
@@ -1656,12 +1617,7 @@
     "slug": "sydney",
     "name": "Sydney",
     "country": "Australia",
-    "categories": [
-      "city",
-      "beach",
-      "adventure",
-      "family"
-    ],
+    "categories": ["city", "beach", "adventure", "family"],
     "price_level": 3,
     "best_season": "October - April",
     "description": "Sydney's harbor is one of the great natural stages on Earth. The Opera House's white sails and the steel arch of the Harbour Bridge frame a waterway dotted with ferries, sailboats, and kayakers. But Sydney is far more than its postcard harbor. It is a city of 100 beaches — from the famous golden crescent of Bondi to the hidden coves of the Royal National Park — connected by coastal walks that rank among the world's finest urban hikes.\n\nThe city's multicultural depth rivals London or New York. Chinatown in Haymarket serves yum cha that would hold its own in Hong Kong. Cabramatta is a Vietnamese food destination. Lakemba's halal restaurants and Leichhardt's Italian bakeries reflect waves of immigration that have made Sydney's dining scene astonishingly diverse. The Barangaroo waterfront development and Surry Hills' laneway restaurants have added contemporary polish without erasing character.\n\nNature is never far. The Blue Mountains — a UNESCO-listed wilderness of eucalyptus forest, sandstone cliffs, and cascading waterfalls — are an hour by train. Sydney Harbour National Park offers bushwalks to hidden beaches accessible only on foot. And the Taronga Zoo ferry ride, with the skyline receding behind you, is worth the trip even before you see the animals.",
@@ -1864,11 +1820,7 @@
     "slug": "dubai",
     "name": "Dubai",
     "country": "United Arab Emirates",
-    "categories": [
-      "city",
-      "beach",
-      "family"
-    ],
+    "categories": ["city", "beach", "family"],
     "price_level": 4,
     "best_season": "November - March",
     "description": "Dubai is a monument to ambition built in the desert. The Burj Khalifa pierces the sky at 828 meters. The Palm Jumeirah reshapes the coastline into a tree visible from space. Shopping malls contain ski slopes and aquariums. It is a city that has willed itself into existence in barely fifty years, and the sheer audacity of it all is part of the experience — whether you find it thrilling or surreal.\n\nBut Dubai has more texture than its glass-and-steel reputation suggests. The Creek — the saltwater inlet that birthed the city — still hums with wooden dhow boats and the gold and spice souks of Deira. Al Fahidi Historical Neighbourhood preserves wind-tower architecture from the pre-oil era. The Alserkal Avenue arts district in Al Quoz has become a serious gallery hub. And the desert itself, just thirty minutes from the skyscrapers, offers dune bashing, camel rides, and Bedouin-style camp dinners under star-filled skies.\n\nThe beaches are immaculate: wide, warm, and serviced by world-class hotels. Families will find more to do than almost anywhere — waterparks, theme parks, interactive museums, and the Dubai Aquarium inside the mall. November through March delivers perfect weather: sunny, dry, and a comfortable 25 degrees.",
@@ -2071,12 +2023,7 @@
     "slug": "singapore",
     "name": "Singapore",
     "country": "Singapore",
-    "categories": [
-      "city",
-      "food-wine",
-      "family",
-      "culture"
-    ],
+    "categories": ["city", "food-wine", "family", "culture"],
     "price_level": 3,
     "best_season": "Year-round",
     "description": "Singapore punches absurdly above its weight. A city-state smaller than New York City contains one of the world's great food cultures, architectural marvels both futuristic and colonial, rainforest reserves within earshot of highway traffic, and a cultural blend of Chinese, Malay, Indian, and Peranakan traditions that manifests most deliciously in its hawker centers.\n\nThose hawker centers are the heart of Singapore. At Maxwell Food Centre, Tian Tian's Hainanese chicken rice draws hour-long queues for silky poached chicken over fragrant jasmine rice. At Old Airport Road, a hundred stalls serve char kway teow, laksa, roti prata, and carrot cake (the savory radish kind). Two hawker stalls hold Michelin stars — the most affordable starred meals on the planet. Singapore takes food so seriously that hawker culture is UNESCO-listed.\n\nThe city's green credentials are genuine. The Supertree Grove at Gardens by the Bay lights up nightly in a vertical-garden sound-and-light show. The Botanic Gardens — another UNESCO site — are a lush Victorian-era creation with the world's largest orchid collection. MacRitchie Reservoir's treetop walk offers canopy-level views of primary rainforest. Singapore proves that density and nature can coexist.",
@@ -2279,12 +2226,7 @@
     "slug": "seoul",
     "name": "Seoul",
     "country": "South Korea",
-    "categories": [
-      "city",
-      "food-wine",
-      "culture",
-      "budget"
-    ],
+    "categories": ["city", "food-wine", "culture", "budget"],
     "price_level": 2,
     "best_season": "March - May",
     "description": "Seoul is a city of restless reinvention layered over deep tradition. Centuries-old Joseon palaces sit beneath the glass towers of Gangnam. Buddhist temples share city blocks with K-pop entertainment headquarters. The Han River bisects the metropolis, its banks lined with cycling paths, floating cafes, and waterfront parks where families picnic and office workers exercise after dark.\n\nThe food alone justifies the trip. Korean barbecue in Mapo-gu, where you grill marbled beef over charcoal at midnight, is a primal thrill. Gwangjang Market's pojangmacha stalls serve bindaetteok (mung-bean pancakes) and mayak gimbap to standing crowds. The alleyways of Ikseon-dong — Seoul's oldest surviving hanok village — have been repurposed into tea houses, vintage shops, and tiny restaurants serving creative Korean cuisine in courtyard settings.\n\nThe city's design sensibility is world-class. The Dongdaemun Design Plaza, a Zaha Hadid creation of sweeping silver curves, hosts fashion weeks and night markets. Bukchon's traditional hanok rooftops cascade down the hillside between Gyeongbokgung and Changdeokgung palaces. And the subway system — clean, cheap, and comprehensively signed in English — makes all of it effortlessly accessible.",
@@ -2481,12 +2423,7 @@
     "slug": "lisbon",
     "name": "Lisbon",
     "country": "Portugal",
-    "categories": [
-      "city",
-      "culture",
-      "food-wine",
-      "budget"
-    ],
+    "categories": ["city", "culture", "food-wine", "budget"],
     "price_level": 2,
     "best_season": "March - October",
     "description": "Lisbon is the sun-drenched, tile-covered capital perched on seven hills above the Tagus River. Vintage trams rattle through narrow streets where azulejo-tiled facades shimmer in shades of blue, yellow, and terracotta. Miradouros — hilltop viewpoints — reveal a city of terracotta rooftops punctuated by church domes and the distant silhouette of the 25 de Abril Bridge, Lisbon's answer to the Golden Gate.\n\nThe city's neighborhoods each have distinct personalities. Alfama's medieval labyrinth echoes with fado — the melancholic Portuguese music born in these very streets. Bairro Alto empties by day and erupts at night with tiny bars spilling onto cobblestones. LX Factory, a creative complex in a former textile plant, hosts design studios, bookshops, brunch spots, and weekend markets. And Belem, downstream on the Tagus, offers the Jeronimos Monastery, the Monument to the Discoveries, and the custard tarts — pasteis de nata — that Lisbon has exported to the world.\n\nRemarkably affordable for a Western European capital, Lisbon delivers excellent value. A bifana (pork sandwich) and a beer cost a few euros. A sunset ginjinha (sour-cherry liqueur) in Rossio Square costs a euro. The food scene ranges from tascas (old-school taverns) serving bacalhau a bras to Michelin-starred contemporary restaurants pushing Portuguese cuisine forward.",
@@ -2689,11 +2626,7 @@
     "slug": "istanbul",
     "name": "Istanbul",
     "country": "Turkey",
-    "categories": [
-      "city",
-      "culture",
-      "food-wine"
-    ],
+    "categories": ["city", "culture", "food-wine"],
     "price_level": 2,
     "best_season": "April - June",
     "description": "Istanbul is the only city in the world that straddles two continents, and that geographic duality runs through everything. East meets West in the architecture (Byzantine mosaics beside Ottoman calligraphy), in the cuisine (meze tables followed by European pastries), and in the daily rhythm (the call to prayer echoing over cocktail bars on Istiklal Caddesi). The city has been the capital of three empires, and all of them left masterpieces.\n\nThe Sultanahmet district alone contains enough history for a week: Hagia Sophia's vast dome, the Blue Mosque's cascading domes and six minarets, Topkapi Palace's jewel-encrusted treasury, and the Basilica Cistern's eerie underground columns reflected in shallow water. But Istanbul is also vibrantly modern. Karakoy and Beyoglu buzz with rooftop bars, contemporary galleries, and specialty coffee roasters. The Asian side — Kadikoy's food market, Moda's seaside cafes — is where the city goes to breathe.\n\nThe food is extraordinary and extraordinarily affordable. A simit (sesame bread ring) and a glass of tea costs pennies. A full fish sandwich from the boats at Eminonu costs two dollars. Sit-down meals of kofte, lahmacun, and meze at a meyhane (tavern) in Beyoglu, accompanied by raki turned milky with ice water, are among the world's great dining experiences — at a fraction of European prices.",
@@ -2896,12 +2829,7 @@
     "slug": "bangkok",
     "name": "Bangkok",
     "country": "Thailand",
-    "categories": [
-      "city",
-      "food-wine",
-      "culture",
-      "budget"
-    ],
+    "categories": ["city", "food-wine", "culture", "budget"],
     "price_level": 1,
     "best_season": "November - February",
     "description": "Bangkok is sensory overload in the best possible way. The city assaults you with color, noise, heat, and flavor from the moment you step out of Suvarnabhumi Airport. Tuk-tuks weave through traffic past golden temple spires. Street vendors stir-fry pad thai in flaming woks on narrow sidewalks. Longtail boats slice through the Chao Phraya River past the Grand Palace's glittering rooftops. It is chaotic, generous, and utterly addictive.\n\nThe street food is legendary — and authenticated by Michelin. Jay Fai, a goggle-wearing grandmother, earned a star for her crab omelette cooked over charcoal in a shophouse. But you do not need stars to eat magnificently. Chinatown's Yaowarat Road after dark is a neon-lit food arcade: grilled satay, mango sticky rice, pad see ew, and fresh oyster omelettes. Chatuchak Weekend Market's 15,000 stalls sell everything from handmade ceramics to vintage denim to coconut ice cream served in the shell.\n\nThe temple circuit is staggering. Wat Phra Kaew houses the Emerald Buddha in the glittering Grand Palace compound. Wat Pho shelters a 46-meter reclining Buddha sheathed in gold leaf. And Wat Arun — the Temple of Dawn — rises from the Chao Phraya riverbank in a tower of porcelain-encrusted spires. Yet Bangkok is also thoroughly modern: rooftop bars on Silom skyscrapers, the contemporary art museum MOCA, and a BTS Skytrain that makes navigating the sprawl surprisingly smooth.",
@@ -3104,11 +3032,7 @@
     "slug": "kyoto",
     "name": "Kyoto",
     "country": "Japan",
-    "categories": [
-      "culture",
-      "romantic",
-      "food-wine"
-    ],
+    "categories": ["culture", "romantic", "food-wine"],
     "price_level": 3,
     "best_season": "March - May",
     "description": "Kyoto was Japan's imperial capital for over a thousand years, and that millennium left behind 2,000 temples, 17 UNESCO World Heritage Sites, and a cultural depth that makes Tokyo feel young. Cherry blossoms frame the Philosopher's Path in spring. Bamboo groves tower above the walking trails of Arashiyama in summer. Maple trees set the hillside temples ablaze in autumn. Even winter has its magic — Kinkaku-ji's golden pavilion reflected in still water under a dusting of snow.\n\nThe city's geisha district, Gion, is the most evocative neighborhood in Japan. Stone-paved lanes lead past wooden machiya (townhouses) with slatted windows, behind which the faint notes of a shamisen might drift. Spotting a maiko (apprentice geisha) hurrying to an engagement in full white makeup and silk kimono is a genuine possibility in Gion's Hanami-koji alley at dusk. The ritual of Kyoto extends to its cuisine: kaiseki — the multi-course haute cuisine rooted in tea ceremony — reaches its apotheosis here.\n\nBeyond the famous sites, Kyoto rewards slow exploration. The moss garden of Saihoji requires advance reservation and a meditative sutra-copying session before entry. The torii gates of Fushimi Inari continue for four kilometers up a mountain, thinning as you climb until you are alone with forest and foxes. The Nishiki Market — \"Kyoto's Kitchen\" — offers a narrow, five-block corridor of pickles, tofu, matcha sweets, and knife shops that has served the city for 400 years.",
@@ -3311,12 +3235,7 @@
     "slug": "cape-town",
     "name": "Cape Town",
     "country": "South Africa",
-    "categories": [
-      "adventure",
-      "beach",
-      "food-wine",
-      "culture"
-    ],
+    "categories": ["adventure", "beach", "food-wine", "culture"],
     "price_level": 2,
     "best_season": "November - March",
     "description": "Cape Town occupies one of the most dramatic natural settings of any city on Earth. Table Mountain's flat summit looms over the city bowl, flanked by Devil's Peak and Lion's Head. The Atlantic coastline stretches south through Camps Bay's white-sand beach to the craggy tip of the Cape of Good Hope. The Indian Ocean warms the eastern shore at Muizenberg, where colorful bathing boxes line a gentle surf break. Nature is not a backdrop here — it is the main character.\n\nThe wine lands of Stellenbosch and Franschhoek are under an hour's drive, offering world-class Pinotage, Chenin Blanc, and Cabernet Sauvignon at estates where you can taste, dine, and sleep among the vineyards. Back in the city, the V&A Waterfront hums with restaurants, the Zeitz Museum of Contemporary Art Africa (Zeitz MOCAA) fills a grain-silo cathedral with African art, and the Neighbourgoods Market in Woodstock draws weekend crowds for Ethiopian injera, Cape Malay bobotie, and South African braai.\n\nCape Town also carries the weight of history. Robben Island, where Nelson Mandela was imprisoned for 18 years, is a short ferry ride away. The District Six Museum chronicles the forced removals of apartheid. Bo-Kaap's candy-colored houses on the slopes of Signal Hill represent the Cape Malay community that has lived here since the 17th century. The city does not shy away from its past.",
@@ -3513,12 +3432,7 @@
     "slug": "marrakech",
     "name": "Marrakech",
     "country": "Morocco",
-    "categories": [
-      "culture",
-      "adventure",
-      "food-wine",
-      "romantic"
-    ],
+    "categories": ["culture", "adventure", "food-wine", "romantic"],
     "price_level": 1,
     "best_season": "March - May",
     "description": "Marrakech is an assault on the senses designed to leave you reeling with pleasure. The medina — a UNESCO-listed labyrinth of rust-red walls, covered souks, and hidden riads — operates on a logic that defies maps. One turn leads to a copper-beater's alley. The next opens onto a courtyard where orange trees shade a turquoise fountain. The smell of cedarwood, leather, cumin, and fresh mint rotates with every step.\n\nJemaa el-Fna, the main square, is the greatest open-air theater in Africa. By day, snake charmers, juice vendors, and henna artists compete for attention. At dusk, a hundred food stalls materialize in clouds of charcoal smoke — grilled lamb, snail soup, sheep's head, and mountains of bread. Storytellers, Gnawa musicians, and acrobats draw circles of spectators. The energy is timeless and overwhelming.\n\nBeyond the medina, the Majorelle Garden — restored by Yves Saint Laurent — offers cobalt-blue architecture amid cactus groves and bougainvillea. The Atlas Mountains, visible from rooftop terraces on clear days, are accessible for day hikes or overnight treks to Berber villages. And the riad experience — sleeping in a restored courtyard house with zellige tilework, carved plaster, and a plunge pool — is one of travel's great pleasures at remarkably affordable prices.",
@@ -3711,11 +3625,7 @@
     "slug": "havana",
     "name": "Havana",
     "country": "Cuba",
-    "categories": [
-      "culture",
-      "budget",
-      "romantic"
-    ],
+    "categories": ["culture", "budget", "romantic"],
     "price_level": 1,
     "best_season": "November - April",
     "description": "Havana is a city frozen in time and pulsing with life. Pastel-colored colonial buildings crumble beautifully along the Malecon, the seaside promenade where Habaneros gather at sunset to fish, flirt, and play music. Chrome-bumpered 1950s Chevrolets and Buicks roll past Art Deco theaters and Baroque churches. The soundtrack is inescapable — son, salsa, rumba, and reggaeton pour from open doorways, live bands play in every plaza, and somewhere a trumpet is always rehearsing.\n\nOld Havana (Habana Vieja) is a UNESCO World Heritage Site of extraordinary density: the 18th-century Cathedral, the fortress of La Cabana across the bay, Hemingway's favorite bars — El Floridita for daiquiris and La Bodeguita del Medio for mojitos. The restoration of Plaza Vieja and surrounding blocks has created some of Cuba's finest dining, though the best meals may still be found in paladares — private restaurants in people's homes serving ropa vieja, lechon asado, and yuca con mojo.\n\nCuba's charms come with quirks. Internet is limited, dual currencies can confuse, and infrastructure creaks. But these frictions are part of what makes Havana feel so different from anywhere else. The warmth of the people, the depth of the music culture, and the visual poetry of a city that looks like a Wes Anderson set designed by Gabriel Garcia Marquez make it unforgettable.",
@@ -3908,12 +3818,7 @@
     "slug": "rio-de-janeiro",
     "name": "Rio de Janeiro",
     "country": "Brazil",
-    "categories": [
-      "beach",
-      "city",
-      "adventure",
-      "culture"
-    ],
+    "categories": ["beach", "city", "adventure", "culture"],
     "price_level": 2,
     "best_season": "May - October",
     "description": "Rio de Janeiro is a city sculpted by geography. Granite peaks burst from the urban fabric — Christ the Redeemer atop Corcovado, Sugarloaf rising from the bay, the Two Brothers towering above Vidigal favela. Between these peaks, golden crescents of sand draw millions: Copacabana's wide boulevard, Ipanema's social stratification by lifeguard post, and the wildly beautiful Prainha hidden behind a coastal mountain.\n\nCarioca culture is outdoors and physical. Beach volleyball, surfing, capoeira circles, and cycling along the Lagoa Rodrigo de Freitas are not tourist activities but daily life. The city invented bossa nova in the bars of Ipanema and samba in the hills of Madureira. During Carnival — the largest festival on Earth — two million people per day fill the streets in costume while samba schools process through the Sambodromo in competitive parades of jaw-dropping scale and artistry.\n\nRio rewards exploration beyond the Zona Sul beaches. Santa Teresa's hillside neighborhood of artists' studios, colonial mansions, and the yellow bonde (streetcar) offers a bohemian counterpoint. The Tijuca National Park — the world's largest urban rainforest — delivers waterfall hikes and hang-gliding launch pads with city-and-ocean views. And the street food is superb: acai bowls thick as ice cream, pastel de queijo from beachside vendors, and churrascarias serving all-you-can-eat Brazilian beef.",
@@ -4116,12 +4021,7 @@
     "slug": "amsterdam",
     "name": "Amsterdam",
     "country": "Netherlands",
-    "categories": [
-      "city",
-      "culture",
-      "romantic",
-      "family"
-    ],
+    "categories": ["city", "culture", "romantic", "family"],
     "price_level": 3,
     "best_season": "April - May",
     "description": "Amsterdam is a city designed for the human scale. The concentric canal rings — a UNESCO World Heritage Site — create a walkable, cyclable lattice of gabled merchant houses, drawbridges, and tree-lined waterways. Houseboats bob in the canals. Bicycles outnumber cars three to one. In April, tulip season transforms the city into a flower market and draws visitors to Keukenhof's seven million blooms just outside town.\n\nThe museum district is staggering for a city of under a million people. The Rijksmuseum houses Rembrandt's Night Watch and Vermeer's Milkmaid. The Van Gogh Museum holds the world's largest collection of his works. The Anne Frank House preserves the secret annex where a teenage girl wrote one of history's most important diaries. The Stedelijk delivers modern and contemporary art. All sit within walking distance on Museumplein.\n\nAmsterdam's liberal culture, legendary nightlife, and cafe culture are equally defining. Brown cafes (bruine kroegen) with nicotine-stained walls serve jenever and Heineken beside glowing fireplaces. The Jordaan neighborhood's narrow streets hold boutique shops, cheese stores, and some of the best Indonesian rijsttafel restaurants outside Jakarta. The Albert Cuyp Market offers stroopwafels, herring, and Surinamese roti in a 600-stall outdoor market that has operated since 1905.",
@@ -4324,12 +4224,7 @@
     "slug": "prague",
     "name": "Prague",
     "country": "Czech Republic",
-    "categories": [
-      "city",
-      "culture",
-      "romantic",
-      "budget"
-    ],
+    "categories": ["city", "culture", "romantic", "budget"],
     "price_level": 2,
     "best_season": "April - June",
     "description": "Prague is the fairy-tale capital of Central Europe, a city of Gothic spires, Baroque palaces, and Art Nouveau facades that survived the 20th century's wars almost entirely intact. The Charles Bridge at dawn — 30 Baroque statues silhouetted against the mist rising from the Vltava — is one of Europe's great sights. Prague Castle, the world's largest ancient castle complex, crowns the hill above, its cathedral's dark Gothic spire visible from every quarter.\n\nThe city's architectural wealth is matched by its beer culture. Czech Republic has the highest per-capita beer consumption on Earth, and Prague's pubs justify the statistic. U Fleku has brewed dark lager since 1499. Strahov Monastery's microbrewery pours amber and wheat beers in a Baroque library setting. The pilsner was literally invented here (in Plzen, an hour away). A half-liter of world-class draft beer costs less than two dollars in a neighborhood hospoda.\n\nBeyond the tourist center, Prague reveals layers. Vinohrady is a leafy residential district of wine bars, brunch cafes, and Art Nouveau apartment blocks. Zizkov — named after a one-eyed Hussite general — is the student-and-pub quarter crowned by the surreal television tower with crawling baby sculptures. Holesovice, across the river, has converted its industrial spaces into galleries, markets, and the DOX Centre for Contemporary Art.",
@@ -4526,12 +4421,7 @@
     "slug": "vienna",
     "name": "Vienna",
     "country": "Austria",
-    "categories": [
-      "city",
-      "culture",
-      "food-wine",
-      "romantic"
-    ],
+    "categories": ["city", "culture", "food-wine", "romantic"],
     "price_level": 3,
     "best_season": "April - October",
     "description": "Vienna is the capital of the coffeehouse, the waltz, and the opera — a city that elevated refined living into a cultural philosophy. The Ringstrasse boulevard encircles the historic center with a parade of grandiose 19th-century buildings: the Staatsoper, the Kunsthistorisches Museum, the Parliament, and the Burgtheater. Inside the Ring, the Gothic spire of Stephansdom cathedral anchors a medieval core of wine taverns, chocolate shops, and imperial palaces.\n\nThe Habsburgs ruled from here for 600 years and left behind enough palaces and art to fill a lifetime. Schonbrunn Palace rivals Versailles in scale and exceeds it in charm. The Belvedere houses Klimt's golden \"The Kiss.\" The Leopold Museum in the MuseumsQuartier holds the world's largest Schiele collection. But Vienna's cultural life is not frozen in amber — the MuseumsQuartier itself occupies former imperial stables reimagined as a contemporary arts complex where Viennese sprawl on outdoor furniture.\n\nThe coffee culture is UNESCO-listed and unchanged for centuries. In a Viennese Kaffeehaus — Cafe Central, Cafe Sperl, Cafe Hawelka — you order a Melange (like a cappuccino) and a slice of Sachertorte, and you sit for as long as you like reading newspapers on wooden holders. Nobody rushes you. This civilized pace extends to the heurigen (wine taverns) in the hills of Grinzing, where new wine and cold cuts are served in garden settings with vineyard views over the city.",
@@ -4728,12 +4618,7 @@
     "slug": "budapest",
     "name": "Budapest",
     "country": "Hungary",
-    "categories": [
-      "city",
-      "culture",
-      "budget",
-      "romantic"
-    ],
+    "categories": ["city", "culture", "budget", "romantic"],
     "price_level": 1,
     "best_season": "May - September",
     "description": "Budapest is two cities divided by the Danube and united by bridges. Buda, the hilly western bank, holds the Royal Palace, Fisherman's Bastion's neo-Romanesque turrets, and the medieval streets of the Castle District. Pest, the flat eastern bank, pulses with energy: the grand Parliament building, the ruin bars of the Jewish Quarter, Andrassy Avenue's boutiques, and the Great Market Hall's paprika-and-salami-scented corridors.\n\nThe thermal bath culture sets Budapest apart from every other European capital. The city sits on a geological fault line that pushes hot mineral water to the surface through 123 natural springs. Szechenyi Baths — a palatial yellow Neo-Baroque complex in City Park — is the most famous, with outdoor pools where locals play chess on floating boards in steaming water year-round. Gellert Baths offers Art Nouveau elegance. Rudas preserves Ottoman-era octagonal pools from the 1500s.\n\nBudapest delivers astonishing value. A three-course meal at a top-tier restaurant costs what a main course alone would cost in Paris. The ruin bars — built in abandoned buildings and courtyards in the former Jewish Quarter — serve craft cocktails amid eclectic junk-shop decor at prices that feel almost irresponsible. The city is beautiful, affordable, and deeply rewarding.",
@@ -4930,11 +4815,7 @@
     "slug": "dubrovnik",
     "name": "Dubrovnik",
     "country": "Croatia",
-    "categories": [
-      "beach",
-      "culture",
-      "romantic"
-    ],
+    "categories": ["beach", "culture", "romantic"],
     "price_level": 3,
     "best_season": "May - June",
     "description": "Dubrovnik's old town is a walled city of limestone streets and terracotta rooftops suspended between mountain and sea. Walking the two-kilometer city walls delivers one of Europe's most thrilling vantage points: the Adriatic crashes against the rocks below, church domes and bell towers rise within, and the island of Lokrum floats just offshore. The \"Pearl of the Adriatic\" earned its nickname honestly.\n\nThe old town's marble-paved Stradun (main street) connects the Pile Gate to the old harbor, passing Onofrio's Fountain, Baroque churches, and Sponza Palace. Game of Thrones brought global fame — fans recognize the city walls as King's Landing — but Dubrovnik's history as an independent republic (Ragusa) that rivaled Venice for 450 years gives it genuine historical gravitas. The Rector's Palace, the Dominican Monastery, and the city's own patron saint festival (St. Blaise, February 3) predate Hollywood by centuries.\n\nThe Adriatic coastline surrounding Dubrovnik is spectacular. Sea kayaking around the walls, swimming at Banje Beach, hopping the ferry to car-free Lokrum Island, and island-hopping to the Elafiti archipelago offer aquatic escapes from the old town's summer crowds. Sunset drinks at Buza Bar — literally a hole in the wall leading to cliff-edge seating above the sea — is the quintessential Dubrovnik experience.",
@@ -5127,11 +5008,7 @@
     "slug": "reykjavik",
     "name": "Reykjavik",
     "country": "Iceland",
-    "categories": [
-      "adventure",
-      "culture",
-      "romantic"
-    ],
+    "categories": ["adventure", "culture", "romantic"],
     "price_level": 4,
     "best_season": "June - August",
     "description": "Reykjavik is the world's most northerly capital and the gateway to landscapes that look like another planet. The city itself is compact and colorful — corrugated-iron houses painted in bold hues, the angular Hallgrimskirkja church rising like a basalt column, and a creative scene that punches absurdly above its population of 130,000. But the real draw is what lies just beyond the city limits.\n\nThe Golden Circle — a 300-kilometer loop from Reykjavik — delivers three of Iceland's signature sights in a single day: Thingvellir, where the North American and Eurasian tectonic plates visibly pull apart; Geysir, the original geyser that gave the English language the word; and Gullfoss, a thundering two-tiered waterfall plunging into a canyon. Further afield, the South Coast offers black-sand beaches at Vik, the glacier lagoon at Jokulsarlon (with floating icebergs), and behind-the-waterfall walks at Seljalandsfoss.\n\nFrom September to March, the Northern Lights dance across the sky on clear nights — ribbons of green, purple, and white shimmering above a volcanic landscape. In summer, the midnight sun never sets, and the days stretch endlessly for whale watching, glacier hiking, and soaking in geothermal pools. The Blue Lagoon gets the press, but the newer Sky Lagoon, with its infinity edge overlooking the North Atlantic, may be even better.",
@@ -5324,11 +5201,7 @@
     "slug": "cusco",
     "name": "Cusco",
     "country": "Peru",
-    "categories": [
-      "adventure",
-      "culture",
-      "budget"
-    ],
+    "categories": ["adventure", "culture", "budget"],
     "price_level": 1,
     "best_season": "May - September",
     "description": "Cusco sits at 3,400 meters in the Peruvian Andes, a city built on Inca foundations — literally. Spanish colonial churches rise from precisely fitted Inca stonework so tight that a knife blade cannot pass between the blocks. The Plaza de Armas, once the Inca ceremonial center of Huacaypata, is now flanked by Baroque cathedrals and arcaded restaurants, but the energy of the place — the confluence of indigenous and colonial, ancient and modern — remains unmistakably its own.\n\nCusco is the staging ground for Machu Picchu, and most visitors pass through on their way to the Lost City. But the Sacred Valley deserves days, not hours: the circular Inca agricultural terraces of Moray, the salt pans of Maras cascading down a hillside in thousands of pools, the fortress of Ollantaytambo where massive stone blocks were hauled up a mountain by a civilization without wheels. The four-day Inca Trail hike to Machu Picchu is a bucket-list experience, though the train from Ollantaytambo offers a less demanding alternative.\n\nThe city itself rewards exploration. San Blas, the artists' quarter above the main plaza, is a maze of steep cobblestone lanes, workshops, and cafes. The San Pedro Market overflows with fresh juices, roast guinea pig (cuy), and enormous avocados. Pisco sours at altitude hit differently. And the acclimatization days that altitude demands are not wasted — they are an invitation to slow down and absorb a city where 500 years of history are visible on every wall.",
@@ -5521,12 +5394,7 @@
     "slug": "naples",
     "name": "Naples",
     "country": "Italy",
-    "categories": [
-      "city",
-      "food-wine",
-      "culture",
-      "budget"
-    ],
+    "categories": ["city", "food-wine", "culture", "budget"],
     "price_level": 1,
     "best_season": "April - June",
     "description": "Naples is the raw, magnificent, complicated heart of southern Italy. It invented pizza — not as a marketing claim but as historical fact — and the Margherita from a wood-fired oven in the Centro Storico, with San Marzano tomatoes, fior di latte, and fresh basil on a charred, pillowy base, remains one of the world's perfect foods. The city takes its pizza so seriously that the art of Neapolitan pizza-making is UNESCO-listed.\n\nThe city's beauty is not the manicured beauty of Florence or the monumental beauty of Rome. It is feral and electric. Laundry hangs between Baroque church facades. Scooters weave through markets selling fresh octopus and contraband cigarettes on the same table. The Spaccanapoli — a street so straight and narrow it \"splits Naples\" — cuts through the ancient Greek and Roman grid like a time-lapse through 2,500 years. Underground, the Napoli Sotterranea reveals Greek aqueducts and Roman theaters buried beneath the living city.\n\nNaples is also the gateway to some of Italy's greatest day trips. Pompeii and Herculaneum — preserved under Vesuvius's ash since 79 AD — are 30 minutes by train. The Amalfi Coast's cliffside villages are an hour by bus. Capri's Blue Grotto and Villa Jovis are a ferry ride across the bay. And Vesuvius itself can be climbed for crater-edge views of the entire Bay of Naples. All of this at prices that make northern Italy look obscene.",
@@ -5729,11 +5597,7 @@
     "slug": "maldives",
     "name": "Maldives",
     "country": "Maldives",
-    "categories": [
-      "beach",
-      "romantic",
-      "adventure"
-    ],
+    "categories": ["beach", "romantic", "adventure"],
     "price_level": 4,
     "best_season": "November - April",
     "description": "The Maldives is the definition of paradise engineering. Across 1,192 coral islands scattered in 26 atolls, the formula is simple and devastating: overwater villas with glass floors, powder-white sand, water so clear you can read a book through it, and coral reefs teeming with manta rays, whale sharks, and technicolor fish. The average elevation is 1.5 meters above sea level. These islands feel temporary, precious, and surreally beautiful.\n\nMost visitors experience the Maldives through resort islands, where a single property occupies an entire island. The luxury tier — Soneva Fushi, One&Only Reethi Rah, St. Regis Vommuli — approaches the limits of what money can buy: underwater restaurants, private island picnics, marine-biologist-guided snorkeling. But the Maldives has broadened its appeal. Guesthouses on local islands (Maafushi, Thulusdhoo, Fulidhoo) offer the same turquoise water and reef access at a fraction of the cost, though without the overwater villa.\n\nThe marine life is the other dimension. The Maldives sits on a coral reef system of extraordinary biodiversity. Night diving with nurse sharks, swimming alongside whale sharks in South Ari Atoll, and watching manta rays barrel-roll through plankton blooms at Hanifaru Bay are experiences that redefine your relationship with the ocean. This is not a beach holiday — it is an encounter with one of the planet's most fragile and magnificent ecosystems.",
@@ -5926,12 +5790,7 @@
     "slug": "amman",
     "name": "Amman",
     "country": "Jordan",
-    "categories": [
-      "culture",
-      "adventure",
-      "food-wine",
-      "budget"
-    ],
+    "categories": ["culture", "adventure", "food-wine", "budget"],
     "price_level": 2,
     "best_season": "March - May",
     "description": "Amman is a city of white limestone hills, ancient citadels, and unexpected sophistication. Built across 19 hills (originally seven, like Rome), the Jordanian capital has reinvented itself from a sleepy administrative center into a cultural hub with excellent restaurants, contemporary art galleries, and a thriving cafe scene. The Citadel — perched on the highest hill — holds Roman, Byzantine, and Umayyad ruins overlooking a restored 6,000-seat Roman theater still used for concerts.\n\nThe city is a gateway to Jordan's extraordinary archaeological sites. Petra — the rose-red Nabataean city carved into sandstone cliffs — is a three-hour drive south and justifies the trip to Jordan on its own. Wadi Rum's Mars-like desert of red sand and towering rock formations offers jeep safaris, camel treks, and Bedouin camp nights under a sky so dark that the Milky Way casts shadows. The Dead Sea, the lowest point on Earth, is an hour from Amman: float in water so saline that sinking is physically impossible.\n\nAmman's food scene reflects the Levant's culinary genius. Hashem, a downtown institution open since the 1950s, serves falafel, hummus, and fuul (fava beans) to everyone from laborers to royals at communal tables. The mansaf — Jordan's national dish of slow-cooked lamb on rice with fermented yogurt sauce — is a ceremonial experience. Rainbow Street's cafes and rooftop bars offer a more contemporary side, with craft cocktails and shawarma late into the night.",
@@ -6128,12 +5987,7 @@
     "slug": "auckland",
     "name": "Auckland",
     "country": "New Zealand",
-    "categories": [
-      "city",
-      "adventure",
-      "nature",
-      "family"
-    ],
+    "categories": ["city", "adventure", "nature", "family"],
     "price_level": 3,
     "best_season": "December - February",
     "description": "Auckland straddles two harbours on a narrow volcanic isthmus, giving it a relationship with water that few cities can match. Sailing is practically a birthright here — the city earned the nickname City of Sails long before it hosted two America's Cup defences — and the Hauraki Gulf beyond the downtown waterfront opens onto dozens of islands, each with its own character. Waiheke Island, a 35-minute ferry ride away, combines world-class pinot gris vineyards, olive groves, and white-sand beaches into a single effortless day trip.\n\nThe volcanic landscape is just as defining. Rangitoto Island, the youngest and largest of 53 Auckland volcanoes, rises symmetrically from the gulf and can be summited in a morning. In the city itself, One Tree Hill Domain and Mount Eden sit above leafy suburbs and offer 360-degree panoramas of the two coasts. The Waitematā Harbour Bridge arcs over the sparkling water, and a harbour-side walk links the Ferry Building to Wynyard Quarter's restaurants and markets.\n\nAuckland's food culture has been transformed by successive waves of Pacific and Asian immigration. Dominion Road is lined with some of the best Cantonese, Korean, and Malaysian restaurants in the Southern Hemisphere. The Otara Flea Market on Saturday mornings is a crash course in Pacific Island cuisine — fresh coconut cream, palusami, and hangi-cooked pork alongside second-hand treasures and live music.",
@@ -6336,12 +6190,7 @@
     "slug": "lima",
     "name": "Lima",
     "country": "Peru",
-    "categories": [
-      "city",
-      "food-wine",
-      "culture",
-      "budget"
-    ],
+    "categories": ["city", "food-wine", "culture", "budget"],
     "price_level": 2,
     "best_season": "December - April",
     "description": "Lima has quietly become South America's gastronomic capital, a claim backed by the fact that four of the world's 50 best restaurants are located in a single coastal neighbourhood. The city's unique position — a desert metropolis perched on Pacific cliffs, flanked by the Andes and the sea — has produced a cuisine unlike any other: ceviche cured in tiger's milk, causa terrines layered with native potato, and nikkei dishes that fuse Japanese technique with Peruvian ingredients, born from the Japanese immigrants who arrived in the 19th century.\n\nBeyond the plate, Lima is a city of dramatic contrasts. The colonial historic centre, a UNESCO World Heritage Site, concentrates baroque churches, elaborate balconied mansions, and the catacombs beneath San Francisco Convent into a compact area around the Plaza Mayor. Miraflores and Barranco perch on cliffs above the Pacific, connected by a cliff-top park where paragliders ride thermal currents and the sea crashes against rocky coves far below.\n\nBarranco is Lima's artistic heart — its pastel-painted streets hold bohemian bars, art galleries, craft studios, and the famous Bridge of Sighs, a wooden footbridge said to grant wishes to those who cross it holding their breath. The combination of world-class food, rich history, Pacific energy, and affordable prices makes Lima one of the most underrated city-break destinations on the planet.",
@@ -6544,12 +6393,7 @@
     "slug": "mexico-city",
     "name": "Mexico City",
     "country": "Mexico",
-    "categories": [
-      "city",
-      "food-wine",
-      "culture",
-      "budget"
-    ],
+    "categories": ["city", "food-wine", "culture", "budget"],
     "price_level": 2,
     "best_season": "March - May",
     "description": "Mexico City operates at a scale and intensity that overwhelms the senses in the best possible way. At 2,240 metres altitude and spanning over 1,400 square kilometres, this megalopolis of 22 million people is simultaneously one of the world's great museum cities, an extraordinary culinary destination, a design and art capital, and a living testament to 700 years of history layered over an Aztec foundation. The Zócalo — one of the largest city squares on Earth — sits above the ruins of Tenochtitlan, and the Templo Mayor excavation at its edge reveals stone carvings just metres below the colonial cathedral.\n\nThe food culture here is staggering in its depth and diversity. Street tacos al pastor — pork carved from a vertical spit, pineapple charred at the tip, wrapped in a warm corn tortilla — cost a dollar and rank among the most satisfying bites in world gastronomy. At the other end of the spectrum, Pujol and Quintonil have pushed Mexican haute cuisine onto the global stage. Between those extremes lies a universe of market fondas, mezcalerías, mariscos stands, and taqueros who have perfected their single craft over decades.\n\nThe city's colonias each have a distinct personality. Roma and Condesa feel like a Latin-inflected Paris, with tree-lined boulevards, art deco apartment buildings, independent bookshops, and outdoor café terraces. Coyoacán preserves the cobblestone tranquility of a colonial village — it's the neighbourhood where Frida Kahlo was born and Diego Rivera maintained his studio. Polanco gleams with luxury boutiques and gallery-quality restaurants. Wherever you land, Mexico City rewards deep exploration.",
@@ -6758,12 +6602,7 @@
     "slug": "mumbai",
     "name": "Mumbai",
     "country": "India",
-    "categories": [
-      "city",
-      "culture",
-      "food-wine",
-      "budget"
-    ],
+    "categories": ["city", "culture", "food-wine", "budget"],
     "price_level": 2,
     "best_season": "November - February",
     "description": "Mumbai is India distilled into a single relentless city: extremes of wealth and poverty, ancient tradition and contemporary ambition, chaos and extraordinary beauty coexisting block by block. On the southern tip of the peninsula, colonial Gothic architecture — the Chhatrapati Shivaji Maharaj Terminus, the High Court, the University Library — rises in ornate Victorian splendour along wide boulevards. The Gateway of India stands at the waterfront like a stone exclamation point, while the Taj Mahal Palace hotel behind it remains one of the most storied grand hotels in Asia.\n\nThe city's food culture is as layered as its history. Mumbai invented the dabba system — the legendary lunchbox delivery network that brings 200,000 home-cooked meals daily from the suburbs to offices in the business district. Vada pav, the fried potato dumpling sandwich sold on every street corner, is Mumbai's beating heart. Bhelpuri assembled on Chowpatty Beach, fresh pomfret curry at Mahim's seafood joints, butter chicken at a Colaba tourist dhaba — every bite tells a story about the city's migrations and mixtures.\n\nBollywood casts its own particular light on Mumbai. Film City in Goregaon has been producing India's dream factory since the 1970s, and the industry's outsized cultural presence is visible everywhere from the billboard-covered flyovers to the movie-music spilling from auto-rickshaws. Dharavi, one of Asia's most densely populated urban settlements, is simultaneously a social challenge and an extraordinary economic ecosystem of recycling, pottery, leather goods, and food production that contributes over a billion dollars annually to the city's economy.",

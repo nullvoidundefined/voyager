@@ -178,7 +178,9 @@ describe('cache.service', () => {
 
     it('cacheGet returns null when Redis throws', async () => {
       process.env.REDIS_URL = 'redis://localhost:6379';
-      mockRedisInstance.get.mockRejectedValueOnce(new Error('Connection refused'));
+      mockRedisInstance.get.mockRejectedValueOnce(
+        new Error('Connection refused'),
+      );
 
       const result = await cacheService.cacheGet('failing-key');
       expect(result).toBeNull();
@@ -186,7 +188,9 @@ describe('cache.service', () => {
 
     it('cacheSet does not throw when Redis throws', async () => {
       process.env.REDIS_URL = 'redis://localhost:6379';
-      mockRedisInstance.set.mockRejectedValueOnce(new Error('Connection refused'));
+      mockRedisInstance.set.mockRejectedValueOnce(
+        new Error('Connection refused'),
+      );
 
       await expect(
         cacheService.cacheSet('failing-key', { data: 1 }, 3600),
@@ -195,7 +199,9 @@ describe('cache.service', () => {
 
     it('cacheDel does not throw when Redis throws', async () => {
       process.env.REDIS_URL = 'redis://localhost:6379';
-      mockRedisInstance.del.mockRejectedValueOnce(new Error('Connection refused'));
+      mockRedisInstance.del.mockRejectedValueOnce(
+        new Error('Connection refused'),
+      );
 
       await expect(
         cacheService.cacheDel('failing-key'),

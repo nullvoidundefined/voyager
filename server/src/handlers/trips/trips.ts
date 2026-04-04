@@ -1,26 +1,26 @@
-import { DEFAULT_COMPLETION_TRACKER } from "app/prompts/booking-steps.js";
+import { DEFAULT_COMPLETION_TRACKER } from 'app/prompts/booking-steps.js';
 import {
   getOrCreateConversation,
   updateBookingState,
-} from "app/repositories/conversations/conversations.js";
-import * as tripRepo from "app/repositories/trips/trips.js";
-import { createTripSchema } from "app/schemas/trips.js";
-import { ApiError } from "app/utils/ApiError.js";
-import { logger } from "app/utils/logs/logger.js";
-import type { Request, Response } from "express";
+} from 'app/repositories/conversations/conversations.js';
+import * as tripRepo from 'app/repositories/trips/trips.js';
+import { createTripSchema } from 'app/schemas/trips.js';
+import { ApiError } from 'app/utils/ApiError.js';
+import { logger } from 'app/utils/logs/logger.js';
+import type { Request, Response } from 'express';
 
 export async function createTrip(req: Request, res: Response): Promise<void> {
   const parsed = createTripSchema.safeParse(req.body);
   if (!parsed.success) {
-    const message = parsed.error.issues.map((e) => e.message).join("; ");
+    const message = parsed.error.issues.map((e) => e.message).join('; ');
     throw ApiError.badRequest(message);
   }
 
   const userId = req.user!.id;
   const trip = await tripRepo.createTrip(userId, parsed.data);
   logger.info(
-    { event: "trip_created", tripId: trip.id, userId },
-    "Trip created",
+    { event: 'trip_created', tripId: trip.id, userId },
+    'Trip created',
   );
   res.status(201).json({ trip });
 }
@@ -37,7 +37,7 @@ export async function getTrip(req: Request, res: Response): Promise<void> {
 
   const trip = await tripRepo.getTripWithDetails(tripId, userId);
   if (!trip) {
-    throw ApiError.notFound("Trip not found");
+    throw ApiError.notFound('Trip not found');
   }
 
   res.json({ trip });
@@ -70,20 +70,20 @@ export async function updateTrip(req: Request, res: Response): Promise<void> {
   if (status !== undefined) input.status = status;
 
   if (departure_date !== undefined) {
-    const today = new Date().toISOString().split("T")[0] as string;
+    const today = new Date().toISOString().split('T')[0] as string;
     if (departure_date < today) {
-      throw ApiError.badRequest("Departure date cannot be in the past");
+      throw ApiError.badRequest('Departure date cannot be in the past');
     }
   }
 
   if (return_date !== undefined && departure_date !== undefined) {
     if (return_date < departure_date) {
-      throw ApiError.badRequest("Return date must be after departure date");
+      throw ApiError.badRequest('Return date must be after departure date');
     }
   }
 
   if (Object.keys(input).length === 0) {
-    throw ApiError.badRequest("No fields to update");
+    throw ApiError.badRequest('No fields to update');
   }
 
   let shouldClearSelections = false;
@@ -111,7 +111,7 @@ export async function updateTrip(req: Request, res: Response): Promise<void> {
     input as tripRepo.UpdateTripInput,
   );
   if (!trip) {
-    throw ApiError.notFound("Trip not found");
+    throw ApiError.notFound('Trip not found');
   }
 
   if (shouldClearSelections) {
@@ -122,12 +122,12 @@ export async function updateTrip(req: Request, res: Response): Promise<void> {
       DEFAULT_COMPLETION_TRACKER as unknown as Record<string, unknown>,
     );
     logger.info(
-      { event: "selections_cleared", tripId, newDestination: destination },
-      "Cleared selections after destination change",
+      { event: 'selections_cleared', tripId, newDestination: destination },
+      'Cleared selections after destination change',
     );
   }
 
-  logger.info({ event: "trip_updated", tripId, userId }, "Trip updated");
+  logger.info({ event: 'trip_updated', tripId, userId }, 'Trip updated');
   res.json({ trip });
 }
 
@@ -137,9 +137,9 @@ export async function deleteTrip(req: Request, res: Response): Promise<void> {
 
   const deleted = await tripRepo.deleteTrip(tripId, userId);
   if (!deleted) {
-    throw ApiError.notFound("Trip not found");
+    throw ApiError.notFound('Trip not found');
   }
 
-  logger.info({ event: "trip_deleted", tripId, userId }, "Trip deleted");
+  logger.info({ event: 'trip_deleted', tripId, userId }, 'Trip deleted');
   res.status(204).send();
 }

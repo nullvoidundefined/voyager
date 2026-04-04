@@ -395,9 +395,14 @@ describe('AgentOrchestrator', () => {
   // -----------------------------------------------------------------------
   it('returns a timeout response when maxDurationMs is exceeded', async () => {
     // Simulate a slow tool that takes longer than the timeout
-    const slowExecutor = vi.fn().mockImplementation(
-      () => new Promise((resolve) => setTimeout(() => resolve({ result: 'slow' }), 60)),
-    );
+    const slowExecutor = vi
+      .fn()
+      .mockImplementation(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ result: 'slow' }), 60),
+          ),
+      );
 
     const timeoutConfig = createConfig({
       toolExecutor: slowExecutor,

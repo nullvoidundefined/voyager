@@ -4,13 +4,13 @@ import {
   insertTripFlight,
   insertTripHotel,
   updateTrip,
-} from "app/repositories/trips/trips.js";
-import { calculateRemainingBudget } from "app/tools/budget.tool.js";
-import { searchCarRentals } from "app/tools/car-rentals.tool.js";
-import { getDestinationInfo } from "app/tools/destination.tool.js";
-import { searchExperiences } from "app/tools/experiences.tool.js";
-import { searchFlights } from "app/tools/flights.tool.js";
-import { searchHotels } from "app/tools/hotels.tool.js";
+} from 'app/repositories/trips/trips.js';
+import { calculateRemainingBudget } from 'app/tools/budget.tool.js';
+import { searchCarRentals } from 'app/tools/car-rentals.tool.js';
+import { getDestinationInfo } from 'app/tools/destination.tool.js';
+import { searchExperiences } from 'app/tools/experiences.tool.js';
+import { searchFlights } from 'app/tools/flights.tool.js';
+import { searchHotels } from 'app/tools/hotels.tool.js';
 import {
   calculateBudgetSchema,
   formatResponseSchema,
@@ -24,9 +24,9 @@ import {
   selectFlightSchema,
   selectHotelSchema,
   updateTripSchema,
-} from "app/tools/schemas.js";
-import { logger } from "app/utils/logs/logger.js";
-import type { ZodError, ZodSchema } from "zod";
+} from 'app/tools/schemas.js';
+import { logger } from 'app/utils/logs/logger.js';
+import type { ZodError, ZodSchema } from 'zod';
 
 export interface ToolContext {
   tripId: string;
@@ -36,8 +36,8 @@ export interface ToolContext {
 
 function formatZodError(error: ZodError): string {
   return error.issues
-    .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
-    .join("; ");
+    .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+    .join('; ');
 }
 
 function parseInput<T>(
@@ -50,7 +50,7 @@ function parseInput<T>(
     const details = formatZodError(result.error);
     logger.warn(
       { toolName, issues: result.error.issues },
-      "Tool input validation failed",
+      'Tool input validation failed',
     );
     return {
       error: `Validation failed for ${toolName}: ${details}. Please fix the input and try again.`,
@@ -64,94 +64,94 @@ export async function executeTool(
   input: Record<string, unknown>,
   context?: ToolContext,
 ): Promise<unknown> {
-  logger.debug({ toolName, input }, "Executing tool");
+  logger.debug({ toolName, input }, 'Executing tool');
 
   switch (toolName) {
-    case "search_flights": {
+    case 'search_flights': {
       const parsed = parseInput(toolName, searchFlightsSchema, input);
-      if ("error" in parsed) return parsed;
+      if ('error' in parsed) return parsed;
       return searchFlights(parsed.data);
     }
 
-    case "search_hotels": {
+    case 'search_hotels': {
       const parsed = parseInput(toolName, searchHotelsSchema, input);
-      if ("error" in parsed) return parsed;
+      if ('error' in parsed) return parsed;
       return searchHotels(parsed.data);
     }
 
-    case "search_experiences": {
+    case 'search_experiences': {
       const parsed = parseInput(toolName, searchExperiencesSchema, input);
-      if ("error" in parsed) return parsed;
+      if ('error' in parsed) return parsed;
       return searchExperiences(parsed.data);
     }
 
-    case "calculate_remaining_budget": {
+    case 'calculate_remaining_budget': {
       const parsed = parseInput(toolName, calculateBudgetSchema, input);
-      if ("error" in parsed) return parsed;
+      if ('error' in parsed) return parsed;
       return calculateRemainingBudget(parsed.data);
     }
 
-    case "get_destination_info": {
+    case 'get_destination_info': {
       const parsed = parseInput(toolName, getDestinationInfoSchema, input);
-      if ("error" in parsed) return parsed;
+      if ('error' in parsed) return parsed;
       return getDestinationInfo(parsed.data);
     }
 
-    case "update_trip": {
-      if (!context) throw new Error("update_trip requires trip context");
+    case 'update_trip': {
+      if (!context) throw new Error('update_trip requires trip context');
       const parsed = parseInput(toolName, updateTripSchema, input);
-      if ("error" in parsed) return parsed;
+      if ('error' in parsed) return parsed;
       const updated = await updateTrip(
         context.tripId,
         context.userId,
         parsed.data,
       );
       return updated
-        ? { success: true, message: "Trip updated successfully" }
-        : { success: false, message: "No fields to update" };
+        ? { success: true, message: 'Trip updated successfully' }
+        : { success: false, message: 'No fields to update' };
     }
 
-    case "search_car_rentals": {
+    case 'search_car_rentals': {
       const parsed = parseInput(toolName, searchCarRentalsSchema, input);
-      if ("error" in parsed) return parsed;
+      if ('error' in parsed) return parsed;
       return searchCarRentals(parsed.data);
     }
 
-    case "select_flight": {
-      if (!context) throw new Error("select_flight requires trip context");
+    case 'select_flight': {
+      if (!context) throw new Error('select_flight requires trip context');
       const parsed = parseInput(toolName, selectFlightSchema, input);
-      if ("error" in parsed) return parsed;
+      if ('error' in parsed) return parsed;
       await insertTripFlight(context.tripId, parsed.data);
-      return { success: true, message: "Flight selection saved" };
+      return { success: true, message: 'Flight selection saved' };
     }
 
-    case "select_hotel": {
-      if (!context) throw new Error("select_hotel requires trip context");
+    case 'select_hotel': {
+      if (!context) throw new Error('select_hotel requires trip context');
       const parsed = parseInput(toolName, selectHotelSchema, input);
-      if ("error" in parsed) return parsed;
+      if ('error' in parsed) return parsed;
       await insertTripHotel(context.tripId, parsed.data);
-      return { success: true, message: "Hotel selection saved" };
+      return { success: true, message: 'Hotel selection saved' };
     }
 
-    case "select_car_rental": {
-      if (!context) throw new Error("select_car_rental requires trip context");
+    case 'select_car_rental': {
+      if (!context) throw new Error('select_car_rental requires trip context');
       const parsed = parseInput(toolName, selectCarRentalSchema, input);
-      if ("error" in parsed) return parsed;
+      if ('error' in parsed) return parsed;
       await insertTripCarRental(context.tripId, parsed.data);
-      return { success: true, message: "Car rental selection saved" };
+      return { success: true, message: 'Car rental selection saved' };
     }
 
-    case "select_experience": {
-      if (!context) throw new Error("select_experience requires trip context");
+    case 'select_experience': {
+      if (!context) throw new Error('select_experience requires trip context');
       const parsed = parseInput(toolName, selectExperienceSchema, input);
-      if ("error" in parsed) return parsed;
+      if ('error' in parsed) return parsed;
       await insertTripExperience(context.tripId, parsed.data);
-      return { success: true, message: "Experience selection saved" };
+      return { success: true, message: 'Experience selection saved' };
     }
 
-    case "format_response": {
+    case 'format_response': {
       const parsed = parseInput(toolName, formatResponseSchema, input);
-      if ("error" in parsed) return parsed;
+      if ('error' in parsed) return parsed;
       return parsed.data;
     }
 

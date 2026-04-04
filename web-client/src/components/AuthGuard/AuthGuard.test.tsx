@@ -1,19 +1,19 @@
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { AuthGuard } from './AuthGuard';
 
 const mockReplace = vi.fn();
-vi.mock("next/navigation", () => ({
+vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace: mockReplace }),
 }));
 
 let mockUser: { id: string } | null = null;
 let mockIsLoading = false;
 
-vi.mock("@/context/AuthContext", () => ({
+vi.mock('@/context/AuthContext', () => ({
   useAuth: () => ({ user: mockUser, isLoading: mockIsLoading }),
 }));
-
-import { AuthGuard } from "./AuthGuard";
 
 afterEach(() => {
   cleanup();
@@ -22,28 +22,28 @@ afterEach(() => {
   mockIsLoading = false;
 });
 
-describe("AuthGuard", () => {
-  it("renders children when user is authenticated", () => {
-    mockUser = { id: "user-1" };
+describe('AuthGuard', () => {
+  it('renders children when user is authenticated', () => {
+    mockUser = { id: 'user-1' };
     render(
       <AuthGuard>
         <div>Protected content</div>
       </AuthGuard>,
     );
-    expect(screen.getByText("Protected content")).toBeInTheDocument();
+    expect(screen.getByText('Protected content')).toBeInTheDocument();
   });
 
-  it("renders nothing when loading", () => {
+  it('renders nothing when loading', () => {
     mockIsLoading = true;
     const { container } = render(
       <AuthGuard>
         <div>Protected content</div>
       </AuthGuard>,
     );
-    expect(container.innerHTML).toBe("");
+    expect(container.innerHTML).toBe('');
   });
 
-  it("renders nothing when not authenticated", () => {
+  it('renders nothing when not authenticated', () => {
     mockUser = null;
     mockIsLoading = false;
     const { container } = render(
@@ -51,10 +51,10 @@ describe("AuthGuard", () => {
         <div>Protected content</div>
       </AuthGuard>,
     );
-    expect(container.innerHTML).toBe("");
+    expect(container.innerHTML).toBe('');
   });
 
-  it("redirects to /login when not authenticated", () => {
+  it('redirects to /login when not authenticated', () => {
     mockUser = null;
     mockIsLoading = false;
     render(
@@ -62,10 +62,10 @@ describe("AuthGuard", () => {
         <div>Protected content</div>
       </AuthGuard>,
     );
-    expect(mockReplace).toHaveBeenCalledWith("/login");
+    expect(mockReplace).toHaveBeenCalledWith('/login');
   });
 
-  it("does not redirect when loading", () => {
+  it('does not redirect when loading', () => {
     mockIsLoading = true;
     render(
       <AuthGuard>
