@@ -2,7 +2,12 @@ import Anthropic from '@anthropic-ai/sdk';
 
 import type { Persona, TranscriptEntry } from '../types.js';
 
-const anthropic = new Anthropic();
+// Lazy-init to ensure ANTHROPIC_API_KEY is loaded from dotenv before construction
+let anthropic: Anthropic | null = null;
+function getClient(): Anthropic {
+  if (!anthropic) anthropic = new Anthropic();
+  return anthropic;
+}
 
 function buildCustomerPrompt(persona: Persona): string {
   const budgetStr = persona.budget
@@ -53,7 +58,7 @@ export async function getCustomerResponse(
     content: t.content,
   }));
 
-  const response = await anthropic.messages.create({
+  const response = await getClient().messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 300,
     system: buildCustomerPrompt(persona),

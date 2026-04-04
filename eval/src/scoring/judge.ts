@@ -2,7 +2,11 @@ import Anthropic from '@anthropic-ai/sdk';
 
 import type { JudgeScores, Persona, TranscriptEntry } from '../types.js';
 
-const anthropic = new Anthropic();
+let anthropic: Anthropic | null = null;
+function getClient(): Anthropic {
+  if (!anthropic) anthropic = new Anthropic();
+  return anthropic;
+}
 
 const JUDGE_PROMPT = `You are an expert evaluator assessing the quality of a travel planning AI agent. You will be given a customer persona and a conversation transcript.
 
@@ -43,7 +47,7 @@ Constraints: ${persona.constraints}`;
     )
     .join('\n\n');
 
-  const response = await anthropic.messages.create({
+  const response = await getClient().messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 1000,
     system: JUDGE_PROMPT,

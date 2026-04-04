@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import 'dotenv/config';
+import { config } from 'dotenv';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -19,6 +19,15 @@ import {
 import { computeJudgeScore, runJudge } from './scoring/judge.js';
 import type { Archetype, EvalReport, PersonaResult } from './types.js';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// Load env vars from the server's .env (database URL, API keys)
+config({ path: join(__dirname, '..', '..', 'server', '.env') });
+
+// Eval-specific overrides
+process.env.NODE_ENV = 'test';
+process.env.EVAL_MOCK_SEARCH = 'true';
+
 // Parse CLI args
 const args = process.argv.slice(2);
 function getArg(name: string): string | undefined {
@@ -31,9 +40,6 @@ const personaCount = getArg('personas')
   : undefined;
 const archetypeFilter = getArg('archetype') as Archetype | undefined;
 const compareFile = getArg('compare');
-
-// Enable mock search mode — set env var before importing server modules
-process.env.EVAL_MOCK_SEARCH = 'true';
 
 async function main() {
   const startTime = Date.now();
@@ -90,8 +96,31 @@ async function main() {
     process.exit(1);
   }
 
-  // Eval user ID — create trips under this ID
-  const EVAL_USER_ID = '00000000-0000-0000-0000-000000000000';
+  // Eval user — ensure a test user exists in the database
+  const EVAL_USER_ID = '00000000-0000-0000-0000-e00000000001';
+  try {
+    const dbModule = await import(
+      join(__dirname, '..', '..', 'server', 'dist', 'db', 'pool', 'pool.js')
+    );
+    const query = dbModule.query as (
+      text: string,
+      values?: unknown[],
+    ) => Promise<{ rows: unknown[] }>;
+    const existing = await query('SELECT id FROM users WHERE id = $1', [
+      EVAL_USER_ID,
+    ]);
+    if (existing.rows.length === 0) {
+      await query(
+        `INSERT INTO users (id, email, password_hash, first_name, last_name)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [EVAL_USER_ID, 'eval@voyager.test', 'no-login', 'Eval', 'Runner'],
+      );
+      console.log('Created eval test user');
+    }
+  } catch (err) {
+    console.error('Failed to ensure eval user exists:', err);
+    process.exit(1);
+  }
 
   // 3. Run conversations
   const results: PersonaResult[] = [];
@@ -241,7 +270,6 @@ async function main() {
   // 5. Output
   printCliReport(report);
 
-  const __dirname = dirname(fileURLToPath(import.meta.url));
   const reportsDir = join(__dirname, '..', 'reports');
   writeJsonReport(report, reportsDir);
 
