@@ -1,5 +1,29 @@
+import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { join } from 'path';
+
 import type { Archetype, Persona } from '../types.js';
 import { DESTINATIONS, ORIGINS, TEMPLATES } from './templates.js';
+
+const CACHE_PATH = join(
+  new URL('.', import.meta.url).pathname,
+  '..',
+  '..',
+  'personas-cache.json',
+);
+
+export function loadCachedPersonas(): Persona[] | null {
+  if (!existsSync(CACHE_PATH)) return null;
+  try {
+    const data = readFileSync(CACHE_PATH, 'utf-8');
+    return JSON.parse(data) as Persona[];
+  } catch {
+    return null;
+  }
+}
+
+export function saveCachedPersonas(personas: Persona[]): void {
+  writeFileSync(CACHE_PATH, JSON.stringify(personas, null, 2), 'utf-8');
+}
 
 function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;

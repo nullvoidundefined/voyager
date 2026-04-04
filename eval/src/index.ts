@@ -3,7 +3,11 @@ import { config } from 'dotenv';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
-import { generatePersonas } from './personas/generator.js';
+import {
+  generatePersonas,
+  loadCachedPersonas,
+  saveCachedPersonas,
+} from './personas/generator.js';
 import { printCliReport } from './reporter/cli.js';
 import { compareReports } from './reporter/compare.js';
 import { writeJsonReport } from './reporter/json.js';
@@ -17,7 +21,7 @@ import {
   runAssertions,
 } from './scoring/assertions.js';
 import { computeJudgeScore, runJudge } from './scoring/judge.js';
-import type { Archetype, EvalReport, PersonaResult } from './types.js';
+import type { Archetype, EvalReport, Persona, PersonaResult } from './types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -49,11 +53,31 @@ async function main() {
   console.log('\u2500'.repeat(40));
 
   // 1. Generate personas
-  const personas = generatePersonas({
-    count: personaCount,
-    archetype: archetypeFilter,
-  });
-  console.log(`Generated ${personas.length} personas`);
+  // Check for --regenerate flag
+  const shouldRegenerate = args.includes('--regenerate');
+
+  // Load cached personas or generate new ones
+  let personas: Persona[];
+  const cached = shouldRegenerate ? null : loadCachedPersonas();
+
+  if (cached && !archetypeFilter && !personaCount) {
+    personas = cached;
+    console.log(`Loaded ${personas.length} cached personas`);
+  } else {
+    personas = generatePersonas({
+      count: personaCount,
+      archetype: archetypeFilter,
+    });
+    // Save to cache (only for full runs without filters)
+    if (!archetypeFilter && !personaCount) {
+      saveCachedPersonas(personas);
+      console.log(`Generated and cached ${personas.length} personas`);
+    } else {
+      console.log(
+        `Generated ${personas.length} personas (not cached — filtered run)`,
+      );
+    }
+  }
 
   // 2. Dynamically import the chat handler from the built server
   // The server must be built first: pnpm --filter agentic-travel-agent-server build
