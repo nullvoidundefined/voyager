@@ -257,3 +257,17 @@ export const api = {
 - `curly: 'error'` — always use braces
 - No unused imports (eslint-plugin-unused-imports)
 - No explicit `any`
+
+---
+
+## Testing Rules
+
+- **Every interactive component needs tests.** ChatBox, form wizards, selectable card groups, modals — all must have `Component.test.tsx` files using React Testing Library.
+- Use `@testing-library/react` with accessible queries (`getByRole`, `getByLabelText`) — test behavior, not implementation.
+- Mock TanStack Query with a test `QueryClient` — never call real APIs from component tests.
+
+---
+
+## Performance Rules
+
+- **Large static data must NOT be bundled.** If a data file (e.g., destinations list) exceeds ~50KB, serve it from an API endpoint instead of importing it into the client bundle. Use TanStack Query with `staleTime: Infinity` and a graceful fallback (e.g., text input instead of autocomplete) if the fetch fails.

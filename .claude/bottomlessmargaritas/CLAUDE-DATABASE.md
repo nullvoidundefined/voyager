@@ -336,3 +336,29 @@ const result = await query<Job>(
 - Every repository query includes `user_id = $N` scoping
 - No direct frontend-to-database connections
 - The API server is the only database client
+
+---
+
+## JSONB Versioning
+
+Any JSONB column that stores evolving structured data (e.g., user preferences, booking state) must include a `schema_version` field inside the JSON:
+
+```typescript
+const merged = {
+  ...existing,
+  ...newData,
+  schema_version: CURRENT_SCHEMA_VERSION,
+};
+```
+
+- Rows without `schema_version` are treated as v0
+- `detectSchemaVersion(data)` checks both `schema_version` and legacy `version` fields
+- Migrations are sequential functions: `migrateV0ToV1()`, `migrateV1ToV2()`, etc.
+- Always stamp the current version on write (upsert/insert)
+
+---
+
+## Transaction Rules
+
+- Multi-row mutations (clearing trip selections, destination changes with booking reset) must use `withTransaction()`
+- Never run 2+ related DELETEs/INSERTs as separate `query()` calls without a transaction client

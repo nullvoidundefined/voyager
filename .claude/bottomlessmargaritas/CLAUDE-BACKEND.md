@@ -681,3 +681,36 @@ DELETE /links/:id/tags/:tagId → remove from sub-resource
 | Trailing commas | All       | `[a, b, c,]`                     |
 | Indentation     | 4 spaces  | —                                |
 | Line width      | 100 chars | —                                |
+
+---
+
+## Resilience Rules
+
+- **Redis is optional.** Cache calls (`cacheGet`, `cacheSet`) must be wrapped in try-catch. On failure, log a warning and return `null` (cache miss) — never let a Redis outage crash a request.
+- **External API calls need circuit breakers.** After N consecutive failures to SerpApi/Google Places, fail fast for a cooldown period instead of timing out every request.
+- **Agent loops need wall-clock timeouts.** Any LLM agent loop (`while(true)`) must have a `maxDurationMs` (default 120s) in addition to the tool-call-count limit. Log a warning with iterations/tokens when timing out.
+- **Multi-row mutations need transactions.** Any function that runs multiple DELETEs, INSERTs, or UPDATEs on related data must use `withTransaction()` so they succeed or fail atomically.
+
+---
+
+## Security Rules
+
+- **Validate LLM tool inputs with Zod.** The tool executor must parse every tool input through a Zod schema before calling the implementation. Never cast `input as unknown as T` — Claude can hallucinate malformed fields.
+- **API keys in headers, not URLs.** Use `X-Goog-Api-Key` (or equivalent) headers for external API calls. Never put keys in query strings — they leak into logs and proxy caches.
+- **Rate-limit expensive endpoints per user.** The chat/agent endpoint must have per-user rate limiting (e.g., 10 requests per 5 minutes keyed by `req.user.id`), not just global rate limiting.
+
+---
+
+## Observability Rules
+
+- **Metrics via abstraction.** Create a `MetricsService` interface for tracking API calls, cache hit rates, agent loop stats, and errors. Start with structured Pino logs (`logger.info({ metric: 'api_call', ... })`). Swap to DataDog/Prometheus later by changing the implementation.
+- **Propagate request IDs.** Thread the request ID from `pino-http` through services, tool executors, and external API calls so every log line in a request's lifecycle is correlatable.
+- **Include Redis + conversation locks in health checks.** `/health/ready` should report Redis status and `activeConversations` set size.
+
+---
+
+## DRYness Rules
+
+- **Extract repeated patterns into helpers.** If a block of code (flow-position mapping, SSE flush, date validation) appears 3+ times, extract it into a named utility function.
+- **God handlers must be decomposed.** If a handler function exceeds ~100 lines, extract pure functions for each responsibility (context building, form generation, completion tracking, etc.) and have the handler orchestrate them.
+- **Prefer `schema_version` for JSONB versioning.** Any JSONB column that may evolve should include a `schema_version` field. Use `detectSchemaVersion()` + sequential migration functions (`migrateV0ToV1`, `migrateV1ToV2`, etc.) for explicit chaining.
