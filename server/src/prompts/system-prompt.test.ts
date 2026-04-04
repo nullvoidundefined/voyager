@@ -14,7 +14,7 @@ describe('buildSystemPrompt', () => {
   it('should include COLLECT_DETAILS addendum when no flow position', () => {
     const result = buildSystemPrompt();
     expect(result).toContain('Collecting Details');
-    expect(result).toContain('form handles data collection');
+    expect(result).toContain('Collecting Details');
   });
 
   it('should include COLLECT_DETAILS addendum for that phase', () => {

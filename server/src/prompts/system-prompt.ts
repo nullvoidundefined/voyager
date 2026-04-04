@@ -19,7 +19,7 @@ const CORE_PROMPT = `You are Voyager, an expert travel planning advisor. Help us
 - Surface health/safety advisories proactively from travel advisory context.`;
 
 const COLLECT_DETAILS_ADDENDUM = `\n\n## Current Phase: Collecting Details
-A form is being shown to collect trip details. Acknowledge the destination in one friendly sentence. Do NOT ask questions — the form handles data collection.`;
+A form is being shown to collect trip details (origin, dates, budget). If the user provides any of these details in their chat message, call update_trip immediately to save them — don't wait for the form. Acknowledge what you've saved in one friendly sentence.`;
 
 const COMPLETE_ADDENDUM = `\n\n## Current Phase: Trip Booked
 The trip is booked. Answer follow-up questions about the trip.`;
