@@ -1,8 +1,8 @@
-# Agentic Travel Agent — Full Application Description
+# Voyager — Full Application Description
 
 ## Overview
 
-The Agentic Travel Agent is a full-stack AI-powered travel planning application that demonstrates **agentic tool-use loops** — the capstone pattern in a portfolio of eight progressive AI applications. Users describe a trip in natural language (destination, dates, budget, preferences), and an AI agent autonomously searches live flight, hotel, and experience APIs, reasons about budget constraints between each step, and assembles a complete itinerary — all streamed to the frontend in real time.
+Voyager is a full-stack AI-powered travel planning application that demonstrates **agentic tool-use loops** — the capstone pattern in a portfolio of eight progressive AI applications. Users describe a trip in natural language (destination, dates, budget, preferences), and an AI agent autonomously searches live flight, hotel, and experience APIs, reasons about budget constraints between each step, and assembles a complete itinerary — all streamed to the frontend in real time.
 
 Unlike simple chatbot wrappers, the agent makes **3–8 sequential tool calls per turn**, examining results, adjusting strategy, and proactively suggesting alternatives when a selection exceeds the budget. This is the key differentiator: the AI is not just answering questions — it is _acting_ on the user's behalf across multiple external systems.
 
@@ -100,7 +100,7 @@ Every tool invocation is logged to a `tool_call_log` table:
 ### Monorepo Structure
 
 ```
-agentic-travel-agent/
+voyager/
 ├── server/           Express API (Railway)
 │   ├── src/
 │   │   ├── routes/         API route definitions
