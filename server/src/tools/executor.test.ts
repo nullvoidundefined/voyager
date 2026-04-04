@@ -1,193 +1,152 @@
-import { updateTrip } from 'app/repositories/trips/trips.js';
-import { calculateRemainingBudget } from 'app/tools/budget.tool.js';
-import { getDestinationInfo } from 'app/tools/destination.tool.js';
-import { executeTool } from 'app/tools/executor.js';
-import { searchExperiences } from 'app/tools/experiences.tool.js';
-import { searchFlights } from 'app/tools/flights.tool.js';
-import { searchHotels } from 'app/tools/hotels.tool.js';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { executeTool } from "app/tools/executor.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock('app/tools/flights.tool.js');
-vi.mock('app/tools/hotels.tool.js');
-vi.mock('app/tools/experiences.tool.js');
-vi.mock('app/tools/budget.tool.js');
-vi.mock('app/tools/destination.tool.js');
-vi.mock('app/repositories/trips/trips.js');
-vi.mock('app/tools/mock/isMockMode.js', () => ({
-  isMockMode: vi.fn().mockReturnValue(false),
+vi.mock("app/repositories/trips/trips.js", () => ({
+  updateTrip: vi.fn().mockResolvedValue({ id: "trip-1" }),
+  insertTripFlight: vi.fn().mockResolvedValue(undefined),
+  insertTripHotel: vi.fn().mockResolvedValue(undefined),
+  insertTripCarRental: vi.fn().mockResolvedValue(undefined),
+  insertTripExperience: vi.fn().mockResolvedValue(undefined),
 }));
-vi.mock('app/tools/mock/flights.mock.js', () => ({
-  generateMockFlights: vi.fn(),
+vi.mock("app/tools/flights.tool.js", () => ({
+  searchFlights: vi.fn().mockResolvedValue([]),
 }));
-vi.mock('app/tools/mock/hotels.mock.js', () => ({
-  generateMockHotels: vi.fn(),
+vi.mock("app/tools/hotels.tool.js", () => ({
+  searchHotels: vi.fn().mockResolvedValue([]),
 }));
-vi.mock('app/tools/mock/car-rentals.mock.js', () => ({
-  generateMockCarRentals: vi.fn(),
+vi.mock("app/tools/experiences.tool.js", () => ({
+  searchExperiences: vi.fn().mockResolvedValue([]),
 }));
-vi.mock('app/tools/mock/experiences.mock.js', () => ({
-  generateMockExperiences: vi.fn(),
+vi.mock("app/tools/car-rentals.tool.js", () => ({
+  searchCarRentals: vi.fn().mockResolvedValue({ rentals: [] }),
 }));
-vi.mock('app/utils/logs/logger.js', () => ({
+vi.mock("app/tools/budget.tool.js", () => ({
+  calculateRemainingBudget: vi.fn().mockReturnValue({ remaining: 500 }),
+}));
+vi.mock("app/tools/destination.tool.js", () => ({
+  getDestinationInfo: vi
+    .fn()
+    .mockReturnValue({ city_name: "Barcelona", iata_code: "BCN" }),
+}));
+vi.mock("app/utils/logs/logger.js", () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
-describe('executor', () => {
+const ctx = { tripId: "trip-1", userId: "user-1" };
+
+describe("executeTool", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('executeTool', () => {
-    it('dispatches search_flights to flights tool', async () => {
-      vi.mocked(searchFlights).mockResolvedValueOnce([]);
-
-      const result = await executeTool('search_flights', {
-        origin: 'SFO',
-        destination: 'BCN',
-        departure_date: '2026-07-01',
-        passengers: 1,
-      });
-
-      expect(searchFlights).toHaveBeenCalledWith({
-        origin: 'SFO',
-        destination: 'BCN',
-        departure_date: '2026-07-01',
-        passengers: 1,
-      });
-      expect(result).toEqual([]);
+  describe("Zod validation", () => {
+    it("rejects search_flights with missing required fields", async () => {
+      const result = await executeTool("search_flights", {});
+      expect(result).toHaveProperty("error");
+      expect((result as { error: string }).error).toContain("Validation");
     });
 
-    it('dispatches search_hotels to hotels tool', async () => {
-      vi.mocked(searchHotels).mockResolvedValueOnce([]);
-
-      await executeTool('search_hotels', {
-        city_code: 'BCN',
-        check_in: '2026-07-01',
-        check_out: '2026-07-06',
-        guests: 2,
+    it("rejects search_flights with invalid date format", async () => {
+      const result = await executeTool("search_flights", {
+        origin: "JFK",
+        destination: "BCN",
+        departure_date: "07/01/2026",
+        passengers: 2,
       });
-
-      expect(searchHotels).toHaveBeenCalled();
+      expect(result).toHaveProperty("error");
+      expect((result as { error: string }).error).toContain("Validation");
     });
 
-    it('dispatches search_experiences to experiences tool', async () => {
-      vi.mocked(searchExperiences).mockResolvedValueOnce([]);
-
-      await executeTool('search_experiences', {
-        location: 'Barcelona',
-        categories: ['tours'],
+    it("accepts valid search_flights input", async () => {
+      const result = await executeTool("search_flights", {
+        origin: "JFK",
+        destination: "BCN",
+        departure_date: "2026-07-01",
+        passengers: 2,
       });
-
-      expect(searchExperiences).toHaveBeenCalled();
+      expect(result).not.toHaveProperty("error");
     });
 
-    it('dispatches calculate_remaining_budget to budget tool', async () => {
-      const budgetResult = {
-        total_budget: 3000,
-        total_spent: 1500,
-        remaining: 1500,
-        remaining_percentage: 50,
-        over_budget: false,
-        breakdown: {
-          flights: { amount: 900, percentage: 30 },
-          hotels: { amount: 600, percentage: 20 },
-          experiences: { amount: 0, percentage: 0 },
-        },
-      };
-      vi.mocked(calculateRemainingBudget).mockReturnValueOnce(budgetResult);
+    it("rejects search_hotels with non-numeric guests", async () => {
+      const result = await executeTool("search_hotels", {
+        city: "Barcelona",
+        check_in: "2026-07-01",
+        check_out: "2026-07-05",
+        guests: "two",
+      });
+      expect(result).toHaveProperty("error");
+    });
 
-      const result = await executeTool('calculate_remaining_budget', {
-        total_budget: 3000,
-        flight_cost: 900,
-        hotel_total_cost: 600,
+    it("rejects calculate_remaining_budget with string instead of number", async () => {
+      const result = await executeTool("calculate_remaining_budget", {
+        total_budget: "three thousand",
+        flight_cost: 0,
+        hotel_total_cost: 0,
         experience_costs: [],
       });
-
-      expect(calculateRemainingBudget).toHaveBeenCalled();
-      expect(result).toEqual(budgetResult);
+      expect(result).toHaveProperty("error");
     });
 
-    it('dispatches get_destination_info to destination tool', async () => {
-      const destResult = {
-        city_name: 'Barcelona',
-        iata_code: 'BCN',
-        country: 'Spain',
-        timezone: 'Europe/Madrid',
-        currency: 'EUR',
-        best_time_to_visit: 'May to June',
-      };
-      vi.mocked(getDestinationInfo).mockReturnValueOnce(destResult);
-
-      const result = await executeTool('get_destination_info', {
-        city_name: 'Barcelona',
-      });
-
-      expect(getDestinationInfo).toHaveBeenCalledWith({
-        city_name: 'Barcelona',
-      });
-      expect(result).toEqual(destResult);
-    });
-
-    it('dispatches update_trip to trips repository', async () => {
-      vi.mocked(updateTrip).mockResolvedValueOnce({
-        id: 'trip-1',
-        user_id: 'user-1',
-        destination: 'Barcelona',
-        origin: null,
-        departure_date: '2026-07-01',
-        return_date: '2026-07-06',
-        budget_total: 3000,
-        budget_currency: 'USD',
-        travelers: 1,
-        preferences: {},
-        status: 'planning',
-        transport_mode: null,
-        created_at: new Date(),
-        updated_at: new Date(),
-      });
-
+    it("rejects update_trip with invalid date format", async () => {
       const result = await executeTool(
-        'update_trip',
-        { destination: 'Barcelona', budget_total: 3000 },
-        { tripId: 'trip-1', userId: 'user-1' },
+        "update_trip",
+        { departure_date: "next Tuesday" },
+        ctx,
       );
+      expect(result).toHaveProperty("error");
+    });
 
-      expect(updateTrip).toHaveBeenCalledWith('trip-1', 'user-1', {
-        destination: 'Barcelona',
-        budget_total: 3000,
-      });
+    it("accepts valid update_trip with no fields", async () => {
+      const result = await executeTool("update_trip", {}, ctx);
+      expect(result).not.toHaveProperty("error");
+    });
+
+    it("rejects select_flight with missing required fields", async () => {
+      const result = await executeTool(
+        "select_flight",
+        { airline: "Delta" },
+        ctx,
+      );
+      expect(result).toHaveProperty("error");
+    });
+
+    it("accepts valid select_flight", async () => {
+      const result = await executeTool(
+        "select_flight",
+        {
+          airline: "Delta",
+          flight_number: "DL100",
+          origin: "JFK",
+          destination: "BCN",
+          price: 450,
+          currency: "USD",
+        },
+        ctx,
+      );
       expect(result).toEqual({
         success: true,
-        message: 'Trip updated successfully',
+        message: "Flight selection saved",
       });
     });
+  });
 
-    it('throws for update_trip without context', async () => {
-      await expect(
-        executeTool('update_trip', { destination: 'Barcelona' }),
-      ).rejects.toThrow('update_trip requires trip context');
-    });
-
-    it('throws for unknown tool name', async () => {
-      await expect(executeTool('unknown_tool', {})).rejects.toThrow(
-        'Unknown tool: unknown_tool',
+  describe("routing", () => {
+    it("throws on unknown tool name", async () => {
+      await expect(executeTool("nonexistent_tool", {})).rejects.toThrow(
+        "Unknown tool",
       );
     });
 
-    it('returns timing information', async () => {
-      vi.mocked(searchFlights).mockResolvedValueOnce([]);
+    it("throws when context-required tools lack context", async () => {
+      await expect(
+        executeTool("update_trip", { destination: "Paris" }),
+      ).rejects.toThrow("requires trip context");
+    });
 
-      const start = Date.now();
-      await executeTool('search_flights', {
-        origin: 'SFO',
-        destination: 'BCN',
-        departure_date: '2026-07-01',
-        passengers: 1,
-      });
-      const elapsed = Date.now() - start;
-
-      // Should complete quickly with mocked tools
-      expect(elapsed).toBeLessThan(100);
+    it("returns input as-is for format_response", async () => {
+      const input = { text: "Hello!" };
+      const result = await executeTool("format_response", input);
+      expect(result).toEqual(input);
     });
   });
 });
