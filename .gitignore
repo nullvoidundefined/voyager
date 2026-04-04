@@ -21,3 +21,5 @@ coverage/
 
 web-client/playwright-report/
 web-client/test-results/
+
+eval/reports/*.json

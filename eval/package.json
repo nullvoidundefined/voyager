@@ -1,0 +1,19 @@
+{
+  "name": "agentic-travel-agent-eval",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "eval": "tsx src/index.ts",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.80.0",
+    "dotenv": "^17.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

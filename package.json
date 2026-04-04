@@ -23,7 +23,8 @@
     "bottomlessmargaritas:format": "prettier --config prettier.config.bottomlessmargaritas.mjs --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "bottomlessmargaritas:format:check": "prettier --config prettier.config.bottomlessmargaritas.mjs --check \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "bottomlessmargaritas:lint": "eslint --config eslint.config.bottomlessmargaritas.js .",
-    "bottomlessmargaritas:lint:fix": "eslint --config eslint.config.bottomlessmargaritas.js . --fix"
+    "bottomlessmargaritas:lint:fix": "eslint --config eslint.config.bottomlessmargaritas.js . --fix",
+    "eval": "pnpm --filter agentic-travel-agent-eval run eval"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.6",
