@@ -42,5 +42,13 @@ if ! redis-cli -h "$REDIS_HOST" -p "$REDIS_PORT" ping >/dev/null 2>&1; then
   fail "Redis not reachable at $REDIS_HOST:$REDIS_PORT"
 fi
 
-echo "✓ e2e-precheck: Postgres and Redis are up"
+# Verify the server can boot. Its dotenv/config import only finds
+# server/.env when run from the server/ directory, so an empty
+# worktree (which never had .env copied in) would crash later
+# with "DATABASE_URL is required". Catch that here.
+if [ ! -f "server/.env" ]; then
+  fail "server/.env is missing (worktrees do not inherit .env from main)"
+fi
+
+echo "✓ e2e-precheck: Postgres, Redis, and server/.env are present"
 exit 0
