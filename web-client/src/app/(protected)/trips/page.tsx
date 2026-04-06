@@ -1,5 +1,8 @@
 'use client';
 
+import { useState } from 'react';
+
+import { AlertDialog } from '@/components/ui/AlertDialog/AlertDialog';
 import { del, get } from '@/lib/api';
 import { getDestinationImage } from '@/lib/destinationImage';
 import { formatCurrency, formatShortDate } from '@/lib/format';
@@ -75,17 +78,23 @@ export default function TripsPage() {
     },
   });
 
-  // Guarded delete handler. Confirms before firing the mutation so that
-  // an accidental tap on the delete button does not silently wipe a
-  // trip. Minimum viable guardrail; Plan C Task 29 migrates this to a
-  // Radix AlertDialog with proper focus trap and aria semantics.
+  // Guarded delete via Radix AlertDialog. Plan C Task 9 used
+  // window.confirm as a minimum viable guardrail; Task 29 upgrades
+  // to the shared components/ui/AlertDialog primitive for proper
+  // focus trap, aria-modal, and motion-respecting animations.
+  const [pendingDeleteTripId, setPendingDeleteTripId] = useState<string | null>(
+    null,
+  );
+
   const handleDeleteClick = (e: React.MouseEvent, tripId: string) => {
     e.preventDefault();
-    const confirmed = window.confirm(
-      'Delete this trip? This cannot be undone.',
-    );
-    if (confirmed) {
-      deleteMutation.mutate(tripId);
+    setPendingDeleteTripId(tripId);
+  };
+
+  const confirmDelete = () => {
+    if (pendingDeleteTripId) {
+      deleteMutation.mutate(pendingDeleteTripId);
+      setPendingDeleteTripId(null);
     }
   };
 
@@ -175,6 +184,19 @@ export default function TripsPage() {
           </Link>
         </div>
       )}
+
+      <AlertDialog
+        open={pendingDeleteTripId !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDeleteTripId(null);
+        }}
+        title='Delete this trip?'
+        description='This action cannot be undone. The trip, its conversation history, and any saved itinerary items will be permanently removed.'
+        confirmLabel='Delete trip'
+        cancelLabel='Keep trip'
+        onConfirm={confirmDelete}
+        destructive
+      />
     </div>
   );
 }
