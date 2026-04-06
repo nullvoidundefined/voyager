@@ -1,3 +1,4 @@
+import { DemoBanner } from '@/components/DemoBanner/DemoBanner';
 import { APP_NAME } from '@/lib/constants';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -143,6 +144,7 @@ export default function FaqPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className={styles.page}>
+        <DemoBanner />
         <header className={styles.hero}>
           <h1>Frequently Asked Questions</h1>
           <p>

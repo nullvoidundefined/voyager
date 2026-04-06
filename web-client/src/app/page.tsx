@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { DemoBanner } from '@/components/DemoBanner/DemoBanner';
 import { MockChatBox } from '@/components/MockChatBox/MockChatBox';
 import { useAuth } from '@/context/AuthContext';
 import { HERO_IMAGES, getDestinationImageUrl } from '@/lib/destinationImage';
@@ -133,6 +134,7 @@ export default function Home() {
 
   return (
     <div className={styles.landing}>
+      <DemoBanner />
       {/* — Hero — */}
       <section className={styles.hero}>
         {HERO_IMAGES.map((img, i) => (
