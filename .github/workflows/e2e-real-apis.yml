@@ -1,0 +1,66 @@
+name: E2E Real APIs (nightly)
+
+on:
+  schedule:
+    - cron: '0 7 * * *' # 07:00 UTC daily
+  workflow_dispatch:
+
+jobs:
+  real-api-smoke:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_USER: postgres
+          POSTGRES_DB: voyager_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter voyager-server run migrate
+        env:
+          DATABASE_URL: postgres://postgres:test@localhost:5432/voyager_test
+      - run: pnpm --dir web-client exec playwright install --with-deps chromium
+      - name: Run real-API smoke (no E2E_MOCK_TOOLS)
+        run: |
+          pnpm --dir web-client exec playwright test \
+            --config=../playwright.config.real-apis.ts
+        env:
+          DATABASE_URL: postgres://postgres:test@localhost:5432/voyager_test
+          REDIS_URL: redis://localhost:6379
+          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NODE_ENV: test
+      - name: Open issue on failure
+        if: failure()
+        run: |
+          gh issue create \
+            --title "real-api smoke failed $(date -u +%Y-%m-%d)" \
+            --label real-api-failure \
+            --body "Nightly real-api smoke failed. See workflow run $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-real-apis
+          path: playwright-report/
+          retention-days: 14

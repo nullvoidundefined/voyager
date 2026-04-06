@@ -22,6 +22,8 @@ coverage/
 
 web-client/playwright-report/
 web-client/test-results/
+playwright-report/
+test-results/
 
 eval/reports/*.json
 eval/personas-cache.json

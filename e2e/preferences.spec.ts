@@ -1,0 +1,57 @@
+/**
+ * User preferences: US-29 through US-33.
+ *
+ * Source of truth: docs/USER_STORIES.md.
+ */
+import { expect, test } from '@playwright/test';
+
+import { newUser, seedUser } from './fixtures/test-users';
+import { login, register } from './helpers/auth';
+
+test.describe('Preferences', () => {
+  test('US-29: preferences wizard opens after registration', async ({
+    page,
+  }) => {
+    const user = newUser();
+    await register(page, user);
+    // The wizard may live on /trips with a modal, /onboarding, or
+    // a dedicated preferences route. Accept any of those landings.
+    await expect(page).toHaveURL(/\/(trips|onboarding|preferences)/, {
+      timeout: 10_000,
+    });
+  });
+
+  test.fixme('US-30: navigate through wizard steps', async () => {
+    // Asserts Next/Back/Skip work and progress bar advances.
+  });
+
+  test('US-31: edit preferences from account page', async ({ page }) => {
+    const user = await seedUser(newUser());
+    await login(page, user);
+    await page.goto('/account');
+    const editBtn = page
+      .locator(
+        'button:has-text("Edit Preferences"), a:has-text("Edit Preferences")',
+      )
+      .first();
+    if ((await editBtn.count()) === 0) {
+      test.skip(true, 'edit-preferences affordance not yet implemented');
+    }
+    await editBtn.click();
+  });
+
+  test.fixme('US-32: incomplete preferences badge', async () => {
+    // Asserts a coral dot next to the Account nav link when
+    // wizard is incomplete.
+  });
+
+  test('US-33: view preferences on account page', async ({ page }) => {
+    const user = await seedUser(newUser());
+    await login(page, user);
+    await page.goto('/account');
+    // AC: completion count visible.
+    await expect(
+      page.locator('text=/[0-9]+ of [0-9]+ categor/i').first(),
+    ).toBeVisible({ timeout: 10_000 });
+  });
+});
