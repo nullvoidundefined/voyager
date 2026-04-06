@@ -8,9 +8,16 @@ export async function createTrip(page: Page): Promise<void> {
   await page.click(
     'a:has-text("New Trip"), button:has-text("New Trip"), a:has-text("New trip"), button:has-text("New trip")',
   );
-  await expect(page).toHaveURL(/\/trips\/(new|[a-f0-9-]+)/, {
-    timeout: 10_000,
-  });
+  // /trips/new is a redirect page: it POSTs a new trip then
+  // router.replaces to /trips/{uuid}. Wait for the final URL
+  // (which includes a UUID) rather than accepting /trips/new,
+  // otherwise downstream test code that calls
+  // extractTripId() on page.url() races the redirect and sees
+  // /trips/new.
+  await expect(page).toHaveURL(
+    /\/trips\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/,
+    { timeout: 15_000 },
+  );
 }
 
 export async function loadTrip(page: Page, tripId: string): Promise<void> {
