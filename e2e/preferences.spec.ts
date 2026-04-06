@@ -14,11 +14,12 @@ test.describe('Preferences', () => {
   }) => {
     const user = newUser();
     await register(page, user);
-    // The wizard may live on /trips with a modal, /onboarding, or
-    // a dedicated preferences route. Accept any of those landings.
-    await expect(page).toHaveURL(/\/(trips|onboarding|preferences)/, {
-      timeout: 10_000,
-    });
+    // The wizard renders IN PLACE on /register and is identified
+    // by its H2 "Your Travel Preferences". The URL stays at
+    // /register until the wizard closes via router.push.
+    await expect(
+      page.locator('h2:has-text("Your Travel Preferences")'),
+    ).toBeVisible({ timeout: 5_000 });
   });
 
   test.fixme('US-30: navigate through wizard steps', async () => {

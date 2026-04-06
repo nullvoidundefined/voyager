@@ -153,7 +153,10 @@ export function VirtualizedChat({
                 transform: `translateY(${virtualItem.start}px)`,
               }}
             >
-              <div className={`${styles.message} ${styles[message.role]}`}>
+              <div
+                className={`${styles.message} ${styles[message.role]}`}
+                data-role={message.role}
+              >
                 <div className={styles.roleBadge}>
                   {message.role === 'user' ? 'You' : APP_NAME}
                 </div>

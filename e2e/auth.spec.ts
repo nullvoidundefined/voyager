@@ -13,11 +13,15 @@ test.describe('Authentication', () => {
     const user = newUser();
     await register(page, user);
     // AC: successful registration opens the Preferences Wizard.
-    // The wizard lives on /trips with a modal overlay, OR a dedicated
-    // route. Accept either landing.
-    await expect(page).toHaveURL(/\/(trips|onboarding|preferences)/, {
-      timeout: 10_000,
-    });
+    // The wizard renders IN PLACE on /register; the URL only
+    // changes after the user closes the wizard. Assert the
+    // wizard's H2 is visible instead of insisting on a URL change.
+    // The register helper already waits for either the wizard or
+    // a URL change, so by the time we get here at least one is
+    // true.
+    await expect(
+      page.locator('h2:has-text("Your Travel Preferences")'),
+    ).toBeVisible({ timeout: 5_000 });
   });
 
   test('US-9: log in (@fast)', async ({ page }) => {

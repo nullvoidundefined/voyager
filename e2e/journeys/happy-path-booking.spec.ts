@@ -26,8 +26,10 @@ test('journey happy-path-booking (@fast)', async ({ page }) => {
   // US-5: register from public CTA.
   await register(page, newUser());
 
-  // US-29 + US-14: land in the wizard or trip area, get to a trip.
-  await expect(page).toHaveURL(/\/(trips|onboarding|preferences)/, {
-    timeout: 10_000,
-  });
+  // US-29 + US-14: the PreferencesWizard renders in place on
+  // /register; assert the wizard appeared rather than insisting
+  // on a URL change that only happens after the wizard closes.
+  await expect(
+    page.locator('h2:has-text("Your Travel Preferences")'),
+  ).toBeVisible({ timeout: 5_000 });
 });
