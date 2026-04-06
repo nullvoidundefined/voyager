@@ -2,15 +2,21 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add 6 Voyager-tailored audit slash-commands, run them in parallel, and triage the findings into a P0/P1 fix queue plus a P2/P3 `ISSUES.md` rolling log.
+**Goal:** Add 8 Voyager-tailored audit slash-commands (thin wrappers over the canonical role definitions at `~/.claude/audits/<role>.md`), run them in parallel, and triage the findings into a P0/P1 fix queue plus a P2/P3 `ISSUES.md` rolling log.
 
-**Architecture:** Phase 1 writes 6 prompt files under `.claude/commands/` that each tell Claude to produce a dated audit file under `docs/audits/`. Phase 2 dispatches 6 subagents in parallel using `isolation: "worktree"` so concurrent commits never conflict. Phase 3 reads all 6 audit files and produces a single consolidated triage document plus an `ISSUES.md` update.
+**Architecture:** Phase 1 writes 8 thin prompt files under `.claude/commands/`, each of which delegates to the corresponding canonical role file at `~/.claude/audits/<role>.md` and adds only Voyager-specific inputs (file paths, project-specific concerns, output location). Phase 2 dispatches 8 subagents in parallel using `isolation: "worktree"` so concurrent commits never conflict; each subagent reads its canonical role file for persona + required sections + disposition, then applies that role to the Voyager codebase. Phase 3 reads all 8 audit files and produces a single consolidated triage document plus an `ISSUES.md` update.
 
-**Tech Stack:** Claude Code slash-commands (Markdown prompts), Agent tool with worktree isolation, Playwright/Vitest stacks are NOT touched in this plan.
+**Canonical role list (from `~/.claude/CLAUDE.md` Audit Roles section):** engineering, ux, design, marketing, financial, security, legal, criticism.
 
-**Scope note:** This plan covers Phases 1–3 of the full design at `docs/superpowers/specs/2026-04-06-doppelscript-learnings-to-voyager-design.md`. Phase 4 (E2E coverage) and Phase 5 (test gates + P0/P1 fixes) will be written as separate plans after this plan completes and the triage file exists — those plans depend on the triage output to scope prerequisite fixes (e.g., whether the tool executor supports adapter injection for E2E mocking).
+**Layering rule:** anything that would apply to any project (persona, mission, required report sections, disposition) lives at the top level in `~/.claude/audits/<role>.md` and is never duplicated. Anything Voyager-specific (file paths, agent-loop concerns, SerpApi quota, dead Amadeus references, monorepo structure) lives in the project command.
+
+**Tech Stack:** Claude Code slash-commands (Markdown prompts), Agent tool with worktree isolation. No Playwright/Vitest work in this plan.
+
+**Scope note:** This plan covers Phases 1–3 of the full design at `docs/superpowers/specs/2026-04-06-doppelscript-learnings-to-voyager-design.md`. Phase 4 (E2E coverage) and Phase 5 (test gates + P0/P1 fixes) will be written as separate plans (Plan B and Plan C) after this plan completes and the triage file exists — those plans depend on the triage output to scope prerequisite fixes and P0/P1 fix queues.
 
 **Source spec:** `docs/superpowers/specs/2026-04-06-doppelscript-learnings-to-voyager-design.md`
+
+**Working branch:** `plan/audit-2026-04-06` in the worktree at `.claude/worktrees/plan-audit-2026-04-06/`
 
 ---
 
@@ -21,28 +27,33 @@ Files created or modified by this plan:
 ```
 voyager/
 ├── .claude/commands/
-│   ├── audit-engineering.md    [CREATE]
-│   ├── audit-security.md       [CREATE]
-│   ├── audit-design.md         [CREATE]
-│   ├── audit-ux.md             [CREATE]
-│   ├── audit-marketing.md      [CREATE]
-│   └── audit-criticism.md      [CREATE]
+│   ├── audit-engineering.md    [CREATE — thin wrapper]
+│   ├── audit-security.md       [CREATE — thin wrapper]
+│   ├── audit-design.md         [CREATE — thin wrapper]
+│   ├── audit-ux.md             [CREATE — thin wrapper]
+│   ├── audit-marketing.md      [CREATE — thin wrapper]
+│   ├── audit-financial.md      [CREATE — thin wrapper]
+│   ├── audit-legal.md          [CREATE — thin wrapper]
+│   └── audit-criticism.md      [CREATE — thin wrapper]
 ├── docs/audits/                [CREATE directory]
-│   ├── .gitkeep                [CREATE — keeps empty dir tracked before Phase 2]
-│   ├── 2026-04-06-engineering.md   [CREATE by subagent in Phase 2]
-│   ├── 2026-04-06-security.md      [CREATE by subagent in Phase 2]
-│   ├── 2026-04-06-design.md        [CREATE by subagent in Phase 2]
-│   ├── 2026-04-06-ux.md            [CREATE by subagent in Phase 2]
-│   ├── 2026-04-06-marketing.md     [CREATE by subagent in Phase 2]
-│   ├── 2026-04-06-criticism.md     [CREATE by subagent in Phase 2]
-│   └── 2026-04-06-triage.md        [CREATE in Phase 3]
+│   ├── .gitkeep                [CREATE — tracks empty dir before Phase 2]
+│   ├── 2026-04-06-engineering.md    [CREATE by subagent in Phase 2]
+│   ├── 2026-04-06-security.md       [CREATE by subagent in Phase 2]
+│   ├── 2026-04-06-design.md         [CREATE by subagent in Phase 2]
+│   ├── 2026-04-06-ux.md             [CREATE by subagent in Phase 2]
+│   ├── 2026-04-06-marketing.md      [CREATE by subagent in Phase 2]
+│   ├── 2026-04-06-financial.md      [CREATE by subagent in Phase 2]
+│   ├── 2026-04-06-legal.md          [CREATE by subagent in Phase 2]
+│   ├── 2026-04-06-criticism.md      [CREATE by subagent in Phase 2]
+│   └── 2026-04-06-triage.md         [CREATE in Phase 3]
 └── ISSUES.md                   [CREATE or APPEND in Phase 3]
 ```
 
 **Conventions:**
 
-- Audit command files are plain Markdown prompts. They have no tests of their own — the "test" is that Phase 2 runs them successfully. So Tasks 2–7 do not follow a TDD loop; they just write, verify structure, and move on.
-- Phase 2 and Phase 3 have meaningful verification steps (file existence, required section presence, every finding traced) that act as their tests.
+- Audit command files are Markdown prompts. They have no tests of their own; the "test" is that Phase 2 runs them successfully.
+- Tasks 2–9 (writing the 8 commands) are short because each is a thin wrapper.
+- Phase 2 and Phase 3 have verification steps (file existence, required section presence, every finding traced) that act as their tests.
 
 ---
 
@@ -56,21 +67,21 @@ voyager/
 
 Run: `ls docs/ 2>&1`
 
-Expected: The `audits/` subdirectory does NOT exist yet. Other files like `USER_STORIES.md` do.
+Expected: `audits/` subdirectory does not exist yet.
 
 - [ ] **Step 2: Create the directory and `.gitkeep` sentinel**
 
-Use the Write tool to create `docs/audits/.gitkeep` with empty content. (The Write tool will create parent directories automatically.)
+Use the Write tool to create `docs/audits/.gitkeep` with empty content. (Write creates parent directories automatically.)
 
 - [ ] **Step 3: Verify creation**
 
 Run: `ls -la docs/audits/`
 
-Expected: Output shows `.gitkeep` file exists in the directory.
+Expected: `.gitkeep` exists.
 
 - [ ] **Step 4: Do NOT commit yet**
 
-The `.gitkeep` will be committed as part of Task 8 alongside the audit commands.
+Bundled into the Phase 1 commit in Task 10.
 
 ---
 
@@ -80,56 +91,64 @@ The `.gitkeep` will be committed as part of Task 8 alongside the audit commands.
 
 - Create: `.claude/commands/audit-engineering.md`
 
-- [ ] **Step 1: Write the command file**
+- [ ] **Step 1: Write the thin-wrapper command file**
 
 Use the Write tool to create `.claude/commands/audit-engineering.md` with this exact content:
 
 ```markdown
-You are a Principal Engineer with 20+ years of experience in distributed systems, API design, security, performance, and production-grade TypeScript / Node.js applications. You have deep expertise in agentic AI systems, tool-use loops, and multi-step reasoning architectures. Conduct a comprehensive engineering audit of Voyager.
+# /audit-engineering — Voyager Engineering Audit
 
-## Instructions
+Invoke the canonical Engineering (CTO) audit role. **Your persona, mission, advisory autonomy, required report sections, failure modes, and disposition are all defined in `~/.claude/audits/engineering.md` — read that file first.** This command only adds Voyager-specific context on top of the canonical role.
 
-1. Work on the current branch (do not create a new branch).
-2. Read the full Voyager codebase — `server/`, `web-client/`, `packages/`, database migrations under `server/migrations/`, `Dockerfile.server`, `railway.toml`, the agent loop in `server/src/services/agent.service.ts`, tool definitions and executors, the SerpApi and Google Places clients, the cache service, dependencies, CI / CD config.
-3. Also read `.claude/bottomlessmargaritas/CLAUDE-BACKEND.md`, `CLAUDE-DATABASE.md`, `CLAUDE-FRONTEND.md`, `docs/FULL_APPLICATION_SPEC.md`, and `docs/USER_STORIES.md` to understand architectural intent.
-4. Generate a file at `docs/audits/YYYY-MM-DD-engineering.md` (use today's date) with the following sections:
-   - **Executive Summary** — high-level assessment and top 3 priorities
-   - **Agent Loop Correctness** — tool-call budget enforcement, max-15 safety limit, malformed tool-response handling, reasoning-between-calls integrity, streaming behavior, token budget tracking, whether the tool executor supports adapter injection (important for E2E mocking)
-   - **External API Integration** — SerpApi caching strategy and quota management, Google Places rate limiting, error and timeout handling, retry logic, cost per agent turn
-   - **Architecture & Design** — layering between routes / handlers / services / repositories, separation of concerns, monorepo hygiene (pnpm workspaces, shared types between server and web-client), coupling hotspots
-   - **Code Quality** — consistency, naming, duplication, dead code, complexity hotspots, dead Amadeus references in schema / tests / docs (flagged in prior investigation — evaluate whether to remove or actually implement)
-   - **Security** — auth flow, CSRF pattern, input validation, secrets management, prompt injection through the agent loop
-   - **Database** — schema design, query patterns, indexing, migration hygiene, connection pooling, raw SQL correctness, pg driver usage
-   - **API Design** — route consistency, error response shape, rate limiting, versioning, request validation (Zod or otherwise)
-   - **Performance** — N+1 queries, bundle size, caching layer effectiveness, cold start, agent turn latency
-   - **Testing** — coverage gaps at unit, integration, and E2E levels; test quality; missing edge cases; mocking discipline
-   - **Docker & Railway Build** — `Dockerfile.server` correctness, multi-stage build effectiveness, image size, `railway.toml`, environment variable hygiene
-   - **Dependencies & Supply Chain** — outdated packages, unnecessary deps, security advisories, lockfile integrity
-   - **DevOps & Deployment** — CI / CD, monitoring, logging, error tracking, rollback strategy
-   - **Tech Debt Register** — known shortcuts, TODOs, deferred decisions, with risk ratings
-   - **Prioritized Recommendations** — ranked list of actionable improvements with estimated impact (High / Med / Low) and effort (High / Med / Low)
+## Voyager-specific context
 
-5. Commit the audit file to the current branch.
-6. Report back with a summary of your findings.
+Apply the canonical Engineering role to the Voyager codebase with these project-specific inputs.
 
-Be specific. Reference actual files, functions, and line numbers. Don't be generic — this is a real audit, not a template. If you find the Amadeus integration is referenced but never called, call it out and recommend removal or implementation.
+**Primary read targets:**
+
+- `server/` — Express API, services, repositories, handlers, middleware
+- `web-client/` — Next.js 15 frontend
+- `packages/` — shared packages across the pnpm workspace
+- `server/migrations/` — Postgres migrations (pg driver, raw SQL, no ORM)
+- `Dockerfile.server`, `railway.toml` — deploy config
+- `.github/workflows/` — CI / CD (if present)
+- `lefthook.yml` — pre-commit / pre-push hooks
+
+**Voyager-specific concerns to evaluate carefully:**
+
+- **Agent loop correctness** — `server/src/services/agent.service.ts` and related tool executor code. Evaluate tool-call budget enforcement (max 15 per turn), malformed tool-response handling, reasoning-between-calls integrity, streaming behavior, and critically: **does the tool executor support adapter injection so E2E tests can swap SerpApi / Google Places for mocks via an env flag? This is a prerequisite for Plan B (E2E coverage).** If adapters are not supported, flag it as P1.
+- **External API integration** — SerpApi caching + quota management (250 searches/month free tier is unforgiving), Google Places rate limiting, retry logic, cost per agent turn in Claude tokens.
+- **Monorepo hygiene** — pnpm workspace structure, shared types between `server/` and `web-client/`, duplication across packages.
+- **Dead Amadeus references** — `server/src/schemas/trips.ts` has `amadeus_offer_id` / `amadeus_hotel_id` columns, and several tests reference Amadeus as a label string, but there is no Amadeus client in `server/src/`. Call out this spec-vs-implementation drift and recommend either removing the dead references or actually implementing the integration.
+- **Docker & Railway build** — `Dockerfile.server` multi-stage effectiveness, image size, env var hygiene, `railway.toml` `dockerfilePath` correctness.
+- **E2E readiness** — per the canonical role's "Operational Basics" requirement: do E2E tests exist? Are they wired to any trigger (pre-push, CI, nightly)? Voyager currently has only minimal E2E coverage — `e2e/auth.spec.ts` and `e2e/navigation.spec.ts`. Flag the gap.
+
+**Project convention files (read before writing):**
+
+- `.claude/bottomlessmargaritas/CLAUDE-BACKEND.md`
+- `.claude/bottomlessmargaritas/CLAUDE-DATABASE.md`
+- `.claude/bottomlessmargaritas/CLAUDE-FRONTEND.md`
+- `.claude/bottomlessmargaritas/CLOUD-DEPLOYMENT.md`
+
+**Product documents:**
+
+- `docs/FULL_APPLICATION_SPEC.md`
+- `docs/USER_STORIES.md`
+- `CLAUDE.md` (project root)
+- `README.md`
+
+## Output
+
+- **File:** `docs/audits/YYYY-MM-DD-engineering.md` (use today's date)
+- **Commit:** to the current branch. Do not create a separate audit branch.
+- **Report back:** executive summary plus the top 3 blockers per the canonical role's required output format.
 ```
 
-- [ ] **Step 2: Verify the file structure**
+- [ ] **Step 2: Verify the file**
 
-Read the file back and confirm:
-
-- Starts with a Principal Engineer persona sentence
-- Has an "## Instructions" section
-- Step 4 references `docs/audits/YYYY-MM-DD-engineering.md`
-- Includes "Agent Loop Correctness" as a section (Voyager-specific)
-- Includes "External API Integration" as a section (Voyager-specific)
-- Ends with a "be specific, reference actual files" closing line
-- Does NOT create a new branch (step 1 says "Work on the current branch")
+Read the file back and confirm it references `~/.claude/audits/engineering.md`, lists Voyager-specific concerns (agent loop, SerpApi, Amadeus, adapter injection), and writes output to `docs/audits/YYYY-MM-DD-engineering.md`. The file should be ~60 lines.
 
 - [ ] **Step 3: Do NOT commit yet**
-
-All 6 audit commands will be committed together in Task 8.
 
 ---
 
@@ -139,49 +158,57 @@ All 6 audit commands will be committed together in Task 8.
 
 - Create: `.claude/commands/audit-security.md`
 
-- [ ] **Step 1: Write the command file**
+- [ ] **Step 1: Write the thin-wrapper command file**
 
 Use the Write tool to create `.claude/commands/audit-security.md` with this exact content:
 
 ```markdown
-You are a Chief Information Security Officer (CISO) and former red team lead with 20+ years of experience in application security, penetration testing, threat modeling, and compliance. You have special expertise in securing LLM-powered applications, including prompt injection defense, tool-use sandboxing, and API key handling in agentic systems. Conduct a comprehensive security audit of Voyager.
+# /audit-security — Voyager Security Audit
 
-## Instructions
+Invoke the canonical Security (CISO) audit role. **Your persona, mission, advisory autonomy, required report sections, failure modes, and disposition are all defined in `~/.claude/audits/security.md` — read that file first.** This command only adds Voyager-specific context on top of the canonical role.
 
-1. Work on the current branch (do not create a new branch).
-2. Read the full Voyager codebase — `server/` (especially auth, middleware, agent loop, tool executors), `web-client/` (auth flows, API calls), database queries, migrations, `Dockerfile.server`, `railway.toml`, environment config, and dependencies.
-3. Also read `.claude/bottomlessmargaritas/CLAUDE-BACKEND.md`, `CLOUD-DEPLOYMENT.md`, `docs/FULL_APPLICATION_SPEC.md`, and any existing security notes to understand the posture and threat model.
-4. Generate a file at `docs/audits/YYYY-MM-DD-security.md` (use today's date) with the following sections:
-   - **Executive Summary** — high-level risk assessment and top 3 critical findings
-   - **LLM & Agent Loop Security** — Anthropic API key handling (no leakage through tool results or error messages), prompt injection surface area (user message → agent → SerpApi query), tool-use sandboxing, max-15 tool-call safety limit, malformed tool-response handling
-   - **External API Key Management** — SerpApi key rotation, Google Places key scoping, environment variable hygiene across Railway / Vercel / local, separate keys for dev / staging / prod
-   - **Authentication & Session Management** — Supabase auth flow, session lifecycle, cookie flags (SameSite, Secure, HttpOnly), logout, token refresh, brute force protection
-   - **Authorization & Access Control** — RLS on trip data, IDOR risks on trip / user endpoints, multi-tenant isolation
-   - **CSRF & Cross-Origin** — CSRF pattern (verify which variant — header-based or cookie-based), CORS config for Vercel preview URLs, `credentials: 'include'` hygiene
-   - **Input Validation & Injection** — Zod validation coverage, SQL injection via raw queries, XSS, path traversal, header injection
-   - **API Security** — rate limiting, verbose errors leaking internals, missing auth on endpoints, enumeration attacks
-   - **Data Protection** — PII handling in trip data, encryption in transit, secrets in logs, backup security
-   - **Dependency & Supply Chain** — known CVEs, outdated packages, lockfile integrity
-   - **Infrastructure & Deployment** — Docker image hygiene, Railway env var scoping, HTTPS enforcement, header hardening (HSTS, CSP, X-Frame-Options)
-   - **Threat Model** — attacker personas, attack trees for the 3 most likely attack vectors against a travel-planning agent, blast radius assessment
-   - **Prioritized Findings** — ranked list using severity (Critical / High / Medium / Low) with CVSS-like scoring, exploitability assessment, and remediation steps
+## Voyager-specific context
 
-5. Commit the audit file to the current branch.
-6. Report back with a summary of your findings.
+Apply the canonical Security role to the Voyager codebase with these project-specific inputs.
 
-Be specific. Reference actual files, functions, line numbers, and code patterns. Demonstrate exploitability where possible. Don't be generic — this is a real security audit, not a compliance checklist.
+**Primary read targets:**
+
+- `server/src/` — all auth, middleware, agent loop, tool executors, API routes
+- `server/migrations/` — schema for RLS-relevant tables
+- `web-client/src/` — auth flows, API calls, credential handling
+- `Dockerfile.server`, `railway.toml`, environment variable configuration
+- `package.json` and `pnpm-lock.yaml` for dependency vulnerability review
+
+**Voyager-specific concerns to evaluate carefully:**
+
+- **LLM & agent loop security** — how is the Anthropic API key handled inside the agent loop? Can it leak through tool results, error messages, or response streams? Is the max-15 tool-call budget enforced? Are malformed tool responses handled safely?
+- **Prompt injection surface** — Voyager takes free-text user messages and feeds them into Claude's tool-use loop, which then constructs queries to SerpApi and Google Places. Evaluate the injection path: user message → agent reasoning → tool call arguments → third-party API query. What is the worst an attacker can do with a crafted user message?
+- **External API key management** — SerpApi key, Google Places key, Anthropic key. Rotation hygiene, scoping per environment (dev/staging/prod), env var scoping across Railway and Vercel.
+- **Supabase auth & RLS** — is Supabase auth configured correctly? Are RLS policies in place on trip data so users can only see their own trips?
+- **CSRF pattern** — verify which variant Voyager uses (header-based or cookie-based) and evaluate whether it works with Vercel preview URL origins.
+- **CORS config** — `CORS_ORIGIN` is comma-separated for Railway; confirm every preview URL origin is covered and credentials flow works.
+- **Known-issues cross-check** — read `~/.claude/KNOWN-ISSUES.md` for prior incident patterns (CSRF SameSite, cookie scoping, Vercel env var baking) and verify none are repeated in Voyager.
+
+**Project convention files (read before writing):**
+
+- `.claude/bottomlessmargaritas/CLAUDE-BACKEND.md`
+- `.claude/bottomlessmargaritas/CLOUD-DEPLOYMENT.md`
+
+**Product documents:**
+
+- `docs/FULL_APPLICATION_SPEC.md`
+- `CLAUDE.md`
+
+## Output
+
+- **File:** `docs/audits/YYYY-MM-DD-security.md` (use today's date)
+- **Commit:** to the current branch.
+- **Report back:** executive summary, top 3 critical findings, and any credential / config requiring immediate rotation or hardening.
 ```
 
-- [ ] **Step 2: Verify the file structure**
+- [ ] **Step 2: Verify the file**
 
-Read the file back and confirm:
-
-- Starts with a CISO / red team persona sentence
-- Step 4 references `docs/audits/YYYY-MM-DD-security.md`
-- Includes "LLM & Agent Loop Security" as the first sub-section after Executive Summary (Voyager-specific)
-- Includes "External API Key Management" section
-- Does NOT create a new branch
-- Ends with the "be specific, demonstrate exploitability" closing line
+Read back and confirm it references `~/.claude/audits/security.md`, includes prompt-injection and LLM-specific concerns, and references `~/.claude/KNOWN-ISSUES.md`. ~55 lines.
 
 - [ ] **Step 3: Do NOT commit yet**
 
@@ -193,48 +220,56 @@ Read the file back and confirm:
 
 - Create: `.claude/commands/audit-design.md`
 
-- [ ] **Step 1: Write the command file**
+- [ ] **Step 1: Write the thin-wrapper command file**
 
 Use the Write tool to create `.claude/commands/audit-design.md` with this exact content:
 
 ```markdown
-You are a Head of Design with 20+ years of experience in visual design, design systems, typography, color theory, motion design, and brand identity for SaaS products. You have a special eye for conversational UI, chat interfaces, travel product aesthetics, and the tension between information-dense itineraries and calm, readable layouts. Conduct a comprehensive design audit of Voyager.
+# /audit-design — Voyager Design Audit
 
-## Instructions
+Invoke the canonical Design (CDO) audit role. **Your persona, mission, advisory autonomy, required report sections, failure modes, and disposition are all defined in `~/.claude/audits/design.md` — read that file first.** This command only adds Voyager-specific context on top of the canonical role.
 
-1. Work on the current branch (do not create a new branch).
-2. Read the full Voyager web-client — `web-client/src/app/`, all components, SCSS modules, global styles, hero carousels, destination cards, trip detail pages, chat UI, itinerary layout, modals, forms.
-3. Also read `.claude/bottomlessmargaritas/CLAUDE-FRONTEND.md`, `CLAUDE-STYLING.md`, and `docs/FULL_APPLICATION_SPEC.md` to understand the intended visual identity and styling conventions.
-4. Generate a file at `docs/audits/YYYY-MM-DD-design.md` (use today's date) with the following sections:
-   - **Executive Summary** — high-level assessment and top 3 priorities
-   - **Visual Identity & Brand Coherence** — does the UI express a coherent travel brand? Logo, color usage, personality, tone
-   - **Typography** — type scale, hierarchy, readability, font choices, line lengths, vertical rhythm across home / explore / destination / trip pages
-   - **Color System** — palette usage, contrast ratios, semantic color mapping, accent consistency across components
-   - **Layout & Spacing** — grid system, whitespace rhythm, alignment, density balance (especially in itinerary and tile-card views)
-   - **Hero & Imagery** — hero carousel quality, destination photography, image treatment, responsive image strategy, alt text coverage
-   - **Component Design** — destination cards, tile cards (flights / hotels / experiences), chat bubbles, form controls, modals — consistency and polish
-   - **Iconography** — icon set coherence, illustration style, empty state visuals
-   - **Motion & Animation** — transitions, loading states, tool-call progress indicators, timing / easing consistency, `prefers-reduced-motion` support
-   - **Design System Maturity** — token usage, CSS custom property discipline, component reusability, documentation
-   - **Visual Hierarchy & Scannability** — can users quickly find what matters in a long itinerary? Is the eye guided correctly in the chat + tile-card flow?
-   - **Responsive Design** — breakpoint behavior, mobile itinerary usability, touch targets, mobile chat UX
-   - **Polish & Craft** — pixel-level details, edge cases, hover / focus / active states, skeleton screens, loading placeholders
-   - **Prioritized Recommendations** — ranked list of actionable improvements with estimated impact (High / Med / Low) and effort (High / Med / Low)
+## Voyager-specific context
 
-5. Commit the audit file to the current branch.
-6. Report back with a summary of your findings.
+Apply the canonical Design role to the Voyager web-client with these project-specific inputs.
 
-Be specific. Reference actual files, components, SCSS module classes, and design tokens. Don't be generic — this is a real audit, not a template.
+**Primary read targets:**
+
+- `web-client/src/app/` — Next.js 15 App Router pages (home, explore, destinations, trips, account)
+- `web-client/src/components/` — all shared components
+- `web-client/src/styles/` — global styles, CSS custom properties, design tokens
+- SCSS modules throughout the web-client (`*.module.scss`)
+- Image assets in `web-client/public/`
+
+**Voyager-specific surfaces to evaluate carefully:**
+
+- **Home page** — hero carousel (5 destination photos), feature highlight cards, live demo chat (MockChatBox), CTAs ("Get Started", "Discover destinations"). Does the visual execution match a premium travel brand?
+- **Explore page** — 30-destination grid with category filtering. Card consistency, photography quality, responsive grid behavior.
+- **Destination detail pages** — hero, quick stats bar, about, top experiences, dining, neighborhoods, weather chart, visa info, "Plan a trip" CTA. Information density vs. calm layout.
+- **Chat & trip pages** — the chat UI is the product's core. Evaluate message bubbles, loading/thinking indicators during tool calls, tile-card layouts for flights/hotels/experiences, selection states, confirmation flows.
+- **Itinerary display** — how is a completed trip presented? Visual hierarchy across flights, hotels, activities.
+- **Mobile breakpoints** — test at 375, 390, 414 widths. The itinerary and chat experience on mobile are critical.
+
+**Project convention files (read before writing):**
+
+- `.claude/bottomlessmargaritas/CLAUDE-FRONTEND.md`
+- `.claude/bottomlessmargaritas/CLAUDE-STYLING.md`
+
+**Product documents:**
+
+- `docs/FULL_APPLICATION_SPEC.md`
+- `docs/USER_STORIES.md`
+
+## Output
+
+- **File:** `docs/audits/YYYY-MM-DD-design.md` (use today's date)
+- **Commit:** to the current branch.
+- **Report back:** executive summary and the top 3 style-drift or visual-consistency issues.
 ```
 
-- [ ] **Step 2: Verify the file structure**
+- [ ] **Step 2: Verify the file**
 
-Read the file back and confirm:
-
-- Starts with a Head of Design persona sentence
-- Step 4 references `docs/audits/YYYY-MM-DD-design.md`
-- Includes "Hero & Imagery" and "Motion & Animation" sections
-- Does NOT create a new branch
+Read back and confirm. ~50 lines.
 
 - [ ] **Step 3: Do NOT commit yet**
 
@@ -246,49 +281,51 @@ Read the file back and confirm:
 
 - Create: `.claude/commands/audit-ux.md`
 
-- [ ] **Step 1: Write the command file**
+- [ ] **Step 1: Write the thin-wrapper command file**
 
 Use the Write tool to create `.claude/commands/audit-ux.md` with this exact content:
 
 ```markdown
-You are a Head of UX with 20+ years of experience in product design, user research, interaction design, accessibility, and information architecture. You have deep expertise in conversational AI interfaces, multi-step agent flows, and the UX challenges specific to AI products that need to feel trustworthy, transparent, and in the user's control. Conduct a comprehensive user experience audit of Voyager.
+# /audit-ux — Voyager UX Audit
 
-## Instructions
+Invoke the canonical UX (Chief Experience Officer) audit role. **Your persona, mission, advisory autonomy, required report sections, failure modes, and disposition are all defined in `~/.claude/audits/ux.md` — read that file first.** This command only adds Voyager-specific context on top of the canonical role.
 
-1. Work on the current branch (do not create a new branch).
-2. Read the full Voyager codebase with a focus on user-facing flows — all pages in `web-client/src/app/`, chat UI, tile-card flow, booking / checkout, onboarding, preferences wizard, error states, loading states, empty states.
-3. Also read `docs/USER_STORIES.md`, `docs/FULL_APPLICATION_SPEC.md`, and `.claude/bottomlessmargaritas/CLAUDE-FRONTEND.md` to understand the intended user journeys and target persona.
-4. Generate a file at `docs/audits/YYYY-MM-DD-ux.md` (use today's date) with the following sections:
-   - **Executive Summary** — high-level assessment and top 3 priorities
-   - **Conversational Agent UX** — turn latency perception, loading states during tool calls, tool-call transparency (can users see what the agent is doing, what it found, why it chose this flight?), perceived control, how users feel when the agent makes a decision for them
-   - **Information Architecture** — navigation between home / explore / destination / trips / chat / account, findability, mental model alignment
-   - **User Flows** — critical path (signup → first trip planned → booked), friction points, dead ends, confusion risks in the chat + tile-card flow
-   - **Onboarding & First-Run** — preferences wizard, time-to-first-value, the "what is this product" moment
-   - **Error Recovery Mid-Conversation** — what happens if a tool call fails, if Claude hallucinates, if SerpApi returns empty results, if the user changes their mind mid-plan
-   - **Iteration Experience** — how easy is it to modify a saved trip, swap a flight, adjust budget, undo a decision
-   - **Forms & Input** — chat input, wizard steps, trip detail form, validation, error messages, progressive disclosure
-   - **Feedback & State Communication** — loading states, empty states, success confirmations, agent-thinking indicators, progress during multi-step agent turns
-   - **Accessibility** — WCAG 2.1 AA compliance, keyboard navigation, screen reader support for the chat flow, color contrast, focus management, `prefers-reduced-motion`, ARIA on tile-card groups
-   - **Responsive & Mobile** — chat experience on mobile, itinerary on mobile, tile-card tap targets
-   - **Cognitive Load** — information density, decision fatigue, jargon, how much the user has to hold in their head between agent turns
-   - **Consistency & Patterns** — UI pattern reuse, terminology alignment, interaction model consistency
-   - **Prioritized Recommendations** — ranked list of actionable improvements with estimated impact (High / Med / Low) and effort (High / Med / Low)
+## Voyager-specific context
 
-5. Commit the audit file to the current branch.
-6. Report back with a summary of your findings.
+Apply the canonical UX role to Voyager with these project-specific inputs.
 
-Be specific. Reference actual files, components, user flows, and user stories by ID (e.g., US-12). Don't be generic — this is a real audit, not a template.
+**Primary read targets:**
+
+- `web-client/src/app/` — every page / route
+- `web-client/src/components/` — especially the chat UI, tile-card flow, and any wizard / onboarding components
+- `docs/USER_STORIES.md` — **exhaustively walk through every user story (US-1 through US-35)** per the canonical role's User Story Coverage requirement. For each story, mark passed / failed / blocked with evidence, and flag any story without an E2E test.
+- `e2e/` — current E2E coverage (expect only `auth.spec.ts` and `navigation.spec.ts`; everything else is a coverage gap)
+
+**Voyager-specific surfaces to evaluate carefully:**
+
+- **Conversational agent UX** — Voyager's core value is a multi-turn chat with Claude that calls tools (flights, hotels, experiences) mid-conversation. Evaluate: turn latency perception, loading states during tool calls, tool-call transparency (can users see what the agent is doing? what it found? why it chose this flight?), perceived user control, how users feel when the agent makes decisions for them.
+- **Error recovery mid-conversation** — what happens if a tool call fails, if Claude hallucinates a result, if SerpApi returns empty, or if the user changes their mind mid-plan? Can the user undo? Can they steer the agent back on track?
+- **Trip iteration experience** — per user stories US-16 through US-24 (chat & booking flow), how does a user iterate on a plan? Swap a flight? Adjust budget? Undo a confirmed tile-card selection?
+- **Onboarding & preferences wizard** — US-29 through US-33. Is the wizard's time-to-value acceptable? Does it explain what the product does?
+- **Destructive / paid action guardrails** — US-27 ("Confirm and book the trip") is the most sensitive. Confirmation dialog required, clear itemized breakdown, no one-click-book footguns.
+- **User story coverage gap** — flag that only 2 of 35 user stories currently have E2E coverage. This is the biggest UX-hygiene finding and feeds directly into Plan B (E2E coverage).
+
+**Product documents:**
+
+- `docs/FULL_APPLICATION_SPEC.md`
+- `docs/USER_STORIES.md`
+- `CLAUDE.md`
+
+## Output
+
+- **File:** `docs/audits/YYYY-MM-DD-ux.md` (use today's date)
+- **Commit:** to the current branch.
+- **Report back:** executive summary, yes/no on whether a new user can complete the primary happy path without help, and the full user story coverage table.
 ```
 
-- [ ] **Step 2: Verify the file structure**
+- [ ] **Step 2: Verify the file**
 
-Read the file back and confirm:
-
-- Starts with a Head of UX persona sentence
-- Step 4 references `docs/audits/YYYY-MM-DD-ux.md`
-- Includes "Conversational Agent UX" as the first Voyager-specific section
-- Includes "Error Recovery Mid-Conversation" section
-- Does NOT create a new branch
+Read back. ~55 lines.
 
 - [ ] **Step 3: Do NOT commit yet**
 
@@ -300,117 +337,236 @@ Read the file back and confirm:
 
 - Create: `.claude/commands/audit-marketing.md`
 
-- [ ] **Step 1: Write the command file**
+- [ ] **Step 1: Write the thin-wrapper command file**
 
 Use the Write tool to create `.claude/commands/audit-marketing.md` with this exact content:
 
 ```markdown
-You are a Senior VP of Marketing with 20+ years of experience in consumer SaaS, growth marketing, brand strategy, and go-to-market execution. You have specifically worked on AI products that have to differentiate against both legacy incumbents (Kayak, Expedia, Booking.com) and the generic-LLM alternative (ChatGPT, Perplexity) — you know how to position "agentic" as a real value prop and not a buzzword. Conduct a comprehensive marketing audit of Voyager.
+# /audit-marketing — Voyager Marketing Audit
 
-## Instructions
+Invoke the canonical Marketing (CMO) audit role. **Your persona, mission, advisory autonomy, required report sections, failure modes, and disposition are all defined in `~/.claude/audits/marketing.md` — read that file first.** This command only adds Voyager-specific context on top of the canonical role.
 
-1. Work on the current branch (do not create a new branch).
-2. Read the full Voyager web-client with a focus on marketing surfaces — landing page, hero copy, feature sections, destination explore page, destination detail pages, FAQ, CTAs, onboarding flows, meta tags, OG images, pricing (if any).
-3. Also read `docs/FULL_APPLICATION_SPEC.md` and `README.md` to understand intended positioning, target audience, and value proposition.
-4. Generate a file at `docs/audits/YYYY-MM-DD-marketing.md` (use today's date) with the following sections:
-   - **Executive Summary** — high-level assessment and top 3 priorities
-   - **Brand & Positioning** — is the value prop clear? "AI travel agent" vs "agentic travel planner" vs "Kayak but smarter" — does the messaging actually land? Who is the target persona and does the copy speak to them?
-   - **Landing Page & Conversion** — hero copy, subhead, CTAs, social proof, trust signals, the "why should I trust this to plan my trip" moment
-   - **Competitive Positioning** — how does Voyager stand against Kayak / Expedia / Booking (legacy) AND ChatGPT / Perplexity (generic LLMs)? What is the moat? Where is this product vulnerable?
-   - **Destination Content** — do the explore page and destination detail pages read as high-quality travel content, or as thin SEO pages? Does the content build trust?
-   - **SEO & Discoverability** — meta tags, page titles, structured data, sitemap, OG images, content strategy
-   - **Onboarding & Activation** — first-run experience, preferences wizard framing, time-to-value, the moment the user realizes "oh, this is different"
-   - **CTAs & Copy** — button labels, microcopy, empty states, error messages — does the voice feel human, trustworthy, and in control?
-   - **Growth Loops & Retention** — is there any virality? Referrals? Re-engagement? Save-a-trip mechanics that bring users back?
-   - **Trust Signals** — real bookings vs research-only positioning, handling of booking responsibility, privacy, data handling transparency
-   - **Prioritized Recommendations** — ranked list of actionable improvements with estimated impact (High / Med / Low)
+## Voyager-specific context
 
-5. Commit the audit file to the current branch.
-6. Report back with a summary of your findings.
+Apply the canonical Marketing role to Voyager with these project-specific inputs.
 
-Be specific. Reference actual files, copy, and components. Don't be generic — this is a real audit, not a template.
+**Primary read targets:**
+
+- `web-client/src/app/page.tsx` and any landing-related components (hero carousel, feature cards, MockChatBox demo, CTAs)
+- `web-client/src/app/explore/` — destination browse page (marketing as much as it is product)
+- `web-client/src/app/destinations/[slug]/` — destination detail pages (thin SEO vs. real travel content)
+- `web-client/src/app/faq/` — FAQ page
+- Meta tags, OG images, `layout.tsx` for SEO surface area
+- `README.md` for intended positioning
+
+**Voyager-specific concerns to evaluate carefully:**
+
+- **Positioning** — how is Voyager described? "AI travel agent" vs. "agentic travel planner" vs. "Kayak but smarter" vs. something else? Who is the target persona and does the copy speak to them?
+- **Competitive positioning** — how does Voyager stand against legacy competitors (Kayak, Expedia, Booking.com) AND generic LLM competitors (ChatGPT with browsing, Perplexity)? What is the moat? Where is it vulnerable?
+- **Destination content quality** — do the 30 destination detail pages read as high-quality travel content that builds trust, or as thin SEO pages? For each detail page area (about, experiences, dining, neighborhoods, weather, visa), is the voice authoritative or generic?
+- **Banned-word check** — scan landing / FAQ / destination copy for em dashes used for drama, "delve," "leverage," "unlock," "seamlessly," "world-class," "cutting-edge," "revolutionary," and empty superlatives. Flag every instance.
+- **CTAs & microcopy** — button labels, empty states, error messages throughout the product.
+- **Trust signals** — testimonials? Social proof? Pricing transparency? "Real bookings" vs. "research only" positioning clarity?
+
+**Product documents:**
+
+- `docs/FULL_APPLICATION_SPEC.md`
+- `README.md`
+
+## Output
+
+- **File:** `docs/audits/YYYY-MM-DD-marketing.md` (use today's date)
+- **Commit:** to the current branch.
+- **Report back:** executive summary, the one-sentence "what is this product and who is it for," and the top 3 copy rewrites.
 ```
 
-- [ ] **Step 2: Verify the file structure**
+- [ ] **Step 2: Verify the file**
 
-Read the file back and confirm:
-
-- Starts with a SVP of Marketing persona sentence
-- Step 4 references `docs/audits/YYYY-MM-DD-marketing.md`
-- Includes "Competitive Positioning" section mentioning Kayak / Expedia / ChatGPT (Voyager-specific)
-- Does NOT create a new branch
+Read back. ~50 lines.
 
 - [ ] **Step 3: Do NOT commit yet**
 
 ---
 
-## Task 7: Write `audit-criticism.md` command
+## Task 7: Write `audit-financial.md` command
+
+**Files:**
+
+- Create: `.claude/commands/audit-financial.md`
+
+- [ ] **Step 1: Write the thin-wrapper command file**
+
+Use the Write tool to create `.claude/commands/audit-financial.md` with this exact content:
+
+```markdown
+# /audit-financial — Voyager Financial Audit
+
+Invoke the canonical Financial (CFO) audit role. **Your persona, mission, advisory autonomy, required report sections, failure modes, and disposition are all defined in `~/.claude/audits/financial.md` — read that file first.** This command only adds Voyager-specific context on top of the canonical role.
+
+## Voyager-specific context
+
+Apply the canonical Financial role to Voyager with these project-specific inputs.
+
+**Paid services to inventory:**
+
+- **Anthropic** — Claude API for the agent loop. Cost per agent turn in tokens. Is there a hard monthly spending cap configured? Voyager's agent loop can call tools up to 15 times per turn, and tool calls are billed.
+- **SerpApi** — Google Flights + Google Hotels. Free tier is **250 searches / month**. This is uncomfortably close to exhaustion after even light testing. Calculate the realistic searches-per-trip-plan and divide into 250 to project how many trip plans the free tier supports.
+- **Google Places API** — for experiences / destination content. What tier? What is the per-request cost?
+- **Railway** — API server + Postgres (Neon is separate or hosted on Railway?). Plan, current monthly cost, resource usage.
+- **Vercel** — web-client deployment. Plan, usage.
+- **Neon** — Postgres (if hosted here rather than Railway). Plan, usage.
+- **Supabase** — auth. Plan, MAU.
+- **Any other service referenced in env vars** — scan `.env.example` and deploy configs for clues.
+
+**Voyager-specific concerns to evaluate carefully:**
+
+- **Unit economics** — what is the projected cost per full trip plan (one end-to-end multi-turn agent conversation)? Anthropic tokens + SerpApi searches + Google Places calls + Postgres queries. Compare to any monetization model (currently: none visible — so every trip plan is subsidized cost with no revenue).
+- **Free-tier cliffs** — SerpApi 250/month is the most dangerous. What happens on search 251? Does the agent loop crash, degrade, or fall back? Is there a cache that reduces calls per search?
+- **Missing spending caps** — every third-party API should have a hard monthly cap configured. Flag each that does not. Anthropic in particular is a P0 risk — an infinite tool-call loop bug could produce a five-figure surprise bill in hours.
+- **Cache effectiveness** — the spec mentions aggressive SerpApi caching. Evaluate `server/src/services/cache.service.ts` and related code. Is the cache actually saving calls?
+- **Dead paid integrations** — Amadeus is referenced in the spec and schema but there is no actual client. Is a paid account accidentally provisioned for it?
+
+**Product documents:**
+
+- `docs/FULL_APPLICATION_SPEC.md`
+- `CLAUDE.md` (especially the "Critical implementation note" about SerpApi free tier)
+- `README.md`
+
+## Output
+
+- **File:** `docs/audits/YYYY-MM-DD-financial.md` (use today's date)
+- **Commit:** to the current branch.
+- **Report back:** projected cost per trip plan, the free-tier cliff analysis (how many trips before SerpApi / Anthropic caps are hit), and any missing spending caps as P0 findings.
+```
+
+- [ ] **Step 2: Verify the file**
+
+Read back. ~55 lines.
+
+- [ ] **Step 3: Do NOT commit yet**
+
+---
+
+## Task 8: Write `audit-legal.md` command
+
+**Files:**
+
+- Create: `.claude/commands/audit-legal.md`
+
+- [ ] **Step 1: Write the thin-wrapper command file**
+
+Use the Write tool to create `.claude/commands/audit-legal.md` with this exact content:
+
+```markdown
+# /audit-legal — Voyager Legal & Compliance Audit
+
+Invoke the canonical Legal & Compliance audit role. **Your persona, mission, advisory autonomy, required report sections, failure modes, and disposition are all defined in `~/.claude/audits/legal.md` — read that file first.** This command only adds Voyager-specific context on top of the canonical role.
+
+## Voyager-specific context
+
+Apply the canonical Legal role to Voyager. **Expected output is a checklist of missing legal documents rather than findings in existing ones** — Voyager is an early-stage product and is unlikely to have Terms of Service, a Privacy Policy, or any of the other legally-required documents yet. The audit's job is to enumerate what is missing, not to critique what exists.
+
+**Things to look for (and expect to be missing):**
+
+- **Terms of Service** — does any page link to a `/terms` or similar? Is there a TOS markdown file anywhere in the repo?
+- **Privacy Policy** — does any page link to `/privacy`? Is there a policy document? If it exists, does it match Voyager's actual data handling (which includes sending user messages to Anthropic's API for LLM processing)?
+- **Cookie Policy / Consent** — does the product set any non-essential cookies? Is there a consent mechanism?
+- **Data Processing Agreements** — with Anthropic (LLM provider processing user trip queries), SerpApi (search queries), Google Places (location searches), Supabase (auth + user data), Neon / Railway (database host). These are all third-party data processors under GDPR.
+- **AI disclosures** — Voyager is an AI product. Is it clearly disclosed to users that their trip queries are processed by an LLM? Are model accuracy claims substantiated?
+- **Travel booking legal** — if the product actually books trips (as opposed to "research only"), there is a large additional legal surface: fiduciary responsibility, consumer protection, refund handling. If it is "research only," the positioning must say so clearly.
+- **Accessibility compliance** — ADA / EAA exposure based on target markets.
+- **Marketing claims** — "AI travel agent" is a claim. Does the product do what that phrase implies?
+
+**Primary read targets:**
+
+- `web-client/src/app/` — look for `/terms`, `/privacy`, `/cookies`, or any legal page
+- `web-client/src/app/layout.tsx` — cookie consent banner? Footer legal links?
+- Everything referenced in `docs/FULL_APPLICATION_SPEC.md` around data handling
+- `README.md`
+
+## Output
+
+- **File:** `docs/audits/YYYY-MM-DD-legal.md` (use today's date)
+- **Commit:** to the current branch.
+- **Report back:** compliance posture (Missing / Partial / Adequate), the checklist of missing legal documents, and the top 3 launch blockers (items that must exist before Voyager can be shown publicly without legal exposure).
+```
+
+- [ ] **Step 2: Verify the file**
+
+Read back. ~45 lines.
+
+- [ ] **Step 3: Do NOT commit yet**
+
+---
+
+## Task 9: Write `audit-criticism.md` command
 
 **Files:**
 
 - Create: `.claude/commands/audit-criticism.md`
 
-- [ ] **Step 1: Write the command file**
+- [ ] **Step 1: Write the thin-wrapper command file**
 
 Use the Write tool to create `.claude/commands/audit-criticism.md` with this exact content:
 
 ```markdown
-You are a ruthless, world-class product critic — part technical reviewer, part business strategist, part angry customer. You have zero tolerance for mediocrity, hand-waving, and "good enough." You have shipped products used by millions and torn apart products that deserved it. You are not here to be nice. You are here to make Voyager excellent by finding every weakness, every shortcut, every lie the team tells itself.
+# /audit-criticism — Voyager Criticism Audit
 
-Your job is not to encourage. It is to expose. If something is bad, say it is bad and say why. If something is half-done, call it half-done. If a decision was lazy, say so. If the core idea itself is flawed — if the product concept has a fatal weakness, if the market thesis is wrong, if the whole thing is solving a problem nobody has — say that too. Nothing is sacred. Not the idea, not the architecture, not the business model. The team can handle it — they asked for this.
+Invoke the canonical Criticism (Devil's Advocate) audit role. **Your persona, mission, advisory autonomy, required report structure, failure modes, and disposition are all defined in `~/.claude/audits/criticism.md` — read that file first.** This command only adds Voyager-specific context on top of the canonical role.
 
-## Instructions
+## Voyager-specific context
 
-1. Work on the current branch (do not create a new branch).
-2. Read EVERYTHING — the full Voyager codebase, `docs/FULL_APPLICATION_SPEC.md`, `docs/USER_STORIES.md`, the landing page, onboarding, the agent loop, the database schema, the tests, the deployment config, the marketing copy, `README.md`.
-3. Generate a file at `docs/audits/YYYY-MM-DD-criticism.md` (use today's date). This is not a structured corporate audit. It is a brutally honest teardown. Structure it however serves the truth best, but cover at minimum:
-   - **The Brutal Truth** — if you had to summarize this product's biggest problem in one paragraph, what is it? Do not soften it.
-   - **What's Actually Good** — be fair. If something is genuinely well done, acknowledge it briefly. But do not pad this section to be polite.
-   - **What's Broken** — things that are objectively wrong, buggy, insecure, or non-functional. Not opinions — facts. Call out the dead Amadeus references in schema / tests / docs and the spec-vs-implementation drift they represent.
-   - **What's Weak** — things that technically work but are half-baked, poorly executed, or below the standard the product aspires to
-   - **What's Missing** — gaps a real user would hit and be frustrated by. Things the team probably knows about but has not prioritized.
-   - **Lies the Team Tells Itself** — assumptions baked into the product that are probably wrong. Features that seem clever but solve no real problem. Complexity that exists because someone thought it was cool, not because users need it.
-   - **The User's Experience, Honestly** — walk through the product as a real traveler planning a real trip. Where does it break down? Where do you lose trust in the agent? Where do you give up?
-   - **The Business Model Problem** — can Voyager survive 250 SerpApi searches / month on the free tier? What is the realistic cost per trip plan in Claude tokens? Does the unit economics actually work, or is this a venture-subsidy product?
-   - **If I Were Competing Against This** — what would you exploit? Where is Voyager most vulnerable to a competitor — legacy (Kayak) or new (ChatGPT Plus with browsing) — who simply does the basics better?
-   - **The Hard Prioritization** — if the team could only fix 5 things before showing this to anyone, what should they be? Be specific and justify each.
+Apply the canonical Criticism role to Voyager. Your job is to evaluate whether the product should exist in its current form, not whether it is well-executed. The other 7 audits will cover execution quality — yours covers intent, strategy, unit economics, moat, and organizational self-deception.
 
-4. Commit the audit file to the current branch.
-5. Report back with a summary of your findings.
+**Voyager-specific concerns you are expected to address directly:**
 
-Do not hold back. Do not hedge. State what is wrong, why it matters, and what to do about it. Reference specific files, specific code, specific copy, specific flows. Vague criticism is useless. The goal is excellence. The path to excellence runs through honesty.
+- **The core idea** — is "agentic AI travel planner" a real product category or a feature? Is this solving a problem anyone actually has, or is it a tech demo that needs a use case?
+- **Unit economics (REQUIRED — see canonical role's Business Model Problem section)** — Voyager's per-trip cost structure is the most obvious strategic risk:
+  - Anthropic tokens per agent turn × 3–5 turns per trip × average turn size
+  - SerpApi searches per trip (250 free tier / month divides by calls-per-trip = how many trips before you're paying)
+  - Google Places calls per trip
+  - **Do the unit economics work?** Show the math. If the free tier supports fewer than N trips per month before paid tiers kick in, flag it.
+- **Moat** — what prevents ChatGPT Plus with browsing from eating this category? What prevents Kayak or Expedia from adding "chat to plan a trip"? What does Voyager know or do that competitors cannot replicate in 6 months?
+- **Positioning drift** — the spec calls it an "Agentic Travel Agent" but the repo was renamed to "Voyager." Is the product's identity clear to the team? Clear to users?
+- **Dead code as signal** — the dead Amadeus references (in `server/src/schemas/trips.ts`, migrations, tests, docs) suggest a feature was planned, partially scoped, and abandoned without cleanup. What does this say about the team's decision discipline?
+- **Real bookings vs. research-only** — does Voyager actually book trips, or does it just generate itineraries? The difference is massive from a legal, business model, and trust standpoint. If it is research-only, why would a user pay for it vs. using ChatGPT?
+- **User story reality check** — do the 35 user stories in `docs/USER_STORIES.md` describe a product users would actually pay for, or do they describe a feature tour?
+
+**Read EVERYTHING** per the canonical role's instructions: full codebase, `docs/FULL_APPLICATION_SPEC.md`, `docs/USER_STORIES.md`, the landing page, the agent loop, the database schema, deployment config, marketing copy, `README.md`, recent commit history.
+
+## Output
+
+- **File:** `docs/audits/YYYY-MM-DD-criticism.md` (use today's date)
+- **Commit:** to the current branch.
+- **Report back:** the one-paragraph "Brutal Truth" and the top 5 things to fix before showing Voyager to anyone.
 ```
 
-- [ ] **Step 2: Verify the file structure**
+- [ ] **Step 2: Verify the file**
 
-Read the file back and confirm:
-
-- Starts with a "ruthless product critic" persona opening
-- Has BOTH the opening persona paragraph AND the "Your job is not to encourage" paragraph before the `## Instructions` heading
-- Step 3 (NOT step 4 — criticism has one less preparatory step) references `docs/audits/YYYY-MM-DD-criticism.md`
-- Includes "The Business Model Problem" section mentioning SerpApi quota and Claude cost (Voyager-specific)
-- Does NOT create a new branch
+Read back. ~55 lines.
 
 - [ ] **Step 3: Do NOT commit yet**
 
 ---
 
-## Task 8: Commit Phase 1 — all 6 audit commands + `.gitkeep`
+## Task 10: Commit Phase 1 — all 8 audit commands + `.gitkeep`
 
 **Files:**
 
-- Modify (stage and commit): the 7 files from Tasks 1–7
+- Stage and commit the files from Tasks 1–9.
 
-- [ ] **Step 1: Verify all 6 audit commands exist**
+- [ ] **Step 1: Verify all 8 audit commands exist**
 
 Run: `ls .claude/commands/audit-*.md`
 
-Expected output:
+Expected output (alphabetical):
 
 ```
 .claude/commands/audit-criticism.md
 .claude/commands/audit-design.md
 .claude/commands/audit-engineering.md
+.claude/commands/audit-financial.md
+.claude/commands/audit-legal.md
 .claude/commands/audit-marketing.md
 .claude/commands/audit-security.md
 .claude/commands/audit-ux.md
@@ -422,44 +578,60 @@ Run: `ls -la docs/audits/`
 
 Expected: `.gitkeep` present.
 
-- [ ] **Step 3: Verify no file says "create a new branch"**
+- [ ] **Step 3: Verify every command references its canonical role file**
 
-Use the Grep tool: `pattern: "Create and check out a new branch|create a new branch"`, `path: ".claude/commands"`.
+Use the Grep tool: `pattern: "~/.claude/audits/"`, `path: ".claude/commands"`, `output_mode: "files_with_matches"`.
 
-Expected: No matches found.
+Expected: all 8 audit-\*.md files listed.
 
-- [ ] **Step 4: Verify every file references `docs/audits/YYYY-MM-DD-`**
+- [ ] **Step 4: Verify no file tries to create a new audit branch**
+
+Use the Grep tool: `pattern: "Create and check out a new branch|create a new branch|create a new audit branch"`, `path: ".claude/commands"`, `output_mode: "files_with_matches"`.
+
+Expected: zero matches.
+
+- [ ] **Step 5: Verify every command writes to `docs/audits/YYYY-MM-DD-<role>.md`**
 
 Use the Grep tool: `pattern: "docs/audits/YYYY-MM-DD-"`, `path: ".claude/commands"`, `output_mode: "files_with_matches"`.
 
-Expected: All 6 audit-\*.md files listed.
+Expected: all 8 audit-\*.md files listed.
 
-- [ ] **Step 5: Stage the files**
-
-Run: `git add .claude/commands/audit-engineering.md .claude/commands/audit-security.md .claude/commands/audit-design.md .claude/commands/audit-ux.md .claude/commands/audit-marketing.md .claude/commands/audit-criticism.md docs/audits/.gitkeep`
-
-Then run: `git status`
-
-Expected: 7 new files staged. No other changes.
-
-- [ ] **Step 6: Commit**
+- [ ] **Step 6: Stage and commit**
 
 Run:
 
 ```bash
+git add .claude/commands/audit-engineering.md .claude/commands/audit-security.md .claude/commands/audit-design.md .claude/commands/audit-ux.md .claude/commands/audit-marketing.md .claude/commands/audit-financial.md .claude/commands/audit-legal.md .claude/commands/audit-criticism.md docs/audits/.gitkeep
+```
+
+Then:
+
+```bash
+git status
+```
+
+Expected: 9 new files staged. No other changes.
+
+Commit:
+
+```bash
 git commit -m "$(cat <<'EOF'
-feat: add Voyager-tailored audit slash-commands
+feat: add Voyager-tailored audit slash-commands (8 roles)
 
-Adds six role-based audit slash-commands under .claude/commands/:
-engineering, security, design, ux, marketing, criticism. Each writes to
-docs/audits/YYYY-MM-DD-<type>.md so audit history is preserved across
-runs rather than overwriting a single root-level file.
+Adds thin-wrapper audit slash-commands under .claude/commands/ for the
+8 canonical audit roles defined at ~/.claude/audits/<role>.md:
+engineering, security, design, ux, marketing, financial, legal,
+criticism.
 
-The engineering and security audits include Voyager-specific sections
-for agent-loop correctness, external API integration, and LLM key
-handling. The criticism audit explicitly calls out the unit economics
-question (SerpApi quota, Claude cost per trip plan) and the dead
-Amadeus references in schema/tests/docs.
+Each command delegates persona, mission, advisory autonomy, required
+report sections, failure modes, and disposition to the canonical
+top-level role file and adds only Voyager-specific context: file
+paths, agent-loop concerns, SerpApi quota, dead Amadeus references,
+user-story coverage gap, unit-economics questions, and the
+prerequisite-for-E2E-mocking check on the tool executor.
+
+Every command writes its audit output to
+docs/audits/YYYY-MM-DD-<role>.md and commits to the current branch.
 
 Also adds docs/audits/.gitkeep so the directory exists in git before
 any audit files are written into it.
@@ -469,29 +641,29 @@ EOF
 )"
 ```
 
-Expected: Commit succeeds. Lefthook pre-commit may run `format:check`, `lint`, `build`. Since no TypeScript or code files changed, these should pass quickly. If any hook fails for an unrelated reason, investigate the root cause — do NOT use `--no-verify`.
+Expected: commit succeeds. Lefthook pre-commit runs `format:check` and `lint` — since the changes are Markdown only, both should pass.
 
 - [ ] **Step 7: Verify the commit**
 
 Run: `git log --oneline -1 && git show --stat HEAD`
 
-Expected: Latest commit is `feat: add Voyager-tailored audit slash-commands` and shows 7 files changed (6 audit commands + `.gitkeep`).
+Expected: latest commit is `feat: add Voyager-tailored audit slash-commands (8 roles)` with 9 files changed.
 
 ---
 
-## Task 9: Phase 2 — dispatch 6 audit subagents in parallel
+## Task 11: Phase 2 — dispatch 8 audit subagents in parallel
 
 **Files:**
 
-- Created by subagents: the 6 dated audit files in `docs/audits/`
+- Created by subagents: the 8 dated audit files in `docs/audits/`.
 
-**Overview:** This task issues 6 `Agent` tool calls in a single message (true parallelism). Each uses `isolation: "worktree"` so concurrent git commits cannot conflict. Each agent receives the full prompt content from its corresponding audit command file (Tasks 2–7) and is told explicitly to write its audit file to the worktree at `docs/audits/2026-04-06-<type>.md`, commit it to the worktree's current branch, and return the final file contents in its response.
+**Overview:** Issue 8 `Agent` tool calls in a single message (true parallelism). Each uses `isolation: "worktree"`. Each agent receives the full prompt content from its corresponding audit command file (Tasks 2–9) and is told explicitly to read its canonical role file first, then write its audit file to the worktree at `docs/audits/2026-04-06-<role>.md`, commit it, and return the final file contents in its response.
 
 - [ ] **Step 1: Confirm today's date for the audit filenames**
 
-Today's date is **2026-04-06**. If the plan is being executed on a different date, substitute that date everywhere below. The filenames must use the actual execution date, not a hardcoded 2026-04-06.
+Today's date is **2026-04-06**. If executing on a different date, substitute that date everywhere below.
 
-- [ ] **Step 2: Read each of the 6 audit command files**
+- [ ] **Step 2: Read each of the 8 audit command files**
 
 Use the Read tool on each of:
 
@@ -500,19 +672,21 @@ Use the Read tool on each of:
 - `.claude/commands/audit-design.md`
 - `.claude/commands/audit-ux.md`
 - `.claude/commands/audit-marketing.md`
+- `.claude/commands/audit-financial.md`
+- `.claude/commands/audit-legal.md`
 - `.claude/commands/audit-criticism.md`
 
-Keep the full content of each file in context — it becomes the body of each subagent's prompt.
+Keep the full content in context — it becomes each subagent's prompt body.
 
-- [ ] **Step 3: Dispatch all 6 agents in a single message**
+- [ ] **Step 3: Dispatch all 8 agents in a single message**
 
-In ONE assistant message, issue 6 parallel `Agent` tool calls. For each agent:
+In ONE assistant message, issue 8 parallel `Agent` tool calls. For each agent:
 
 - `subagent_type`: `"general-purpose"`
-- `isolation`: `"worktree"` (REQUIRED — each audit commits to git, and without worktree isolation the 6 agents would clobber each other)
-- `description`: e.g. `"Engineering audit"`, `"Security audit"`, etc. (3–5 words)
+- `isolation`: `"worktree"` (REQUIRED — each audit commits to git; without worktree isolation the 8 agents would clobber each other)
+- `description`: e.g. `"Engineering audit"`, `"Security audit"`, `"Financial audit"`, etc. (3–5 words)
 - `model`: `"opus"` (audits benefit from the strongest model)
-- `prompt`: the FULL content of the matching audit command file, PLUS the following appendix:
+- `prompt`: the FULL content of the matching project audit command file PLUS this execution appendix:
 
 ```
 ---
@@ -520,90 +694,87 @@ In ONE assistant message, issue 6 parallel `Agent` tool calls. For each agent:
 ## Execution notes for this subagent
 
 - You are running inside an isolated git worktree of the Voyager repo.
-- Today's date is 2026-04-06. Write your audit file to EXACTLY this path: docs/audits/2026-04-06-<type>.md (replacing <type> with your audit type, e.g. "engineering").
-- After writing the file, commit it to the current branch with a message like: "audit: <type> 2026-04-06".
-- In your final response to the parent session, include: (a) a ~5-sentence summary of your top findings, (b) the full contents of the audit file you wrote (so the parent can consolidate all 6 onto real main).
-- Do NOT invoke any other audit command. Do NOT dispatch further subagents. Just do the one audit.
-- Be specific. Reference actual files, functions, and line numbers. Generic reports will be rejected.
+- Today's date is 2026-04-06. Write your audit file to EXACTLY this path: docs/audits/2026-04-06-<role>.md (replacing <role> with your audit type, e.g. "engineering").
+- FIRST, read the canonical role file at ~/.claude/audits/<role>.md to get your full persona, mission, advisory autonomy, required report sections, failure modes, and disposition. The project command above provides ONLY Voyager-specific context on top of the canonical role.
+- After writing the file, commit it to the current branch with a message like: "audit: <role> 2026-04-06".
+- In your final response to the parent session, include: (a) a ~5-sentence executive summary of your top findings, (b) the full contents of the audit file you wrote (so the parent can consolidate all 8 onto real branch).
+- Do NOT invoke any other audit. Do NOT dispatch further subagents. Just do the one audit.
+- Be specific. Reference actual files, functions, line numbers, copy, or config. Generic reports will be rejected and re-dispatched.
+- The project command has already told you not to create a new audit branch — commit to the current branch (which is the worktree's branch).
 ```
 
-Dispatch all 6 in a single message so they run in parallel. Do NOT dispatch them one at a time.
+Dispatch all 8 in a single message so they run in parallel.
 
-- [ ] **Step 4: Wait for all 6 subagents to complete**
+- [ ] **Step 4: Wait for all 8 subagents to complete**
 
-The Agent tool returns each subagent's final message. Parse out:
+The Agent tool returns each subagent's final message. For each, extract:
 
-- The file contents for each audit file (to be committed to real main in Task 10)
-- The top-findings summary for each audit (will be referenced in Task 11 triage)
+- The file contents for the audit file (to be committed in Task 12)
+- The executive summary (for the handoff report in Task 17)
 
-If any subagent failed or produced a generic report, re-dispatch that one alone with stricter wording (e.g., "Your prior response was too generic — reference specific files and line numbers, not general principles").
+**Truncation fallback:** If any subagent's output is truncated and the audit file content is incomplete, read the file directly from the worktree path returned by the Agent tool (typically `.claude/worktrees/<task-id>-<branch>/docs/audits/2026-04-06-<role>.md`). Use `git worktree list` to locate worktrees if needed.
 
 - [ ] **Step 5: Verify subagent output quality**
 
-For each of the 6 audit file contents received, spot-check:
+For each of the 8 audit file contents received, spot-check:
 
 - Does it mention at least 3 specific file paths (e.g., `server/src/services/agent.service.ts`)?
-- Does it have the section headings from the command (Executive Summary, etc.)?
-- Does the Prioritized Recommendations section have at least 3 items with severity / effort tags?
+- Does it have the section headings required by the canonical role file?
+- Is the Prioritized Recommendations (or equivalent) section populated with at least 3 items with severity / effort tags?
 
-If any audit fails these checks, re-dispatch that one specific audit with the feedback.
+If any audit fails these checks, re-dispatch that single audit with stricter wording ("Your prior response was too generic — reference specific files and line numbers, not general principles").
 
 - [ ] **Step 6: Do NOT commit yet**
 
-The audit files currently exist only in the 6 worktrees. Task 10 consolidates them onto real `main`.
+Task 12 consolidates the files onto the plan branch.
 
 ---
 
-## Task 10: Consolidate audit files onto `main` and commit Phase 2
+## Task 12: Consolidate audit files onto plan branch + commit Phase 2
 
 **Files:**
 
-- Create on `main`: `docs/audits/2026-04-06-engineering.md`
-- Create on `main`: `docs/audits/2026-04-06-security.md`
-- Create on `main`: `docs/audits/2026-04-06-design.md`
-- Create on `main`: `docs/audits/2026-04-06-ux.md`
-- Create on `main`: `docs/audits/2026-04-06-marketing.md`
-- Create on `main`: `docs/audits/2026-04-06-criticism.md`
+- Create on `plan/audit-2026-04-06`: all 8 `docs/audits/2026-04-06-<role>.md` files.
 
 - [ ] **Step 1: Write each audit file to the real working tree**
 
-Use the Write tool on each path below, using the file contents returned by the corresponding subagent in Task 9:
+Use the Write tool on each path below, using the file contents returned by the corresponding subagent in Task 11:
 
 - `docs/audits/2026-04-06-engineering.md`
 - `docs/audits/2026-04-06-security.md`
 - `docs/audits/2026-04-06-design.md`
 - `docs/audits/2026-04-06-ux.md`
 - `docs/audits/2026-04-06-marketing.md`
+- `docs/audits/2026-04-06-financial.md`
+- `docs/audits/2026-04-06-legal.md`
 - `docs/audits/2026-04-06-criticism.md`
 
-- [ ] **Step 2: Verify all 6 files exist and are non-trivial**
+- [ ] **Step 2: Verify all 8 files exist and are non-trivial**
 
 Run: `ls -la docs/audits/2026-04-06-*.md && wc -l docs/audits/2026-04-06-*.md`
 
-Expected: All 6 files listed, each with at least ~50 lines. An audit file shorter than 50 lines is suspect — re-dispatch that audit.
+Expected: all 8 files listed, each with at least ~50 lines. An audit file shorter than 50 lines is suspect — re-dispatch that audit.
 
-- [ ] **Step 3: Stage the 6 files**
+- [ ] **Step 3: Stage and commit**
 
-Run: `git add docs/audits/2026-04-06-engineering.md docs/audits/2026-04-06-security.md docs/audits/2026-04-06-design.md docs/audits/2026-04-06-ux.md docs/audits/2026-04-06-marketing.md docs/audits/2026-04-06-criticism.md`
+Run: `git add docs/audits/2026-04-06-*.md && git status`
 
-Then run: `git status`
+Expected: 8 new files staged.
 
-Expected: 6 new files staged. No other changes.
-
-- [ ] **Step 4: Commit**
-
-Run:
+Then:
 
 ```bash
 git commit -m "$(cat <<'EOF'
-audit: 2026-04-06 run (engineering, security, design, ux, marketing, criticism)
+audit: 2026-04-06 run (8 roles — engineering, security, design, ux, marketing, financial, legal, criticism)
 
-Consolidated output of 6 parallel audit subagents dispatched from the
-audit slash-commands added in the previous commit. Each audit was run
-by a fresh Opus instance in an isolated git worktree and returned the
-file contents to this session for landing on main.
+Consolidated output of 8 parallel audit subagents dispatched from the
+Voyager audit slash-commands. Each audit was run by a fresh Opus
+instance in an isolated git worktree, reading its canonical role
+definition from ~/.claude/audits/<role>.md and applying it to the
+Voyager codebase with project-specific context from the matching
+.claude/commands/audit-<role>.md wrapper.
 
-Follow-up: the next commit will produce a triage document at
+Follow-up: the next commit produces a triage file at
 docs/audits/2026-04-06-triage.md that severity-tags every finding and
 routes P0/P1 to the fix queue and P2/P3 to ISSUES.md.
 
@@ -612,88 +783,67 @@ EOF
 )"
 ```
 
-Expected: Commit succeeds. Lefthook may run its hooks — since no code changed, format / lint / build should all pass.
+Expected: commit succeeds. Lefthook runs — no code changes, should pass.
 
-- [ ] **Step 5: Verify the commit**
+- [ ] **Step 4: Verify the commit**
 
 Run: `git log --oneline -2 && git show --stat HEAD`
 
-Expected: Latest commit is the audit run commit with 6 files changed. Prior commit is the audit slash-command commit from Task 8.
+Expected: latest commit has 8 files; prior commit is the audit slash-command commit from Task 10.
 
-- [ ] **Step 6: Worktree cleanup**
+- [ ] **Step 5: Worktree cleanup**
 
-Each of the 6 subagents ran in an isolated worktree. If the worktrees still exist, list them: `git worktree list`. Any worktree that was created by a subagent and is no longer needed can be removed with `git worktree remove <path>`. Do NOT remove the main working tree. If in doubt, leave them — they will not interfere with subsequent tasks.
+Run: `git worktree list`. Any worktrees created by the Task 11 subagents (typically under `.claude/worktrees/`) can be removed with `git worktree remove <path>` if no longer needed. Do NOT remove the plan worktree.
 
 ---
 
-## Task 11: Read audits and produce the triage data
+## Task 13: Read audits and produce the triage data
 
 **Files:**
 
-- Read: all 6 files from `docs/audits/2026-04-06-*.md`
+- Read: all 8 files in `docs/audits/2026-04-06-*.md`.
 
-- [ ] **Step 1: Read all 6 audit files**
+- [ ] **Step 1: Read all 8 audit files**
 
-Use the Read tool on each of:
-
-- `docs/audits/2026-04-06-engineering.md`
-- `docs/audits/2026-04-06-security.md`
-- `docs/audits/2026-04-06-design.md`
-- `docs/audits/2026-04-06-ux.md`
-- `docs/audits/2026-04-06-marketing.md`
-- `docs/audits/2026-04-06-criticism.md`
+Use the Read tool on each.
 
 - [ ] **Step 2: Enumerate every distinct finding**
 
-For each audit, extract every item that represents an actionable finding. An "actionable finding" is anything the team could plausibly open a ticket for — a bug, a security issue, a UX friction point, a design inconsistency, a positioning weakness, a unit-economics risk, dead code, etc. Ignore pure compliments ("this is well done"). Deduplicate across audits — if engineering and security both flag the same CORS misconfiguration, merge them into one finding with both sources listed.
+For each audit, extract every actionable item. Deduplicate across audits (if engineering and security both flag the same CORS misconfiguration, merge with both sources listed).
 
 - [ ] **Step 3: Severity-tag each finding**
 
 For each finding, assign:
 
-- **Severity:**
-  - **P0** — broken, security hole, data loss, critical path non-functional
-  - **P1** — critical path degraded, high-risk, must-fix-before-launch
-  - **P2** — quality / UX friction, tech debt with near-term cost
-  - **P3** — nice-to-have, cosmetic, long-term polish
-- **Effort:** S (< 1 hr), M (1–4 hr), L (> 4 hr)
-- **Category:** bug / security / UX / design / marketing / tech-debt
-- **Source:** the audit file(s) and section(s) where it was raised
+- **Severity:** P0 / P1 / P2 / P3 per the canonical definitions
+- **Effort:** S / M / L
+- **Category:** bug / security / UX / design / marketing / financial / legal / tech-debt / strategy
+- **Source:** which audit file(s) and section(s) raised it
 
-Be honest about severity. Err toward P0/P1 for anything touching security, data integrity, or a user's ability to complete a core flow. Err toward P2/P3 for anything cosmetic or speculative. If you are not sure, default to P2 — do NOT hide things in P3 to shrink the fix queue.
+Triage ID prefixes: `ENG-`, `SEC-`, `DES-`, `UX-`, `MKT-`, `FIN-`, `LEG-`, `CRIT-`, numbered sequentially within each prefix starting at 01.
 
-- [ ] **Step 4: Produce an intermediate working list**
+Be honest about severity. Err toward P0/P1 for anything touching security, data integrity, user ability to complete a core flow, or unit economics viability. Err toward P2/P3 for cosmetic or speculative items. If unsure, default to P2 — never hide things in P3 to shrink the fix queue.
 
-Hold the triage data in context as a structured list — you will write it to disk in Task 12 (triage file for P0/P1) and Task 13 (ISSUES.md for P2/P3). Do NOT write anything to disk yet.
+- [ ] **Step 4: Hold the triage data in context for Tasks 14–15**
 
-A sample entry in your working list:
-
-```
-[ENG-01] Agent loop does not enforce the 15-call budget
-  Source: docs/audits/2026-04-06-engineering.md §Agent Loop Correctness
-  Severity: P0
-  Effort: S
-  Category: bug
-  Repro: send a pathological user message that makes Claude want to keep calling tools; observe no limit
-  Fix approach: add a counter to agent.service.ts tool loop; throw if count > 15
-```
+Do not write to disk yet.
 
 ---
 
-## Task 12: Write the triage file
+## Task 14: Write the triage file
 
 **Files:**
 
-- Create: `docs/audits/2026-04-06-triage.md`
+- Create: `docs/audits/2026-04-06-triage.md`.
 
 - [ ] **Step 1: Write the triage file**
 
-Use the Write tool to create `docs/audits/2026-04-06-triage.md` with the following structure. Replace the placeholder counts, IDs, and entries with the actual findings from Task 11:
+Use the Write tool to create `docs/audits/2026-04-06-triage.md` with the following structure, replacing placeholders with actual data:
 
 ```markdown
 # Audit Triage — 2026-04-06
 
-Consolidated triage of findings from the 6 audits run on 2026-04-06.
+Consolidated triage of findings from the 8 audits run on 2026-04-06.
 
 ## Summary
 
@@ -703,7 +853,7 @@ Consolidated triage of findings from the 6 audits run on 2026-04-06.
 - **P2 (logged to ISSUES.md, deferred):** <N>
 - **P3 (logged to ISSUES.md, deferred):** <N>
 
-P0 and P1 items below are the fix queue for the next plan (Phase 5 Part D in the source spec). P2 and P3 items are in `ISSUES.md` at the repo root.
+P0 and P1 items below are the fix queue for Plan C (the test-first P0/P1 fix loop). P2 and P3 items are in `ISSUES.md` at the repo root.
 
 **Source audits:**
 
@@ -712,6 +862,8 @@ P0 and P1 items below are the fix queue for the next plan (Phase 5 Part D in the
 - `docs/audits/2026-04-06-design.md`
 - `docs/audits/2026-04-06-ux.md`
 - `docs/audits/2026-04-06-marketing.md`
+- `docs/audits/2026-04-06-financial.md`
+- `docs/audits/2026-04-06-legal.md`
 - `docs/audits/2026-04-06-criticism.md`
 
 ## P0 — Must fix now
@@ -721,7 +873,7 @@ P0 and P1 items below are the fix queue for the next plan (Phase 5 Part D in the
 - **Source:** <audit file> §<section>
 - **Severity:** P0 · **Effort:** S · **Category:** bug
 - **Repro:** <concrete steps or conditions>
-- **Fix approach:** <brief, concrete technical plan>
+- **Fix approach:** <brief concrete technical plan>
 
 <repeat for every P0 item>
 
@@ -732,7 +884,7 @@ P0 and P1 items below are the fix queue for the next plan (Phase 5 Part D in the
 - **Source:** <audit file> §<section>
 - **Severity:** P1 · **Effort:** M · **Category:** security
 - **Repro:** <concrete steps or conditions>
-- **Fix approach:** <brief, concrete technical plan>
+- **Fix approach:** <brief concrete technical plan>
 
 <repeat for every P1 item>
 
@@ -741,48 +893,31 @@ P0 and P1 items below are the fix queue for the next plan (Phase 5 Part D in the
 See `ISSUES.md` at the repo root. <N> items logged there, tagged with severity, effort, category, and source.
 ```
 
-Use stable triage IDs with a prefix matching the source audit category:
+- [ ] **Step 2: Verify the triage file**
 
-- `ENG-*` for engineering
-- `SEC-*` for security
-- `DES-*` for design
-- `UX-*` for ux
-- `MKT-*` for marketing
-- `CRIT-*` for criticism
-
-Number them sequentially within each prefix starting at 01.
-
-- [ ] **Step 2: Verify the triage file structure**
-
-Read the file back and confirm:
-
-- Has a Summary section with counts
-- Has a P0 section (even if empty — say "None" if no P0 findings)
-- Has a P1 section (same rule)
-- Every P0 and P1 entry has Source / Severity / Effort / Category / Repro / Fix approach fields
-- Points to ISSUES.md for P2 / P3
+Read back and confirm: Summary section with counts, P0 section (even if "None"), P1 section (even if "None"), every entry has Source / Severity / Effort / Category / Repro / Fix approach.
 
 - [ ] **Step 3: Do NOT commit yet**
 
-The triage file and `ISSUES.md` are committed together in Task 14.
+Tasks 14–16 are bundled into one commit in Task 16.
 
 ---
 
-## Task 13: Create or update `ISSUES.md` with P2 / P3 findings
+## Task 15: Create / update `ISSUES.md` with P2 / P3 findings
 
 **Files:**
 
-- Create or modify: `ISSUES.md` (at repo root)
+- Create or modify: `ISSUES.md` (at repo root).
 
 - [ ] **Step 1: Check whether `ISSUES.md` already exists**
 
 Run: `ls ISSUES.md 2>&1`
 
-If it exists, read it first with the Read tool so you can append to it without clobbering. If it does not exist, you will create it fresh.
+If it exists, read it first.
 
 - [ ] **Step 2: Write or extend `ISSUES.md`**
 
-If creating fresh, start with this header:
+If creating fresh, start with:
 
 ```markdown
 # Voyager — Open Issues
@@ -790,21 +925,21 @@ If creating fresh, start with this header:
 Rolling log of open issues, P2 / P3 severity. P0 / P1 items live in the current
 triage file under `docs/audits/`.
 
-Each entry includes severity, effort, category, and source (which audit surfaced
-it). Items are appended over time — never overwrite this file.
+Each entry includes severity, effort, category, and source. Items are appended
+over time — never overwrite this file.
 
 ---
 ```
 
-If it already exists, keep its existing contents and append a new dated section:
+Append a new dated section:
 
 ```markdown
 ## 2026-04-06 audit run
 
-<every P2 and P3 finding from Task 11, one per entry>
+<every P2 and P3 finding from Task 13, one per entry>
 ```
 
-Each entry follows this format:
+Each entry:
 
 ```markdown
 ### [ENG-07] <title>
@@ -814,147 +949,117 @@ Each entry follows this format:
 - **Notes:** <1–2 sentences describing the finding and any fix sketch>
 ```
 
-Use the same stable triage IDs you chose in Task 12. Do NOT renumber — the same ID should refer to the same finding in both the triage file and ISSUES.md.
+Use the same stable triage IDs from Task 14.
 
-- [ ] **Step 3: Verify every Task 11 finding is accounted for**
+- [ ] **Step 3: Verify every finding is accounted for**
 
-Count the total number of findings from your Task 11 working list. Count the entries in the triage file (P0 + P1) and in ISSUES.md (P2 + P3 for this run). The totals must match. If not, you dropped a finding — go back and add it.
+Count total findings from Task 13. Count entries in the triage file (P0 + P1) plus entries in ISSUES.md (P2 + P3 for this run). Totals must match.
 
 - [ ] **Step 4: Do NOT commit yet**
 
 ---
 
-## Task 14: Commit Phase 3 — triage file + `ISSUES.md`
-
-**Files:**
-
-- Stage and commit: `docs/audits/2026-04-06-triage.md`, `ISSUES.md`
+## Task 16: Commit Phase 3 — triage file + `ISSUES.md`
 
 - [ ] **Step 1: Stage both files**
 
-Run: `git add docs/audits/2026-04-06-triage.md ISSUES.md`
+Run: `git add docs/audits/2026-04-06-triage.md ISSUES.md && git status`
 
-Then run: `git status`
+Expected: triage file (new) and ISSUES.md (new or modified) staged.
 
-Expected: 1 new file (triage) and 1 new-or-modified file (ISSUES.md). No other changes.
+- [ ] **Step 2: Extract severity counts for the commit message**
 
-- [ ] **Step 2: Determine the severity counts for the commit message**
-
-From Task 11, extract:
-
-- `N_P0` = number of P0 findings
-- `N_P1` = number of P1 findings
-- `N_P2` = number of P2 findings
-- `N_P3` = number of P3 findings
+From Task 13: `N_P0`, `N_P1`, `N_P2`, `N_P3`.
 
 - [ ] **Step 3: Commit**
 
-Run (substituting the actual counts):
+Run (substituting actual counts):
 
 ```bash
 git commit -m "$(cat <<'EOF'
 docs: triage 2026-04-06 audit findings (<N_P0> P0, <N_P1> P1, <N_P2> P2, <N_P3> P3)
 
-Reads the 6 audit files from the 2026-04-06 run and produces a
+Reads the 8 audit files from the 2026-04-06 run and produces a
 consolidated triage file at docs/audits/2026-04-06-triage.md with
 the P0/P1 fix queue. P2/P3 findings are logged to ISSUES.md at the
 repo root as a rolling log (not overwritten by future runs).
 
-The P0/P1 queue becomes the scope for the next plan (Phase 5 Part D
-in the source spec): test-first fixes on a single branch
-fix/audit-2026-04-06-p0p1 with one commit per fix.
+The P0/P1 queue becomes the scope for Plan C (test-first fix loop).
 
 Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 EOF
 )"
 ```
 
-Expected: Commit succeeds. Lefthook may run its hooks — since no code changed, format / lint / build should all pass.
+- [ ] **Step 4: Verify**
 
-- [ ] **Step 4: Verify the commit**
+Run: `git log --oneline -4`
 
-Run: `git log --oneline -3 && git show --stat HEAD`
+Expected (newest to oldest):
 
-Expected: Latest commit is the triage commit. Prior two commits are the Phase 2 audit run and the Phase 1 audit slash-commands.
+1. docs: triage 2026-04-06 audit findings
+2. audit: 2026-04-06 run (8 roles)
+3. feat: add Voyager-tailored audit slash-commands (8 roles)
+4. chore: prettier-format spec and plan docs
 
 ---
 
-## Task 15: Exit verification and handoff
-
-**Files:** none modified.
+## Task 17: Exit verification and handoff
 
 - [ ] **Step 1: Verify Phase 1 exit criteria**
 
 Run: `ls .claude/commands/audit-*.md`
 
-Expected: exactly 6 files (engineering, security, design, ux, marketing, criticism).
+Expected: exactly 8 files.
 
-Use the Grep tool: `pattern: "docs/audits/YYYY-MM-DD-"`, `path: ".claude/commands"`, `output_mode: "files_with_matches"`.
-
-Expected: all 6 audit-\*.md files matched.
-
-Use the Grep tool: `pattern: "create a new branch|Create and check out"`, `path: ".claude/commands"`, `output_mode: "files_with_matches"`.
-
-Expected: zero matches.
+Use Grep: `pattern: "~/.claude/audits/"`, `path: ".claude/commands"` — all 8 files should match.
 
 - [ ] **Step 2: Verify Phase 2 exit criteria**
 
-Run: `ls docs/audits/2026-04-06-*.md`
+Run: `ls docs/audits/2026-04-06-*.md | grep -v triage`
 
-Expected: exactly 6 dated audit files (NOT including the triage file — that's Phase 3).
+Expected: exactly 8 dated audit files (not counting the triage file).
 
 Run: `wc -l docs/audits/2026-04-06-*.md`
 
-Expected: each file has substantive line count (>= 50 lines). If any is shorter, it's probably a thin report and should be re-run in a follow-up.
+Expected: each audit file >= 50 lines.
 
 - [ ] **Step 3: Verify Phase 3 exit criteria**
 
-Run: `ls docs/audits/2026-04-06-triage.md ISSUES.md`
-
-Expected: both files exist.
-
-Use the Read tool on `docs/audits/2026-04-06-triage.md`. Verify:
-
-- Summary section with counts
-- P0 section present
-- P1 section present
-- Each entry has Source, Severity, Effort, Category, Repro, Fix approach
-
-Use the Read tool on `ISSUES.md`. Verify:
-
-- Has a header explaining its purpose
-- Has entries from the 2026-04-06 run (unless there were zero P2/P3 findings, which would be surprising)
+Verify `docs/audits/2026-04-06-triage.md` and `ISSUES.md` exist and have the required sections.
 
 - [ ] **Step 4: Verify git history**
 
 Run: `git log --oneline -5`
 
-Expected: the last 3 commits (from newest to oldest) are:
+Expected last 4 commits (newest to oldest):
 
 1. `docs: triage 2026-04-06 audit findings (<counts>)`
-2. `audit: 2026-04-06 run (engineering, security, design, ux, marketing, criticism)`
-3. `feat: add Voyager-tailored audit slash-commands`
+2. `audit: 2026-04-06 run (8 roles — ...)`
+3. `feat: add Voyager-tailored audit slash-commands (8 roles)`
+4. `chore: prettier-format spec and plan docs`
 
-- [ ] **Step 5: Produce a handoff report for the next plan**
+- [ ] **Step 5: Produce the handoff report**
 
-Write a short summary (as an assistant message, not a committed file) containing:
+Write a status message (assistant output, not a committed file) including:
 
-1. The severity counts from the triage file (N_P0, N_P1, N_P2, N_P3)
-2. The top 3 P0 findings by ID and title
-3. The top 3 P1 findings by ID and title
-4. Any P0/P1 finding that is a **prerequisite for E2E mocking** (specifically: does the engineering audit report whether the tool executor supports adapter injection, or does it need refactoring to support `E2E_MOCK_TOOLS=1`?). This is important input for Plan B (Phase 4 + Phase 5 A/B/C).
-5. A sentence identifying which follow-up plan should be written next:
-   - **Plan B (Phase 4 + Phase 5 A/B/C):** E2E coverage + test gates. Write this next.
-   - **Plan C (Phase 5 Part D):** P0/P1 fix loop. Write after Plan B is executed, or interleave with Plan B if any P0 finding blocks E2E work.
+1. Severity counts (N_P0, N_P1, N_P2, N_P3)
+2. Top 3 P0 findings by ID and title
+3. Top 3 P1 findings by ID and title
+4. **Prerequisite for E2E mocking (Plan B input):** does the engineering audit report that the tool executor supports adapter injection, or does it need refactoring to support `E2E_MOCK_TOOLS=1`? If refactoring is needed, flag it as a prerequisite P1 fix in Plan C.
+5. **Legal audit status:** how many required documents are missing? Which are launch blockers?
+6. **Financial audit unit economics:** projected cost per trip plan, SerpApi free-tier cliff, any missing spending caps as P0.
+7. **Criticism audit brutal truth:** the one-paragraph headline finding.
+8. Recommendation: write Plan B (E2E coverage + test gates) and Plan C (test-first P0/P1 fixes) immediately, both committed alongside this plan. Neither should execute without user review.
 
-- [ ] **Step 6: Plan complete**
+- [ ] **Step 6: Plan A complete**
 
 At this point:
 
-- 6 audit slash-commands exist and work on the current branch
-- 6 dated audit reports are on `main`
-- Triage file categorizes every finding by severity
+- 8 audit slash-commands exist on the plan branch
+- 8 dated audit reports are on the plan branch
+- Triage file categorizes every finding
 - `ISSUES.md` holds the P2/P3 rolling log
-- The P0/P1 fix queue is ready for Plan C
+- Git history is clean and coherent
 
-Report to the user that Plan A is complete and ask which follow-up plan they want drafted next.
+The plan then proceeds to write Plan B and Plan C as sibling documents (outside this plan's scope but promised as the next work).
