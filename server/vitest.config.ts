@@ -30,24 +30,31 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov'],
       reportsDirectory: 'coverage',
-      // Lowered from 80 to 75 on 2026-04-06 (PR-G). PR-C
-      // removed **/rateLimiter.ts from the exclude list
-      // because the SEC-04 boot crash happened in code that
-      // was hidden from coverage. Once the rate limiter file
-      // joined the report, the global branches dropped from
-      // a previously-passing >=80 to 76.43 because route
-      // handlers, logger, app.ts, and several tool files
-      // have always had partial branch coverage but were
-      // either silently passing because of the exclusions or
-      // being averaged out. Tracked as ENG-18 in ISSUES.md:
-      // the goal is to write the missing tests and bump the
-      // threshold back to 80, not to keep papering over the
-      // gap.
+      // Restored to 80 on 2026-04-07 (PR-J). History:
+      //   - Original threshold: 80 across all four metrics.
+      //   - PR-C (2026-04-06) removed **/rateLimiter.ts from the
+      //     exclude list because the SEC-04 boot crash happened
+      //     in code that was hidden from coverage.
+      //   - PR-G (2026-04-06) dropped the threshold to 75 as a
+      //     temporary measure because PR-C's inclusion exposed
+      //     pre-existing gaps in routes, logger, trip-context,
+      //     and several tool files that had always been below
+      //     80 but were silently passing.
+      //   - PR-J (2026-04-07) wrote missing tests for
+      //     trip-context (35 new tests), logger (4), and the
+      //     trips/places routers (8). Branch coverage climbed
+      //     from 76.43 to 80.38, so the threshold is restored
+      //     to 80 with the same safety margin the original
+      //     setting provided.
+      //
+      // If coverage drops below 80 again, EITHER add tests to
+      // bring it back up OR document a temporary lowering as a
+      // tracked ENG issue. Do not silently adjust the number.
       thresholds: {
-        branches: 75,
-        functions: 75,
-        lines: 75,
-        statements: 75,
+        branches: 80,
+        functions: 80,
+        lines: 80,
+        statements: 80,
       },
     },
     environment: 'node',

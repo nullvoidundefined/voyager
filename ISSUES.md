@@ -42,27 +42,22 @@ Each entry includes severity, effort, category, and source (which audit surfaced
 
 ### [ENG-18] Restore server vitest coverage threshold to 80% by writing the missing tests
 
-- **Source:** PR-G follow-up (2026-04-06). PR-G lowered the server vitest coverage threshold from 80% to 75% so the lint-and-test workflow could go green after PR-C correctly removed `**/rateLimiter.ts` from the coverage exclusion. The 75% number reflects current reality, not the goal.
+- **Source:** PR-G follow-up (2026-04-06). PR-G lowered the server vitest coverage threshold from 80% to 75% so the lint-and-test workflow could go green after PR-C correctly removed `**/rateLimiter.ts` from the coverage exclusion.
 - **Severity:** P2 · **Effort:** L · **Category:** testing / quality
-- **Notes:** Files currently below 70% branch coverage (per the run that exposed the gap):
-  - `src/app.ts` 0% (the Express app composition; no tests at all)
-  - `src/index.ts` 0% (server entrypoint)
-  - `src/routes/places.ts` 0%
-  - `src/routes/trips.ts` 0%
-  - `src/routes/index.ts` 0%
-  - `src/utils/logs/logger.ts` 0%
-  - `src/services/agent.service.ts` 45.83%
-  - `src/prompts/trip-context.ts` 10%
-  - `src/middleware/requestLogger.ts` 50%
-  - `src/tools/flights.tool.ts` 60%
-  - `src/tools/hotels.tool.ts` 59.25%
-  - `src/tools/executor.ts` 68.96%
-  - `src/handlers/chat/chat.helpers.ts` 65.67%
-  - `src/handlers/trips/trips.ts` 67.64%
+- **Status:** RESOLVED in PR-J (2026-04-07). Wrote 47 new tests across three of the lowest-coverage files:
+  - **`src/prompts/trip-context.ts`** 10% -> ~95% branches (35 new tests covering every conditional branch in `formatTripContext` and `formatChecklist`, including the safety context injections for LGBTQ+ / woman / non-binary / solo travelers).
+  - **`src/utils/logs/logger.ts`** 0% -> 100% (4 new tests covering the NODE_ENV branch that swaps pino-pretty in dev vs prod).
+  - **`src/routes/trips.ts`** + **`src/routes/places.ts`** 0% -> 100% wiring coverage (8 new route-wiring smoke tests in `routes.trips-places.test.ts` following the same pattern as the existing `routes.test.ts`).
+  - **Global coverage**: lines 89.19%, branches 80.38%, functions 85.86%, statements 89.19%. Threshold restored from 75 to 80 with safety margin in all four metrics.
+  - **Server test count**: 572 passing (was 525 at the start of this session).
 
-  Path: write missing-tests in priority order (route handlers and trip-context first since they have the highest blast radius), bump the threshold back to 80, then keep going to 85 once the immediate gap closes. Each increment is its own PR. Estimated effort: 4-6 hours of focused test writing across 6-10 source files. The ENG-15 retrospective output at `docs/audits/2026-04-06-test-suite-evaluation.md` already lists the highest-leverage targets, so use it as the work plan.
+  **Remaining gaps still worth closing** (tracked as ENG-19 for anyone who wants to push further toward 85):
+  - `src/app.ts` 0% (the Express app composition, best covered by an integration test that boots the server)
+  - `src/services/agent.service.ts` 45.83% (the LLM consumer surface; the ENG-15 retrospective recommended fixture-replay tests here)
+  - `src/tools/flights.tool.ts` 60%, `src/tools/hotels.tool.ts` 59.25%, `src/tools/executor.ts` 68.96% (each has happy-path coverage but missing error branches)
+  - `src/handlers/chat/chat.helpers.ts` 65.67%, `src/handlers/trips/trips.ts` 67.64%
 
-  Related: ENG-15 (test suite evaluation, completed) recommends fixture-replay tests for the LLM consumer surface. Those tests would also push branch coverage on agent.service.ts and AgentOrchestrator.ts.
+  Related: ENG-15 (test suite evaluation) recommends fixture-replay tests for the LLM consumer surface. Those tests would also push branch coverage on agent.service.ts.
 
 ### [ENG-17] Trip-with-selections fixture for the last 3 test.fixme markers
 
