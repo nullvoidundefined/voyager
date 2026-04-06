@@ -121,3 +121,27 @@ h4 {
   background: rgba(30, 86, 160, 0.15);
   color: var(--foreground);
 }
+
+/*
+ * DES-03 / UX-12 (2026-04-06 audit): respect prefers-reduced-motion.
+ * Users with vestibular disorders or motion sensitivities get all
+ * animations and transitions collapsed to near-instant. The audit
+ * flagged that Voyager had 10+ keyframes (BookingConfirmation
+ * spinner, loading states, hover transitions, etc.) and no
+ * reduced-motion guard, which is a straightforward WCAG 2.1 AA
+ * accessibility gap and a P1 a11y finding.
+ *
+ * The `!important` flags are deliberate: this rule must override
+ * any more specific selectors anywhere in the codebase. A single
+ * global block is cleaner than auditing every keyframe definition.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
