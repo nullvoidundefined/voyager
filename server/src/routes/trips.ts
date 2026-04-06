@@ -14,6 +14,11 @@ tripRouter.get('/:id', tripHandlers.getTrip);
 tripRouter.put('/:id', tripHandlers.updateTrip);
 tripRouter.delete('/:id', tripHandlers.deleteTrip);
 
+// Test-only seam (ENG-17). The handler itself returns 404 unless
+// E2E_BYPASS_RATE_LIMITS=1 is set, so this route is invisible in
+// production. See server/src/handlers/trips/trips.ts::seedSelections.
+tripRouter.post('/:id/test-selections', tripHandlers.seedSelections);
+
 tripRouter.post('/:id/chat', chatRateLimiter, chatHandlers.chat);
 tripRouter.get('/:id/messages', chatHandlers.getMessages);
 

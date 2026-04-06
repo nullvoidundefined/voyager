@@ -143,3 +143,81 @@ export async function deleteTrip(req: Request, res: Response): Promise<void> {
   logger.info({ event: 'trip_deleted', tripId, userId }, 'Trip deleted');
   res.status(204).send();
 }
+
+/**
+ * Test-only seam: insert flight / hotel / car-rental / experience
+ * selections directly via the repository functions, bypassing the
+ * agent loop.
+ *
+ * ENG-17: E2E tests for US-23, US-26, and US-27 need a trip that
+ * has selections already in place BEFORE the test runs. Going
+ * through the real chat flow would require a multi-turn
+ * MockAnthropic state machine and would couple the tests to the
+ * agent loop. This endpoint provides a deterministic alternative
+ * that reuses the same repo functions the real select_* tools
+ * call.
+ *
+ * The handler returns 404 unless E2E_BYPASS_RATE_LIMITS=1 is set,
+ * which means the endpoint is invisible in production. The env
+ * flag is the same one playwright.config.ts and
+ * src/__integration__/setup.ts already set for test mode.
+ *
+ * Payload shape mirrors the select_* tool schemas. See
+ * selectFlightSchema, selectHotelSchema, etc. in src/tools/schemas.ts.
+ */
+export async function seedSelections(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  if (process.env.E2E_BYPASS_RATE_LIMITS !== '1') {
+    throw ApiError.notFound('Not found');
+  }
+
+  const userId = req.user!.id;
+  const tripId = req.params.id as string;
+
+  // Ownership check: ensure the caller owns this trip.
+  const trip = await tripRepo.getTripWithDetails(tripId, userId);
+  if (!trip) {
+    throw ApiError.notFound('Trip not found');
+  }
+
+  const {
+    flights = [],
+    hotels = [],
+    car_rentals = [],
+    experiences = [],
+  } = (req.body ?? {}) as {
+    flights?: Record<string, unknown>[];
+    hotels?: Record<string, unknown>[];
+    car_rentals?: Record<string, unknown>[];
+    experiences?: Record<string, unknown>[];
+  };
+
+  for (const flight of flights) {
+    await tripRepo.insertTripFlight(tripId, flight);
+  }
+  for (const hotel of hotels) {
+    await tripRepo.insertTripHotel(tripId, hotel);
+  }
+  for (const rental of car_rentals) {
+    await tripRepo.insertTripCarRental(tripId, rental);
+  }
+  for (const experience of experiences) {
+    await tripRepo.insertTripExperience(tripId, experience);
+  }
+
+  logger.info(
+    {
+      event: 'trip_selections_seeded',
+      tripId,
+      userId,
+      flightCount: flights.length,
+      hotelCount: hotels.length,
+      carRentalCount: car_rentals.length,
+      experienceCount: experiences.length,
+    },
+    'Test-only trip selections seeded',
+  );
+  res.status(204).send();
+}

@@ -5,10 +5,19 @@
  */
 import { expect, test } from '@playwright/test';
 
+import { defaultSelections, seedTripSelections } from './fixtures/test-trips';
 import { newUser, seedUser } from './fixtures/test-users';
 import { login } from './helpers/auth';
 import { sendMessage } from './helpers/chat';
 import { createTrip } from './helpers/trip';
+
+function extractTripId(url: string): string {
+  const match = url.match(/\/trips\/([a-f0-9-]+)/i);
+  if (!match?.[1]) {
+    throw new Error(`Could not extract trip id from url: ${url}`);
+  }
+  return match[1];
+}
 
 test.describe('Checkout', () => {
   test('US-25: open booking confirmation modal', async ({ page }) => {
@@ -39,20 +48,81 @@ test.describe('Checkout', () => {
     ).toBeVisible({ timeout: 5_000 });
   });
 
-  test.fixme('US-26: review itemized breakdown', async () => {
-    // Needs a trip that has selected_flight, selected_hotel,
-    // selected_car_rental, and selected_experiences populated
-    // before the modal opens. Either via the API
-    // (PUT /trips/:id with the selection fields) or by
-    // walking through the chat tile selection flow. Tracked
-    // alongside US-23 in ENG-17.
+  test('US-26: review itemized breakdown', async ({ page }) => {
+    test.setTimeout(60_000);
+    const user = await seedUser(newUser());
+    await login(page, user);
+    await createTrip(page);
+    const tripId = extractTripId(page.url());
+    // ENG-17: seed the trip with a canonical happy-path selection
+    // set (flight, hotel, car rental, experience) via the test-only
+    // endpoint. This bypasses the agent loop and the multi-turn
+    // chat flow. See e2e/fixtures/test-trips.ts.
+    await seedTripSelections(page, tripId, defaultSelections());
+    // Reload so the trip page re-fetches with the new selections.
+    await page.reload();
+    // Send any chat message to produce the "Confirm booking"
+    // quick reply chip.
+    await sendMessage(
+      page,
+      'Plan a 3-day trip to San Francisco from Denver next month, $2500 budget, 2 travelers',
+    );
+    await page
+      .locator('[role="group"][aria-label="Quick replies"]')
+      .getByRole('button', { name: 'Confirm booking' })
+      .click();
+    // Scope every assertion to the booking confirmation dialog
+    // so "Flights" / "Hotels" headings do not collide with any
+    // tile-group headings the chat area may also render.
+    const dialog = page.getByRole('dialog', { name: 'Booking confirmation' });
+    await expect(dialog).toBeVisible({ timeout: 5_000 });
+    await expect(
+      dialog.getByRole('heading', { name: 'Flights' }),
+    ).toBeVisible();
+    await expect(dialog.getByRole('heading', { name: 'Hotels' })).toBeVisible();
+    await expect(
+      dialog.getByRole('heading', { name: 'Car Rentals' }),
+    ).toBeVisible();
+    await expect(
+      dialog.getByRole('heading', { name: 'Experiences' }),
+    ).toBeVisible();
+    // The flight line item from defaultSelections() has airline
+    // "Delta" and flight number "DL100". Verify the line item
+    // text appears inside the dialog.
+    await expect(dialog.getByText(/Delta DL100/i).first()).toBeVisible();
   });
 
-  test.fixme('US-27: confirm and book the trip', async () => {
-    // Depends on US-26 setup (trip with selections). Once the
-    // modal renders with line items, clicking the "Save
-    // itinerary" button calls handleConfirmBooking which
-    // PUTs status=saved. Tracked in ENG-17.
+  test('US-27: confirm and book the trip', async ({ page }) => {
+    test.setTimeout(60_000);
+    const user = await seedUser(newUser());
+    await login(page, user);
+    await createTrip(page);
+    const tripId = extractTripId(page.url());
+    await seedTripSelections(page, tripId, defaultSelections());
+    await page.reload();
+    await sendMessage(
+      page,
+      'Plan a 3-day trip to San Francisco from Denver next month, $2500 budget, 2 travelers',
+    );
+    await page
+      .locator('[role="group"][aria-label="Quick replies"]')
+      .getByRole('button', { name: 'Confirm booking' })
+      .click();
+    await expect(
+      page.getByRole('heading', { name: /Save Your Itinerary for/i }).first(),
+    ).toBeVisible({ timeout: 5_000 });
+    // Click "Save itinerary" to trigger handleConfirmBooking.
+    // The handler PUTs status=saved and optimistically updates
+    // the React Query cache.
+    await page.getByRole('button', { name: 'Save itinerary' }).click();
+    // Verify the trip status actually changed via the API.
+    const resp = await page.request.get(
+      `http://localhost:3001/trips/${tripId}`,
+      { headers: { 'X-Requested-With': 'XMLHttpRequest' } },
+    );
+    expect(resp.status()).toBeLessThan(400);
+    const body = (await resp.json()) as { trip: { status: string } };
+    expect(body.trip.status).toBe('saved');
   });
 
   test('US-28: booked trip locked state', async ({ page }) => {
@@ -63,12 +133,7 @@ test.describe('Checkout', () => {
     // simulate a completed booking. The chat input should
     // become disabled and show the locked placeholder.
     await createTrip(page);
-    const url = page.url();
-    const tripIdMatch = url.match(/\/trips\/([a-f0-9-]+)/i);
-    if (!tripIdMatch?.[1]) {
-      test.skip(true, 'unable to read trip id from URL');
-    }
-    const tripId = tripIdMatch?.[1] ?? '';
+    const tripId = extractTripId(page.url());
     // Use the page's request context so the session cookie is
     // included in the PUT.
     const putResponse = await page.request.put(

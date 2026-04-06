@@ -110,10 +110,26 @@ test.describe('Chat and booking flow', () => {
     });
   });
 
-  test.fixme('US-23: select and confirm a tile card', async () => {
-    // Needs a multi-turn MockAnthropic that responds to a user
-    // tile selection and emits a confirmation. Tracked as
-    // ENG-17 in ISSUES.md.
+  test('US-23: select and confirm a tile card', async ({ page }) => {
+    test.setTimeout(60_000);
+    const user = await seedUser(newUser());
+    await login(page, user);
+    await createTrip(page);
+    await sendMessage(
+      page,
+      'Plan a 3-day trip to San Francisco from Denver next month, $2500 budget, 2 travelers',
+    );
+    // Wait for tiles to render (mock emits search_flights on
+    // iteration 1).
+    const firstFlight = page.locator('[data-tile-card="flight"]').first();
+    await expect(firstFlight).toBeVisible({ timeout: 30_000 });
+    // Click the card. The SelectableCardGroup wrapper toggles
+    // aria-pressed=true on the clicked button, which is the
+    // canonical signal that the selection was registered.
+    await firstFlight.click();
+    await expect(firstFlight).toHaveAttribute('aria-pressed', 'true', {
+      timeout: 5_000,
+    });
   });
 
   test('US-24: use quick reply chips', async ({ page }) => {

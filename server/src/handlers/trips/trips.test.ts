@@ -4,7 +4,7 @@ import * as tripRepo from 'app/repositories/trips/trips.js';
 import { uuid } from 'app/utils/tests/uuids.js';
 import express from 'express';
 import request from 'supertest';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('app/repositories/trips/trips.js');
 vi.mock('app/utils/logs/logger.js', () => ({
@@ -34,6 +34,7 @@ function createApp() {
   app.get('/trips/:id', tripHandlers.getTrip);
   app.put('/trips/:id', tripHandlers.updateTrip);
   app.delete('/trips/:id', tripHandlers.deleteTrip);
+  app.post('/trips/:id/test-selections', tripHandlers.seedSelections);
   app.use(errorHandler);
   return app;
 }
@@ -258,6 +259,121 @@ describe('trip handlers', () => {
 
       expect(res.status).toBe(204);
       expect(tripRepo.deleteTrip).toHaveBeenCalledWith(tripId, userId);
+    });
+  });
+
+  describe('POST /trips/:id/test-selections (seedSelections, ENG-17)', () => {
+    const ORIGINAL_FLAG = process.env.E2E_BYPASS_RATE_LIMITS;
+
+    afterEach(() => {
+      if (ORIGINAL_FLAG === undefined) {
+        delete process.env.E2E_BYPASS_RATE_LIMITS;
+      } else {
+        process.env.E2E_BYPASS_RATE_LIMITS = ORIGINAL_FLAG;
+      }
+    });
+
+    it('returns 404 when E2E_BYPASS_RATE_LIMITS is not set', async () => {
+      delete process.env.E2E_BYPASS_RATE_LIMITS;
+      const res = await request(app)
+        .post(`/trips/${tripId}/test-selections`)
+        .send({ flights: [] });
+      expect(res.status).toBe(404);
+      expect(res.body.error).toBe('NOT_FOUND');
+    });
+
+    it('returns 404 when trip is not owned by the caller', async () => {
+      process.env.E2E_BYPASS_RATE_LIMITS = '1';
+      vi.mocked(tripRepo.getTripWithDetails).mockResolvedValueOnce(null);
+      const res = await request(app)
+        .post(`/trips/${tripId}/test-selections`)
+        .send({ flights: [] });
+      expect(res.status).toBe(404);
+    });
+
+    it('inserts flights, hotels, car rentals, and experiences via repo functions', async () => {
+      process.env.E2E_BYPASS_RATE_LIMITS = '1';
+      vi.mocked(tripRepo.getTripWithDetails).mockResolvedValueOnce(
+        mockTrip as unknown as Awaited<
+          ReturnType<typeof tripRepo.getTripWithDetails>
+        >,
+      );
+      vi.mocked(tripRepo.insertTripFlight).mockResolvedValue(undefined);
+      vi.mocked(tripRepo.insertTripHotel).mockResolvedValue(undefined);
+      vi.mocked(tripRepo.insertTripCarRental).mockResolvedValue(undefined);
+      vi.mocked(tripRepo.insertTripExperience).mockResolvedValue(undefined);
+
+      const payload = {
+        flights: [
+          {
+            airline: 'Delta',
+            flight_number: 'DL100',
+            origin: 'DEN',
+            destination: 'SFO',
+            price: 300,
+            currency: 'USD',
+          },
+        ],
+        hotels: [
+          {
+            name: 'Test Hotel',
+            price_per_night: 200,
+            total_price: 800,
+            currency: 'USD',
+          },
+        ],
+        car_rentals: [
+          {
+            provider: 'Hertz',
+            car_name: 'Toyota Camry',
+            total_price: 300,
+            currency: 'USD',
+          },
+        ],
+        experiences: [
+          {
+            name: 'Bay Cruise',
+            estimated_cost: 75,
+          },
+        ],
+      };
+
+      const res = await request(app)
+        .post(`/trips/${tripId}/test-selections`)
+        .send(payload);
+
+      expect(res.status).toBe(204);
+      expect(tripRepo.insertTripFlight).toHaveBeenCalledWith(
+        tripId,
+        payload.flights[0],
+      );
+      expect(tripRepo.insertTripHotel).toHaveBeenCalledWith(
+        tripId,
+        payload.hotels[0],
+      );
+      expect(tripRepo.insertTripCarRental).toHaveBeenCalledWith(
+        tripId,
+        payload.car_rentals[0],
+      );
+      expect(tripRepo.insertTripExperience).toHaveBeenCalledWith(
+        tripId,
+        payload.experiences[0],
+      );
+    });
+
+    it('accepts an empty payload without calling any insert', async () => {
+      process.env.E2E_BYPASS_RATE_LIMITS = '1';
+      vi.mocked(tripRepo.getTripWithDetails).mockResolvedValueOnce(
+        mockTrip as unknown as Awaited<
+          ReturnType<typeof tripRepo.getTripWithDetails>
+        >,
+      );
+      const res = await request(app)
+        .post(`/trips/${tripId}/test-selections`)
+        .send({});
+      expect(res.status).toBe(204);
+      expect(tripRepo.insertTripFlight).not.toHaveBeenCalled();
+      expect(tripRepo.insertTripHotel).not.toHaveBeenCalled();
     });
   });
 });
