@@ -67,11 +67,20 @@ pre-push:
       run: pnpm --filter voyager-server build
     e2e-precheck:
       run: ./scripts/e2e-precheck.sh
-    # e2e-fast runs in WARNING mode for now: it executes the @fast
-    # Playwright suite, prints any failure, but always exits 0 so a
-    # broken local environment cannot block a push. Promote to
-    # blocking once the local server boots cleanly across all
-    # worktrees and the @fast suite is reliably green. Tracked in
-    # docs/audits/2026-04-06-plan-b-handoff.md.
+    # e2e-fast runs in WARNING mode pending ENG-16. The
+    # @fast suite is reliably green in CI but the local
+    # environment is still flaky: my dev API server is not
+    # always bound to :3001, the prod Neon DB latency is
+    # variable, and Playwright's webServer spawn dies
+    # silently if anything is off. PR-F bumped the register
+    # helper timeout from 10s to 30s as a marginal
+    # improvement, but local-vs-CI parity still does not
+    # exist. The ENG-16 follow-up (local Postgres test DB,
+    # local server health gate) is the real fix.
+    #
+    # CI is the authoritative gate via the `e2e` required
+    # check on main branch protection. This warning hook is
+    # a courtesy for fast local feedback, not the
+    # authoritative wall.
     e2e-fast:
-      run: 'pnpm test:e2e:fast || (echo "" && echo "WARNING e2e-fast failed but is non-blocking. See lefthook.yml note." && exit 0)'
+      run: 'pnpm test:e2e:fast || (echo "" && echo "WARNING e2e-fast failed but is non-blocking. CI is the authoritative gate via the e2e required check. See ENG-16 in ISSUES.md." && exit 0)'
