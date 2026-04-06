@@ -15,7 +15,13 @@ export default defineConfig({
         '**/config/**',
         '**/types/**',
         '**/db/**',
-        '**/rateLimiter.ts',
+        // rateLimiter.ts was previously excluded; the 2026-04-06
+        // process retrospective traced a production boot crash
+        // (the SEC-04 ioredis enableOfflineQueue:false bug) to
+        // exactly this file. Excluding it from coverage hid the
+        // gap. The boot regression test in
+        // rateLimiter.boot.test.ts now exercises the affected
+        // path so the coverage report should reflect it.
         '**/*.d.ts',
         '**/*.test.ts',
         'src/index.ts',
