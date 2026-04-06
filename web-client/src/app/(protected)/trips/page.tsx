@@ -75,6 +75,20 @@ export default function TripsPage() {
     },
   });
 
+  // Guarded delete handler. Confirms before firing the mutation so that
+  // an accidental tap on the delete button does not silently wipe a
+  // trip. Minimum viable guardrail; Plan C Task 29 migrates this to a
+  // Radix AlertDialog with proper focus trap and aria semantics.
+  const handleDeleteClick = (e: React.MouseEvent, tripId: string) => {
+    e.preventDefault();
+    const confirmed = window.confirm(
+      'Delete this trip? This cannot be undone.',
+    );
+    if (confirmed) {
+      deleteMutation.mutate(tripId);
+    }
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -113,10 +127,7 @@ export default function TripsPage() {
                       type='button'
                       className={styles.deleteBtn}
                       aria-label='Delete trip'
-                      onClick={(e) => {
-                        e.preventDefault();
-                        deleteMutation.mutate(trip.id);
-                      }}
+                      onClick={(e) => handleDeleteClick(e, trip.id)}
                     >
                       &times;
                     </button>
@@ -128,10 +139,7 @@ export default function TripsPage() {
                       type='button'
                       className={styles.deleteBtn}
                       aria-label='Delete trip'
-                      onClick={(e) => {
-                        e.preventDefault();
-                        deleteMutation.mutate(trip.id);
-                      }}
+                      onClick={(e) => handleDeleteClick(e, trip.id)}
                     >
                       &times;
                     </button>
