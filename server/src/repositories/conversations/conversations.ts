@@ -1,4 +1,4 @@
-import type { ChatNode } from '@agentic-travel-agent/shared-types';
+import type { ChatNode } from '@voyager/shared-types';
 import { query } from 'app/db/pool/pool.js';
 
 export interface Conversation {

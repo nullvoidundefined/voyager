@@ -1,9 +1,6 @@
 'use client';
 
-import type {
-  ChatNodeOfType,
-  Citation,
-} from '@agentic-travel-agent/shared-types';
+import type { ChatNodeOfType, Citation } from '@voyager/shared-types';
 import ReactMarkdown from 'react-markdown';
 
 import styles from './MarkdownText.module.scss';

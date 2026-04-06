@@ -6,7 +6,7 @@ Automated evaluation system for the Voyager travel agent. Runs synthetic custome
 
 ```bash
 # Build the server first (eval imports it directly)
-pnpm --filter agentic-travel-agent-server build
+pnpm --filter voyager-server build
 
 # Run full evaluation (15-18 personas, ~$3-8 API cost)
 pnpm eval

@@ -1,5 +1,5 @@
-import type { ChatNode, SSEEvent } from '@agentic-travel-agent/shared-types';
 import Anthropic from '@anthropic-ai/sdk';
+import type { ChatNode, SSEEvent } from '@voyager/shared-types';
 import { logger } from 'app/utils/logs/logger.js';
 
 import { buildNodeFromToolResult } from './node-builder.js';

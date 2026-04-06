@@ -1,4 +1,4 @@
-import type { ChatMessage, ChatNode } from '@agentic-travel-agent/shared-types';
+import type { ChatMessage, ChatNode } from '@voyager/shared-types';
 import {
   DEFAULT_COMPLETION_TRACKER,
   computeNudge,

@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-travel-agent/shared-types",
+  "name": "@voyager/shared-types",
   "version": "1.0.0",
   "private": true,
   "main": "./src/index.ts",

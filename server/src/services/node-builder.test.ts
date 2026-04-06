@@ -1,4 +1,4 @@
-import type { ChatNode } from '@agentic-travel-agent/shared-types';
+import type { ChatNode } from '@voyager/shared-types';
 import { describe, expect, it } from 'vitest';
 
 import { buildNodeFromToolResult } from './node-builder.js';

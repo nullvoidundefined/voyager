@@ -63,7 +63,7 @@ Voyager follows a standard client-server architecture with a conversational AI a
   web-client/           -- Next.js 15 frontend
 ```
 
-`packages/shared-types` is a TypeScript-only package (`@agentic-travel-agent/shared-types`) imported by both `server/` and `web-client/`. It is the single source of truth for the typed chat protocol. Changes to `ChatNode` are immediately reflected in both packages, and TypeScript enforces that every node type has a corresponding component in the frontend's `NodeRenderer`.
+`packages/shared-types` is a TypeScript-only package (`@voyager/shared-types`) imported by both `server/` and `web-client/`. It is the single source of truth for the typed chat protocol. Changes to `ChatNode` are immediately reflected in both packages, and TypeScript enforces that every node type has a corresponding component in the frontend's `NodeRenderer`.
 
 ## Backend Architecture
 
@@ -487,7 +487,7 @@ The chat endpoint is called directly via `fetch` (inside `useSSEChat`, not the A
 
 - **Lefthook** manages git hooks via `lefthook.yml`
 - **Pre-commit** (parallel): `pnpm format:check` + `pnpm lint`
-- **Pre-push**: `pnpm format:check` + `pnpm lint` + `pnpm --filter agentic-travel-agent-server build`
+- **Pre-push**: `pnpm format:check` + `pnpm lint` + `pnpm --filter voyager-server build`
 
 ## Security
 

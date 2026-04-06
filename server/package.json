@@ -1,5 +1,5 @@
 {
-  "name": "agentic-travel-agent-server",
+  "name": "voyager-server",
   "version": "1.0.0",
   "type": "module",
   "engines": {
@@ -22,7 +22,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@agentic-travel-agent/shared-types": "workspace:*",
+    "@voyager/shared-types": "workspace:*",
     "@anthropic-ai/sdk": "^0.80.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",

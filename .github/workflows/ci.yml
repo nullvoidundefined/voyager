@@ -54,10 +54,10 @@ jobs:
         run: pnpm format:check
 
       - name: Build
-        run: pnpm --filter agentic-travel-agent-server build
+        run: pnpm --filter voyager-server build
 
       - name: Run migrations
-        run: pnpm --filter agentic-travel-agent-server run migrate:up
+        run: pnpm --filter voyager-server run migrate:up
         env:
           DATABASE_URL: postgres://test:test@localhost:5432/test
 
@@ -80,7 +80,7 @@ jobs:
           retention-days: 14
 
       - name: Integration tests
-        run: pnpm --filter agentic-travel-agent-server run test:integration
+        run: pnpm --filter voyager-server run test:integration
         env:
           DATABASE_URL: postgres://test:test@localhost:5432/test
           REDIS_URL: redis://localhost:6379

@@ -1,4 +1,4 @@
-import type { ChatNode } from '@agentic-travel-agent/shared-types';
+import type { ChatNode } from '@voyager/shared-types';
 import { cacheGet, cacheSet } from 'app/services/cache.service.js';
 
 const CACHE_TTL = 86400; // 24 hours

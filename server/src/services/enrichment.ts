@@ -1,4 +1,4 @@
-import type { ChatNode } from '@agentic-travel-agent/shared-types';
+import type { ChatNode } from '@voyager/shared-types';
 
 import { lookupCity } from '../data/cities.js';
 import { getDrivingRequirements } from './enrichment-sources/driving.js';

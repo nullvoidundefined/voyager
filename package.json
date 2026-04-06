@@ -1,5 +1,5 @@
 {
-  "name": "agentic-travel-agent",
+  "name": "voyager",
   "version": "1.0.0",
   "private": true,
   "packageManager": "pnpm@9.15.9",
@@ -8,15 +8,15 @@
   },
   "scripts": {
     "dev": "pnpm --parallel run dev",
-    "build": "pnpm --filter agentic-travel-agent-server build && pnpm --filter agentic-travel-agent-web build",
+    "build": "pnpm --filter voyager-server build && pnpm --filter voyager-web build",
     "lint": "eslint --config eslint.config.bottomlessmargaritas.js .",
     "lint:fix": "eslint --config eslint.config.bottomlessmargaritas.js . --fix",
     "format": "prettier --config prettier.config.bottomlessmargaritas.mjs --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "format:check": "prettier --config prettier.config.bottomlessmargaritas.mjs --check \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
-    "test": "pnpm --filter agentic-travel-agent-server run test",
-    "test:coverage": "pnpm --filter agentic-travel-agent-server run test:coverage",
-    "test:integration": "pnpm --filter agentic-travel-agent-server run test:integration",
-    "test:e2e": "pnpm --filter agentic-travel-agent-web run test:e2e",
+    "test": "pnpm --filter voyager-server run test",
+    "test:coverage": "pnpm --filter voyager-server run test:coverage",
+    "test:integration": "pnpm --filter voyager-server run test:integration",
+    "test:e2e": "pnpm --filter voyager-web run test:e2e",
     "seed:test": "npx tsx scripts/seed-test-db.ts",
     "test:smoke": "bash scripts/smoke-test.sh",
     "prepare": "git rev-parse --git-dir > /dev/null 2>&1 && lefthook install || true",
@@ -24,7 +24,7 @@
     "bottomlessmargaritas:format:check": "prettier --config prettier.config.bottomlessmargaritas.mjs --check \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "bottomlessmargaritas:lint": "eslint --config eslint.config.bottomlessmargaritas.js .",
     "bottomlessmargaritas:lint:fix": "eslint --config eslint.config.bottomlessmargaritas.js . --fix",
-    "eval": "pnpm --filter agentic-travel-agent-eval run eval"
+    "eval": "pnpm --filter voyager-eval run eval"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.6",

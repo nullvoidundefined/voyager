@@ -1,5 +1,5 @@
 {
-  "name": "agentic-travel-agent-web",
+  "name": "voyager-web",
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@9.15.9",
@@ -20,7 +20,7 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
-    "@agentic-travel-agent/shared-types": "workspace:*",
+    "@voyager/shared-types": "workspace:*",
     "@tanstack/react-query": "^5.95.2",
     "@tanstack/react-virtual": "^3.13.23",
     "@vercel/analytics": "^1",

@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { APP_NAME } from '@/lib/constants';
-import type { ChatMessage, ChatNode } from '@agentic-travel-agent/shared-types';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import type { ChatMessage, ChatNode } from '@voyager/shared-types';
 
 import { NodeRenderer } from './NodeRenderer';
 import styles from './VirtualizedChat.module.scss';

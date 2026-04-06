@@ -36,9 +36,9 @@
 
 ## Shared Packages
 
-| Package                              | Purpose                                                                                                        |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `@agentic-travel-agent/shared-types` | `ChatNode` discriminated union, tile data interfaces, `SSEEvent` types -- imported by both server and frontend |
+| Package                 | Purpose                                                                                                        |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `@voyager/shared-types` | `ChatNode` discriminated union, tile data interfaces, `SSEEvent` types -- imported by both server and frontend |
 
 ## Infrastructure
 
@@ -73,9 +73,9 @@
 
 The project uses **pnpm workspaces** with three packages:
 
-- `packages/shared-types/` -- Shared TypeScript types (package: `@agentic-travel-agent/shared-types`)
-- `server/` -- Express API (package: `agentic-travel-agent-server`)
-- `web-client/` -- Next.js frontend (package: `agentic-travel-agent-web`)
+- `packages/shared-types/` -- Shared TypeScript types (package: `@voyager/shared-types`)
+- `server/` -- Express API (package: `voyager-server`)
+- `web-client/` -- Next.js frontend (package: `voyager-web`)
 
 The monorepo root contains shared configs (ESLint, Prettier, TypeScript), the Dockerfile for Railway, Lefthook config, and orchestration scripts.
 

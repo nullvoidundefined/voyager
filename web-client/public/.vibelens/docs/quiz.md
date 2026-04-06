@@ -700,7 +700,7 @@
 
 ? Consider what it exports and who imports it.
 
-> `@agentic-travel-agent/shared-types` exports `ChatNode`, `Flight`, `Hotel`, `CarRental`, `Experience`, `FormField`, `DayPlan`, `WeatherDay`, `Citation`, `SSEEvent`, and helper types. Both server and frontend import from it.
+> `@voyager/shared-types` exports `ChatNode`, `Flight`, `Hotel`, `CarRental`, `Experience`, `FormField`, `DayPlan`, `WeatherDay`, `Citation`, `SSEEvent`, and helper types. Both server and frontend import from it.
 
 ---
 

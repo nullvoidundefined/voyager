@@ -52,4 +52,4 @@ pre-push:
     lint:
       run: pnpm lint
     build:
-      run: pnpm --filter agentic-travel-agent-server build
+      run: pnpm --filter voyager-server build

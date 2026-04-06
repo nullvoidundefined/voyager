@@ -1,4 +1,4 @@
-import type { SSEEvent } from '@agentic-travel-agent/shared-types';
+import type { SSEEvent } from '@voyager/shared-types';
 import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {

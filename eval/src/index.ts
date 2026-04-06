@@ -80,7 +80,7 @@ async function main() {
   }
 
   // 2. Dynamically import the chat handler from the built server
-  // The server must be built first: pnpm --filter agentic-travel-agent-server build
+  // The server must be built first: pnpm --filter voyager-server build
   let chatHandler: (req: unknown, res: unknown) => Promise<void>;
   let createTrip: (
     userId: string,
@@ -115,7 +115,7 @@ async function main() {
     getTripWithDetails = tripModule.getTripWithDetails;
   } catch (err) {
     console.error('Failed to import server modules. Build the server first:');
-    console.error('  pnpm --filter agentic-travel-agent-server build');
+    console.error('  pnpm --filter voyager-server build');
     console.error('Error:', err instanceof Error ? err.message : err);
     process.exit(1);
   }

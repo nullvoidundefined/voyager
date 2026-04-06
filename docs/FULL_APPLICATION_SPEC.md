@@ -1,7 +1,7 @@
 # Voyager
 
 **Portfolio demo of an agentic AI travel planning pattern**
-**Repo:** `voyager` (formerly `agentic-travel-agent`; internal package names under `@agentic-travel-agent/` still reflect the original name for lockfile stability)
+**Repo:** `voyager` (renamed from `agentic-travel-agent`; all package names and imports are fully unified to `@voyager/*` as of 2026-04-06)
 
 ## Product Summary
 

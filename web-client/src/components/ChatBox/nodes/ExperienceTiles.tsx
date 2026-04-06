@@ -1,6 +1,6 @@
 'use client';
 
-import type { ChatNodeOfType } from '@agentic-travel-agent/shared-types';
+import type { ChatNodeOfType } from '@voyager/shared-types';
 
 import { ExperienceCard } from '../widgets/ExperienceCard';
 import { SelectableCardGroup } from '../widgets/SelectableCardGroup';

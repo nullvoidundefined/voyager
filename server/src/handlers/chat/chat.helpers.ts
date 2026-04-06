@@ -1,4 +1,4 @@
-import type { ChatNode, SSEEvent } from '@agentic-travel-agent/shared-types';
+import type { ChatNode, SSEEvent } from '@voyager/shared-types';
 import { type TripState, getFlowPosition } from 'app/prompts/booking-steps.js';
 import type { TripContext } from 'app/prompts/trip-context.js';
 import type { TripWithDetails } from 'app/schemas/trips.js';

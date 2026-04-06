@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { API_BASE } from '@/lib/api';
-import type { ChatNode, SSEEvent } from '@agentic-travel-agent/shared-types';
 import { useQueryClient } from '@tanstack/react-query';
+import type { ChatNode, SSEEvent } from '@voyager/shared-types';
 
 interface UseSSEChatOptions {
   tripId: string;

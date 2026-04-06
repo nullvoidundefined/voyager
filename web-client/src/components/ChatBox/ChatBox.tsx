@@ -3,8 +3,8 @@
 import { type FormEvent, useCallback, useRef, useState } from 'react';
 
 import { get, put } from '@/lib/api';
-import type { ChatMessage } from '@agentic-travel-agent/shared-types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { ChatMessage } from '@voyager/shared-types';
 
 import styles from './ChatBox.module.scss';
 import { VirtualizedChat } from './VirtualizedChat';

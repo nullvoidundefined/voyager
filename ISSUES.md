@@ -56,7 +56,8 @@ Each entry includes severity, effort, category, and source (which audit surfaced
 
 - **Source:** engineering §Naming drift
 - **Severity:** P3 · **Effort:** M · **Category:** branding / tech-debt
-- **Notes:** Rename `agentic-travel-agent-server`, `agentic-travel-agent-web`, `@agentic-travel-agent/shared-types` to `voyager-*` as one atomic refactor.
+- **Notes:** Rename the server, web, and shared-types packages to `voyager-*` as one atomic refactor.
+- **Status: closed** by the mechanical rename across 39 files plus lockfile regeneration on the `fix/audit-2026-04-06-p0p1` branch. The Vercel project slug and the `interviewiangreenough.xyz` deploy URL still reference the old name in `CLAUDE.md`; those are infra-level identifiers external to the codebase and are tracked as a separate infra cleanup.
 
 ---
 

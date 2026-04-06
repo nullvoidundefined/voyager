@@ -1,9 +1,5 @@
-import type {
-  ChatNode,
-  Citation,
-  SSEEvent,
-} from '@agentic-travel-agent/shared-types';
 import type Anthropic from '@anthropic-ai/sdk';
+import type { ChatNode, Citation, SSEEvent } from '@voyager/shared-types';
 import {
   type CompletionTracker,
   type FlowPosition,

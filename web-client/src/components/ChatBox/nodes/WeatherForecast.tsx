@@ -1,7 +1,4 @@
-import type {
-  ChatNodeOfType,
-  WeatherDay,
-} from '@agentic-travel-agent/shared-types';
+import type { ChatNodeOfType, WeatherDay } from '@voyager/shared-types';
 
 import styles from './WeatherForecast.module.scss';
 

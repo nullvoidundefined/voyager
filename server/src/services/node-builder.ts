@@ -4,7 +4,7 @@ import type {
   Experience,
   Flight,
   Hotel,
-} from '@agentic-travel-agent/shared-types';
+} from '@voyager/shared-types';
 import { randomUUID } from 'crypto';
 
 interface FlightRaw {

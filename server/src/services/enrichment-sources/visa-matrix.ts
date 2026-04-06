@@ -1,4 +1,4 @@
-import type { ChatNode } from '@agentic-travel-agent/shared-types';
+import type { ChatNode } from '@voyager/shared-types';
 
 // Simplified visa requirement lookup
 // In production, this would load from the passport-index CSV dataset

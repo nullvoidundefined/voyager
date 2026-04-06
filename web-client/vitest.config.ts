@@ -9,7 +9,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
-      '@agentic-travel-agent/shared-types': path.resolve(
+      '@voyager/shared-types': path.resolve(
         __dirname,
         '../packages/shared-types/src',
       ),
