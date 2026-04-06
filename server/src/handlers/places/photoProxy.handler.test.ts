@@ -122,4 +122,80 @@ describe('photoProxyHandler', () => {
     expect(res.status).toHaveBeenCalledWith(502);
     expect(res.json).toHaveBeenCalledWith({ error: 'PHOTO_PROXY_ERROR' });
   });
+
+  // SEC-01: ref validation and maxwidth clamping (2026-04-06 audit).
+  describe('SEC-01 input hardening', () => {
+    it('returns 400 when ref does not match Google Places photo format', async () => {
+      const malformedRefs = [
+        '../../../etc/passwd',
+        'https://evil.com/photos/x',
+        'places/<script>alert(1)</script>/photos/a',
+        'places/abc/photos/../../other',
+        '; rm -rf',
+        'a'.repeat(600),
+      ];
+
+      for (const ref of malformedRefs) {
+        vi.clearAllMocks();
+        const req = mockReq({ ref });
+        const res = mockRes();
+        await photoProxyHandler(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(mockFetch).not.toHaveBeenCalled();
+      }
+    });
+
+    it('accepts well-formed Google Places photo references', async () => {
+      const body = Readable.toWeb(Readable.from(Buffer.from('fake-image')));
+      mockFetch.mockResolvedValue({
+        ok: true,
+        headers: new Headers({ 'content-type': 'image/jpeg' }),
+        body,
+      });
+
+      const req = mockReq({
+        ref: 'places/ChIJN1t_tDeuEmsRUsoyG83frY4/photos/AcJnMuH3xzL',
+      });
+      const res = mockRes();
+      await photoProxyHandler(req, res);
+      expect(mockFetch).toHaveBeenCalled();
+    });
+
+    it('clamps maxwidth to the 64-1600 range', async () => {
+      const body = Readable.toWeb(Readable.from(Buffer.from('fake-image')));
+      mockFetch.mockResolvedValue({
+        ok: true,
+        headers: new Headers({ 'content-type': 'image/jpeg' }),
+        body,
+      });
+
+      // Huge value: should clamp to 1600
+      const req = mockReq({
+        ref: 'places/abc/photos/xyz',
+        maxwidth: '99999',
+      });
+      const res = mockRes();
+      await photoProxyHandler(req, res);
+      const calledUrl: string = mockFetch.mock.calls[0]![0];
+      expect(calledUrl).toContain('maxWidthPx=1600');
+    });
+
+    it('clamps tiny maxwidth values up to 64', async () => {
+      const body = Readable.toWeb(Readable.from(Buffer.from('fake-image')));
+      mockFetch.mockResolvedValue({
+        ok: true,
+        headers: new Headers({ 'content-type': 'image/jpeg' }),
+        body,
+      });
+
+      const req = mockReq({
+        ref: 'places/abc/photos/xyz',
+        maxwidth: '1',
+      });
+      const res = mockRes();
+      await photoProxyHandler(req, res);
+      const calledUrl: string = mockFetch.mock.calls[0]![0];
+      expect(calledUrl).toContain('maxWidthPx=64');
+    });
+  });
 });
