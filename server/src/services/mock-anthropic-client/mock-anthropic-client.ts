@@ -83,23 +83,33 @@ function buildIterationOneToolUse(): MockFinalMessage {
         type: 'tool_use',
         id: 'mock-toolu-flights-1',
         name: 'search_flights',
+        // Field names must match searchFlightsSchema exactly:
+        // origin, destination, departure_date, return_date,
+        // passengers (not "adults"). Mismatched field names get
+        // rejected by Zod, the executor turns the error into a
+        // string result, and buildNodeFromToolResult returns
+        // null instead of a flight_tiles node. The result is a
+        // silently empty chat with no tiles.
         input: {
           origin: 'DEN',
           destination: 'SFO',
           departure_date: '2026-06-01',
           return_date: '2026-06-04',
-          adults: 2,
+          passengers: 2,
         },
       },
       {
         type: 'tool_use',
         id: 'mock-toolu-hotels-1',
         name: 'search_hotels',
+        // Field names must match searchHotelsSchema exactly:
+        // city (not "location"), check_in (not "check_in_date"),
+        // check_out (not "check_out_date"), guests (not "adults").
         input: {
-          location: 'San Francisco',
-          check_in_date: '2026-06-01',
-          check_out_date: '2026-06-04',
-          adults: 2,
+          city: 'San Francisco',
+          check_in: '2026-06-01',
+          check_out: '2026-06-04',
+          guests: 2,
         },
       },
     ],
