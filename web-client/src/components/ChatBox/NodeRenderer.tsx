@@ -4,13 +4,13 @@ import type { ChatNode } from '@voyager/shared-types';
 
 import { TripDetailsForm } from './TripDetailsForm';
 import { AdvisoryCard } from './nodes/AdvisoryCard';
+import { BookingPrompt } from './nodes/BookingPrompt';
 import { BudgetBar } from './nodes/BudgetBar';
 import { CarRentalTiles } from './nodes/CarRentalTiles';
 import { ExperienceTiles } from './nodes/ExperienceTiles';
 import { FlightTiles } from './nodes/FlightTiles';
 import { HotelTiles } from './nodes/HotelTiles';
 import { MarkdownText } from './nodes/MarkdownText';
-import { ToolProgressIndicator } from './nodes/ToolProgressIndicator';
 import { WeatherForecast } from './nodes/WeatherForecast';
 import { ItineraryTimeline } from './widgets/ItineraryTimeline';
 import { QuickReplyChips } from './widgets/QuickReplyChips';
@@ -21,6 +21,7 @@ export interface NodeRendererCallbacks {
   onConfirmCarRental?: (label: string) => void;
   onConfirmExperience?: (label: string) => void;
   onQuickReply?: (text: string) => void;
+  onBookNow?: () => void;
   onFormSubmit?: (
     structuredData: Record<string, string>,
     displayMessage: string,
@@ -113,7 +114,9 @@ export function NodeRenderer({ node, callbacks = {} }: NodeRendererProps) {
       );
 
     case 'tool_progress':
-      return <ToolProgressIndicator node={node} />;
+      // Rendered as part of a consolidated ChatProgressBar by VirtualizedChat.
+      // Returning null here prevents per-node chip rendering. See invariant 6.
+      return null;
 
     case 'travel_plan_form': {
       // Map FormField to TripField for the TripDetailsForm component
@@ -135,6 +138,16 @@ export function NodeRenderer({ node, callbacks = {} }: NodeRendererProps) {
         />
       );
     }
+
+    case 'booking_prompt':
+      return (
+        <BookingPrompt
+          experiencesEmpty={node.experiences_empty}
+          carRentalsEmpty={node.car_rentals_empty}
+          onBookNow={cb.onBookNow ?? (() => {})}
+          onQuickReply={cb.onQuickReply ?? (() => {})}
+        />
+      );
 
     default: {
       // Exhaustive check — TypeScript will error if a node type is unhandled

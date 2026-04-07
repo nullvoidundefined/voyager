@@ -101,3 +101,62 @@ Fixed: consolidated `CITY_COORDS` and `CITY_DATABASE` into shared `server/src/da
 ### B9: Mobile Safari login fails with "Authentication required"
 
 Fixed: API proxied through Vercel rewrites (`/api/:path*` → Railway) for same-origin cookies. Changed `sameSite` to `'lax'`. Safari ITP no longer blocks the session cookie. Resolved 2026-04-03.
+
+## Bug batch 2026-04-07
+
+Batch IDs below (B1 through B6) are scoped to the 2026-04-07 fix batch on
+branch `fix/bug-batch-2026-04-07`. They do not overlap with the historical
+B1 through B23 entries above.
+
+### B1: Trip detail Budget tile and Cost Breakdown render `$NaN`
+
+severity: P1 effort: S - fixed 2026-04-07
+Root cause: pg returned NUMERIC columns as strings, and the trip detail
+page reduced over `c.total_price` without a `?? 0` defensive default.
+Fix: registered a global pg.types parser for NUMERIC so currency
+columns come back as numbers, plus a defensive `?? 0` and a
+Number.isFinite guard on the frontend. Test in
+`server/src/db/pool/pool.test.ts` and
+`web-client/src/app/(protected)/trips/[id]/page.test.tsx`. Commit 3b50361.
+
+### B2: Car rental tool throws and the agent narrates "having trouble accessing"
+
+severity: P1 effort: M - fixed 2026-04-07
+Root cause: `searchCarRentals` did not catch SerpApi errors, so any
+upstream failure threw to the executor and the agent improvised a
+fallback narration. Fix: wrap the SerpApi call in try/catch and
+return `{ rentals: [], error }` instead. Updated tool description to
+make the no-results path explicit. Commit d8c363a.
+
+### B3: ToolProgressIndicator chips have no gap and look broken
+
+severity: P2 effort: M - fixed 2026-04-07
+Root cause: per-tool chip rendering with no margin between chips and a
+duplicate "Done" label. Fix: replaced the chip stack with a single
+ChatProgressBar widget that collapses adjacent tool_progress nodes
+into one determinate progress bar. Locked with invariant 6. Commit 990b30c.
+
+### B4: Chat appears dead between submit and first stream chunk
+
+severity: P2 effort: S - fixed 2026-04-07
+Root cause: no UI feedback during the gap between the user sending a
+message and the first SSE event arriving. Fix: render an indeterminate
+ChatProgressBar with the label "Thinking" while isSending is true and
+no streaming nodes have arrived yet. Locked with invariant 7. Commit 6bfa8b4.
+
+### B5: No gap between chat box and Flights section
+
+severity: P3 effort: S - fixed 2026-04-07
+Root cause: missing margin-bottom on `.chatSection` in the trip detail
+SCSS module. Fix: 48px bottom margin (and matching `.itinerary` top
+margin) plus a Playwright computed-style assertion that the visible
+gap is at least 32 pixels. Commits 029e2e7, d43f929, f819b46.
+
+### B6: "Book This Trip" / "Try Again" buttons are huge and intrusive
+
+severity: P2 effort: M - fixed 2026-04-07
+Root cause: the booking actions UI was a sticky two-button bar with
+oversized buttons and no gutter from the input. Fix: replaced with an
+inline BookingPrompt tile rendered as the last assistant message in
+the chat stream. Conditional chips show only what is missing from the
+trip. Locked with invariant 8. Commit c264b75.

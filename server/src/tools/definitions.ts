@@ -209,7 +209,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   {
     name: 'search_car_rentals',
     description:
-      'Search for car rental options at a destination. Returns available cars with pricing, features, and pickup/dropoff details.',
+      'Search for car rental options at a destination. Returns available cars with pricing, features, and pickup/dropoff details. If the result has empty `rentals` and an `error` field, the search did not succeed for this destination. Tell the user "no car rentals available for this destination" and offer alternatives like taxis, public transit, or arranging rental independently. Do NOT say you are "having trouble accessing" results.',
     input_schema: {
       type: 'object',
       properties: {

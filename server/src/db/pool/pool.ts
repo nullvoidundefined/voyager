@@ -1,6 +1,15 @@
 import { logger } from 'app/utils/logs/logger.js';
 import pg from 'pg';
 
+// Coerce Postgres NUMERIC columns to JavaScript numbers at the boundary.
+// Default pg behavior returns NUMERIC as a string (because numeric is
+// arbitrary-precision and JS number cannot losslessly represent all
+// values). Voyager's NUMERIC columns are bounded currency amounts, so
+// the precision risk is acceptable in exchange for safe arithmetic.
+// Without this, sums like `0 + "150.00"` produce string concat or NaN
+// downstream, which is how the Budget tile rendered "$NaN allocated".
+pg.types.setTypeParser(pg.types.builtins.NUMERIC, (val) => parseFloat(val));
+
 const { Pool } = pg;
 
 export type PoolClient = pg.PoolClient;

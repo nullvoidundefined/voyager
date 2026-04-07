@@ -8,6 +8,7 @@ import type { ChatMessage, ChatNode } from '@voyager/shared-types';
 
 import { NodeRenderer } from './NodeRenderer';
 import styles from './VirtualizedChat.module.scss';
+import { ChatProgressBar } from './widgets/ChatProgressBar';
 
 interface VirtualizedChatProps {
   messages: ChatMessage[];
@@ -16,6 +17,7 @@ interface VirtualizedChatProps {
   streamingText: string;
   isSending: boolean;
   onQuickReply: (text: string) => void;
+  onBookNow?: () => void;
   onFormSubmit?: (
     structuredData: Record<string, string>,
     displayMessage: string,
@@ -36,7 +38,23 @@ const NODE_HEIGHT_ESTIMATES: Partial<Record<ChatNode['type'], number>> = {
   budget_bar: 48,
   quick_replies: 48,
   tool_progress: 32,
+  booking_prompt: 96,
 };
+
+const TOOL_LABELS: Record<string, string> = {
+  search_flights: 'Searching flights',
+  search_hotels: 'Searching hotels',
+  search_car_rentals: 'Searching car rentals',
+  search_experiences: 'Finding experiences',
+  calculate_remaining_budget: 'Calculating budget',
+  get_destination_info: 'Looking up destination',
+  format_response: 'Assembling response',
+};
+
+function getToolLabelForName(toolName: string): string {
+  if (!toolName) return 'Working';
+  return TOOL_LABELS[toolName] ?? toolName.replace(/_/g, ' ');
+}
 
 function estimateMessageHeight(nodes: ChatNode[]): number {
   if (nodes.length === 0) return 40;
@@ -53,6 +71,7 @@ export function VirtualizedChat({
   streamingText,
   isSending,
   onQuickReply,
+  onBookNow,
   onFormSubmit,
 }: VirtualizedChatProps) {
   const parentRef = useRef<HTMLDivElement>(null);
@@ -129,6 +148,15 @@ export function VirtualizedChat({
           </p>
         </div>
       )}
+      {isSending &&
+        streamingNodes.length === 0 &&
+        toolProgress.length === 0 &&
+        streamingText === '' &&
+        messages.at(-1)?.role !== 'assistant' && (
+          <div className={styles.pendingIndicator}>
+            <ChatProgressBar mode='indeterminate' label='Thinking' />
+          </div>
+        )}
       <div
         style={{
           height: `${virtualizer.getTotalSize()}px`,
@@ -161,24 +189,59 @@ export function VirtualizedChat({
                   {message.role === 'user' ? 'You' : APP_NAME}
                 </div>
                 <div className={styles.bubble}>
-                  {message.nodes.map((node, nodeIdx) => (
-                    <NodeRenderer
-                      key={`${message.id}-${nodeIdx}`}
-                      node={node}
-                      callbacks={{
-                        onQuickReply,
-                        onFormSubmit,
-                        onConfirmFlight: (label) =>
-                          onQuickReply(`I've selected the ${label} flight`),
-                        onConfirmHotel: (label) =>
-                          onQuickReply(`I've selected ${label}`),
-                        onConfirmCarRental: (label) =>
-                          onQuickReply(`I've selected the ${label} rental`),
-                        onConfirmExperience: (label) =>
-                          onQuickReply(`I've selected ${label}`),
-                      }}
-                    />
-                  ))}
+                  {(() => {
+                    const toolNodes = message.nodes.filter(
+                      (n): n is Extract<ChatNode, { type: 'tool_progress' }> =>
+                        n.type === 'tool_progress',
+                    );
+                    const otherNodes = message.nodes.filter(
+                      (n) => n.type !== 'tool_progress',
+                    );
+                    const latestRunning = toolNodes
+                      .filter((n) => n.status === 'running')
+                      .at(-1);
+                    const latestAny = toolNodes.at(-1);
+                    const latestToolName =
+                      latestRunning?.tool_name ?? latestAny?.tool_name ?? '';
+                    return (
+                      <>
+                        {toolNodes.length > 0 && (
+                          <ChatProgressBar
+                            mode='determinate'
+                            done={
+                              toolNodes.filter((n) => n.status === 'done')
+                                .length
+                            }
+                            total={toolNodes.length}
+                            latestLabel={getToolLabelForName(latestToolName)}
+                          />
+                        )}
+                        {otherNodes.map((node, nodeIdx) => (
+                          <NodeRenderer
+                            key={`${message.id}-${nodeIdx}`}
+                            node={node}
+                            callbacks={{
+                              onQuickReply,
+                              onBookNow,
+                              onFormSubmit,
+                              onConfirmFlight: (label) =>
+                                onQuickReply(
+                                  `I've selected the ${label} flight`,
+                                ),
+                              onConfirmHotel: (label) =>
+                                onQuickReply(`I've selected ${label}`),
+                              onConfirmCarRental: (label) =>
+                                onQuickReply(
+                                  `I've selected the ${label} rental`,
+                                ),
+                              onConfirmExperience: (label) =>
+                                onQuickReply(`I've selected ${label}`),
+                            }}
+                          />
+                        ))}
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
