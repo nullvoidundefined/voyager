@@ -10,6 +10,12 @@ Each entry includes severity, effort, category, and source (which audit surfaced
 
 ### Engineering (tech debt)
 
+### [ENG-21] Pre-existing em dashes in `CLAUDE.md` violate the global em-dash rule
+
+- **Source:** 2026-04-07 critic-guided meta-rule edit session audit
+- **Severity:** P3 · **Effort:** S · **Category:** docs / style
+- **Notes:** `CLAUDE.md` on main as of commit `22dda36` contains eight em-dash characters (U+2014) on lines 29, 33, 34, 45, 63, 66, 82, and 87 (line numbers may shift as the file evolves). The global em-dash ban in `~/.claude/CLAUDE.md` covers all markdown files including project CLAUDE.md files and was intentionally elevated to global scope to prevent exactly this drift. These instances pre-date the rule's elevation to global scope and were deliberately left untouched during the 2026-04-07 meta-rule edit session to keep that session's commits grouped by concern. Fix by replacing each em dash with the appropriate substitution from the global rule (period and new sentence, comma, semicolon, colon, parentheses, or line break depending on context) in a single dedicated `style:` commit. Do not batch with unrelated edits.
+
 ### [ENG-20] 13 orphaned git worktrees in `.claude/worktrees/`
 
 - **Source:** 2026-04-07 lint deadlock investigation (see commits `1dd2bd0` chore(eslint) and `498a720` chore(lefthook))
