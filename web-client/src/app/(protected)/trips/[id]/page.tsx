@@ -45,7 +45,7 @@ interface TripCarRental {
   provider: string;
   car_name: string;
   car_type: string;
-  total_price: number;
+  total_price: number | null;
   currency: string;
 }
 
@@ -129,16 +129,21 @@ export default function TripDetailPage() {
     0,
   );
   const carRentalTotal = trip.car_rentals.reduce(
-    (sum, c) => sum + c.total_price,
+    (sum, c) =>
+      sum + (Number.isFinite(c.total_price) ? (c.total_price ?? 0) : 0),
     0,
   );
   const experienceTotal = trip.experiences.reduce(
     (sum, e) => sum + (e.estimated_cost ?? 0),
     0,
   );
-  const allocated = flightTotal + hotelTotal + carRentalTotal + experienceTotal;
+  const rawAllocated =
+    flightTotal + hotelTotal + carRentalTotal + experienceTotal;
+  const allocated = Number.isFinite(rawAllocated) ? rawAllocated : 0;
   const remaining =
-    trip.budget_total != null ? trip.budget_total - allocated : null;
+    trip.budget_total != null && Number.isFinite(trip.budget_total - allocated)
+      ? trip.budget_total - allocated
+      : null;
 
   const hasFlights = trip.flights.length > 0;
 
@@ -353,7 +358,12 @@ export default function TripDetailPage() {
           returnDate={trip.return_date}
           flights={trip.flights}
           hotels={trip.hotels}
-          carRentals={trip.car_rentals}
+          carRentals={trip.car_rentals.map((c) => ({
+            ...c,
+            total_price: Number.isFinite(c.total_price)
+              ? (c.total_price ?? 0)
+              : 0,
+          }))}
           experiences={trip.experiences}
           budgetTotal={trip.budget_total}
           budgetCurrency={trip.budget_currency}
