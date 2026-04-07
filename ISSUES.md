@@ -39,11 +39,24 @@ Each entry includes severity, effort, category, and source (which audit surfaced
   - `.claude/worktrees/queue-cleanup-2026-04-06` on `test/eng-19-coverage-85-2026-04-07`. REMOVED
 - **Follow-up surfaced during the cleanup:** the main checkout still has additional stale local branches that were never tied to a worktree but are also old audit-era artifacts: `backup/pre-reset-2026-04-07`, `chore/dead-test-cleanup-2026-04-06`, `chore/queue-cleanup-2026-04-06`, `feat/chatbox-invariants-test-2026-04-06`, `feat/eng-17-multi-turn-mock-2026-04-06`, `feat/eng-17-trip-with-selections-2026-04-06`, `feat/unblock-fixme-markers-2026-04-06`, `fix/eng-16-fast-lane-parity-2026-04-06`, `fix/eng-16-local-db-fixture-2026-04-07`, `fix/routes-test-rate-limiter-mock-2026-04-06`, `test/eng-18-coverage-restore-2026-04-07`, `test/eng-19-coverage-85-2026-04-07`. These are out of scope for ENG-20 (not worktrees) but should be triaged in a separate cleanup pass. Logged below as ENG-22.
 
-### [ENG-22] Stale local branches without worktrees from 2026-04-06 era
+### [ENG-22] Stale local branches without worktrees from 2026-04-06 era (RESOLVED 2026-04-07)
 
 - **Source:** surfaced during ENG-20 cleanup on 2026-04-07
 - **Severity:** P3 · **Effort:** S · **Category:** tech-debt / tooling
-- **Notes:** 12 stale local branches remain in the main checkout after ENG-20 was resolved. Each was created during the 2026-04-06 audit and plan-execution work but never had an associated worktree, so ENG-20's worktree-scoped cleanup did not cover them. Most or all of their content has likely already landed on main via PRs, but each needs the same triage as ENG-20 (compare to main, verify content lands, then delete) before being removed. Branches at time of logging: `backup/pre-reset-2026-04-07`, `chore/dead-test-cleanup-2026-04-06`, `chore/queue-cleanup-2026-04-06`, `feat/chatbox-invariants-test-2026-04-06`, `feat/eng-17-multi-turn-mock-2026-04-06`, `feat/eng-17-trip-with-selections-2026-04-06`, `feat/unblock-fixme-markers-2026-04-06`, `fix/eng-16-fast-lane-parity-2026-04-06`, `fix/eng-16-local-db-fixture-2026-04-07`, `fix/routes-test-rate-limiter-mock-2026-04-06`, `test/eng-18-coverage-restore-2026-04-07`, `test/eng-19-coverage-85-2026-04-07`. Cleanup pattern: `for b in <list>; do git log main..$b --oneline; done` to find any unmerged commits, then `git branch -D` per branch.
+- **Status:** RESOLVED 2026-04-07. All 12 branches deleted on `chore/eng-22-cleanup-2026-04-07`. Triage: 11 of the 12 were already-merged ancestors of main (pure leftover labels). The remaining branch `backup/pre-reset-2026-04-07` had 5 unique commits (`e36e6a2`, `36bd653`, `03b8782`, `94aeff9`, `63298f6`) representing the original drafts of the eslint-ignore-claude, lefthook-staged-files, ENG-20-ticket, CLAUDE.md-incident-history, and 4-doc-prettier-cleanup work. None of these SHAs exist on main, but the resulting content does (verified via `grep -c '\.claude' eslint.config.bottomlessmargaritas.js` returns 1, `grep -c 'staged_files' lefthook.yml` returns 2, `grep -c 'ENG-20' ISSUES.md` returns 5, `grep -c 'Incident history' CLAUDE.md` returns 1). The branch represents the pre-rebase / pre-squash form of work that has since landed on main via PRs with different SHAs. No content was lost. All 12 branches removed via `git branch -D`.
+- **Branches removed (preserved for traceability):**
+  - `backup/pre-reset-2026-04-07` (5 ahead, content on main via different SHAs)
+  - `chore/dead-test-cleanup-2026-04-06` (ancestor of main)
+  - `chore/queue-cleanup-2026-04-06` (ancestor of main)
+  - `feat/chatbox-invariants-test-2026-04-06` (ancestor of main)
+  - `feat/eng-17-multi-turn-mock-2026-04-06` (ancestor of main)
+  - `feat/eng-17-trip-with-selections-2026-04-06` (ancestor of main)
+  - `feat/unblock-fixme-markers-2026-04-06` (ancestor of main)
+  - `fix/eng-16-fast-lane-parity-2026-04-06` (ancestor of main)
+  - `fix/eng-16-local-db-fixture-2026-04-07` (ancestor of main)
+  - `fix/routes-test-rate-limiter-mock-2026-04-06` (ancestor of main)
+  - `test/eng-18-coverage-restore-2026-04-07` (ancestor of main)
+  - `test/eng-19-coverage-85-2026-04-07` (ancestor of main)
 
 ### [ENG-05] No Sentry / error tracking integrated
 
