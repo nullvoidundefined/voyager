@@ -72,7 +72,7 @@ function normalizeCarRental(
 
 export async function searchCarRentals(
   input: CarRentalInput,
-): Promise<{ rentals: CarRentalResult[] }> {
+): Promise<{ rentals: CarRentalResult[]; error?: string }> {
   // Mock mode for eval runs
   if (isMockMode()) {
     return generateMockCarRentals(input);
@@ -101,10 +101,20 @@ export async function searchCarRentals(
     currency: 'USD',
   };
 
-  const response = (await serpApiGet(
-    'google_car_rental',
-    params,
-  )) as SerpApiCarRentalResponse;
+  let response: SerpApiCarRentalResponse;
+  try {
+    response = (await serpApiGet(
+      'google_car_rental',
+      params,
+    )) as SerpApiCarRentalResponse;
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    logger.warn(
+      { err, pickup_location: input.pickup_location },
+      'Car rental search failed; returning empty result',
+    );
+    return { rentals: [], error: errorMessage };
+  }
 
   const carsResults = response.cars_results ?? [];
   const rentals = carsResults

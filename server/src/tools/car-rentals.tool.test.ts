@@ -206,5 +206,51 @@ describe('car-rentals.tool', () => {
 
       expect(result.rentals).toHaveLength(5);
     });
+
+    it('returns { rentals: [], error } when SerpApi throws', async () => {
+      vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
+      vi.mocked(serpApiService.serpApiGet).mockRejectedValueOnce(
+        new Error('SerpApi 500: engine not supported for region'),
+      );
+
+      const result = await searchCarRentals({
+        pickup_location: 'Beijing',
+        pickup_date: '2026-08-01',
+        dropoff_date: '2026-08-08',
+      });
+
+      expect(result.rentals).toEqual([]);
+      expect(result.error).toContain('engine not supported');
+    });
+
+    it('does not throw when SerpApi throws', async () => {
+      vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
+      vi.mocked(serpApiService.serpApiGet).mockRejectedValueOnce(
+        new Error('Network ECONNRESET'),
+      );
+
+      await expect(
+        searchCarRentals({
+          pickup_location: 'Beijing',
+          pickup_date: '2026-08-01',
+          dropoff_date: '2026-08-08',
+        }),
+      ).resolves.toBeDefined();
+    });
+
+    it('does not cache failed responses', async () => {
+      vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
+      vi.mocked(serpApiService.serpApiGet).mockRejectedValueOnce(
+        new Error('SerpApi 503'),
+      );
+
+      await searchCarRentals({
+        pickup_location: 'Beijing',
+        pickup_date: '2026-08-01',
+        dropoff_date: '2026-08-08',
+      });
+
+      expect(cacheService.cacheSet).not.toHaveBeenCalled();
+    });
   });
 });
