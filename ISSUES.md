@@ -16,27 +16,33 @@ Each entry includes severity, effort, category, and source (which audit surfaced
 - **Severity:** P3 · **Effort:** S · **Category:** docs / style
 - **Notes:** `CLAUDE.md` on main as of commit `22dda36` contains eight em-dash characters (U+2014) on lines 29, 33, 34, 45, 63, 66, 82, and 87 (line numbers may shift as the file evolves). The global em-dash ban in `~/.claude/CLAUDE.md` covers all markdown files including project CLAUDE.md files and was intentionally elevated to global scope to prevent exactly this drift. These instances pre-date the rule's elevation to global scope and were deliberately left untouched during the 2026-04-07 meta-rule edit session to keep that session's commits grouped by concern. Fix by replacing each em dash with the appropriate substitution from the global rule (period and new sentence, comma, semicolon, colon, parentheses, or line break depending on context) in a single dedicated `style:` commit. Do not batch with unrelated edits.
 
-### [ENG-20] 13 orphaned git worktrees in `.claude/worktrees/`
+### [ENG-20] 13 orphaned git worktrees in `.claude/worktrees/` (RESOLVED 2026-04-07)
 
 - **Source:** 2026-04-07 lint deadlock investigation (see commits `1dd2bd0` chore(eslint) and `498a720` chore(lefthook))
 - **Severity:** P2 · **Effort:** M · **Category:** tech-debt / tooling
-- **Notes:** 13 live git worktrees are checked out under `.claude/worktrees/` from audit and plan work on 2026-04-06. Each is a full checkout of voyager at a different branch. None have been cleaned up.
-- **Why it matters:** one of these worktrees (`agent-a23ae2b5`) directly caused a commit deadlock on 2026-04-07. ESLint's flat config did not exclude `.claude/**`, so it walked into every worktree, and the worktree files are not covered by any tsconfig project in the main checkout's `parserOptions.project`, so `@typescript-eslint/parser` emitted 2945 spurious "parserOptions.project has been provided" errors on an untouched checkout. The proximate fix was `.claude/**` added to the eslint ignores list in commit `1dd2bd0`, but the worktrees themselves remain latent traps for any future tool that walks the directory tree without honoring `.gitignore`.
-- **Worktrees at time of logging** (from `git worktree list`):
-  - `.claude/worktrees/agent-a23ae2b5` on `worktree-agent-a23ae2b5` (caused the 2026-04-07 deadlock)
-  - `.claude/worktrees/agent-a3d8f473` on `worktree-agent-a3d8f473`
-  - `.claude/worktrees/agent-a4fffa10` on `worktree-agent-a4fffa10`
-  - `.claude/worktrees/agent-a85513f0` on `worktree-agent-a85513f0`
-  - `.claude/worktrees/agent-a9c2d56e` on `worktree-agent-a9c2d56e`
-  - `.claude/worktrees/agent-ab3c1e9a` on `worktree-agent-ab3c1e9a`
-  - `.claude/worktrees/agent-aca1fb11` on `worktree-agent-aca1fb11`
-  - `.claude/worktrees/agent-aebc5a93` on `audit/legal-2026-04-06`
-  - `.claude/worktrees/e2e-mock-anthropic-2026-04-06` on `feat/e2e-mock-anthropic-2026-04-06`
-  - `.claude/worktrees/plan-audit-2026-04-06` on `plan/audit-2026-04-06`
-  - `.claude/worktrees/plan-b-e2e-2026-04-06` on `plan/e2e-and-gates-2026-04-06`
-  - `.claude/worktrees/plan-c-fixes-2026-04-06` on `fix/audit-2026-04-06-p0p1`
-  - `.claude/worktrees/queue-cleanup-2026-04-06` on `test/eng-19-coverage-85-2026-04-07`
-- **Action before deletion:** for each worktree, verify via `git log` whether its branch has been merged into main (several of these branches appear to have landed via PRs already, so the worktree is just a stale checkout) or contains unmerged commits. For any branch with unmerged work: merge, rebase, cherry-pick, or explicitly abandon with a note here. Once cleared, run `git worktree remove .claude/worktrees/<name>` then `git branch -D <branch>`. Use the superpowers `finishing-a-development-branch` skill for each worktree individually; do not bulk-delete.
+- **Status:** RESOLVED 2026-04-07. All 13 worktrees removed and their branches deleted on `chore/eng-20-21-cleanup-2026-04-07`. Triage process: each branch was compared to main via `git diff main..<branch> --stat` and content was verified to already be on main, either via direct merge or via a re-committed equivalent. The 4 already-merged branches (feat/e2e-mock-anthropic-2026-04-06, plan/audit-2026-04-06, plan/e2e-and-gates-2026-04-06, fix/audit-2026-04-06-p0p1) were ancestors of main and removed cleanly. The 8 audit branches each contained one audit report file that already existed on main, with the only differences being prettier formatting cleanups (em-dash replacement, table alignment, unescaped underscores) that happened during the landing pass. The 1 docs/billing-anthropic-configured-2026-04-07 branch contained the same change as commit `a42bbac` already on main via PR #21. No content was lost. A bonus orphan branch `worktree-agent-aebc5a93` (created automatically alongside `audit/legal-2026-04-06` when the worktree was provisioned) was also removed in the same pass.
+- **Why it mattered:** one of these worktrees (`agent-a23ae2b5`) directly caused a commit deadlock on 2026-04-07. ESLint's flat config did not exclude `.claude/**`, so it walked into every worktree, and the worktree files are not covered by any tsconfig project in the main checkout's `parserOptions.project`, so `@typescript-eslint/parser` emitted 2945 spurious "parserOptions.project has been provided" errors on an untouched checkout. The proximate fix was `.claude/**` added to the eslint ignores list in commit `1dd2bd0`. With the worktrees themselves now removed, the latent trap is gone too.
+- **Original worktree inventory** (preserved for incident traceability):
+  - `.claude/worktrees/agent-a23ae2b5` on `worktree-agent-a23ae2b5` (caused the 2026-04-07 deadlock). REMOVED
+  - `.claude/worktrees/agent-a3d8f473` on `worktree-agent-a3d8f473`. REMOVED
+  - `.claude/worktrees/agent-a4fffa10` on `worktree-agent-a4fffa10`. REMOVED
+  - `.claude/worktrees/agent-a85513f0` on `worktree-agent-a85513f0`. REMOVED
+  - `.claude/worktrees/agent-a9c2d56e` on `worktree-agent-a9c2d56e`. REMOVED
+  - `.claude/worktrees/agent-ab3c1e9a` on `worktree-agent-ab3c1e9a`. REMOVED
+  - `.claude/worktrees/agent-aca1fb11` on `worktree-agent-aca1fb11`. REMOVED
+  - `.claude/worktrees/agent-aebc5a93` on `audit/legal-2026-04-06`. REMOVED
+  - `.claude/worktrees/e2e-mock-anthropic-2026-04-06` on `feat/e2e-mock-anthropic-2026-04-06`. REMOVED
+  - `.claude/worktrees/plan-audit-2026-04-06` on `plan/audit-2026-04-06`. REMOVED
+  - `.claude/worktrees/plan-b-e2e-2026-04-06` on `plan/e2e-and-gates-2026-04-06`. REMOVED
+  - `.claude/worktrees/plan-c-fixes-2026-04-06` on `fix/audit-2026-04-06-p0p1`. REMOVED
+  - `.claude/worktrees/queue-cleanup-2026-04-06` on `test/eng-19-coverage-85-2026-04-07`. REMOVED
+- **Follow-up surfaced during the cleanup:** the main checkout still has additional stale local branches that were never tied to a worktree but are also old audit-era artifacts: `backup/pre-reset-2026-04-07`, `chore/dead-test-cleanup-2026-04-06`, `chore/queue-cleanup-2026-04-06`, `feat/chatbox-invariants-test-2026-04-06`, `feat/eng-17-multi-turn-mock-2026-04-06`, `feat/eng-17-trip-with-selections-2026-04-06`, `feat/unblock-fixme-markers-2026-04-06`, `fix/eng-16-fast-lane-parity-2026-04-06`, `fix/eng-16-local-db-fixture-2026-04-07`, `fix/routes-test-rate-limiter-mock-2026-04-06`, `test/eng-18-coverage-restore-2026-04-07`, `test/eng-19-coverage-85-2026-04-07`. These are out of scope for ENG-20 (not worktrees) but should be triaged in a separate cleanup pass. Logged below as ENG-22.
+
+### [ENG-22] Stale local branches without worktrees from 2026-04-06 era
+
+- **Source:** surfaced during ENG-20 cleanup on 2026-04-07
+- **Severity:** P3 · **Effort:** S · **Category:** tech-debt / tooling
+- **Notes:** 12 stale local branches remain in the main checkout after ENG-20 was resolved. Each was created during the 2026-04-06 audit and plan-execution work but never had an associated worktree, so ENG-20's worktree-scoped cleanup did not cover them. Most or all of their content has likely already landed on main via PRs, but each needs the same triage as ENG-20 (compare to main, verify content lands, then delete) before being removed. Branches at time of logging: `backup/pre-reset-2026-04-07`, `chore/dead-test-cleanup-2026-04-06`, `chore/queue-cleanup-2026-04-06`, `feat/chatbox-invariants-test-2026-04-06`, `feat/eng-17-multi-turn-mock-2026-04-06`, `feat/eng-17-trip-with-selections-2026-04-06`, `feat/unblock-fixme-markers-2026-04-06`, `fix/eng-16-fast-lane-parity-2026-04-06`, `fix/eng-16-local-db-fixture-2026-04-07`, `fix/routes-test-rate-limiter-mock-2026-04-06`, `test/eng-18-coverage-restore-2026-04-07`, `test/eng-19-coverage-85-2026-04-07`. Cleanup pattern: `for b in <list>; do git log main..$b --oneline; done` to find any unmerged commits, then `git branch -D` per branch.
 
 ### [ENG-05] No Sentry / error tracking integrated
 
