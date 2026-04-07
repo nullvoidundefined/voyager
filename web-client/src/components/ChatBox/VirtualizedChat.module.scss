@@ -92,3 +92,9 @@
     transform: translateY(0);
   }
 }
+
+.pendingIndicator {
+  padding: 12px 24px;
+  display: flex;
+  justify-content: flex-start;
+}

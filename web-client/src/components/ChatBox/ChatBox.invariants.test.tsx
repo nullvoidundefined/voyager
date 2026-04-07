@@ -375,4 +375,58 @@ describe('ChatBox invariants', () => {
       expect(bar).toHaveAttribute('aria-valuenow', '100');
     });
   });
+
+  describe('invariant 7: pending indicator renders synchronously after send', () => {
+    it('shows an indeterminate progress bar with "Thinking" while isSending=true and no nodes have arrived yet', () => {
+      const userMsg = makeUserMessage('m1', 'Plan a Beijing trip');
+
+      render(
+        <VirtualizedChat
+          messages={[userMsg]}
+          streamingNodes={[]}
+          toolProgress={[]}
+          streamingText=''
+          isSending
+          onQuickReply={noop}
+        />,
+      );
+
+      const bar = screen.getByRole('progressbar', { name: /thinking/i });
+      expect(bar).toBeInTheDocument();
+      expect(bar).not.toHaveAttribute('aria-valuenow');
+    });
+
+    it('removes the pending indicator once the first streaming node arrives', () => {
+      const userMsg = makeUserMessage('m1', 'Plan a Beijing trip');
+
+      const { rerender } = render(
+        <VirtualizedChat
+          messages={[userMsg]}
+          streamingNodes={[]}
+          toolProgress={[]}
+          streamingText=''
+          isSending
+          onQuickReply={noop}
+        />,
+      );
+      expect(
+        screen.queryByRole('progressbar', { name: /thinking/i }),
+      ).toBeInTheDocument();
+
+      rerender(
+        <VirtualizedChat
+          messages={[userMsg]}
+          streamingNodes={[]}
+          toolProgress={[]}
+          streamingText='Looking at your options'
+          isSending
+          onQuickReply={noop}
+        />,
+      );
+
+      expect(
+        screen.queryByRole('progressbar', { name: /thinking/i }),
+      ).not.toBeInTheDocument();
+    });
+  });
 });

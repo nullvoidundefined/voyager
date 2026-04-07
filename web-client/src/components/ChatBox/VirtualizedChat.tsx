@@ -145,6 +145,15 @@ export function VirtualizedChat({
           </p>
         </div>
       )}
+      {isSending &&
+        streamingNodes.length === 0 &&
+        toolProgress.length === 0 &&
+        streamingText === '' &&
+        messages.at(-1)?.role !== 'assistant' && (
+          <div className={styles.pendingIndicator}>
+            <ChatProgressBar mode='indeterminate' label='Thinking' />
+          </div>
+        )}
       <div
         style={{
           height: `${virtualizer.getTotalSize()}px`,
