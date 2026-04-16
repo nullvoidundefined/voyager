@@ -10,11 +10,6 @@ const ROOT_DIR = __dirname;
 
 export default defineConfig({
   testDir: path.resolve(ROOT_DIR, 'e2e'),
-  // The nightly real-API smoke suite lives at e2e/real-apis/ and
-  // must NOT run in the main mocked suite. The e2e-real-apis.yml
-  // workflow points at it explicitly with --grep or by passing the
-  // path as an argument.
-  testIgnore: ['**/real-apis/**'],
   // ENG-14 (2026-04-06): run scripts/e2e-smoke.sh once after the
   // webServers report ready and before any spec executes. The
   // smoke validates that the server is healthy AND that CORS is
@@ -84,8 +79,7 @@ export default defineConfig({
           : {}),
         // Plan B: force the server to use mock tool adapters so
         // E2E runs do not burn real SerpApi / Google Places
-        // quota. The real-API smoke suite in e2e/real-apis/ runs
-        // in a separate nightly workflow with this flag unset.
+        // quota.
         E2E_MOCK_TOOLS: '1',
         // Option B (2026-04-06): swap the real Anthropic SDK for
         // a deterministic stub so the suite needs no API key
