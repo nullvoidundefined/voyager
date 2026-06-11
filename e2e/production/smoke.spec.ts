@@ -1,9 +1,12 @@
 /**
  * Production smoke suite. Runs against the live deployment.
- * Only covers public pages -- no auth, no agent calls, no API cost.
+ * Public-pages tests run unconditionally. The auth test requires
+ * SMOKE_USER_EMAIL and SMOKE_USER_PASSWORD to be set (skipped otherwise).
  * Run with: pnpm test:e2e:production
  */
 import { expect, test } from '@playwright/test';
+
+import { assertLoggedIn, login, logout } from '../helpers/auth';
 
 test.describe('Production smoke', () => {
   test('home page loads with primary CTAs', async ({ page }) => {
@@ -55,5 +58,18 @@ test.describe('Production smoke', () => {
   test('protected route redirects to login', async ({ page }) => {
     await page.goto('/trips');
     await expect(page).toHaveURL(/\/login/, { timeout: 10_000 });
+  });
+
+  test('auth: smoke user can log in and reach dashboard', async ({ page }) => {
+    const email = process.env.SMOKE_USER_EMAIL;
+    const password = process.env.SMOKE_USER_PASSWORD;
+    if (!email || !password) {
+      test.skip(true, 'SMOKE_USER_EMAIL / SMOKE_USER_PASSWORD not set');
+      return;
+    }
+    await login(page, { email, password });
+    await assertLoggedIn(page);
+    await logout(page);
+    await expect(page).toHaveURL(/\/(login|$)/, { timeout: 5_000 });
   });
 });

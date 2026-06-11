@@ -17,50 +17,10 @@ jobs:
       - name: Wait for Railway deploy
         run: sleep 90
 
-      - name: Check backend health
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            "${{ vars.RAILWAY_URL }}/health" \
-            --max-time 15)
-          if [ "$STATUS" != "200" ]; then
-            echo "Backend health check failed: $STATUS"
-            exit 1
-          fi
-          echo "Backend healthy"
+      - uses: actions/checkout@v4
 
-      - name: Check CORS headers
-        run: |
-          CORS=$(curl -s -D - -o /dev/null \
-            "${{ vars.RAILWAY_URL }}/health" \
-            -H "Origin: ${{ vars.FRONTEND_URL }}" \
-            --max-time 15 | grep -i "access-control-allow-origin" || echo "MISSING")
-          if ! echo "$CORS" | grep -q "${{ vars.FRONTEND_URL }}"; then
-            echo "CORS check failed: $CORS"
-            exit 1
-          fi
-          echo "CORS correctly configured"
-
-      - name: Check frontend
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            "${{ vars.FRONTEND_URL }}" \
-            --max-time 15)
-          if [ "$STATUS" != "200" ]; then
-            echo "Frontend check failed: $STATUS"
-            exit 1
-          fi
-          echo "Frontend healthy"
-
-      - name: Check frontend login page
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            "${{ vars.FRONTEND_URL }}/login" \
-            --max-time 15)
-          if [ "$STATUS" != "200" ]; then
-            echo "Frontend login page failed: $STATUS"
-            exit 1
-          fi
-          echo "Frontend login page healthy"
+      - name: Run smoke tests
+        run: bash scripts/health-check.sh ${{ vars.RAILWAY_URL }} ${{ vars.FRONTEND_URL }} false
 
       - name: Create issue on failure
         if: failure()
@@ -72,5 +32,60 @@ jobs:
               repo: context.repo.repo,
               title: `Deploy health check failed - ${new Date().toISOString()}`,
               body: `Post-deploy health check failed after push to main.\n\nCommit: ${context.sha}\nWorkflow: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              labels: ['deploy-failure']
+            });
+
+  e2e-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: health-check
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Restore Playwright cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        run: pnpm --dir apps/client/web exec playwright install --with-deps chromium
+
+      - name: Run production E2E smoke
+        run: pnpm test:e2e:production
+        env:
+          SMOKE_USER_EMAIL: ${{ secrets.SMOKE_USER_EMAIL }}
+          SMOKE_USER_PASSWORD: ${{ secrets.SMOKE_USER_PASSWORD }}
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-smoke-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Create issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Production E2E smoke failed - ${new Date().toISOString()}`,
+              body: `Production Playwright smoke suite failed after push to main.\n\nCommit: ${context.sha}\nWorkflow: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
               labels: ['deploy-failure']
             });
