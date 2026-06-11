@@ -156,6 +156,54 @@ describe('hotelsTool', () => {
       );
     });
 
+    it('returns no_results with pricing-gap message when all hotels have missing prices', async () => {
+      vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
+      vi.mocked(serpApiService.serpApiGet).mockResolvedValueOnce({
+        properties: [
+          { name: 'Unpriced Hotel A', overall_rating: 4, hotel_class: 3 },
+          { name: 'Unpriced Hotel B', overall_rating: 3.5, hotel_class: 2 },
+        ],
+      });
+
+      const result = await searchHotels({
+        city: 'Barcelona',
+        check_in: '2026-07-01',
+        check_out: '2026-07-06',
+        guests: 2,
+      });
+
+      expect(result.status).toBe('no_results');
+      expect(result.hotels).toEqual([]);
+      expect(result.message).toMatch(/pricing data was unavailable/i);
+    });
+
+    it('filters out zero-price hotels and returns only priced ones', async () => {
+      vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
+      vi.mocked(serpApiService.serpApiGet).mockResolvedValueOnce({
+        properties: [
+          {
+            name: 'Priced Hotel',
+            overall_rating: 4,
+            hotel_class: 3,
+            rate_per_night: { lowest: '$120', extracted_lowest: 120 },
+            total_rate: { lowest: '$600', extracted_lowest: 600 },
+          },
+          { name: 'Unpriced Hotel', overall_rating: 4, hotel_class: 3 },
+        ],
+      });
+
+      const result = await searchHotels({
+        city: 'Barcelona',
+        check_in: '2026-07-01',
+        check_out: '2026-07-06',
+        guests: 2,
+      });
+
+      expect(result.status).toBe('ok');
+      expect(result.hotels).toHaveLength(1);
+      expect(result.hotels[0]!.name).toBe('Priced Hotel');
+    });
+
     it('returns status:no_results when SerpApi has zero properties', async () => {
       vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
       vi.mocked(serpApiService.serpApiGet).mockResolvedValueOnce({

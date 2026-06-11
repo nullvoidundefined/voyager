@@ -77,6 +77,11 @@ export interface AgentOrchestratorConfig {
   onToolExecuted?: OnToolExecuted;
   /** Provide a custom Anthropic client (useful for testing) */
   client?: Anthropic;
+  /** Tools that must be called before format_response is accepted.
+   *  Enforces the data-before-response invariant in code, not just prompts.
+   *  When format_response is called before all required tools have run, the
+   *  orchestrator returns a guardrail message and the agent must search first. */
+  requiredBeforeFormat?: string[];
 }
 
 export class AgentOrchestrator {
@@ -89,6 +94,7 @@ export class AgentOrchestrator {
   private readonly maxTokens: number;
   private readonly onToolExecuted?: OnToolExecuted;
   private readonly client: Anthropic;
+  private readonly requiredBeforeFormat: string[];
 
   constructor(config: AgentOrchestratorConfig) {
     this.tools = config.tools;
@@ -100,6 +106,18 @@ export class AgentOrchestrator {
     this.maxTokens = config.maxTokens ?? DEFAULT_MAX_TOKENS;
     this.onToolExecuted = config.onToolExecuted;
     this.client = config.client ?? new Anthropic();
+    this.requiredBeforeFormat = config.requiredBeforeFormat ?? [];
+  }
+
+  private buildFormatResponseGuardMessage(
+    calledTools: ToolCallRecord[],
+  ): string | null {
+    if (this.requiredBeforeFormat.length === 0) return null;
+    const missing = this.requiredBeforeFormat.filter(
+      (name) => !calledTools.some((c) => c.tool_name === name),
+    );
+    if (missing.length === 0) return null;
+    return `Guardrail: you must call ${missing.join(', ')} before format_response to show real results. Call it now, then present the results via format_response.`;
   }
 
   async run(
@@ -237,17 +255,26 @@ export class AgentOrchestrator {
           let isError = false;
           let errorMessage: string | null = null;
 
+          const guardMessage =
+            block.name === 'format_response'
+              ? this.buildFormatResponseGuardMessage(toolCalls)
+              : null;
+
           const startTime = Date.now();
-          try {
-            result = await this.toolExecutor(block.name, input, meta);
-          } catch (err) {
-            isError = true;
-            errorMessage = err instanceof Error ? err.message : String(err);
-            result = `Tool error (do not retry): ${errorMessage}`;
-            logger.error(
-              { err, toolName: block.name },
-              'Tool execution failed',
-            );
+          if (guardMessage !== null) {
+            result = guardMessage;
+          } else {
+            try {
+              result = await this.toolExecutor(block.name, input, meta);
+            } catch (err) {
+              isError = true;
+              errorMessage = err instanceof Error ? err.message : String(err);
+              result = `Tool error (do not retry): ${errorMessage}`;
+              logger.error(
+                { err, toolName: block.name },
+                'Tool execution failed',
+              );
+            }
           }
           const latencyMs = Date.now() - startTime;
 
@@ -266,8 +293,8 @@ export class AgentOrchestrator {
             onEvent?.({ type: 'node', node });
           }
 
-          // Detect format_response tool
-          if (block.name === 'format_response') {
+          // Record format_response data only when the guard passed (required search was done)
+          if (block.name === 'format_response' && guardMessage === null) {
             formatResponseData = result as FormatResponseData;
           }
 

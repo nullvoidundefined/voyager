@@ -456,6 +456,111 @@ describe('AgentOrchestrator', () => {
     expect(result.toolCallsUsed).toHaveLength(1); // first tool ran, second iteration timed out
   });
 
+  // -----------------------------------------------------------------------
+  // requiredBeforeFormat guardrail
+  // -----------------------------------------------------------------------
+  describe('requiredBeforeFormat guardrail', () => {
+    it('returns guard message when format_response is called before required tool', async () => {
+      const guardConfig = createConfig({
+        requiredBeforeFormat: ['search_flights'],
+      });
+      const mockStream = getStreamMock(guardConfig);
+
+      // Agent calls format_response without calling search_flights first
+      mockStream.mockReturnValueOnce(
+        createMockStream(
+          makeToolUseResponse([
+            {
+              id: 'fr_1',
+              name: 'format_response',
+              input: { text: 'Results!' },
+            },
+          ]),
+        ),
+      );
+      // After receiving the guard message the agent ends the turn
+      mockStream.mockReturnValueOnce(
+        createMockStream(makeTextResponse('Let me search first.')),
+      );
+
+      const orchestrator = new AgentOrchestrator(guardConfig);
+      const result = await orchestrator.run(
+        [{ role: 'user', content: 'Find flights' }],
+        [],
+      );
+
+      // toolExecutor must NOT have been called (guard intercepted before execution)
+      expect(guardConfig.toolExecutor).not.toHaveBeenCalled();
+      // formatResponse must be null since the guard blocked the call
+      expect(result.formatResponse).toBeNull();
+      // The blocked call should still be recorded with the guard message
+      expect(result.toolCallsUsed).toHaveLength(1);
+      expect(result.toolCallsUsed[0]!.tool_name).toBe('format_response');
+      expect(String(result.toolCallsUsed[0]!.result)).toMatch(/Guardrail/);
+    });
+
+    it('allows format_response after required tool has been called', async () => {
+      const guardConfig = createConfig({
+        requiredBeforeFormat: ['search_flights'],
+      });
+      const mockStream = getStreamMock(guardConfig);
+      const formatInput = { text: 'Here are your flight options.' };
+
+      (guardConfig.toolExecutor as Mock)
+        .mockResolvedValueOnce({ status: 'ok', flights: [] })
+        .mockResolvedValueOnce(formatInput);
+
+      // Agent calls search_flights first, then format_response
+      mockStream.mockReturnValueOnce(
+        createMockStream(
+          makeToolUseResponse([
+            {
+              id: 'sf_1',
+              name: 'search_flights',
+              input: { origin: 'NYC', destination: 'LAX' },
+            },
+          ]),
+        ),
+      );
+      mockStream.mockReturnValueOnce(
+        createMockStream(
+          makeToolUseResponse([
+            { id: 'fr_1', name: 'format_response', input: formatInput },
+          ]),
+        ),
+      );
+      mockStream.mockReturnValueOnce(createMockStream(makeTextResponse('')));
+
+      const orchestrator = new AgentOrchestrator(guardConfig);
+      const result = await orchestrator.run(
+        [{ role: 'user', content: 'Find flights' }],
+        [],
+      );
+
+      // Both tools must have been executed
+      expect(guardConfig.toolExecutor).toHaveBeenCalledTimes(2);
+      expect(guardConfig.toolExecutor).toHaveBeenNthCalledWith(
+        1,
+        'search_flights',
+        expect.any(Object),
+        undefined,
+      );
+      expect(guardConfig.toolExecutor).toHaveBeenNthCalledWith(
+        2,
+        'format_response',
+        formatInput,
+        undefined,
+      );
+      // formatResponse must be set from the actual executor result
+      expect(result.formatResponse).toEqual(formatInput);
+      // No guard message in recorded tool calls
+      const formatCall = result.toolCallsUsed.find(
+        (c) => c.tool_name === 'format_response',
+      );
+      expect(String(formatCall!.result)).not.toMatch(/Guardrail/);
+    });
+  });
+
   it('defaults maxDurationMs to 120000', () => {
     const orchestrator = new AgentOrchestrator(config);
     // Access via casting since it's private — just testing the default

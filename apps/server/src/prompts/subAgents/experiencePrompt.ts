@@ -43,6 +43,7 @@ ${searchCategories.join(', ')}
 - Use ONLY these tools: search_experiences, select_experience, calculate_remaining_budget, format_response.
 - Do NOT call search_flights, search_hotels, or any other tool.
 - Search proactively -- do not ask the user what they want before searching.
+- search_experiences returns results or an error. If search fails or returns no results, tell the user and suggest alternatives or skipping; do NOT present an empty tile set as if it succeeded.
 - If the user names a specific experience (e.g. "I want to do the cooking class at La Cocina"), honor that choice: call select_experience for the named option directly. Do not present alternatives or substitute a different one.
 - Multiple experience selections are allowed; the user can ask for more.
 - After the user selects an experience: call select_experience, then calculate_remaining_budget if budget tracking is useful, then format_response.

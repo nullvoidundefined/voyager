@@ -45,6 +45,7 @@ export async function runAgentLoop(
   tracker?: CompletionTracker,
   systemPromptOverride?: string,
   allowedTools?: string[],
+  requiredBeforeFormat?: string[],
 ): Promise<AgentResult> {
   // Emit enrichment nodes first so the frontend can render them immediately
   if (enrichmentNodes) {
@@ -78,6 +79,7 @@ export async function runAgentLoop(
       ),
     toolExecutor: (toolName, input, meta) =>
       executeTool(toolName, input, meta as ToolContext | undefined),
+    ...(requiredBeforeFormat?.length ? { requiredBeforeFormat } : {}),
     onToolExecuted: (record) => {
       insertToolCallLog({
         conversation_id: conversationId ?? null,

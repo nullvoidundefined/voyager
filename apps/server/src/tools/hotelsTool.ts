@@ -206,12 +206,30 @@ export async function searchHotels(
     );
   }
 
+  // Track pre-price-filter count to distinguish "pricing data unavailable"
+  // from "genuinely no results" when building the outcome message.
+  const resultsBeforePriceFilter = results.length;
+
+  // Remove hotels SerpApi returned without pricing -- they appear as $0 tiles
+  // in the UI and create false "bookable" signals. Filter before sorting so
+  // zero-priced hotels never reach the tile renderer.
+  results = results.filter((r) => r.total_price > 0 || r.price_per_night > 0);
+
   results = results.sort((a, b) => a.total_price - b.total_price).slice(0, 5);
 
-  const outcome: HotelSearchOutcome =
-    results.length > 0
-      ? { status: 'ok', hotels: results }
-      : { status: 'no_results', hotels: [] };
+  let outcome: HotelSearchOutcome;
+  if (results.length > 0) {
+    outcome = { status: 'ok', hotels: results };
+  } else if (resultsBeforePriceFilter > 0) {
+    outcome = {
+      status: 'no_results',
+      hotels: [],
+      message:
+        'Hotel search returned results but pricing data was unavailable for all properties. This is a data gap, not "no hotels available." Suggest the user try different dates or proceed without hotels.',
+    };
+  } else {
+    outcome = { status: 'no_results', hotels: [] };
+  }
 
   await cacheSet(cacheKey, outcome, CACHE_TTL);
   logger.info(

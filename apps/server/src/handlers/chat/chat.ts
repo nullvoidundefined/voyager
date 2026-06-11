@@ -25,6 +25,7 @@ import { findByUserId as findUserPreferences } from 'app/repositories/userPrefer
 import { planCardSchema } from 'app/schemas/planCard/planCard.js';
 import { runAgentLoop } from 'app/services/agent/agentService.js';
 import {
+  SUB_AGENT_REQUIRED_TOOLS,
   SUB_AGENT_TOOLS,
   buildDefaultPlanCard,
   selectSubAgent,
@@ -271,6 +272,7 @@ export async function chat(req: Request, res: Response) {
       tracker,
       systemPromptOverride,
       allowedTools,
+      SUB_AGENT_REQUIRED_TOOLS[subAgentType],
     );
 
     // FIN-01 / FIN-05: increment the per-user daily token counter with

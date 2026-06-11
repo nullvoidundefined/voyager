@@ -20,6 +20,19 @@ export type SubAgentType =
   | 'experience'
   | 'conversation';
 
+/** Tools that must be called before format_response for each sub-agent type.
+ *  Consumed by AgentOrchestrator to enforce the data-before-response invariant
+ *  in code rather than relying solely on prompt instructions. */
+export const SUB_AGENT_REQUIRED_TOOLS: Record<SubAgentType, string[]> = {
+  detail: [],
+  plan: [],
+  flight: ['search_flights'],
+  hotel: ['search_hotels'],
+  ground: [],
+  experience: [],
+  conversation: [],
+};
+
 export const SUB_AGENT_TOOLS: Record<SubAgentType, string[]> = {
   detail: ['update_trip', 'get_destination_info', 'format_response'],
   plan: ['update_trip', 'format_response'],
