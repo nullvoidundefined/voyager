@@ -168,4 +168,80 @@ test.describe('authenticated smoke', () => {
     expect(ariaLabel).not.toMatch(/undefined/i);
     expect(ariaLabel).not.toMatch(/\bNaN\b/);
   });
+
+  test('trip persists across sessions: appears in list after navigation and reload', async ({
+    page,
+  }) => {
+    test.setTimeout(210_000);
+
+    await login(page, { email: SMOKE_EMAIL, password: SMOKE_PASSWORD });
+
+    // Create a new trip
+    const tripCreated = page.waitForResponse(
+      (res) =>
+        res.url().includes('/trips') &&
+        res.request().method() === 'POST' &&
+        res.status() === 201,
+      { timeout: 30_000 },
+    );
+    await page
+      .locator(
+        'a:has-text("New Trip"), button:has-text("New Trip"), a:has-text("New trip"), button:has-text("New trip")',
+      )
+      .first()
+      .click();
+    const createdResponse = await tripCreated;
+    const tripBody = (await createdResponse.json().catch(() => ({}))) as {
+      id?: string;
+      trip?: { id?: string };
+    };
+    const tripId = tripBody.trip?.id ?? tripBody.id;
+
+    await expect(page).toHaveURL(
+      /\/trips\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/,
+      { timeout: 15_000 },
+    );
+
+    // Send an initial message so the trip has a title/content
+    const input = page
+      .locator(
+        'input[aria-label="Ask the agent to plan your trip..."], input[placeholder="Ask the agent to plan your trip..."]',
+      )
+      .first();
+    await input.fill(
+      'Plan a 3-day trip to Barcelona, July 10 to July 13, for 2 people, budget $2500.',
+    );
+    await page
+      .locator('form')
+      .filter({ has: input })
+      .locator('button[type="submit"]')
+      .first()
+      .click();
+
+    // Wait for the agent to respond (at minimum, wait for the plan step)
+    await page
+      .locator('button:has-text("Start planning"), [data-tile-card]')
+      .first()
+      .waitFor({ state: 'visible', timeout: 120_000 })
+      .catch(() => {
+        // Agent may respond differently; continue regardless
+      });
+
+    // Navigate to the trips list
+    await page.goto('/trips');
+    await expect(page).toHaveURL(/\/trips$/, { timeout: 10_000 });
+
+    // Trip must appear in the list (by URL id or link text)
+    const tripLink = tripId
+      ? page.locator(`a[href*="${tripId}"]`).first()
+      : page.locator('a[href*="/trips/"]').first();
+    await expect(tripLink).toBeVisible({ timeout: 15_000 });
+
+    // Reload the page and confirm the trip is still there
+    await page.reload();
+    await expect(page).toHaveURL(/\/trips$/, { timeout: 10_000 });
+    await expect(tripLink).toBeVisible({ timeout: 10_000 });
+
+    await logout(page);
+  });
 });
