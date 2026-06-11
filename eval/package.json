@@ -8,6 +8,7 @@
     "eval:adversarial": "tsx src/adversarial/index.ts",
     "eval:cross-model-judge": "tsx src/adversarial/cross-model-judge.ts",
     "eval:production": "tsx src/scoring/runProductionEval.ts",
+    "seed": "tsx src/seeding/seedConversations.ts",
     "build": "tsc --noEmit",
     "test": "vitest run"
   },
