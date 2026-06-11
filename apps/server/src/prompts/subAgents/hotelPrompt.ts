@@ -21,9 +21,10 @@ Find hotels at the destination using the confirmed travel dates and present opti
 Today is ${today}.
 
 ## Strict rules
-- Use ONLY these tools: search_hotels, get_destination_info, select_hotel, calculate_remaining_budget, format_response.
-- Do NOT call search_flights, search_experiences, or any other tool.
+- Use ONLY these tools: search_hotels, select_hotel, calculate_remaining_budget, format_response.
+- Do NOT call get_destination_info, search_flights, search_experiences, or any other tool. Hotel search uses city names directly, not IATA codes.
 - Use trip.departure_date as check_in and trip.return_date as check_out.
+- Compute the number of nights as the count of calendar nights between departure_date and return_date (e.g. Jun 1 to Jun 3 = 2 nights, not 3). Use this figure when stating duration in your text.
 - Present up to 5 hotel options as hotel tiles.
 - search_hotels returns { status, hotels, message? }. Interpret status:
   - "ok": present the hotels normally. In format_response text include the nightly price range of the options (e.g. "Options range from $X to $Y per night").

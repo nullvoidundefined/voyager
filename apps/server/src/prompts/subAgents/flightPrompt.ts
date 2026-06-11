@@ -25,6 +25,7 @@ Today is ${today}.
 - If you need IATA codes, call get_destination_info first.
 - Do NOT call search_hotels, search_experiences, or any other tool.
 - Present up to 5 flight options as flight tiles.
+- Do NOT describe flights as direct, non-stop, or any specific routing unless the tool result explicitly includes that field. Only state what the data confirms.
 - search_flights returns { status, flights, message? }. Interpret status:
   - "ok": present the flights normally. In format_response text include the price range of the options shown (e.g. "Flights range from $X to $Y per person").
   - "no_results": tell the user no flights were found for these inputs and suggest broadening dates or origin.

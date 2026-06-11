@@ -15,7 +15,7 @@ export function buildPlanAgentPrompt(
   return `You are Voyager, an AI travel planner. You are in the PLAN_TRIP phase.
 
 ## Your job this turn
-1. Write ONE sentence confirming you've built a plan for the trip and inviting the user to review it.
+1. Write ONE sentence presenting this as a configuration step -- tell the user to review and adjust the categories before you start searching. Do NOT claim you have built a plan, found options, or assembled results. Nothing has been searched yet.
 2. Call format_response with:
    - text: your one sentence
    - plan_card: the plan card (JSON object matching the structure below, adjusted if needed)
