@@ -87,12 +87,15 @@ rm -f /tmp/hc_body /tmp/hc_cookies
 
 echo "=== Health checks for $BASE_URL ==="
 check "GET /health" "$BASE_URL/health" "200" "ok"
+check "GET /health/ready (db)" "$BASE_URL/health/ready" "200" '"db":"connected"'
+check "GET /health/ready (cache)" "$BASE_URL/health/ready" "200" '"cache":"connected"'
+check "GET /health/ready (commit)" "$BASE_URL/health/ready" "200" '"commit":"'
 
 if [ "$CSRF_APP" = "true" ]; then
   check "GET /api/csrf-token" "$BASE_URL/api/csrf-token" "200" "token"
 fi
 
-check_cors "$BASE_URL/health"
+check_cors "$BASE_URL/health/ready"
 check_login_rejects_bad_creds
 
 if [ -n "$FRONTEND_URL" ]; then

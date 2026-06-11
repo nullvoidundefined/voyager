@@ -129,9 +129,13 @@ app.get('/health/ready', async (_req, res) => {
 
   const status = dbStatus === 'connected' ? 'ok' : 'degraded';
   const statusCode = dbStatus === 'connected' ? 200 : 503;
-  res
-    .status(statusCode)
-    .json({ status, db: dbStatus, cache: cacheStatus, activeConversations });
+  res.status(statusCode).json({
+    status,
+    db: dbStatus,
+    cache: cacheStatus,
+    activeConversations,
+    commit: process.env.RAILWAY_GIT_COMMIT_SHA ?? 'local',
+  });
 });
 
 const destinationsPath = path.resolve(
