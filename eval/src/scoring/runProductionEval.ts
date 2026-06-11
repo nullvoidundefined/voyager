@@ -10,7 +10,8 @@
  * Reads ANTHROPIC_API_KEY and DATABASE_URL from the environment (or .env).
  * Override the judge model with EVAL_PLAN_JUDGE_MODEL.
  */
-import 'dotenv/config';
+import { config } from 'dotenv';
+import { resolve } from 'node:path';
 import pg from 'pg';
 
 import { computePlanScore, runPlanJudge } from './planJudge.js';
@@ -20,6 +21,8 @@ import type {
   ToolCallRecord,
   TripContext,
 } from './planJudge.js';
+
+config({ path: resolve(process.cwd(), '../apps/server/.env') });
 
 const { Pool } = pg;
 
@@ -58,7 +61,7 @@ async function fetchRecentTurns(pool: pg.Pool): Promise<MessageRow[]> {
        am.id,
        am.nodes,
        am.tool_calls_json,
-       am.created_at,
+       am.created_at::text,
        um.content AS user_message,
        t.destination,
        t.origin,

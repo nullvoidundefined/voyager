@@ -113,18 +113,23 @@ async function callJudgeApi(input: PlanTurnInput): Promise<string> {
     model: getPlanJudgeModel(),
     max_tokens: 1500,
     system: PLAN_JUDGE_PROMPT,
-    messages: [
-      { role: 'user', content: buildUserContent(input) },
-      { role: 'assistant', content: '{' },
-    ],
+    messages: [{ role: 'user', content: buildUserContent(input) }],
   });
   const block = response.content[0];
   return block?.type === 'text' ? block.text : '';
 }
 
+function extractJson(rawText: string): string {
+  const fenced = rawText.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenced) return fenced[1].trim();
+  const braced = rawText.match(/\{[\s\S]*\}/);
+  return braced ? braced[0] : rawText;
+}
+
 function parseJudgeResponse(rawText: string): PlanJudgeResult {
+  const text = extractJson(rawText);
   try {
-    return JSON.parse('{' + rawText) as PlanJudgeResult;
+    return JSON.parse(text) as PlanJudgeResult;
   } catch {
     const fallback: DimensionScore = {
       score: 3,
