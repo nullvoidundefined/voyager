@@ -4,3 +4,6 @@ server/.agents/
 
 # Shared convention docs (not app source code)
 .claude/
+
+# Build-time generated artifact (written by scripts/deploy.sh, not hand-authored)
+apps/server/src/data/version.json
