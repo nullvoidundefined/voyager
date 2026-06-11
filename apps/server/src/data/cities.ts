@@ -994,15 +994,6 @@ export const CITY_DATABASE: Record<string, CityData> = {
     timezone: 'Asia/Kolkata',
     currency: 'INR',
   },
-  'new delhi': {
-    lat: 28.6139,
-    lon: 77.209,
-    country_code: 'IN',
-    country_name: 'India',
-    iata_code: 'DEL',
-    timezone: 'Asia/Kolkata',
-    currency: 'INR',
-  },
   bangalore: {
     lat: 12.9716,
     lon: 77.5946,
