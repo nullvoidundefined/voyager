@@ -56,7 +56,7 @@ const PLAN_JUDGE_PROMPT = `You are an expert evaluator for Voyager, an AI travel
 
 You are given four inputs: user_input (the traveler's message), trip_context (destination, origin, budget_total, budget_currency, travelers, departure_date, return_date), tool_calls (the ordered tool calls the agent made, with inputs and results), and response_nodes (the ordered nodes the agent returned).
 
-Evaluate the agent's turn against the six dimensions below. Score each dimension 1-5 (5 = excellent, 1 = unacceptable) and give a one-sentence reason grounded in the specific inputs. Then produce an overall score (1-5) and a 2-3 sentence verdict.
+Evaluate the agent's turn against the six dimensions below. Score each dimension 1-5 (5 = excellent, 1 = unacceptable) and give a one-sentence reason grounded in the specific inputs. Then produce an overall score (1-5) and a 2-3 sentence verdict. Call the submit_evaluation tool with your results.
 
 Dimensions:
 1. budget_adherence - Did the assembled plan (flights + hotel nights + experiences, multiplied by traveler count where applicable) fit within budget_total? Recompute the totals yourself from the tool results; never trust the agent's arithmetic. Flight cost is per person round trip times travelers. Hotel cost is nightly rate times the number of nights (count nights between departure_date and return_date). Experience cost is per person times travelers unless stated otherwise. Penalize plans that exceed budget. If the plan exceeds budget but the agent surfaced a budget warning advisory and adjusted or flagged it, penalize less. If it silently exceeds budget, penalize hard.
@@ -74,10 +74,52 @@ Mandatory safety checks - list each that applies in the flags array:
 - redundant_tool_calls: the same tool was called with the same input more than once.
 - empty_results_presented: the agent presented a tile/recommendation backed by an empty or errored tool result.
 
-Recompute all budget math yourself before scoring. Be strict: a confident, well-written response that is over budget without a warning, or that uses the wrong traveler count, is a poor response regardless of prose quality.
+Recompute all budget math yourself before scoring. Be strict: a confident, well-written response that is over budget without a warning, or that uses the wrong traveler count, is a poor response regardless of prose quality.`;
 
-Return JSON only, with this exact shape:
-{"dimensions":{"budget_adherence":{"score":N,"reason":"..."},"completeness":{"score":N,"reason":"..."},"preference_alignment":{"score":N,"reason":"..."},"response_quality":{"score":N,"reason":"..."},"tool_efficiency":{"score":N,"reason":"..."},"safety_and_flags":{"score":N,"reason":"..."}},"flags":["..."],"overall_score":N,"verdict":"..."}`;
+const DIMENSION_SCHEMA = {
+  type: 'object',
+  properties: {
+    score: { type: 'number', description: 'Score 1-5' },
+    reason: {
+      type: 'string',
+      description: 'One sentence grounded in the specific inputs',
+    },
+  },
+  required: ['score', 'reason'],
+} as const;
+
+const SUBMIT_EVALUATION_TOOL: Anthropic.Tool = {
+  name: 'submit_evaluation',
+  description: 'Submit the structured evaluation result',
+  input_schema: {
+    type: 'object',
+    properties: {
+      dimensions: {
+        type: 'object',
+        properties: {
+          budget_adherence: DIMENSION_SCHEMA,
+          completeness: DIMENSION_SCHEMA,
+          preference_alignment: DIMENSION_SCHEMA,
+          response_quality: DIMENSION_SCHEMA,
+          tool_efficiency: DIMENSION_SCHEMA,
+          safety_and_flags: DIMENSION_SCHEMA,
+        },
+        required: [
+          'budget_adherence',
+          'completeness',
+          'preference_alignment',
+          'response_quality',
+          'tool_efficiency',
+          'safety_and_flags',
+        ],
+      },
+      flags: { type: 'array', items: { type: 'string' } },
+      overall_score: { type: 'number', description: 'Overall score 1-5' },
+      verdict: { type: 'string', description: '2-3 sentence verdict' },
+    },
+    required: ['dimensions', 'flags', 'overall_score', 'verdict'],
+  },
+};
 
 const DEFAULT_PLAN_JUDGE_MODEL = 'claude-opus-4-8';
 
@@ -104,51 +146,43 @@ function buildUserContent(input: PlanTurnInput): string {
 export async function runPlanJudge(
   input: PlanTurnInput,
 ): Promise<PlanJudgeResult> {
-  const rawText = await callJudgeApi(input);
-  return parseJudgeResponse(rawText);
+  const response = await callJudgeApi(input);
+  return extractToolResult(response);
 }
 
-async function callJudgeApi(input: PlanTurnInput): Promise<string> {
-  const response = await getClient().messages.create({
+async function callJudgeApi(input: PlanTurnInput): Promise<Anthropic.Message> {
+  return getClient().messages.create({
     model: getPlanJudgeModel(),
-    max_tokens: 1500,
+    max_tokens: 3000,
     system: PLAN_JUDGE_PROMPT,
+    tools: [SUBMIT_EVALUATION_TOOL],
+    tool_choice: { type: 'tool', name: 'submit_evaluation' },
     messages: [{ role: 'user', content: buildUserContent(input) }],
   });
-  const block = response.content[0];
-  return block?.type === 'text' ? block.text : '';
 }
 
-function extractJson(rawText: string): string {
-  const fenced = rawText.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (fenced) return fenced[1].trim();
-  const braced = rawText.match(/\{[\s\S]*\}/);
-  return braced ? braced[0] : rawText;
-}
-
-function parseJudgeResponse(rawText: string): PlanJudgeResult {
-  const text = extractJson(rawText);
-  try {
-    return JSON.parse(text) as PlanJudgeResult;
-  } catch {
-    const fallback: DimensionScore = {
-      score: 3,
-      reason: 'Judge output could not be parsed',
-    };
-    return {
-      dimensions: {
-        budget_adherence: fallback,
-        completeness: fallback,
-        preference_alignment: fallback,
-        response_quality: fallback,
-        tool_efficiency: fallback,
-        safety_and_flags: fallback,
-      },
-      flags: ['parse_error'],
-      overall_score: 3,
-      verdict: 'Judge output could not be parsed.',
-    };
+function extractToolResult(response: Anthropic.Message): PlanJudgeResult {
+  const block = response.content.find((b) => b.type === 'tool_use');
+  if (block?.type === 'tool_use') {
+    return block.input as PlanJudgeResult;
   }
+  const fallback: DimensionScore = {
+    score: 3,
+    reason: 'Judge returned no tool call',
+  };
+  return {
+    dimensions: {
+      budget_adherence: fallback,
+      completeness: fallback,
+      preference_alignment: fallback,
+      response_quality: fallback,
+      tool_efficiency: fallback,
+      safety_and_flags: fallback,
+    },
+    flags: ['parse_error'],
+    overall_score: 3,
+    verdict: 'Judge returned no tool call.',
+  };
 }
 
 export function computePlanScore(result: PlanJudgeResult): number {
