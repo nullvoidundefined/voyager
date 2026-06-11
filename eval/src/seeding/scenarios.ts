@@ -136,4 +136,108 @@ export const SCENARIOS: TripScenario[] = [
     update: { transport_mode: 'driving' },
     turns: [{ message: 'Find me a hotel in Sedona.' }],
   },
+
+  // --- Batch 2: more flying scenarios ---
+  {
+    name: 'Boston to Barcelona (flying, couple)',
+    trip: {
+      destination: 'Barcelona, Spain',
+      origin: 'Boston, MA',
+      budget_total: 5000,
+      budget_currency: 'USD',
+      travelers: 2,
+      ...futureDates(80, 8),
+    },
+    turns: [{ message: 'Find flights to Barcelona.' }],
+  },
+  {
+    name: 'Seattle to Bali (flying, solo)',
+    trip: {
+      destination: 'Bali, Indonesia',
+      origin: 'Seattle, WA',
+      budget_total: 3500,
+      budget_currency: 'USD',
+      travelers: 1,
+      ...futureDates(100, 14),
+    },
+    turns: [{ message: 'Search for flights to Bali.' }],
+  },
+  {
+    name: 'Dallas to Rome (flying, anniversary)',
+    trip: {
+      destination: 'Rome, Italy',
+      origin: 'Dallas, TX',
+      budget_total: 6000,
+      budget_currency: 'USD',
+      travelers: 2,
+      ...futureDates(65, 10),
+    },
+    turns: [{ message: 'Show me flight options to Rome.' }],
+  },
+  {
+    name: 'Denver to Reykjavik (flying, adventure)',
+    trip: {
+      destination: 'Reykjavik, Iceland',
+      origin: 'Denver, CO',
+      budget_total: 4500,
+      budget_currency: 'USD',
+      travelers: 2,
+      ...futureDates(55, 7),
+    },
+    turns: [{ message: 'Find flights to Iceland.' }],
+  },
+
+  // --- Batch 2: more driving/hotel scenarios ---
+  {
+    name: 'Drive to Savannah (driving, hotels)',
+    trip: {
+      destination: 'Savannah, GA',
+      origin: 'Charlotte, NC',
+      budget_total: 1500,
+      budget_currency: 'USD',
+      travelers: 2,
+      ...futureDates(42, 4),
+    },
+    update: { transport_mode: 'driving' },
+    turns: [{ message: 'Find hotels in Savannah.' }],
+  },
+  {
+    name: 'Drive to Portland (driving, hotels)',
+    trip: {
+      destination: 'Portland, OR',
+      origin: 'Seattle, WA',
+      budget_total: 900,
+      budget_currency: 'USD',
+      travelers: 2,
+      ...futureDates(28, 3),
+    },
+    update: { transport_mode: 'driving' },
+    turns: [{ message: 'What hotels are available in Portland?' }],
+  },
+  {
+    name: 'Drive to Austin (driving, hotels)',
+    trip: {
+      destination: 'Austin, TX',
+      origin: 'San Antonio, TX',
+      budget_total: 700,
+      budget_currency: 'USD',
+      travelers: 2,
+      ...futureDates(38, 2),
+    },
+    update: { transport_mode: 'driving' },
+    turns: [{ message: 'Search hotels in Austin.' }],
+  },
+  {
+    name: 'Drive to Charleston (driving, hotels)',
+    trip: {
+      destination: 'Charleston, SC',
+      origin: 'Columbia, SC',
+      budget_total: 600,
+      budget_currency: 'USD',
+      travelers: 2,
+      ...futureDates(25, 2),
+    },
+    update: { transport_mode: 'driving' },
+    turns: [{ message: 'Find me hotels in Charleston.' }],
+  },
 ];

@@ -87,6 +87,15 @@ async function fetchRecentTurns(pool: pg.Pool): Promise<MessageRow[]> {
   return rows;
 }
 
+const JUDGE_DIMENSIONS = new Set([
+  'budget_adherence',
+  'completeness',
+  'preference_alignment',
+  'response_quality',
+  'tool_efficiency',
+  'safety_and_flags',
+]);
+
 const PLANNING_NODE_TYPES = new Set([
   'flight_tiles',
   'hotel_tiles',
@@ -165,14 +174,22 @@ function computeDimensionAverages(
   scored: ScoredTurn[],
 ): Record<string, number> {
   const sums: Record<string, number> = {};
+  const counts: Record<string, number> = {};
   for (const { result } of scored) {
-    for (const [dim, { score }] of Object.entries(result.dimensions)) {
+    for (const [dim, val] of Object.entries(result.dimensions)) {
+      if (!JUDGE_DIMENSIONS.has(dim)) continue;
+      const score =
+        typeof val === 'object' && val !== null
+          ? (val as { score: number }).score
+          : NaN;
+      if (Number.isNaN(score)) continue;
       sums[dim] = (sums[dim] ?? 0) + score;
+      counts[dim] = (counts[dim] ?? 0) + 1;
     }
   }
   const averages: Record<string, number> = {};
   for (const [dim, total] of Object.entries(sums)) {
-    averages[dim] = Math.round((total / scored.length) * 10) / 10;
+    averages[dim] = Math.round((total / (counts[dim] ?? 1)) * 10) / 10;
   }
   return averages;
 }
@@ -183,8 +200,15 @@ function printReport(
   skippedCount: number,
 ): void {
   const total = scored.length;
+  const validScores = scored
+    .map((t) => t.score)
+    .filter((s) => !Number.isNaN(s));
   const overallAvg =
-    Math.round((scored.reduce((s, t) => s + t.score, 0) / total) * 100) / 100;
+    validScores.length > 0
+      ? Math.round(
+          (validScores.reduce((s, v) => s + v, 0) / validScores.length) * 100,
+        ) / 100
+      : 0;
   const dimAvgs = computeDimensionAverages(scored);
   const flags = tallyFlags(scored);
 

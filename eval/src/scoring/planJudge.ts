@@ -185,8 +185,20 @@ function extractToolResult(response: Anthropic.Message): PlanJudgeResult {
   };
 }
 
+const EXPECTED_DIMENSIONS: Array<keyof PlanJudgeResult['dimensions']> = [
+  'budget_adherence',
+  'completeness',
+  'preference_alignment',
+  'response_quality',
+  'tool_efficiency',
+  'safety_and_flags',
+];
+
 export function computePlanScore(result: PlanJudgeResult): number {
-  const scores = Object.values(result.dimensions).map((d) => d.score);
+  const scores = EXPECTED_DIMENSIONS.map(
+    (k) => result.dimensions[k]?.score,
+  ).filter((s): s is number => typeof s === 'number' && !Number.isNaN(s));
+  if (scores.length === 0) return 0;
   const avg = scores.reduce((sum, s) => sum + s, 0) / scores.length;
   return Math.round((avg / 5) * 100) / 100;
 }

@@ -11,11 +11,21 @@
  *   SEEDER_BASE_URL   - API base URL (default: http://localhost:3001)
  *   SEEDER_EMAIL      - test user email (default: eval-seeder@voyager.test)
  *   SEEDER_PASSWORD   - test user password (default: Seeder!2026)
+ *
+ * Two-turn flow per scenario:
+ *   Turn 1 (warmup): triggers the plan agent, which returns a plan_card node.
+ *   Turn 2+ (scored): sent with planConfirmation=<plan_card from turn 1>, which
+ *     sets tracker.plan_confirmed=true and routes to the flight or hotel sub-agent.
+ *     These are the turns that runProductionEval scores.
  */
 import { config } from 'dotenv';
 import { resolve } from 'node:path';
 
-import { VoyagerApiClient } from './apiClient.js';
+import {
+  type PlanCard,
+  VoyagerApiClient,
+  extractPlanCard,
+} from './apiClient.js';
 import { SCENARIOS } from './scenarios.js';
 import type { TripScenario } from './scenarios.js';
 
@@ -24,6 +34,20 @@ config({ path: resolve(process.cwd(), '../apps/server/.env') });
 const BASE_URL = process.env.SEEDER_BASE_URL ?? 'http://localhost:3001';
 const SEEDER_EMAIL = process.env.SEEDER_EMAIL ?? 'eval-seeder@voyager.test';
 const SEEDER_PASSWORD = process.env.SEEDER_PASSWORD ?? 'Seeder!2026';
+
+async function fetchPlanCard(
+  client: VoyagerApiClient,
+  tripId: string,
+): Promise<PlanCard | null> {
+  const warmup = await client.sendChatMessage(tripId, "Let's start planning.");
+  if (!warmup) {
+    process.stdout.write('    warmup: agent error\n');
+    return null;
+  }
+  const card = extractPlanCard(warmup);
+  process.stdout.write(`    warmup: plan_card ${card ? 'found' : 'missing'}\n`);
+  return card;
+}
 
 async function runScenario(
   client: VoyagerApiClient,
@@ -36,13 +60,20 @@ async function runScenario(
     trip = await client.updateTrip(trip.id, scenario.update);
   }
 
+  const planCard = await fetchPlanCard(client, trip.id);
+
   let seededTurns = 0;
   for (const turn of scenario.turns) {
-    process.stdout.write(`    -> "${turn.message.slice(0, 60)}..."\n`);
-    const result = await client.sendChatMessage(trip.id, turn.message);
+    process.stdout.write(`    -> "${turn.message.slice(0, 60)}"\n`);
+    const result = await client.sendChatMessage(
+      trip.id,
+      turn.message,
+      planCard ?? undefined,
+    );
     if (result) {
-      const nodeCount = result.message.nodes.length;
-      process.stdout.write(`       done. nodes=${nodeCount}\n`);
+      const nodes = result.message.nodes as Array<{ type: string }>;
+      const types = nodes.map((n) => n.type).join(', ');
+      process.stdout.write(`       done. nodes=[${types}]\n`);
       seededTurns++;
     } else {
       process.stdout.write('       agent error -- turn not seeded\n');
@@ -75,11 +106,11 @@ async function main(): Promise<void> {
     }
   }
 
-  console.info(`\nSeeding complete.`);
+  console.info('\nSeeding complete.');
   console.info(
     `  Scenarios: ${SCENARIOS.length - failedScenarios}/${SCENARIOS.length} succeeded`,
   );
-  console.info(`  Turns seeded: ${totalTurns}`);
+  console.info(`  Turns seeded: ${totalTurns} (warmup turns not counted)`);
   console.info('\nRun eval:production to score the new turns:');
   console.info('  pnpm --filter voyager-eval eval:production');
 }

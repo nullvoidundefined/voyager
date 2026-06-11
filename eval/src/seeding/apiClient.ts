@@ -40,6 +40,29 @@ export interface UpdateTripParams {
   status?: string;
 }
 
+/** Minimal plan card shape accepted by the planConfirmation endpoint. */
+export interface PlanCard {
+  categories: Array<{
+    id: string;
+    label: string;
+    enabled: boolean;
+    not_applicable: boolean;
+    not_applicable_reason?: string;
+    sub_options?: unknown[];
+  }>;
+}
+
+/** Extract the plan_card node from a done event, or null if absent. */
+export function extractPlanCard(event: ChatDoneEvent): PlanCard | null {
+  const nodes = event.message.nodes as Array<{
+    type: string;
+    plan_card?: { categories?: unknown };
+  }>;
+  const node = nodes.find((n) => n.type === 'plan_card');
+  if (!node?.plan_card?.categories) return null;
+  return { categories: node.plan_card.categories } as PlanCard;
+}
+
 const DEFAULT_HEADERS = {
   'Content-Type': 'application/json',
   'X-Requested-With': 'XMLHttpRequest',
@@ -152,16 +175,21 @@ export class VoyagerApiClient {
 
   /**
    * POST a chat message and read the SSE stream to completion.
+   * Pass planConfirmation to confirm the plan card and advance tracker.plan_confirmed,
+   * which shifts the flow from PLAN_TRIP to PLANNING (flight/hotel routing).
    * Returns the parsed done-event payload, or null on agent error.
    */
   async sendChatMessage(
     tripId: string,
     message: string,
+    planConfirmation?: PlanCard,
   ): Promise<ChatDoneEvent | null> {
+    const body: Record<string, unknown> = { message };
+    if (planConfirmation) body.planConfirmation = planConfirmation;
     const res = await fetch(`${this.baseUrl}/trips/${tripId}/chat`, {
       method: 'POST',
       headers: this.requestHeaders({ Accept: 'text/event-stream' }),
-      body: JSON.stringify({ message }),
+      body: JSON.stringify(body),
     });
 
     if (!res.ok) {
