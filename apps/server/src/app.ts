@@ -27,6 +27,21 @@ import helmet from 'helmet';
 import fs from 'node:fs';
 import path from 'node:path';
 
+function readCommitSha(): string {
+  try {
+    const versionPath = path.resolve(
+      path.dirname(new URL(import.meta.url).pathname),
+      'data/version.json',
+    );
+    const { commit } = JSON.parse(fs.readFileSync(versionPath, 'utf-8')) as {
+      commit: string;
+    };
+    return commit || 'unknown';
+  } catch {
+    return 'unknown';
+  }
+}
+
 function validateEnv(): void {
   if (!process.env.DATABASE_URL) {
     console.error('Fatal: DATABASE_URL is required');
@@ -134,7 +149,7 @@ app.get('/health/ready', async (_req, res) => {
     db: dbStatus,
     cache: cacheStatus,
     activeConversations,
-    commit: process.env.RAILWAY_GIT_COMMIT_SHA ?? 'local',
+    commit: readCommitSha(),
   });
 });
 
