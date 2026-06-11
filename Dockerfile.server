@@ -21,6 +21,7 @@ RUN pnpm --filter @voyager/shared-types run build
 RUN pnpm --filter voyager-server run build
 
 # Production stage
+ARG RAILWAY_GIT_COMMIT_SHA
 FROM node:22-slim AS production
 RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 WORKDIR /app
@@ -34,6 +35,8 @@ COPY --from=base /app/packages/shared-types/dist packages/shared-types/dist
 COPY --from=base /app/apps/server/dist apps/server/dist
 COPY apps/server/src/data/destinations.json apps/server/dist/data/destinations.json
 COPY apps/server/migrations apps/server/migrations
+
+ENV RAILWAY_GIT_COMMIT_SHA=${RAILWAY_GIT_COMMIT_SHA}
 
 EXPOSE 3001
 USER node
