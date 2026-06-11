@@ -87,6 +87,32 @@ async function fetchRecentTurns(pool: pg.Pool): Promise<MessageRow[]> {
   return rows;
 }
 
+const PLANNING_NODE_TYPES = new Set([
+  'flight_tiles',
+  'hotel_tiles',
+  'car_rental_tiles',
+  'experience_tiles',
+  'itinerary',
+  'plan_card',
+  'budget_bar',
+]);
+
+const SEARCH_TOOL_NAMES = new Set([
+  'search_flights',
+  'search_hotels',
+  'search_experiences',
+  'search_car_rentals',
+]);
+
+function isPlanningTurn(row: MessageRow): boolean {
+  const hasSearchCall = (row.tool_calls_json ?? []).some((c) =>
+    SEARCH_TOOL_NAMES.has(c.tool_name),
+  );
+  if (hasSearchCall) return true;
+  const nodes = row.nodes as Array<{ type?: string }>;
+  return nodes.some((n) => n?.type && PLANNING_NODE_TYPES.has(n.type));
+}
+
 function buildTurnInput(row: MessageRow): PlanTurnInput {
   const tripContext: TripContext = {
     destination: row.destination,
@@ -151,7 +177,11 @@ function computeDimensionAverages(
   return averages;
 }
 
-function printReport(scored: ScoredTurn[]): void {
+function printReport(
+  scored: ScoredTurn[],
+  totalFetched: number,
+  skippedCount: number,
+): void {
   const total = scored.length;
   const overallAvg =
     Math.round((scored.reduce((s, t) => s + t.score, 0) / total) * 100) / 100;
@@ -159,7 +189,9 @@ function printReport(scored: ScoredTurn[]): void {
   const flags = tallyFlags(scored);
 
   console.info('\n=== Voyager Production Plan Eval ===');
-  console.info(`Turns scored: ${total}`);
+  console.info(
+    `Turns: ${totalFetched} fetched, ${skippedCount} clarifying/form skipped, ${total} scored`,
+  );
   console.info(`Overall avg (normalized 0-1): ${overallAvg}`);
 
   console.info('\nDimension averages (1-5 scale):');
@@ -208,9 +240,13 @@ async function main(): Promise<void> {
       );
       return;
     }
-    console.info(`Found ${rows.length} turns. Scoring with plan judge...`);
-    const scored = await scoreAllTurns(rows);
-    printReport(scored);
+    const planningRows = rows.filter(isPlanningTurn);
+    const skippedCount = rows.length - planningRows.length;
+    console.info(
+      `Found ${rows.length} turns: ${planningRows.length} planning, ${skippedCount} clarifying/form (skipped).`,
+    );
+    const scored = await scoreAllTurns(planningRows);
+    printReport(scored, rows.length, skippedCount);
   } finally {
     await pool.end();
   }
