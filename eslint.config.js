@@ -22,6 +22,7 @@ export default tseslint.config([
       '**/vitest.integration.config.ts',
       '**/playwright.config.ts',
       '**/playwright.real.config.ts',
+      '**/playwright.production.config.ts',
       '**/playwright.global-setup.ts',
       'e2e/**',
       'scripts/**',
