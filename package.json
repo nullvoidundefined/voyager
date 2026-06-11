@@ -20,6 +20,7 @@
     "test:e2e:fast": "pnpm --dir apps/client/web exec playwright test --config=../../../playwright.config.ts --grep @fast --project=chromium",
     "test:e2e:real": "pnpm --dir apps/client/web exec playwright test --config=../../../playwright.real.config.ts",
     "seed:test": "npx tsx scripts/seed-test-db.ts",
+    "deploy": "bash scripts/deploy.sh",
     "test:smoke": "bash scripts/smoke-test.sh",
     "test:smoke:production": "bash scripts/health-check.sh https://server-production-f028.up.railway.app https://voyager.iangreenoughdeveloper.com false",
     "test:e2e:production": "pnpm --dir apps/client/web exec playwright test --config=../../../playwright.production.config.ts",

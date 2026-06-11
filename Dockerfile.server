@@ -2,12 +2,6 @@ FROM node:22-slim AS base
 RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 WORKDIR /app
 
-# Capture the commit SHA at build time.
-# Railway passes RAILWAY_GIT_COMMIT_SHA as a build-time env var.
-# The value is written to dist/data/version.json so the production
-# stage can read it without needing the ARG re-declared there.
-ARG RAILWAY_GIT_COMMIT_SHA=unknown
-
 # Copy workspace config
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
 
@@ -25,9 +19,6 @@ COPY packages/shared-types/ packages/shared-types/
 # Build shared-types first so its dist/ exists when the server compiles + runs
 RUN pnpm --filter @voyager/shared-types run build
 RUN pnpm --filter voyager-server run build
-
-# Write the commit SHA into the built artifact so the running server can report it.
-RUN node -e "require('fs').writeFileSync('apps/server/dist/data/version.json', JSON.stringify({commit:'${RAILWAY_GIT_COMMIT_SHA}'}))"
 
 # Production stage
 FROM node:22-slim AS production
