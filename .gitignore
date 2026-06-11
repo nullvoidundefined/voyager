@@ -41,4 +41,3 @@ MEMORY.md
 # Local tooling state and dev-only artifacts
 .superpowers/
 screenshots/
-apps/server/src/data/version.json
