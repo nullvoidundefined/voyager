@@ -44,16 +44,19 @@ review (see "Held for decision").
       after each agent iteration; `useSSEChat` exposes `liveTokens` and `ChatBox` renders a live
       spend indicator. Backed by an orchestrator emission test and a hook guard.
 
-### Held for decision (one focused follow-up PR)
+### Done (continued)
 
-- [ ] **(b)+(a2): module-per-tool registry + Zod-derivation, as ONE PR.** Co-locate definition +
-      schema + subAgents per tool in one module; derive `TOOL_DEFINITIONS`, `toolSchemas`, and
-      `SUB_AGENT_TOOLS` from the registry; then derive each tool's model-facing `input_schema` from
-      its Zod schema (a per-tool module is the natural home for it). The derivation is locally
-      verifiable when the derived JSON equals the current hand-written JSON (equivalence test);
-      otherwise flip only equivalence-proven tools and leave the rest under the drift guard.
-      `SubAgentType` is imported only by `subAgentService`, so relocate it to a neutral module to
-      avoid a registry<->subAgentService cycle. ~0.5-1 day.
+- [x] **(b)+(a2): module-per-tool registry + Zod-derivation, as ONE PR.** Shipped on
+      `refactor/tool-registry-zod-derivation` (see `docs/prs/2026-06-15-tool-registry-zod-derivation.md`).
+      `tools/registry/` now holds 17 per-tool modules (name + description + Zod schema);
+      `TOOL_DEFINITIONS` and `toolSchemas` derive from `TOOL_REGISTRY` via `z.toJSONSchema`, so the
+      model-facing JSON cannot drift from the validator. Descriptions were ported into the Zod
+      schemas; byte-equivalence was not the bar (the derived schema is richer: regex/min-max and
+      number->integer), so the old drift guard was replaced by `derivation.test.ts`, which asserts
+      the derived schema preserves every description/enum/type/required from a frozen baseline.
+      Decisions: kept `SUB_AGENT_TOOLS` a separate curated map (so the `SubAgentType` relocation was
+      unnecessary, no cycle arises); fixed two latent `format_response` validator drifts surfaced by
+      the port (`source_type` enum, `plan_card` object). 1104 server tests green.
 
 ## Non-fixes (intentional, do not change)
 

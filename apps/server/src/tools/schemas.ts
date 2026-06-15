@@ -1,207 +1,30 @@
-import { z } from 'zod';
+/**
+ * Tool input schemas. The per-tool Zod schemas now live beside their definitions
+ * in tools/registry/; this module re-exports them under their established names
+ * (so executor imports stay stable) and derives the toolSchemas name->schema
+ * lookup from the registry for validation dispatch.
+ */
+import { TOOL_REGISTRY } from 'app/tools/registry/toolRegistry.js';
+import type { ZodType } from 'zod';
 
-const dateString = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD');
+export { addLegSchema } from 'app/tools/registry/addLeg.js';
+export { calculateBudgetSchema } from 'app/tools/registry/calculateRemainingBudget.js';
+export { formatResponseSchema } from 'app/tools/registry/formatResponse.js';
+export { getDestinationInfoSchema } from 'app/tools/registry/getDestinationInfo.js';
+export { planDailyScheduleSchema } from 'app/tools/registry/planDailySchedule.js';
+export { reOpenCategorySchema } from 'app/tools/registry/reOpenCategory.js';
+export { removeLegSchema } from 'app/tools/registry/removeLeg.js';
+export { reorderLegsSchema } from 'app/tools/registry/reorderLegs.js';
+export { searchCarRentalsSchema } from 'app/tools/registry/searchCarRentals.js';
+export { searchExperiencesSchema } from 'app/tools/registry/searchExperiences.js';
+export { searchFlightsSchema } from 'app/tools/registry/searchFlights.js';
+export { searchHotelsSchema } from 'app/tools/registry/searchHotels.js';
+export { selectCarRentalSchema } from 'app/tools/registry/selectCarRental.js';
+export { selectExperienceSchema } from 'app/tools/registry/selectExperience.js';
+export { selectFlightSchema } from 'app/tools/registry/selectFlight.js';
+export { selectHotelSchema } from 'app/tools/registry/selectHotel.js';
+export { updateTripSchema } from 'app/tools/registry/updateTrip.js';
 
-// SEC-03 (2026-04-06 audit): allowlist for location-like fields.
-// Accepts unicode letters / numbers / spaces and the punctuation
-// legitimately used in place names (comma, period, hyphen,
-// apostrophe, parentheses). Rejects shell metachars, HTML / XSS
-// characters, URL-structure characters (?, #, /, =), control
-// characters, and anything longer than 100 chars. Length cap is
-// conservative: the longest real city name ("Krung Thep Maha
-// Nakhon..." 168 chars) does not fit, but the world does not need
-// Voyager to book trips to Bangkok's full ceremonial name.
-const locationAllowlist = z
-  .string()
-  .min(1)
-  .max(100)
-  .regex(
-    /^[\p{L}\p{N} ,.\-'()]+$/u,
-    'Must contain only letters, numbers, spaces, and common punctuation',
-  );
-
-export const searchFlightsSchema = z.object({
-  origin: locationAllowlist,
-  destination: locationAllowlist,
-  departure_date: dateString,
-  return_date: dateString.optional(),
-  passengers: z.number().int().min(1),
-  max_price: z.number().positive().optional(),
-  cabin_class: z
-    .enum(['ECONOMY', 'PREMIUM_ECONOMY', 'BUSINESS', 'FIRST'])
-    .optional(),
-  one_way: z.boolean().optional(),
-  flexible_dates: z.boolean().optional(),
-});
-
-export const searchHotelsSchema = z.object({
-  city: locationAllowlist,
-  check_in: dateString,
-  check_out: dateString,
-  guests: z.number().int().min(1),
-  star_rating_min: z.number().min(1).max(5).optional(),
-  max_price_per_night: z.number().positive().optional(),
-});
-
-export const searchExperiencesSchema = z.object({
-  location: locationAllowlist,
-  categories: z.array(locationAllowlist).min(1),
-  max_price_per_person: z.number().positive().optional(),
-  limit: z.number().int().positive().optional(),
-});
-
-export const calculateBudgetSchema = z.object({
-  total_budget: z.number(),
-  flight_cost: z.number(),
-  hotel_total_cost: z.number(),
-  car_rental_cost: z.number().nonnegative(),
-  experience_costs: z.array(z.number()),
-});
-
-export const getDestinationInfoSchema = z.object({
-  city_name: locationAllowlist,
-});
-
-export const updateTripSchema = z.object({
-  destination: locationAllowlist.optional(),
-  origin: locationAllowlist.optional(),
-  departure_date: dateString.optional(),
-  return_date: dateString.optional(),
-  budget_total: z.number().positive().optional(),
-  travelers: z.number().int().positive().optional(),
-  transport_mode: z.enum(['flying', 'driving']).optional(),
-});
-
-export const searchCarRentalsSchema = z.object({
-  pickup_location: locationAllowlist,
-  pickup_date: dateString,
-  dropoff_date: dateString,
-  dropoff_location: locationAllowlist.optional(),
-  car_type: z.string().max(50).optional(),
-});
-
-export const selectFlightSchema = z.object({
-  airline: locationAllowlist,
-  flight_number: locationAllowlist,
-  origin: locationAllowlist,
-  destination: locationAllowlist,
-  departure_time: z.string().optional(),
-  arrival_time: z.string().optional(),
-  price: z.coerce.number(),
-  currency: z.string().min(1),
-});
-
-export const selectHotelSchema = z.object({
-  name: locationAllowlist,
-  city: locationAllowlist.optional(),
-  star_rating: z.coerce.number().optional(),
-  price_per_night: z.coerce.number(),
-  total_price: z.coerce.number(),
-  currency: z.string().min(1),
-  check_in: z.string().optional(),
-  check_out: z.string().optional(),
-});
-
-export const selectCarRentalSchema = z.object({
-  provider: locationAllowlist,
-  car_name: locationAllowlist,
-  car_type: z.string().optional(),
-  price_per_day: z.coerce.number().optional(),
-  total_price: z.coerce.number(),
-  currency: z.string().min(1),
-});
-
-export const selectExperienceSchema = z.object({
-  name: locationAllowlist,
-  category: z.string().optional(),
-  estimated_cost: z.coerce.number(),
-  rating: z.coerce.number().optional(),
-});
-
-export const formatResponseSchema = z.object({
-  text: z.string().min(1),
-  citations: z
-    .array(
-      z.object({
-        id: z.string(),
-        label: z.string(),
-        url: z.string().optional(),
-        source_type: z.string().optional(),
-      }),
-    )
-    .optional(),
-  quick_replies: z.array(z.string()).optional(),
-  advisory: z
-    .object({
-      severity: z.enum(['info', 'warning', 'critical']),
-      title: z.string(),
-      body: z.string(),
-    })
-    .optional(),
-  skip_category: z
-    .enum(['flights', 'hotels', 'car_rental', 'experiences'])
-    .optional(),
-  plan_card: z.unknown().optional(),
-});
-
-const scheduleItemSchema = z.object({
-  time_of_day: z.enum(['morning', 'afternoon', 'evening']),
-  title: z.string().min(1),
-  description: z.string().optional(),
-  item_type: z.enum(['activity', 'meal', 'transport', 'accommodation']),
-  item_order: z.number().int().positive(),
-  place_id: z.string().max(100).optional(),
-  booking_url: z.string().optional(),
-  price_usd: z.number().optional(),
-});
-
-const scheduleDaySchema = z.object({
-  day_number: z.number().int().positive(),
-  day_date: dateString,
-  items: z.array(scheduleItemSchema),
-});
-
-export const planDailyScheduleSchema = z.object({
-  days: z.array(scheduleDaySchema),
-});
-
-export const addLegSchema = z.object({
-  origin: locationAllowlist,
-  destination: locationAllowlist,
-  depart_date: dateString,
-  leg_order: z.number().int().positive(),
-});
-
-export const removeLegSchema = z.object({
-  leg_id: z.string().min(1),
-});
-
-export const reorderLegsSchema = z.object({
-  ordered_leg_ids: z.array(z.string().min(1)).min(1),
-});
-
-export const reOpenCategorySchema = z.object({
-  category: z.enum(['flights', 'hotels', 'car_rental', 'experiences']),
-});
-
-export const toolSchemas: Record<string, z.ZodSchema> = {
-  add_leg: addLegSchema,
-  calculate_remaining_budget: calculateBudgetSchema,
-  format_response: formatResponseSchema,
-  get_destination_info: getDestinationInfoSchema,
-  plan_daily_schedule: planDailyScheduleSchema,
-  re_open_category: reOpenCategorySchema,
-  remove_leg: removeLegSchema,
-  reorder_legs: reorderLegsSchema,
-  search_car_rentals: searchCarRentalsSchema,
-  search_experiences: searchExperiencesSchema,
-  search_flights: searchFlightsSchema,
-  search_hotels: searchHotelsSchema,
-  select_car_rental: selectCarRentalSchema,
-  select_experience: selectExperienceSchema,
-  select_flight: selectFlightSchema,
-  select_hotel: selectHotelSchema,
-  update_trip: updateTripSchema,
-};
+export const toolSchemas: Record<string, ZodType> = Object.fromEntries(
+  TOOL_REGISTRY.map((tool) => [tool.name, tool.schema]),
+);
