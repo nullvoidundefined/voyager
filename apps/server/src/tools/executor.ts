@@ -30,9 +30,14 @@ import {
 } from 'app/tools/legsTool.js';
 import { handlePlanDailySchedule } from 'app/tools/scheduleTool.js';
 import {
+  addLegSchema,
   calculateBudgetSchema,
   formatResponseSchema,
   getDestinationInfoSchema,
+  planDailyScheduleSchema,
+  reOpenCategorySchema,
+  removeLegSchema,
+  reorderLegsSchema,
   searchCarRentalsSchema,
   searchExperiencesSchema,
   searchFlightsSchema,
@@ -203,8 +208,11 @@ export async function executeTool(
       return { success: true, message: 'Experience selection saved' };
     }
 
-    case 're_open_category':
+    case 're_open_category': {
+      const parsed = parseInput(toolName, reOpenCategorySchema, input);
+      if ('error' in parsed) return parsed;
       return { success: true };
+    }
 
     case 'format_response': {
       const parsed = parseInput(toolName, formatResponseSchema, input);
@@ -215,8 +223,10 @@ export async function executeTool(
     case 'plan_daily_schedule': {
       if (!context)
         throw new Error('plan_daily_schedule requires trip context');
+      const parsed = parseInput(toolName, planDailyScheduleSchema, input);
+      if ('error' in parsed) return parsed;
       return handlePlanDailySchedule(
-        input as unknown as {
+        parsed.data as {
           days: Array<{
             day_number: number;
             day_date: string;
@@ -230,21 +240,21 @@ export async function executeTool(
 
     case 'add_leg': {
       if (!context) throw new Error('add_leg requires trip context');
-      return handleAddLeg(
-        input as {
-          origin: string;
-          destination: string;
-          depart_date: string;
-          leg_order: number;
-        },
-        context,
-        { createLeg, listLegs, deleteLeg, reorderLegs },
-      );
+      const parsed = parseInput(toolName, addLegSchema, input);
+      if ('error' in parsed) return parsed;
+      return handleAddLeg(parsed.data, context, {
+        createLeg,
+        listLegs,
+        deleteLeg,
+        reorderLegs,
+      });
     }
 
     case 'remove_leg': {
       if (!context) throw new Error('remove_leg requires trip context');
-      return handleRemoveLeg(input as { leg_id: string }, context, {
+      const parsed = parseInput(toolName, removeLegSchema, input);
+      if ('error' in parsed) return parsed;
+      return handleRemoveLeg(parsed.data, context, {
         createLeg,
         listLegs,
         deleteLeg,
@@ -254,11 +264,14 @@ export async function executeTool(
 
     case 'reorder_legs': {
       if (!context) throw new Error('reorder_legs requires trip context');
-      return handleReorderLegs(
-        input as { ordered_leg_ids: string[] },
-        context,
-        { createLeg, listLegs, deleteLeg, reorderLegs },
-      );
+      const parsed = parseInput(toolName, reorderLegsSchema, input);
+      if ('error' in parsed) return parsed;
+      return handleReorderLegs(parsed.data, context, {
+        createLeg,
+        listLegs,
+        deleteLeg,
+        reorderLegs,
+      });
     }
 
     default:

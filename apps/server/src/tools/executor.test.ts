@@ -345,6 +345,38 @@ describe('executeTool', () => {
     });
   });
 
+  describe('validation for previously-unvalidated tools', () => {
+    it('rejects re_open_category with an invalid category', async () => {
+      const result = await executeTool('re_open_category', {
+        category: 'spaceships',
+      });
+      expect(result).toHaveProperty('error');
+      expect((result as { error: string }).error).toContain('Validation');
+    });
+
+    it('rejects add_leg with missing required fields', async () => {
+      const result = await executeTool('add_leg', { origin: 'JFK' }, ctx);
+      expect(result).toHaveProperty('error');
+      expect((result as { error: string }).error).toContain('Validation');
+    });
+
+    it('rejects reorder_legs when ordered_leg_ids is not an array', async () => {
+      const result = await executeTool(
+        'reorder_legs',
+        { ordered_leg_ids: 'not-an-array' },
+        ctx,
+      );
+      expect(result).toHaveProperty('error');
+      expect((result as { error: string }).error).toContain('Validation');
+    });
+
+    it('rejects plan_daily_schedule with missing days', async () => {
+      const result = await executeTool('plan_daily_schedule', {}, ctx);
+      expect(result).toHaveProperty('error');
+      expect((result as { error: string }).error).toContain('Validation');
+    });
+  });
+
   describe('leg + schedule tool routing', () => {
     it('routes add_leg to handleAddLeg with input and context', async () => {
       const { handleAddLeg } = await import('app/tools/legsTool.js');
