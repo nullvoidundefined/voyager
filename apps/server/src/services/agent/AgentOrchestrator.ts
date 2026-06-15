@@ -1,5 +1,7 @@
-import Anthropic from '@anthropic-ai/sdk';
+import type Anthropic from '@anthropic-ai/sdk';
 import type { ChatNode, SSEEvent } from '@voyager/shared-types';
+import { getLlmClient } from 'app/clients/llm.js';
+import { DEFAULT_MAX_TOKENS, DEFAULT_MODEL } from 'app/constants/models.js';
 import { logger } from 'app/utils/logs/logger.js';
 
 import { buildNodeFromToolResult } from './nodeBuilder.js';
@@ -10,8 +12,6 @@ import { buildNodeFromToolResult } from './nodeBuilder.js';
 // it still covers the typical 3 to 6 real agent turns while bounding
 // worst-case burn per user message.
 const DEFAULT_MAX_ITERATIONS = 8;
-const DEFAULT_MODEL = 'claude-sonnet-4-20250514';
-const DEFAULT_MAX_TOKENS = 2048;
 const DEFAULT_MAX_DURATION_MS = 120_000;
 
 export interface ToolCallRecord {
@@ -105,7 +105,7 @@ export class AgentOrchestrator {
     this.model = config.model ?? DEFAULT_MODEL;
     this.maxTokens = config.maxTokens ?? DEFAULT_MAX_TOKENS;
     this.onToolExecuted = config.onToolExecuted;
-    this.client = config.client ?? new Anthropic();
+    this.client = config.client ?? getLlmClient();
     this.requiredBeforeFormat = config.requiredBeforeFormat ?? [];
   }
 
@@ -199,6 +199,16 @@ export class AgentOrchestrator {
       tokensUsed.cache_creation +=
         response.usage.cache_creation_input_tokens ?? 0;
       tokensUsed.cache_read += response.usage.cache_read_input_tokens ?? 0;
+
+      // Surface running token spend after every iteration so the client can
+      // show live budget burn instead of only a post-turn total.
+      onEvent?.({
+        type: 'budget',
+        cache_creation_tokens: tokensUsed.cache_creation,
+        cache_read_tokens: tokensUsed.cache_read,
+        input_tokens: tokensUsed.input,
+        output_tokens: tokensUsed.output,
+      });
 
       if (response.stop_reason === 'end_turn') {
         const textBlock = response.content.find(

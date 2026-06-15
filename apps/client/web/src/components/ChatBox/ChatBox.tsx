@@ -97,6 +97,7 @@ export function ChatBox({
     streamingNodes,
     toolProgress,
     streamingText,
+    liveTokens,
     error: sseError,
     clearError: clearSseError,
   } = useSSEChat({
@@ -338,6 +339,12 @@ export function ChatBox({
       <div className={styles.srOnly} aria-live='polite' aria-atomic='true'>
         {isSending ? 'Agent is searching...' : ''}
       </div>
+
+      {isSending && liveTokens !== null && (
+        <div className={styles.liveBudget} aria-live='polite'>
+          {liveTokens.toLocaleString()} tokens used
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className={styles.inputArea}>
         <input

@@ -146,17 +146,62 @@ export const formatResponseSchema = z.object({
   plan_card: z.unknown().optional(),
 });
 
+const scheduleItemSchema = z.object({
+  time_of_day: z.enum(['morning', 'afternoon', 'evening']),
+  title: z.string().min(1),
+  description: z.string().optional(),
+  item_type: z.enum(['activity', 'meal', 'transport', 'accommodation']),
+  item_order: z.number().int().positive(),
+  place_id: z.string().max(100).optional(),
+  booking_url: z.string().optional(),
+  price_usd: z.number().optional(),
+});
+
+const scheduleDaySchema = z.object({
+  day_number: z.number().int().positive(),
+  day_date: dateString,
+  items: z.array(scheduleItemSchema),
+});
+
+export const planDailyScheduleSchema = z.object({
+  days: z.array(scheduleDaySchema),
+});
+
+export const addLegSchema = z.object({
+  origin: locationAllowlist,
+  destination: locationAllowlist,
+  depart_date: dateString,
+  leg_order: z.number().int().positive(),
+});
+
+export const removeLegSchema = z.object({
+  leg_id: z.string().min(1),
+});
+
+export const reorderLegsSchema = z.object({
+  ordered_leg_ids: z.array(z.string().min(1)).min(1),
+});
+
+export const reOpenCategorySchema = z.object({
+  category: z.enum(['flights', 'hotels', 'car_rental', 'experiences']),
+});
+
 export const toolSchemas: Record<string, z.ZodSchema> = {
+  add_leg: addLegSchema,
+  calculate_remaining_budget: calculateBudgetSchema,
+  format_response: formatResponseSchema,
+  get_destination_info: getDestinationInfoSchema,
+  plan_daily_schedule: planDailyScheduleSchema,
+  re_open_category: reOpenCategorySchema,
+  remove_leg: removeLegSchema,
+  reorder_legs: reorderLegsSchema,
+  search_car_rentals: searchCarRentalsSchema,
+  search_experiences: searchExperiencesSchema,
   search_flights: searchFlightsSchema,
   search_hotels: searchHotelsSchema,
-  search_experiences: searchExperiencesSchema,
-  calculate_remaining_budget: calculateBudgetSchema,
-  get_destination_info: getDestinationInfoSchema,
-  update_trip: updateTripSchema,
-  search_car_rentals: searchCarRentalsSchema,
-  select_flight: selectFlightSchema,
-  select_hotel: selectHotelSchema,
   select_car_rental: selectCarRentalSchema,
   select_experience: selectExperienceSchema,
-  format_response: formatResponseSchema,
+  select_flight: selectFlightSchema,
+  select_hotel: selectHotelSchema,
+  update_trip: updateTripSchema,
 };

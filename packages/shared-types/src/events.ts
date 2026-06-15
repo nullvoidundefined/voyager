@@ -10,5 +10,12 @@ export type SSEEvent =
       tool_id: string;
       status: 'running' | 'done';
     }
+  | {
+      type: 'budget';
+      cache_creation_tokens: number;
+      cache_read_tokens: number;
+      input_tokens: number;
+      output_tokens: number;
+    }
   | { type: 'done'; message: ChatMessage }
   | { type: 'error'; error: string };
