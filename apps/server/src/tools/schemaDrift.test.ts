@@ -18,7 +18,7 @@ interface DerivedSchema {
 
 describe('tool schema drift guard', () => {
   for (const [name, schema] of Object.entries(toolSchemas)) {
-    it(`${name}: definition keys and required match the Zod schema`, () => {
+    it(`${name}: top-level definition keys and required match the Zod schema`, () => {
       const derived = z.toJSONSchema(schema) as DerivedSchema;
       const definition = TOOL_DEFINITIONS.find((t) => t.name === name);
       expect(definition).toBeDefined();
