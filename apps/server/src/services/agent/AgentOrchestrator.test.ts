@@ -353,6 +353,37 @@ describe('AgentOrchestrator', () => {
     expect(streamedText).toBe('Here are your results.');
   });
 
+  it('emits a cumulative budget event after each model iteration', async () => {
+    const events: SSEEvent[] = [];
+    const onEvent = (e: SSEEvent) => events.push(e);
+
+    streamMock
+      .mockReturnValueOnce(
+        createMockStream(
+          makeToolUseResponse([
+            { id: 'tool_1', name: 'test_tool', input: { query: 'paris' } },
+          ]),
+        ),
+      )
+      .mockReturnValueOnce(createMockStream(makeTextResponse('Done.')));
+
+    const orchestrator = new AgentOrchestrator(config);
+    await orchestrator.run([{ role: 'user', content: 'Search' }], [], onEvent);
+
+    const budgetEvents = events.filter(
+      (e): e is Extract<SSEEvent, { type: 'budget' }> => e.type === 'budget',
+    );
+    // One per model round-trip: the tool_use turn and the final end_turn.
+    expect(budgetEvents).toHaveLength(2);
+    const [first, second] = budgetEvents;
+    if (!first || !second) throw new Error('expected two budget events');
+    expect(typeof first.input_tokens).toBe('number');
+    expect(typeof first.output_tokens).toBe('number');
+    // Cumulative: later totals never drop below earlier ones.
+    expect(second.input_tokens).toBeGreaterThanOrEqual(first.input_tokens);
+    expect(second.output_tokens).toBeGreaterThanOrEqual(first.output_tokens);
+  });
+
   // -----------------------------------------------------------------------
   // onToolExecuted callback receives correct data
   // -----------------------------------------------------------------------

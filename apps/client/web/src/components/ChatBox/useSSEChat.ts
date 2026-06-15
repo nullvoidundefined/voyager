@@ -20,6 +20,7 @@ interface UseSSEChatReturn {
   streamingNodes: ChatNode[];
   toolProgress: ChatNode[];
   streamingText: string;
+  liveTokens: number | null;
   error: string | null;
   clearError: () => void;
 }
@@ -32,6 +33,7 @@ export function useSSEChat({
   const [streamingNodes, setStreamingNodes] = useState<ChatNode[]>([]);
   const [toolProgress, setToolProgress] = useState<ChatNode[]>([]);
   const [streamingText, setStreamingText] = useState('');
+  const [liveTokens, setLiveTokens] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -75,6 +77,10 @@ export function useSSEChat({
         });
         break;
 
+      case 'budget':
+        setLiveTokens(event.input_tokens + event.output_tokens);
+        break;
+
       case 'done':
         // Cleanup is handled in the finally block
         break;
@@ -97,6 +103,7 @@ export function useSSEChat({
       setStreamingNodes([]);
       setToolProgress([]);
       setStreamingText('');
+      setLiveTokens(null);
 
       const controller = new AbortController();
       abortControllerRef.current = controller;
@@ -193,6 +200,7 @@ export function useSSEChat({
     streamingNodes,
     toolProgress,
     streamingText,
+    liveTokens,
     error,
     clearError,
   };

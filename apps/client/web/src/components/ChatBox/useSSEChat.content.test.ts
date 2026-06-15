@@ -44,4 +44,10 @@ describe('useSSEChat error handling', () => {
     // "Could not reach the agent" error from the outer catch.
     expect(hookSource).toMatch(/try\s*\{[\s\S]*?JSON\.parse[\s\S]*?\}\s*catch/);
   });
+
+  it('handles the budget event to expose live token usage', () => {
+    expect(hookSource).toMatch(/case 'budget'/);
+    expect(hookSource).toMatch(/setLiveTokens/);
+    expect(hookSource).toMatch(/liveTokens/);
+  });
 });

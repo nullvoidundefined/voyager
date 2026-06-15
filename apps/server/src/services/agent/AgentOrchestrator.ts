@@ -200,6 +200,16 @@ export class AgentOrchestrator {
         response.usage.cache_creation_input_tokens ?? 0;
       tokensUsed.cache_read += response.usage.cache_read_input_tokens ?? 0;
 
+      // Surface running token spend after every iteration so the client can
+      // show live budget burn instead of only a post-turn total.
+      onEvent?.({
+        type: 'budget',
+        cache_creation_tokens: tokensUsed.cache_creation,
+        cache_read_tokens: tokensUsed.cache_read,
+        input_tokens: tokensUsed.input,
+        output_tokens: tokensUsed.output,
+      });
+
       if (response.stop_reason === 'end_turn') {
         const textBlock = response.content.find(
           (block): block is Anthropic.TextBlock => block.type === 'text',

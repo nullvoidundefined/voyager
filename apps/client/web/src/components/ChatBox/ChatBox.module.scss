@@ -221,6 +221,13 @@
   border: 0;
 }
 
+.liveBudget {
+  padding: 0 1rem 0.25rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-align: right;
+}
+
 @media (max-width: 767px) {
   .chatBox {
     min-height: 60vh;
