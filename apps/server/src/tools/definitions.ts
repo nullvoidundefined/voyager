@@ -52,6 +52,11 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
           description:
             'Set to true for one-way flights (omits return date). Default: false.',
         },
+        flexible_dates: {
+          type: 'boolean',
+          description:
+            'Set to true to also search dates near the requested departure for cheaper options. Default: false.',
+        },
       },
       required: ['origin', 'destination', 'departure_date', 'passengers'],
     },
@@ -266,7 +271,6 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
         arrival_time: { type: 'string' },
         price: { type: 'number' },
         currency: { type: 'string' },
-        booking_url: { type: 'string' },
       },
       required: [
         'airline',
@@ -293,7 +297,6 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
         currency: { type: 'string' },
         check_in: { type: 'string' },
         check_out: { type: 'string' },
-        booking_url: { type: 'string' },
       },
       required: ['name', 'price_per_night', 'total_price', 'currency'],
     },
@@ -310,7 +313,6 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
         price_per_day: { type: 'number' },
         total_price: { type: 'number' },
         currency: { type: 'string' },
-        booking_url: { type: 'string' },
       },
       required: ['provider', 'car_name', 'total_price', 'currency'],
     },
@@ -325,7 +327,6 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
         category: { type: 'string' },
         estimated_cost: { type: 'number' },
         rating: { type: 'number' },
-        booking_url: { type: 'string' },
       },
       required: ['name', 'estimated_cost'],
     },
