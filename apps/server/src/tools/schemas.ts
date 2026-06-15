@@ -158,7 +158,7 @@ const scheduleItemSchema = z.object({
 });
 
 const scheduleDaySchema = z.object({
-  day_number: z.number(),
+  day_number: z.number().int().positive(),
   day_date: dateString,
   items: z.array(scheduleItemSchema),
 });
