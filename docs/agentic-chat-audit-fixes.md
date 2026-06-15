@@ -23,26 +23,35 @@ review (see "Held for decision").
       from the model-facing definition (model could never trigger it). Added to the definition. - `select_*.booking_url`: advertised to the model but absent from Zod (silently stripped) and
       read by no handler. Removed.
 
+### Done (continued)
+
+- [x] **Validation gap closed (the safe core of the single-source item).** The 5 tools with no Zod
+      schema (`re_open_category`, `plan_daily_schedule`, `add_leg`, `remove_leg`, `reorder_legs`)
+      cast LLM input with no validation. Added a Zod schema each (keys/required match the definition,
+      enforced by the now-17-tool drift guard), wired `parseInput` into each executor case, added
+      negative-input tests.
+
+- [x] **Tool-result caching: already implemented (audit false positive).** All four `search_*` tool
+      adapters (`flightsTool`, `hotelsTool`, `carRentalsTool`, `experiencesTool`) already cache
+      results via `cacheGet`/`cacheSet` keyed on normalized input, TTL 6h. Mutations correctly do not
+      cache. The audit mapped the orchestrator/executor layer and missed caching one layer down in
+      the adapters, which is the correct layer. No work needed.
+
 ### Held for decision (checkpoint)
 
-- [ ] **Single source of truth via Zod derivation.** The documented end state is deriving the
-      Anthropic `input_schema` from the Zod schema via `z.toJSONSchema` (Zod 4 native, no new dep).
-      Deferred because: (1) 5 of 17 tools (`re_open_category`, `plan_daily_schedule`, `add_leg`,
-      `remove_leg`, `reorder_legs`) have **no** Zod schema, so they would need new ones (also closes
-      a validation gap); (2) deriving changes the exact description strings sent to the model, which
-      needs an adversarial-eval run to confirm no behavior regression. The drift guard already
-      enforces the no-drift invariant in the interim. **Recommend** doing this as its own
-      eval-gated change.
+- [ ] **Flip model-facing JSON to derived-from-Zod (rest of the single-source item).** All 17 tools
+      are now Zod-backed; the remaining step is deriving the Anthropic `input_schema` from Zod via
+      `z.toJSONSchema` and deleting the hand-written JSON. Blocked on an eval run: deriving changes
+      the exact description strings sent to the model, and the adversarial eval that confirms no
+      behavior regression needs a deployed agent + real API key (cannot run locally). The drift guard
+      enforces no-drift in the interim. Land as its own eval-gated change.
 
 - [ ] **Collapse the 4-file tool-add surface.** Co-locate def + schema + handler + allowlist per
-      tool module. High-churn DX-only reorg; recommend its own dedicated change, not bundled.
-
-- [ ] **Tool-result caching.** Memoize identical searches. Carries a correctness tradeoff (travel
-      prices/availability go stale) and a TTL + cache-key-normalization design decision. Needs a
-      product call on acceptable staleness per tool.
+      tool module. High-churn DX-only reorg with regression risk; recommend its own dedicated change.
 
 - [ ] **Real-time budget visibility.** Emit incremental token burn during streaming (new SSE event
-      type + frontend rendering). Feature work spanning orchestrator, shared-types, and UI.
+      type + frontend rendering). Backend is straightforward; the frontend display is a UI design
+      decision.
 
 ## Non-fixes (intentional, do not change)
 
