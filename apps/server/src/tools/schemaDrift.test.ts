@@ -1,7 +1,7 @@
 /**
- * Drift guard: every tool with a Zod input schema must have a hand-written
- * Anthropic tool definition whose property keys and required list match the Zod
- * schema. Prevents the validator and the model-facing schema from diverging,
+ * Drift guard: for each tool with a Zod input schema, ensure the tool definition's
+ * top-level property keys and `required` list match the Zod schema's top-level object.
+ * Prevents the validator and the model-facing schema from diverging,
  * e.g. a field the validator accepts but the model is never told about
  * (flexible_dates regression, 2026-06 audit). Until the canonical pattern's
  * derive-from-Zod refactor lands, this test enforces the no-drift invariant.
