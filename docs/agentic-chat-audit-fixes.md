@@ -7,8 +7,8 @@ coverage, adversarial judge harness, chat/tool E2E).
 
 ## Status (2026-06-15)
 
-Branch `refactor/agentic-chat-audit-fixes`. The two correctness fixes are landed and verified
-(tests + tsc green). The remaining three are larger or carry product decisions and are held for
+Branch `refactor/agentic-chat-audit-fixes`. The audit correctness + validation fixes are landed and verified
+(tests + tsc green). The remaining items are larger or carry product decisions and are held for
 review (see "Held for decision").
 
 ### Done
