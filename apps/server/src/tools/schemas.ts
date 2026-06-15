@@ -1,8 +1,8 @@
 /**
  * Tool input schemas. The per-tool Zod schemas now live beside their definitions
  * in tools/registry/; this module re-exports them under their established names
- * (so executor imports stay stable) and derives the toolSchemas name->schema
- * lookup from the registry for validation dispatch.
+ * (so executor imports stay stable). It also exports a name->schema map derived
+ * from the registry.
  */
 import { TOOL_REGISTRY } from 'app/tools/registry/toolRegistry.js';
 import type { ZodType } from 'zod';
