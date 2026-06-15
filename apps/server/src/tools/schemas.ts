@@ -1,12 +1,8 @@
 /**
- * Tool input schemas. The per-tool Zod schemas now live beside their definitions
- * in tools/registry/; this module re-exports them under their established names
- * (so executor imports stay stable). It also exports a name->schema map derived
- * from the registry.
+ * Tool input schemas. The per-tool Zod schemas live beside their definitions in
+ * tools/registry/; this module re-exports them under their established names so
+ * the executor's imports stay stable.
  */
-import { TOOL_REGISTRY } from 'app/tools/registry/toolRegistry.js';
-import type { ZodType } from 'zod';
-
 export { addLegSchema } from 'app/tools/registry/addLeg.js';
 export { calculateBudgetSchema } from 'app/tools/registry/calculateRemainingBudget.js';
 export { formatResponseSchema } from 'app/tools/registry/formatResponse.js';
@@ -24,7 +20,3 @@ export { selectExperienceSchema } from 'app/tools/registry/selectExperience.js';
 export { selectFlightSchema } from 'app/tools/registry/selectFlight.js';
 export { selectHotelSchema } from 'app/tools/registry/selectHotel.js';
 export { updateTripSchema } from 'app/tools/registry/updateTrip.js';
-
-export const toolSchemas: Record<string, ZodType> = Object.fromEntries(
-  TOOL_REGISTRY.map((tool) => [tool.name, tool.schema]),
-);
