@@ -14,7 +14,7 @@ review (see "Held for decision").
 ### Done
 
 - [x] **Extract LLM client (R-220/R-222).** `new Anthropic()` was instantiated inside
-      `AgentOrchestrator`. Moved SDK construction to `clients/llm.ts` (lazy singleton); model id
+      `AgentOrchestrator`. Moved SDK construction to `clients/llm.ts` (factory); model id
       moved to `constants/models.ts` (R-219). Tests inject their own client, so the fallback path
       is runtime-only. (`AgentOrchestrator.test.ts` green.)
 
