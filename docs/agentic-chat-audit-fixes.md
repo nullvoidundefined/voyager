@@ -37,21 +37,20 @@ review (see "Held for decision").
       cache. The audit mapped the orchestrator/executor layer and missed caching one layer down in
       the adapters, which is the correct layer. No work needed.
 
-### Held for decision (checkpoint)
+- [x] **Real-time budget visibility shipped.** A `budget` SSE event streams cumulative token usage
+      after each agent iteration; `useSSEChat` exposes `liveTokens` and `ChatBox` renders a live
+      spend indicator. Backed by an orchestrator emission test and a hook guard.
 
-- [ ] **Flip model-facing JSON to derived-from-Zod (rest of the single-source item).** All 17 tools
-      are now Zod-backed; the remaining step is deriving the Anthropic `input_schema` from Zod via
-      `z.toJSONSchema` and deleting the hand-written JSON. Blocked on an eval run: deriving changes
-      the exact description strings sent to the model, and the adversarial eval that confirms no
-      behavior regression needs a deployed agent + real API key (cannot run locally). The drift guard
-      enforces no-drift in the interim. Land as its own eval-gated change.
+### Held for decision (one focused follow-up PR)
 
-- [ ] **Collapse the 4-file tool-add surface.** Co-locate def + schema + handler + allowlist per
-      tool module. High-churn DX-only reorg with regression risk; recommend its own dedicated change.
-
-- [ ] **Real-time budget visibility.** Emit incremental token burn during streaming (new SSE event
-      type + frontend rendering). Backend is straightforward; the frontend display is a UI design
-      decision.
+- [ ] **(b)+(a2): module-per-tool registry + Zod-derivation, as ONE PR.** Co-locate definition +
+      schema + subAgents per tool in one module; derive `TOOL_DEFINITIONS`, `toolSchemas`, and
+      `SUB_AGENT_TOOLS` from the registry; then derive each tool's model-facing `input_schema` from
+      its Zod schema (a per-tool module is the natural home for it). The derivation is locally
+      verifiable when the derived JSON equals the current hand-written JSON (equivalence test);
+      otherwise flip only equivalence-proven tools and leave the rest under the drift guard.
+      `SubAgentType` is imported only by `subAgentService`, so relocate it to a neutral module to
+      avoid a registry<->subAgentService cycle. ~0.5-1 day.
 
 ## Non-fixes (intentional, do not change)
 
