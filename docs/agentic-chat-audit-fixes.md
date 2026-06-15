@@ -20,6 +20,7 @@ review (see "Held for decision").
 
 - [x] **Tool-schema drift guard + two latent-bug fixes.** Added `tools/schemaDrift.test.ts`
       asserting every Zod-backed tool's definition keys + required match the schema. It surfaced:
+
       - `search_flights.flexible_dates`: implemented in the handler and accepted by Zod but missing
         from the model-facing definition (model could never trigger it). Added to the definition.
       - `select_*.booking_url`: advertised to the model but absent from Zod (silently stripped) and
