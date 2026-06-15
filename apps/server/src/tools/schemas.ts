@@ -151,8 +151,8 @@ const scheduleItemSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
   item_type: z.enum(['activity', 'meal', 'transport', 'accommodation']),
-  item_order: z.number(),
-  place_id: z.string().optional(),
+  item_order: z.number().int().positive(),
+  place_id: z.string().max(100).optional(),
   booking_url: z.string().optional(),
   price_usd: z.number().optional(),
 });
