@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { PreferencesWizard } from '../PreferencesWizard';
 
-vi.mock('@/lib/api/api', () => ({
+vi.mock('@/lib/api', () => ({
   put: vi.fn().mockResolvedValue({}),
 }));
 

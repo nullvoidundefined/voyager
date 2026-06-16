@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { get } from '@/lib/api/api';
+import { get } from '@/lib/api';
 
 import TripDetailPage from '../page';
 
@@ -10,7 +10,7 @@ vi.mock('next/navigation', () => ({
   useParams: () => ({ id: 'trip-1' }),
 }));
 
-vi.mock('@/lib/api/api', () => ({
+vi.mock('@/lib/api', () => ({
   get: vi.fn().mockResolvedValue({
     trip: {
       id: 'trip-1',

@@ -3,7 +3,7 @@
  * multi-destination trip so each segment's routing can be stored and queried
  * independently of the parent trip record.
  */
-import { query } from 'app/database/pool/pool.js';
+import { query } from 'app/database/pool.js';
 
 export interface TripLeg {
   id: string;

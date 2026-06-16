@@ -3,7 +3,7 @@ import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as legsHandlers from 'app/handlers/trips/legs.js';
-import { errorHandler } from 'app/middleware/errorHandler/errorHandler.js';
+import { errorHandler } from 'app/middleware/errorHandler.js';
 import * as legsRepo from 'app/repositories/trips/tripLegsRepository.js';
 import * as tripsRepo from 'app/repositories/trips/trips.js';
 import { uuid } from 'app/test-fixtures/uuids.js';

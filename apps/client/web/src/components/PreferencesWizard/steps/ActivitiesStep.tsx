@@ -3,7 +3,7 @@
  * multi-select so the questionnaire can capture several preferred activity types
  * at once.
  */
-import { ACTIVITY_OPTIONS } from '@/lib/preferenceOptions/preferenceOptions';
+import { ACTIVITY_OPTIONS } from '@/lib/preferenceOptions';
 
 import styles from '../PreferencesWizard.module.scss';
 

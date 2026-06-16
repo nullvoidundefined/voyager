@@ -13,7 +13,7 @@ vi.mock('@/context/AuthContext', () => ({
   useAuth: () => ({ user: null, logout: vi.fn() }),
 }));
 
-vi.mock('@/lib/api/api', () => ({
+vi.mock('@/lib/api', () => ({
   get: vi.fn().mockResolvedValue({ preferences: null }),
 }));
 

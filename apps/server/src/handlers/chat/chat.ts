@@ -17,7 +17,7 @@ import {
   noEngagement,
   normalizeCompletionTracker,
   updateCompletionTracker,
-} from 'app/prompts/bookingSteps/bookingSteps.js';
+} from 'app/prompts/bookingSteps.js';
 import { buildConversationAgentPrompt } from 'app/prompts/subAgents/conversationPrompt.js';
 import { buildExperienceAgentPrompt } from 'app/prompts/subAgents/experiencePrompt.js';
 import { buildFlightAgentPrompt } from 'app/prompts/subAgents/flightPrompt.js';
@@ -32,7 +32,7 @@ import {
 } from 'app/repositories/conversations.js';
 import { getTripWithDetails } from 'app/repositories/trips/trips.js';
 import { findByUserId as findUserPreferences } from 'app/repositories/userPreferences.js';
-import { planCardSchema } from 'app/schemas/planCard/planCard.js';
+import { planCardSchema } from 'app/schemas/planCard.js';
 import { runAgentLoop } from 'app/services/agent/agentService.js';
 import {
   SUB_AGENT_REQUIRED_TOOLS,

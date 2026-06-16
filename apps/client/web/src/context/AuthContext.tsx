@@ -9,7 +9,7 @@ import { createContext, useCallback, useContext, useMemo } from 'react';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { ApiError, get, post } from '@/lib/api/api';
+import { ApiError, get, post } from '@/lib/api';
 
 export interface User {
   id: string;

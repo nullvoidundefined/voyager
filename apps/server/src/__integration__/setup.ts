@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { afterAll, beforeAll } from 'vitest';
 
-import { pool } from 'app/database/pool/pool.js';
+import { pool } from 'app/database/pool.js';
 
 // Bypass the rate limiter for the integration test process. The
 // integration tests fire dozens of /auth/register and /auth/login

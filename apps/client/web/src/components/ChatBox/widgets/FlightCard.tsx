@@ -3,7 +3,7 @@
  * with code fallback). Exists as the per-item tile inside flight selection
  * groups, rendering as a pressable button for accessible selection.
  */
-import { formatCurrency } from '@/lib/format/format';
+import { formatCurrency } from '@/lib/format';
 
 import styles from './FlightCard.module.scss';
 

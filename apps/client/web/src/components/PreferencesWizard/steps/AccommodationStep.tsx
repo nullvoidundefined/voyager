@@ -3,7 +3,7 @@
  * ACCOMMODATION_OPTIONS as a single-select so the questionnaire captures lodging
  * style in one place.
  */
-import { ACCOMMODATION_OPTIONS } from '@/lib/preferenceOptions/preferenceOptions';
+import { ACCOMMODATION_OPTIONS } from '@/lib/preferenceOptions';
 
 import styles from '../PreferencesWizard.module.scss';
 

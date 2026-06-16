@@ -12,8 +12,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Toast } from '@/components/Toast/Toast';
 import { useAuth } from '@/context/AuthContext';
-import { ApiError, get } from '@/lib/api/api';
-import { APP_NAME } from '@/lib/constants/constants';
+import { ApiError, get } from '@/lib/api';
+import { APP_NAME } from '@/lib/constants';
 
 import styles from '../auth.module.scss';
 

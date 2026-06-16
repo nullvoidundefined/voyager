@@ -3,7 +3,7 @@
  * as a single-select so the questionnaire records how packed or relaxed an
  * itinerary should be.
  */
-import { TRAVEL_PACE_OPTIONS } from '@/lib/preferenceOptions/preferenceOptions';
+import { TRAVEL_PACE_OPTIONS } from '@/lib/preferenceOptions';
 
 import styles from '../PreferencesWizard.module.scss';
 

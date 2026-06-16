@@ -3,11 +3,11 @@
  * normalizing legacy rows on read so older persisted shapes are migrated to the
  * current schema before reaching the rest of the app.
  */
-import { query } from 'app/database/pool/pool.js';
+import { query } from 'app/database/pool.js';
 import {
   type UserPreferences,
   normalizePreferences,
-} from 'app/schemas/userPreferences/userPreferences.js';
+} from 'app/schemas/userPreferences.js';
 
 export interface UserPreferencesRow {
   id: string;

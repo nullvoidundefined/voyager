@@ -14,7 +14,7 @@ import type {
   TripPlanCard,
 } from '@voyager/shared-types';
 
-import { APP_NAME } from '@/lib/constants/constants';
+import { APP_NAME } from '@/lib/constants';
 
 import { NodeRenderer } from './NodeRenderer';
 import styles from './VirtualizedChat.module.scss';

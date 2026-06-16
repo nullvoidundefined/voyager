@@ -5,7 +5,7 @@
  */
 import express from 'express';
 
-import * as prefsHandlers from 'app/handlers/userPreferences/userPreferences.js';
+import * as prefsHandlers from 'app/handlers/userPreferences.js';
 import { requireAuth } from 'app/middleware/requireAuth/requireAuth.js';
 
 const userPreferencesRouter = express.Router();

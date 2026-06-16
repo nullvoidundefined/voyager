@@ -3,7 +3,7 @@
  * schedule items so the planned timeline is stored separately from the trip's
  * top-level booking records.
  */
-import { query } from 'app/database/pool/pool.js';
+import { query } from 'app/database/pool.js';
 
 export interface ScheduleItem {
   id: string;

@@ -26,11 +26,11 @@ import { Skeleton } from '@/components/Skeleton/Skeleton';
 import { Toast } from '@/components/Toast/Toast';
 import type { MapPin } from '@/components/TripMap/TripMap';
 import { TripMap } from '@/components/TripMap/TripMap';
-import { del, get, post, put } from '@/lib/api/api';
-import { budgetBarDivisor, isOverBudget } from '@/lib/budget/budget';
-import { getDestinationImage } from '@/lib/destinationImage/destinationImage';
-import { downloadICS } from '@/lib/exportIcs/exportIcs';
-import { formatCurrency, formatShortDate } from '@/lib/format/format';
+import { del, get, post, put } from '@/lib/api';
+import { budgetBarDivisor, isOverBudget } from '@/lib/budget';
+import { getDestinationImage } from '@/lib/destinationImage';
+import { downloadICS } from '@/lib/exportIcs';
+import { formatCurrency, formatShortDate } from '@/lib/format';
 
 import styles from './tripDetail.module.scss';
 

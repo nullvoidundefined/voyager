@@ -10,13 +10,13 @@ import { logger } from 'app/clients/logger.js';
 import { posthog } from 'app/clients/posthog.js';
 import { ApiError } from 'app/errors/ApiError.js';
 import { getAuthUser } from 'app/middleware/requireAuth/getAuthUser.js';
-import { DEFAULT_COMPLETION_TRACKER } from 'app/prompts/bookingSteps/bookingSteps.js';
+import { DEFAULT_COMPLETION_TRACKER } from 'app/prompts/bookingSteps.js';
 import {
   getOrCreateConversation,
   updateBookingState,
 } from 'app/repositories/conversations.js';
 import * as tripRepo from 'app/repositories/trips/trips.js';
-import { createTripSchema, updateTripSchema } from 'app/schemas/trips/trips.js';
+import { createTripSchema, updateTripSchema } from 'app/schemas/trips.js';
 import {
   selectCarRentalSchema,
   selectExperienceSchema,

@@ -23,8 +23,8 @@ import { CostCounter } from '@/components/CostCounter/CostCounter';
 import { Toast } from '@/components/Toast/Toast';
 import type { ToolCall } from '@/components/ToolTimeline/ToolTimeline';
 import { ToolTimeline } from '@/components/ToolTimeline/ToolTimeline';
-import { get, post, put } from '@/lib/api/api';
-import { runDemoScript } from '@/lib/demoScript/demoScript';
+import { get, post, put } from '@/lib/api';
+import { runDemoScript } from '@/lib/demoScript';
 
 import styles from './ChatBox.module.scss';
 import { VirtualizedChat } from './VirtualizedChat';

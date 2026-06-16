@@ -5,8 +5,8 @@
  */
 import type { ChatNode } from '@voyager/shared-types';
 
-import { query } from 'app/database/pool/pool.js';
-import type { CompletionTracker } from 'app/prompts/bookingSteps/bookingSteps.js';
+import { query } from 'app/database/pool.js';
+import type { CompletionTracker } from 'app/prompts/bookingSteps.js';
 
 export interface Conversation {
   id: string;

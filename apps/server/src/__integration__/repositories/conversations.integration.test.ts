@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { pool } from 'app/database/pool/pool.js';
-import { DEFAULT_COMPLETION_TRACKER } from 'app/prompts/bookingSteps/bookingSteps.js';
+import { pool } from 'app/database/pool.js';
+import { DEFAULT_COMPLETION_TRACKER } from 'app/prompts/bookingSteps.js';
 import {
   getMessagesByConversation,
   getOrCreateConversation,

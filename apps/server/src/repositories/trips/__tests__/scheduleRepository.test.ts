@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { query } from 'app/database/pool/pool.js';
+import { query } from 'app/database/pool.js';
 
 import {
   addScheduleItem,
@@ -8,7 +8,7 @@ import {
   upsertScheduleDay,
 } from '../scheduleRepository.js';
 
-vi.mock('app/database/pool/pool.js', () => ({
+vi.mock('app/database/pool.js', () => ({
   query: vi.fn(),
 }));
 

@@ -13,9 +13,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { Skeleton } from '@/components/Skeleton/Skeleton';
 import { AlertDialog } from '@/components/ui/AlertDialog/AlertDialog';
-import { del, get } from '@/lib/api/api';
-import { getDestinationImage } from '@/lib/destinationImage/destinationImage';
-import { formatCurrency, formatShortDate } from '@/lib/format/format';
+import { del, get } from '@/lib/api';
+import { getDestinationImage } from '@/lib/destinationImage';
+import { formatCurrency, formatShortDate } from '@/lib/format';
 
 import styles from './trips.module.scss';
 

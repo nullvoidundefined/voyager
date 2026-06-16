@@ -27,7 +27,7 @@ vi.mock('@tanstack/react-query', () => ({
   }),
 }));
 
-vi.mock('@/lib/api/api', () => ({
+vi.mock('@/lib/api', () => ({
   API_BASE: 'http://localhost:3001',
 }));
 

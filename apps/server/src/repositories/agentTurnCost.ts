@@ -3,7 +3,7 @@
  * into dollar costs using the pricing table below and writes them to the
  * agent_turn_cost table, so spend can be attributed to each conversation turn.
  */
-import { query } from 'app/database/pool/pool.js';
+import { query } from 'app/database/pool.js';
 
 /**
  * Sonnet 4.6 pricing. Units are dollars per million tokens.

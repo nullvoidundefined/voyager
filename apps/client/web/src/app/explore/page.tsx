@@ -14,10 +14,7 @@ import {
   DESTINATIONS,
   type Destination,
 } from '@/data/destinations';
-import {
-  HERO_IMAGES,
-  getDestinationImage,
-} from '@/lib/destinationImage/destinationImage';
+import { HERO_IMAGES, getDestinationImage } from '@/lib/destinationImage';
 
 import styles from './page.module.scss';
 

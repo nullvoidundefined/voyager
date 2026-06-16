@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { pool } from 'app/database/pool/pool.js';
+import { pool } from 'app/database/pool.js';
 
 const SENTINEL_DOMAIN = '@integration-test.invalid';
 

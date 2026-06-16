@@ -50,7 +50,7 @@ import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { app } from 'app/app.js';
-import { pool } from 'app/database/pool/pool.js';
+import { pool } from 'app/database/pool.js';
 
 const TEST_EMAIL = 'chat-integration@integration-test.invalid';
 const TEST_PASSWORD = 'testpassword123';

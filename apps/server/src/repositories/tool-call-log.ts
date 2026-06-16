@@ -2,7 +2,7 @@
  * Tool-call audit log data access. Records each agent tool invocation to the
  * tool_call_log table so runs can be traced and debugged after the fact.
  */
-import { query } from 'app/database/pool/pool.js';
+import { query } from 'app/database/pool.js';
 
 export interface ToolCallLogEntry {
   id: string;

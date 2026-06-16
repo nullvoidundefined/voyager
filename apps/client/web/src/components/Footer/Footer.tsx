@@ -7,7 +7,7 @@
 import Link from 'next/link';
 
 import { useAuth } from '@/context/AuthContext';
-import { APP_NAME } from '@/lib/constants/constants';
+import { APP_NAME } from '@/lib/constants';
 
 import styles from './Footer.module.scss';
 

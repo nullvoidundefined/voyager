@@ -3,7 +3,7 @@ import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as tripHandlers from 'app/handlers/trips/trips.js';
-import { errorHandler } from 'app/middleware/errorHandler/errorHandler.js';
+import { errorHandler } from 'app/middleware/errorHandler.js';
 import * as tripRepo from 'app/repositories/trips/trips.js';
 import { uuid } from 'app/test-fixtures/uuids.js';
 

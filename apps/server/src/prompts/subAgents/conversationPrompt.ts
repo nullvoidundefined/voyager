@@ -3,9 +3,9 @@
  * to the traveler. Summarizes booking progress and trip context into prompt
  * text so the model can steer the conversation toward the next booking step.
  */
-import type { CompletionTracker } from 'app/prompts/bookingSteps/bookingSteps.js';
-import type { TripContext } from 'app/prompts/tripContext/tripContext.js';
-import { formatTripContext } from 'app/prompts/tripContext/tripContext.js';
+import type { CompletionTracker } from 'app/prompts/bookingSteps.js';
+import type { TripContext } from 'app/prompts/tripContext.js';
+import { formatTripContext } from 'app/prompts/tripContext.js';
 
 function summarizeTracker(tracker: CompletionTracker): string {
   const lines: string[] = [];

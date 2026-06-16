@@ -5,7 +5,7 @@
  */
 import type { Request, Response } from 'express';
 
-import { query } from 'app/database/pool/pool.js';
+import { query } from 'app/database/pool.js';
 import { ApiError } from 'app/errors/ApiError.js';
 import { getAuthUser } from 'app/middleware/requireAuth/getAuthUser.js';
 import { getTripWithDetails } from 'app/repositories/trips/trips.js';

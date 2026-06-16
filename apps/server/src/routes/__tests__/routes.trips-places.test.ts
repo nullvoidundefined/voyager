@@ -42,12 +42,12 @@ vi.mock('app/handlers/chat/chat.js', () => ({
     res.status(200).json({ ok: 'getMessages' }),
 }));
 
-vi.mock('app/handlers/places/photoProxy.handler.js', () => ({
+vi.mock('app/handlers/photoProxy.handler.js', () => ({
   photoProxyHandler: (_: express.Request, res: express.Response) =>
     res.status(200).json({ ok: 'photoProxy' }),
 }));
 
-vi.mock('app/middleware/rateLimiter/rateLimiter.js', () => ({
+vi.mock('app/middleware/rateLimiter.js', () => ({
   rateLimiter: (
     _: express.Request,
     __: express.Response,

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { query } from 'app/database/pool/pool.js';
+import { query } from 'app/database/pool.js';
 
 import {
   createLeg,
@@ -9,7 +9,7 @@ import {
   reorderLegs,
 } from '../tripLegsRepository.js';
 
-vi.mock('app/database/pool/pool.js', () => ({
+vi.mock('app/database/pool.js', () => ({
   query: vi.fn(),
 }));
 

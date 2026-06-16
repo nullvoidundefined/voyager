@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { pool } from 'app/database/pool/pool.js';
+import { pool } from 'app/database/pool.js';
 import {
   clearSelectionsForTrip,
   createTrip,

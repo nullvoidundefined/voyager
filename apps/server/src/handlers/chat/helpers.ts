@@ -10,10 +10,10 @@ import {
   type CompletionTracker,
   type TripState,
   getFlowPosition,
-} from 'app/prompts/bookingSteps/bookingSteps.js';
-import type { TripContext } from 'app/prompts/tripContext/tripContext.js';
-import type { TripWithDetails } from 'app/schemas/trips/trips.js';
-import type { UserPreferences } from 'app/schemas/userPreferences/userPreferences.js';
+} from 'app/prompts/bookingSteps.js';
+import type { TripContext } from 'app/prompts/tripContext.js';
+import type { TripWithDetails } from 'app/schemas/trips.js';
+import type { UserPreferences } from 'app/schemas/userPreferences.js';
 import {
   EXPERIENCE_INTEREST_OPTIONS,
   type ExperienceInterest,

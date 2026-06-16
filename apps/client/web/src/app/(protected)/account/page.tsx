@@ -11,8 +11,8 @@ import { useQuery } from '@tanstack/react-query';
 
 import { PreferencesWizard } from '@/components/PreferencesWizard/PreferencesWizard';
 import { useAuth } from '@/context/AuthContext';
-import { get } from '@/lib/api/api';
-import { type UserPreferences } from '@/lib/preferenceOptions/preferenceOptions';
+import { get } from '@/lib/api';
+import { type UserPreferences } from '@/lib/preferenceOptions';
 
 import styles from './account.module.scss';
 
