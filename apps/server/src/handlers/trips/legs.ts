@@ -1,3 +1,6 @@
+import type { Request, Response } from 'express';
+import { z } from 'zod';
+
 import { ApiError } from 'app/errors/ApiError.js';
 import { getAuthUser } from 'app/middleware/requireAuth/getAuthUser.js';
 import {
@@ -7,8 +10,6 @@ import {
   reorderLegs as reorderLegsRepo,
 } from 'app/repositories/trips/tripLegsRepository.js';
 import { getTripWithDetails } from 'app/repositories/trips/trips.js';
-import type { Request, Response } from 'express';
-import { z } from 'zod';
 
 const addLegSchema = z.object({
   origin: z.string().min(1),

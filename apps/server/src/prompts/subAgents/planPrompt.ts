@@ -1,5 +1,5 @@
-import { formatTripContext } from 'app/prompts/tripContext/tripContext.js';
 import type { TripContext } from 'app/prompts/tripContext/tripContext.js';
+import { formatTripContext } from 'app/prompts/tripContext/tripContext.js';
 import type { TripPlanCard } from 'app/types/planCard.js';
 
 export function buildPlanAgentPrompt(

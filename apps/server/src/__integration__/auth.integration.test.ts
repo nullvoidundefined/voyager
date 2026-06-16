@@ -1,7 +1,8 @@
-import { app } from 'app/app.js';
 import type { Server } from 'http';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
+import { app } from 'app/app.js';
 
 const TEST_EMAIL = 'auth-flow@integration-test.invalid';
 const TEST_PASSWORD = 'testpassword123';

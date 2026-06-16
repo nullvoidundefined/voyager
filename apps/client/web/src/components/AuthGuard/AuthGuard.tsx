@@ -2,8 +2,9 @@
 
 import { useEffect } from 'react';
 
-import { useAuth } from '@/context/AuthContext';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+
+import { useAuth } from '@/context/AuthContext';
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();

@@ -10,10 +10,11 @@
  * - trip_type and flexible_dates are included in PUT requests
  * - flexible_dates is coerced from string 'true'/'false' to boolean
  */
-import { get, put } from '@/lib/api/api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render } from '@testing-library/react';
 import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { get, put } from '@/lib/api/api';
 
 import { ChatBox } from '../ChatBox';
 

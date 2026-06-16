@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { pool } from 'app/database/pool/pool.js';
 import {
   clearSelectionsForTrip,
@@ -12,7 +14,6 @@ import {
   listTrips,
   updateTrip,
 } from 'app/repositories/trips/trips.js';
-import { describe, expect, it } from 'vitest';
 
 import { seedTrip, seedUser } from '../helpers/seed.js';
 

@@ -1,7 +1,8 @@
+import { describe, expect, it } from 'vitest';
+
 import { DEFAULT_COMPLETION_TRACKER } from 'app/prompts/bookingSteps/bookingSteps.js';
 import type { TripWithDetails } from 'app/schemas/trips/trips.js';
 import type { TripPlanCard } from 'app/types/planCard.js';
-import { describe, expect, it } from 'vitest';
 
 import {
   applyPlanConfirmation,

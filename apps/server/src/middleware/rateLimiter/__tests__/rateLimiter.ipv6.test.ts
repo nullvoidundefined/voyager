@@ -1,7 +1,8 @@
-import { rateLimiter } from 'app/middleware/rateLimiter/rateLimiter.js';
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
+
+import { rateLimiter } from 'app/middleware/rateLimiter/rateLimiter.js';
 
 /**
  * ENG-02 backfill: regression test for commit `bea33cc`

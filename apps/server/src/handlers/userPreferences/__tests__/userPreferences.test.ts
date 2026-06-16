@@ -1,3 +1,8 @@
+import cookieParser from 'cookie-parser';
+import express from 'express';
+import request from 'supertest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import * as prefsHandlers from 'app/handlers/userPreferences/userPreferences.js';
 import { errorHandler } from 'app/middleware/errorHandler/errorHandler.js';
 import { requireAuth } from 'app/middleware/requireAuth/requireAuth.js';
@@ -5,10 +10,6 @@ import * as prefsRepo from 'app/repositories/userPreferences.js';
 import type { User } from 'app/schemas/auth/auth.js';
 import type { UserPreferences } from 'app/schemas/userPreferences/userPreferences.js';
 import { uuid } from 'app/test-fixtures/uuids.js';
-import cookieParser from 'cookie-parser';
-import express from 'express';
-import request from 'supertest';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('app/repositories/userPreferences.js');
 vi.mock('app/clients/logger.js', () => ({

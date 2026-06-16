@@ -1,8 +1,9 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useAuth } from '@/context/AuthContext';
 import { APP_NAME } from '@/lib/constants/constants';
-import Link from 'next/link';
 
 import styles from './Footer.module.scss';
 

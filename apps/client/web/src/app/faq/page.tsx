@@ -1,7 +1,8 @@
-import { DemoBanner } from '@/components/DemoBanner/DemoBanner';
-import { APP_NAME } from '@/lib/constants/constants';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
+import { DemoBanner } from '@/components/DemoBanner/DemoBanner';
+import { APP_NAME } from '@/lib/constants/constants';
 
 import styles from './faq.module.scss';
 

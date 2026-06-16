@@ -1,7 +1,8 @@
 /** get_destination_info tool: resolve a city to IATA code and travel facts. */
+import { z } from 'zod';
+
 import { locationAllowlist } from 'app/tools/registry/primitives.js';
 import type { ToolModule } from 'app/tools/registry/toolModule.js';
-import { z } from 'zod';
 
 export const getDestinationInfoSchema = z.object({
   city_name: locationAllowlist.describe(

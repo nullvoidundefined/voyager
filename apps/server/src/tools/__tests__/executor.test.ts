@@ -1,5 +1,6 @@
-import { executeTool } from 'app/tools/executor.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { executeTool } from 'app/tools/executor.js';
 
 vi.mock('app/repositories/trips/trips.js', () => ({
   updateTrip: vi.fn().mockResolvedValue({ id: 'trip-1' }),

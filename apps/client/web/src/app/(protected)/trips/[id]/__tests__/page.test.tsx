@@ -1,7 +1,8 @@
-import { get } from '@/lib/api/api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+
+import { get } from '@/lib/api/api';
 
 import TripDetailPage from '../page';
 

@@ -1,7 +1,8 @@
 /** search_experiences tool: activities, tours, restaurants at a destination. */
+import { z } from 'zod';
+
 import { locationAllowlist } from 'app/tools/registry/primitives.js';
 import type { ToolModule } from 'app/tools/registry/toolModule.js';
-import { z } from 'zod';
 
 export const searchExperiencesSchema = z.object({
   location: locationAllowlist.describe(

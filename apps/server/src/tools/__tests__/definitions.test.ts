@@ -1,5 +1,6 @@
-import { TOOL_DEFINITIONS } from 'app/tools/definitions.js';
 import { describe, expect, it } from 'vitest';
+
+import { TOOL_DEFINITIONS } from 'app/tools/definitions.js';
 
 describe('tool definitions', () => {
   it('exports exactly 17 tool definitions', () => {

@@ -2,10 +2,11 @@
  * Single smoke test for route wiring: verifies each path/method reaches the correct handler.
  * Handler behavior is covered by handler tests; this only guards against broken router wiring.
  */
-import { authRouter } from 'app/routes/auth.js';
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
+
+import { authRouter } from 'app/routes/auth.js';
 
 vi.mock('app/handlers/auth/auth.js', () => ({
   register: (_: express.Request, res: express.Response) =>

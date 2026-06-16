@@ -1,11 +1,12 @@
+import express from 'express';
+import request from 'supertest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import * as pool from 'app/database/pool/pool.js';
 import * as shareHandlers from 'app/handlers/trips/share.js';
 import { errorHandler } from 'app/middleware/errorHandler/errorHandler.js';
 import * as tripsRepo from 'app/repositories/trips/trips.js';
 import { uuid } from 'app/test-fixtures/uuids.js';
-import express from 'express';
-import request from 'supertest';
-import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('app/database/pool/pool.js');
 vi.mock('app/repositories/trips/trips.js');

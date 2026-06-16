@@ -2,14 +2,15 @@
 
 import { type FormEvent, useState } from 'react';
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter/PasswordStrengthMeter';
 import { PreferencesWizard } from '@/components/PreferencesWizard/PreferencesWizard';
 import { Toast } from '@/components/Toast/Toast';
 import { useAuth } from '@/context/AuthContext';
 import { ApiError } from '@/lib/api/api';
 import { APP_NAME } from '@/lib/constants/constants';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 import styles from '../auth.module.scss';
 

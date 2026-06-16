@@ -5,8 +5,10 @@ export default {
   importOrder: [
     '^react$',
     '^react-dom',
-    '.*\\.css$',
+    '^next',
     '<THIRD_PARTY_MODULES>',
+    '^app/',
+    '^@/',
     '^[../]',
     '^[./]',
   ],

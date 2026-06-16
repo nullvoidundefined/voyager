@@ -1,5 +1,6 @@
-import { getDestinationInfo } from 'app/tools/destinationTool.js';
 import { describe, expect, it } from 'vitest';
+
+import { getDestinationInfo } from 'app/tools/destinationTool.js';
 
 describe('destinationTool', () => {
   describe('getDestinationInfo', () => {

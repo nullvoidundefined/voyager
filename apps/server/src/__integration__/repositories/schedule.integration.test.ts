@@ -1,10 +1,11 @@
+import { describe, expect, it } from 'vitest';
+
 import { pool } from 'app/database/pool/pool.js';
 import {
   addScheduleItem,
   getScheduleForTrip,
   upsertScheduleDay,
 } from 'app/repositories/trips/scheduleRepository.js';
-import { describe, expect, it } from 'vitest';
 
 import { seedTrip, seedUser } from '../helpers/seed.js';
 

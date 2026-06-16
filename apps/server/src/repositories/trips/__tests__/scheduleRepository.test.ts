@@ -1,5 +1,6 @@
-import { query } from 'app/database/pool/pool.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { query } from 'app/database/pool/pool.js';
 
 import {
   addScheduleItem,

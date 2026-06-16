@@ -1,7 +1,8 @@
+import { describe, expect, it } from 'vitest';
+
 import { DEFAULT_COMPLETION_TRACKER } from 'app/prompts/bookingSteps/bookingSteps.js';
 import { buildSystemPrompt } from 'app/prompts/systemPrompt/systemPrompt.js';
 import type { TripContext } from 'app/prompts/tripContext/tripContext.js';
-import { describe, expect, it } from 'vitest';
 
 describe('buildSystemPrompt', () => {
   it('should include core prompt in every response', () => {

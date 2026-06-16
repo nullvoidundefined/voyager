@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 
+import Image from 'next/image';
+import Link from 'next/link';
+
 import {
   CATEGORY_FILTERS,
   DESTINATIONS,
@@ -11,8 +14,6 @@ import {
   HERO_IMAGES,
   getDestinationImage,
 } from '@/lib/destinationImage/destinationImage';
-import Image from 'next/image';
-import Link from 'next/link';
 
 import styles from './page.module.scss';
 

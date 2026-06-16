@@ -1,7 +1,8 @@
+import type { Request, Response } from 'express';
+
 import { posthog } from 'app/clients/posthog.js';
 import { getAuthUser } from 'app/middleware/requireAuth/getAuthUser.js';
 import { findByUserId, upsert } from 'app/repositories/userPreferences.js';
-import type { Request, Response } from 'express';
 
 export async function getPreferences(req: Request, res: Response) {
   const userId = getAuthUser(req).id;

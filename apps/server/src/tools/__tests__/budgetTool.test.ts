@@ -1,5 +1,6 @@
-import { calculateRemainingBudget } from 'app/tools/budgetTool.js';
 import { describe, expect, it } from 'vitest';
+
+import { calculateRemainingBudget } from 'app/tools/budgetTool.js';
 
 describe('budgetTool', () => {
   describe('calculateRemainingBudget', () => {

@@ -1,3 +1,8 @@
+import cookieParser from 'cookie-parser';
+import express from 'express';
+import request from 'supertest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { SESSION_COOKIE_NAME } from 'app/constants/session.js';
 import {
   loadSession,
@@ -5,10 +10,6 @@ import {
 } from 'app/middleware/requireAuth/requireAuth.js';
 import * as authRepo from 'app/repositories/auth.js';
 import { uuid } from 'app/test-fixtures/uuids.js';
-import cookieParser from 'cookie-parser';
-import express from 'express';
-import request from 'supertest';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('app/repositories/auth.js');
 

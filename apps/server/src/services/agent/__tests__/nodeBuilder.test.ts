@@ -1,4 +1,3 @@
-import type { ChatNode } from '@voyager/shared-types';
 import { describe, expect, it } from 'vitest';
 
 import { buildNodeFromToolResult } from '../nodeBuilder.js';

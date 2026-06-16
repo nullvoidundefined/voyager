@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import {
   searchCarRentalsSchema,
   searchExperiencesSchema,
@@ -8,7 +10,6 @@ import {
   selectFlightSchema,
   selectHotelSchema,
 } from 'app/tools/schemas.js';
-import { describe, expect, it } from 'vitest';
 
 /**
  * SEC-03 tests: tool input allowlist.

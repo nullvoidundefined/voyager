@@ -4,8 +4,8 @@
  * single source into the Anthropic tool definition, so the model-facing
  * JSON Schema can never drift from the validator (it IS the validator).
  */
-import { z } from 'zod';
 import type { ZodType } from 'zod';
+import { z } from 'zod';
 
 export interface ToolDefinition {
   description: string;

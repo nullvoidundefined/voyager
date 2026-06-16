@@ -1,4 +1,6 @@
 import type { ChatMessage, ChatNode } from '@voyager/shared-types';
+import type { Request, Response } from 'express';
+
 import { logger } from 'app/clients/logger.js';
 import { posthog } from 'app/clients/posthog.js';
 import { ApiError } from 'app/errors/ApiError.js';
@@ -39,7 +41,6 @@ import {
 } from 'app/services/cache/tokenBudgetService.js';
 import { getEnrichmentNodes } from 'app/services/external/enrichment.js';
 import type { TripPlanCard } from 'app/types/planCard.js';
-import type { Request, Response } from 'express';
 
 import {
   applyPlanConfirmation,

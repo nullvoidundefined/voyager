@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { pool } from 'app/database/pool/pool.js';
 import {
   createLeg,
@@ -5,7 +7,6 @@ import {
   listLegs,
   reorderLegs,
 } from 'app/repositories/trips/tripLegsRepository.js';
-import { describe, expect, it } from 'vitest';
 
 import { seedTrip, seedUser } from '../helpers/seed.js';
 

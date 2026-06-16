@@ -1,5 +1,6 @@
-import { getRedis } from 'app/clients/redis.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { getRedis } from 'app/clients/redis.js';
 
 import {
   addTokenUsage,

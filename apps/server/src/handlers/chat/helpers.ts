@@ -1,4 +1,6 @@
 import type { ChatNode, SSEEvent } from '@voyager/shared-types';
+import type { Response } from 'express';
+
 import {
   type CompletionTracker,
   type TripState,
@@ -12,7 +14,6 @@ import {
   type ExperienceInterest,
   type TripPlanCard,
 } from 'app/types/planCard.js';
-import type { Response } from 'express';
 
 /** Map a TripWithDetails to the TripState shape needed by getFlowPosition. */
 export function toFlowInput(trip: TripWithDetails): TripState {

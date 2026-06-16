@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import { post } from '@/lib/api/api';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+
+import { post } from '@/lib/api/api';
 
 import styles from './newTrip.module.scss';
 

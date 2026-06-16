@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { pool } from 'app/database/pool/pool.js';
 import { DEFAULT_COMPLETION_TRACKER } from 'app/prompts/bookingSteps/bookingSteps.js';
 import {
@@ -6,7 +8,6 @@ import {
   insertMessage,
   updateBookingState,
 } from 'app/repositories/conversations.js';
-import { describe, expect, it } from 'vitest';
 
 import { seedConversation, seedTrip, seedUser } from '../helpers/seed.js';
 

@@ -1,8 +1,9 @@
+import { z } from 'zod';
+
 import type {
   CreateLegInput,
   TripLeg,
 } from 'app/repositories/trips/tripLegsRepository.js';
-import { z } from 'zod';
 
 import type { ToolContext } from './executor.js';
 

@@ -1,11 +1,12 @@
+import express from 'express';
+import request from 'supertest';
+import { afterEach, describe, expect, it } from 'vitest';
+
 import {
   authRateLimiter,
   chatRateLimiter,
   rateLimiter,
 } from 'app/middleware/rateLimiter/rateLimiter.js';
-import express from 'express';
-import request from 'supertest';
-import { afterEach, describe, expect, it } from 'vitest';
 
 function buildApp(
   limiter: ReturnType<typeof import('express-rate-limit').default>,

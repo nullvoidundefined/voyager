@@ -1,7 +1,8 @@
+import type { Request, Response } from 'express';
+
 import { query } from 'app/database/pool/pool.js';
 import { ApiError } from 'app/errors/ApiError.js';
 import { getTripWithDetails } from 'app/repositories/trips/trips.js';
-import type { Request, Response } from 'express';
 
 export async function createShareHandler(
   req: Request<{ id: string }>,

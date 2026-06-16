@@ -1,7 +1,8 @@
 /** select_experience tool: persist the user's chosen experience to the trip. */
+import { z } from 'zod';
+
 import { locationAllowlist } from 'app/tools/registry/primitives.js';
 import type { ToolModule } from 'app/tools/registry/toolModule.js';
-import { z } from 'zod';
 
 export const selectExperienceSchema = z.object({
   name: locationAllowlist,

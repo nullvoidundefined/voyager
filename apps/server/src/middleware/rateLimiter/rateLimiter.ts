@@ -1,8 +1,9 @@
+import rateLimit, { type Store } from 'express-rate-limit';
+import RedisStore from 'rate-limit-redis';
+
 import { logger } from 'app/clients/logger.js';
 import { getRedis } from 'app/clients/redis.js';
 import { isProduction } from 'app/config/env.js';
-import rateLimit, { type Store } from 'express-rate-limit';
-import RedisStore from 'rate-limit-redis';
 
 /**
  * Returns true when the request should bypass rate limiting.

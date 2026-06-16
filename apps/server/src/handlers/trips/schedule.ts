@@ -1,8 +1,9 @@
+import type { Request, Response } from 'express';
+
 import { ApiError } from 'app/errors/ApiError.js';
 import { getAuthUser } from 'app/middleware/requireAuth/getAuthUser.js';
 import { getScheduleForTrip } from 'app/repositories/trips/scheduleRepository.js';
 import { getTripWithDetails } from 'app/repositories/trips/trips.js';
-import type { Request, Response } from 'express';
 
 export async function getScheduleHandler(
   req: Request<{ id: string }>,

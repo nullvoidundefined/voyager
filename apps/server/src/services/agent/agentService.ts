@@ -5,6 +5,7 @@ import type {
   SSEEvent,
   TripPlanCard,
 } from '@voyager/shared-types';
+
 import { logger } from 'app/clients/logger.js';
 import {
   type CompletionTracker,

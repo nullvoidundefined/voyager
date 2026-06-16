@@ -1,6 +1,6 @@
 import type { CompletionTracker } from 'app/prompts/bookingSteps/bookingSteps.js';
-import { formatTripContext } from 'app/prompts/tripContext/tripContext.js';
 import type { TripContext } from 'app/prompts/tripContext/tripContext.js';
+import { formatTripContext } from 'app/prompts/tripContext/tripContext.js';
 
 export function buildFlightAgentPrompt(
   tripContext: TripContext,

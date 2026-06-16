@@ -1,12 +1,13 @@
+import express from 'express';
+import request from 'supertest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import * as chatHandlers from 'app/handlers/chat/chat.js';
 import { errorHandler } from 'app/middleware/errorHandler/errorHandler.js';
 import * as convRepo from 'app/repositories/conversations.js';
 import * as tripRepo from 'app/repositories/trips/trips.js';
 import * as agentService from 'app/services/agent/agentService.js';
 import { uuid } from 'app/test-fixtures/uuids.js';
-import express from 'express';
-import request from 'supertest';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('app/repositories/conversations.js');
 vi.mock('app/repositories/trips/trips.js');

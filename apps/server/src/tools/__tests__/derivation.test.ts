@@ -8,9 +8,10 @@
  * from the validator) and may narrow number->integer; it must never drop or
  * change what the model previously saw.
  */
-import { TOOL_DEFINITIONS } from 'app/tools/definitions.js';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+
+import { TOOL_DEFINITIONS } from 'app/tools/definitions.js';
 
 interface BaselineDefinition {
   description: string;

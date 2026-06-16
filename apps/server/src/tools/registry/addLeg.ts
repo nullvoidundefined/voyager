@@ -1,10 +1,11 @@
 /** add_leg tool: append a city segment to a multi-city itinerary. */
+import { z } from 'zod';
+
 import {
   dateString,
   locationAllowlist,
 } from 'app/tools/registry/primitives.js';
 import type { ToolModule } from 'app/tools/registry/toolModule.js';
-import { z } from 'zod';
 
 export const addLegSchema = z.object({
   origin: locationAllowlist.describe('Origin city or airport code'),

@@ -45,11 +45,12 @@
  *     That belongs in trip-selections.integration.test.ts when ENG-17
  *     lands.
  */
-import { app } from 'app/app.js';
-import { pool } from 'app/database/pool/pool.js';
 import type { Server } from 'http';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
+import { app } from 'app/app.js';
+import { pool } from 'app/database/pool/pool.js';
 
 const TEST_EMAIL = 'chat-integration@integration-test.invalid';
 const TEST_PASSWORD = 'testpassword123';

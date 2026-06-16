@@ -1,3 +1,10 @@
+// Static destinations data — public, aggressively cached
+import cookieParser from 'cookie-parser';
+import express from 'express';
+import helmet from 'helmet';
+import fs from 'node:fs';
+import path from 'node:path';
+
 import { logger } from 'app/clients/logger.js';
 import { posthog } from 'app/clients/posthog.js';
 import { corsConfig } from 'app/config/corsConfig.js';
@@ -20,12 +27,6 @@ import {
   isAnthropicMockMode,
   setMockScenario,
 } from 'app/test-fixtures/mockAnthropicClient/mockAnthropicClient.js';
-import cookieParser from 'cookie-parser';
-import express from 'express';
-import helmet from 'helmet';
-// Static destinations data — public, aggressively cached
-import fs from 'node:fs';
-import path from 'node:path';
 
 function readCommitSha(): string {
   try {

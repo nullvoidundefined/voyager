@@ -1,5 +1,6 @@
-import { logger } from 'app/clients/logger.js';
 import pg from 'pg';
+
+import { logger } from 'app/clients/logger.js';
 
 // Coerce Postgres NUMERIC columns to JavaScript numbers at the boundary.
 // Default pg behavior returns NUMERIC as a string (because numeric is

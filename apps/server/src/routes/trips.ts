@@ -1,3 +1,5 @@
+import express from 'express';
+
 import * as chatHandlers from 'app/handlers/chat/chat.js';
 import * as costsHandlers from 'app/handlers/trips/costs.js';
 import * as legsHandlers from 'app/handlers/trips/legs.js';
@@ -6,7 +8,6 @@ import * as shareHandlers from 'app/handlers/trips/share.js';
 import * as tripHandlers from 'app/handlers/trips/trips.js';
 import { chatRateLimiter } from 'app/middleware/rateLimiter/rateLimiter.js';
 import { requireAuth } from 'app/middleware/requireAuth/requireAuth.js';
-import express from 'express';
 
 const tripRouter = express.Router();
 

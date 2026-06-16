@@ -1,9 +1,10 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import {
   DEFAULT_TOOL_ADAPTERS,
   type ToolAdapters,
   executeTool,
 } from 'app/tools/executor.js';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('app/repositories/trips/trips.js', () => ({
   updateTrip: vi.fn(),

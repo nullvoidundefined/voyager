@@ -1,9 +1,10 @@
+import { describe, expect, it } from 'vitest';
+
 import {
   loginSchema,
   registerSchema,
   userSchema,
 } from 'app/schemas/auth/auth.js';
-import { describe, expect, it } from 'vitest';
 
 describe('registerSchema', () => {
   it('accepts valid email, password, first_name, and last_name', () => {

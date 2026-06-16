@@ -1,3 +1,5 @@
+import type { Metadata } from 'next';
+
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary/ErrorBoundary';
@@ -6,7 +8,6 @@ import { Header } from '@/components/Header/Header';
 import { AuthProvider } from '@/context/AuthContext';
 import { APP_NAME } from '@/lib/constants/constants';
 import { QueryProvider } from '@/providers/QueryProvider';
-import type { Metadata } from 'next';
 
 import '../styles/animations.scss';
 import './globals.scss';

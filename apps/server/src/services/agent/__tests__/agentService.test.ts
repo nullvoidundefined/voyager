@@ -1,7 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { insertToolCallLog } from 'app/repositories/tool-call-log.js';
 import { executeTool } from 'app/tools/executor.js';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { runAgentLoop } from '../agentService.js';
 

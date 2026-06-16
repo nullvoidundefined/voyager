@@ -1,5 +1,6 @@
-import { photoProxyHandler } from 'app/handlers/places/photoProxy.handler.js';
 import express from 'express';
+
+import { photoProxyHandler } from 'app/handlers/places/photoProxy.handler.js';
 
 const placesRouter = express.Router();
 

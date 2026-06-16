@@ -1,10 +1,11 @@
+import { describe, expect, it } from 'vitest';
+
 import type { CompletionTracker } from 'app/prompts/bookingSteps/bookingSteps.js';
 import {
   type TripContext,
   formatChecklist,
   formatTripContext,
 } from 'app/prompts/tripContext/tripContext.js';
-import { describe, expect, it } from 'vitest';
 
 /**
  * Unit tests for the tripContext formatter. ENG-18 flagged this
