@@ -38,8 +38,8 @@ already dispatches type-safely. (Not updating the doc here to keep this PR singl
 ## Testing
 
 - `tsc --noEmit`: clean (confirms nothing referenced the removed export).
-- `vitest run src/tools`: 452 passed.
-- `eslint src/tools/schemas.ts`: clean.
+- `vitest run src/tools` (from `apps/server`): 452 passed.
+- `eslint src/tools/schemas.ts` (from `apps/server`): clean.
 
 ## Reflection
 
