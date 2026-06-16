@@ -1,4 +1,4 @@
-import { logger } from 'app/utils/logs/logger.js';
+import { logger } from 'app/clients/logger.js';
 
 type CircuitState = 'closed' | 'open' | 'half-open';
 

@@ -1,6 +1,5 @@
-import { logger } from 'app/utils/logs/logger.js';
-
-import { getRedis } from './redisService.js';
+import { logger } from 'app/clients/logger.js';
+import { getRedis } from 'app/clients/redis.js';
 
 export const DEFAULT_DAILY_OUTPUT_TOKEN_BUDGET = 50_000;
 

@@ -1,9 +1,9 @@
+import { logger } from 'app/clients/logger.js';
+import { CircuitBreaker } from 'app/resilience/CircuitBreaker.js';
 import {
   incrementMonthlyUsage,
   isOverMonthlyCap,
 } from 'app/services/cache/serpApiQuotaService.js';
-import { CircuitBreaker } from 'app/utils/CircuitBreaker.js';
-import { logger } from 'app/utils/logs/logger.js';
 
 /**
  * Thrown when serpApiGet is called but the monthly SerpApi quota has

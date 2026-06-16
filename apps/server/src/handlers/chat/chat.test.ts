@@ -1,16 +1,16 @@
 import * as chatHandlers from 'app/handlers/chat/chat.js';
 import { errorHandler } from 'app/middleware/errorHandler/errorHandler.js';
-import * as convRepo from 'app/repositories/conversations/conversations.js';
+import * as convRepo from 'app/repositories/conversations.js';
 import * as tripRepo from 'app/repositories/trips/trips.js';
 import * as agentService from 'app/services/agent/agentService.js';
-import { uuid } from 'app/utils/tests/uuids.js';
+import { uuid } from 'app/test-fixtures/uuids.js';
 import express from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('app/repositories/conversations/conversations.js');
+vi.mock('app/repositories/conversations.js');
 vi.mock('app/repositories/trips/trips.js');
-vi.mock('app/repositories/userPreferences/userPreferences.js');
+vi.mock('app/repositories/userPreferences.js');
 vi.mock('app/services/agent/agentService.js');
 vi.mock('app/tools/mock/isMockMode.js', () => ({
   isMockMode: vi.fn().mockReturnValue(false),
@@ -30,7 +30,7 @@ vi.mock('app/tools/mock/experiencesMock.js', () => ({
 vi.mock('app/services/external/enrichment.js', () => ({
   getEnrichmentNodes: vi.fn().mockResolvedValue([]),
 }));
-vi.mock('app/utils/logs/logger.js', () => ({
+vi.mock('app/clients/logger.js', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 

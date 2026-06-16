@@ -1,4 +1,4 @@
-import { query } from 'app/db/pool/pool.js';
+import { query } from 'app/database/pool/pool.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -7,7 +7,7 @@ import {
   updateTrip,
 } from './trips.js';
 
-vi.mock('app/db/pool/pool.js', () => ({
+vi.mock('app/database/pool/pool.js', () => ({
   query: vi.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
   withTransaction: vi.fn(),
 }));

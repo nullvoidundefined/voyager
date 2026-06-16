@@ -1,4 +1,4 @@
-import { query, withTransaction } from 'app/db/pool/pool.js';
+import { query, withTransaction } from 'app/database/pool/pool.js';
 import type {
   CreateTripInput,
   Trip,

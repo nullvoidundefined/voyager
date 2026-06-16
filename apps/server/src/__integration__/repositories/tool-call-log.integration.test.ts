@@ -1,8 +1,8 @@
-import pool from 'app/db/pool/pool.js';
+import { pool } from 'app/database/pool/pool.js';
 import {
   getToolCallLogsByConversation,
   insertToolCallLog,
-} from 'app/repositories/tool-call-log/tool-call-log.js';
+} from 'app/repositories/tool-call-log.js';
 import { describe, expect, it } from 'vitest';
 
 import { seedConversation, seedTrip, seedUser } from '../helpers/seed.js';

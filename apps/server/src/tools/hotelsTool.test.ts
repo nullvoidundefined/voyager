@@ -13,7 +13,7 @@ vi.mock('app/services/external/serpapiService.js', () => {
   };
 });
 vi.mock('app/services/cache/cacheService.js');
-vi.mock('app/utils/logs/logger.js', () => ({
+vi.mock('app/clients/logger.js', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
@@ -62,7 +62,7 @@ describe('hotelsTool', () => {
       cacheSet: vi.fn(),
       normalizeCacheKey: vi.fn().mockReturnValue('test-hotel-cache-key'),
     }));
-    vi.doMock('app/utils/logs/logger.js', () => ({
+    vi.doMock('app/clients/logger.js', () => ({
       logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
     }));
     vi.doMock('app/tools/mock/isMockMode.js', () => ({
@@ -444,7 +444,7 @@ describe('hotelsTool', () => {
         cacheSet: vi.fn(),
         normalizeCacheKey: vi.fn().mockReturnValue('test-cache-key'),
       }));
-      vi.doMock('app/utils/logs/logger.js', () => ({
+      vi.doMock('app/clients/logger.js', () => ({
         logger: {
           error: vi.fn(),
           info: vi.fn(),

@@ -1,6 +1,5 @@
-import { logger } from 'app/utils/logs/logger.js';
-
-import { getRedis } from './redisService.js';
+import { logger } from 'app/clients/logger.js';
+import { getRedis } from 'app/clients/redis.js';
 
 export const SERPAPI_MONTHLY_CAP = 200;
 

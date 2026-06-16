@@ -1,4 +1,4 @@
-import { logger } from 'app/utils/logs/logger.js';
+import { logger } from 'app/clients/logger.js';
 import { randomUUID } from 'crypto';
 import { pinoHttp } from 'pino-http';
 

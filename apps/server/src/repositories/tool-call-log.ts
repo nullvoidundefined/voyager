@@ -1,4 +1,4 @@
-import { query } from 'app/db/pool/pool.js';
+import { query } from 'app/database/pool/pool.js';
 
 export interface ToolCallLogEntry {
   id: string;

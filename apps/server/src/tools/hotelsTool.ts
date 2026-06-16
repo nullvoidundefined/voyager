@@ -1,3 +1,4 @@
+import { logger } from 'app/clients/logger.js';
 import {
   cacheGet,
   cacheSet,
@@ -9,7 +10,6 @@ import {
 } from 'app/services/external/serpapiService.js';
 import { generateMockHotels } from 'app/tools/mock/hotelsMock.js';
 import { isMockMode } from 'app/tools/mock/isMockMode.js';
-import { logger } from 'app/utils/logs/logger.js';
 
 // FIN-07: extended from 1h to 6h on 2026-04-06. See flightsTool.ts
 // for rationale. Hotel prices are even less volatile than flights.

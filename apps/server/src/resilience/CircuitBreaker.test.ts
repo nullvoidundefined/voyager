@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CircuitBreaker } from './CircuitBreaker.js';
 
-vi.mock('app/utils/logs/logger.js', () => ({
+vi.mock('app/clients/logger.js', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 

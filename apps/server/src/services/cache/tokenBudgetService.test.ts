@@ -1,6 +1,6 @@
+import { getRedis } from 'app/clients/redis.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { getRedis } from './redisService.js';
 import {
   addTokenUsage,
   getDailyTokenUsage,
@@ -13,11 +13,11 @@ const mockRedisInstance = {
   expire: vi.fn(),
 };
 
-vi.mock('./redisService.js', () => ({
+vi.mock('app/clients/redis.js', () => ({
   getRedis: vi.fn(() => mockRedisInstance),
 }));
 
-vi.mock('app/utils/logs/logger.js', () => ({
+vi.mock('app/clients/logger.js', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 

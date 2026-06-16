@@ -1,3 +1,5 @@
+import { logger } from 'app/clients/logger.js';
+import { CircuitBreaker } from 'app/resilience/CircuitBreaker.js';
 import {
   cacheGet,
   cacheSet,
@@ -5,8 +7,6 @@ import {
 } from 'app/services/cache/cacheService.js';
 import { generateMockExperiences } from 'app/tools/mock/experiencesMock.js';
 import { isMockMode } from 'app/tools/mock/isMockMode.js';
-import { CircuitBreaker } from 'app/utils/CircuitBreaker.js';
-import { logger } from 'app/utils/logs/logger.js';
 
 const placesBreaker = new CircuitBreaker('GooglePlaces', {
   failureThreshold: 3,

@@ -2,16 +2,16 @@ import { SESSION_COOKIE_NAME } from 'app/constants/session.js';
 import * as authHandlers from 'app/handlers/auth/auth.js';
 import { errorHandler } from 'app/middleware/errorHandler/errorHandler.js';
 import { requireAuth } from 'app/middleware/requireAuth/requireAuth.js';
-import * as authRepo from 'app/repositories/auth/auth.js';
+import * as authRepo from 'app/repositories/auth.js';
 import type { User } from 'app/schemas/auth/auth.js';
-import { uuid } from 'app/utils/tests/uuids.js';
+import { uuid } from 'app/test-fixtures/uuids.js';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('app/repositories/auth/auth.js');
-vi.mock('app/utils/logs/logger.js', () => ({
+vi.mock('app/repositories/auth.js');
+vi.mock('app/clients/logger.js', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 

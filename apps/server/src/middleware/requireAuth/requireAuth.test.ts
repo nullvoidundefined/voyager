@@ -3,14 +3,14 @@ import {
   loadSession,
   requireAuth,
 } from 'app/middleware/requireAuth/requireAuth.js';
-import * as authRepo from 'app/repositories/auth/auth.js';
-import { uuid } from 'app/utils/tests/uuids.js';
+import * as authRepo from 'app/repositories/auth.js';
+import { uuid } from 'app/test-fixtures/uuids.js';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('app/repositories/auth/auth.js');
+vi.mock('app/repositories/auth.js');
 
 const id = uuid();
 const app = express();

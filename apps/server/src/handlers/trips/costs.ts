@@ -1,7 +1,7 @@
-import { query } from 'app/db/pool/pool.js';
+import { query } from 'app/database/pool/pool.js';
+import { ApiError } from 'app/errors/ApiError.js';
 import { getAuthUser } from 'app/middleware/requireAuth/getAuthUser.js';
 import { getTripWithDetails } from 'app/repositories/trips/trips.js';
-import { ApiError } from 'app/utils/ApiError.js';
 import type { Request, Response } from 'express';
 
 export async function getTripCostsHandler(

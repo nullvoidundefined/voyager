@@ -1,17 +1,17 @@
 import * as tripHandlers from 'app/handlers/trips/trips.js';
 import { errorHandler } from 'app/middleware/errorHandler/errorHandler.js';
 import * as tripRepo from 'app/repositories/trips/trips.js';
-import { uuid } from 'app/utils/tests/uuids.js';
+import { uuid } from 'app/test-fixtures/uuids.js';
 import express from 'express';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('app/repositories/trips/trips.js');
-vi.mock('app/repositories/conversations/conversations.js', () => ({
+vi.mock('app/repositories/conversations.js', () => ({
   getOrCreateConversation: vi.fn().mockResolvedValue({ id: 'conv-1' }),
   updateBookingState: vi.fn().mockResolvedValue(undefined),
 }));
-vi.mock('app/utils/logs/logger.js', () => ({
+vi.mock('app/clients/logger.js', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 

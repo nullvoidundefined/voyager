@@ -1,3 +1,4 @@
+import { getRedis } from 'app/clients/redis.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -6,7 +7,6 @@ import {
   cacheSet,
   normalizeCacheKey,
 } from './cacheService.js';
-import { getRedis } from './redisService.js';
 
 const mockRedisInstance = {
   get: vi.fn(),
@@ -17,13 +17,13 @@ const mockRedisInstance = {
   on: vi.fn(),
 };
 
-vi.mock('./redisService.js', () => ({
+vi.mock('app/clients/redis.js', () => ({
   getRedis: vi.fn(() => mockRedisInstance),
   connectRedis: vi.fn(),
   disconnectRedis: vi.fn(),
 }));
 
-vi.mock('app/utils/logs/logger.js', () => ({
+vi.mock('app/clients/logger.js', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 

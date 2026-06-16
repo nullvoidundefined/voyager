@@ -1,4 +1,4 @@
-import { query } from 'app/db/pool/pool.js';
+import { query } from 'app/database/pool/pool.js';
 
 /**
  * Sonnet 4.6 pricing. Units are dollars per million tokens.

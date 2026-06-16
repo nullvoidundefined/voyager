@@ -1,3 +1,4 @@
+import { logger } from 'app/clients/logger.js';
 import {
   cacheGet,
   cacheSet,
@@ -6,7 +7,6 @@ import {
 import { serpApiGet } from 'app/services/external/serpapiService.js';
 import { generateMockCarRentals } from 'app/tools/mock/carRentalsMock.js';
 import { isMockMode } from 'app/tools/mock/isMockMode.js';
-import { logger } from 'app/utils/logs/logger.js';
 
 const CACHE_TTL = 3600; // 1 hour
 

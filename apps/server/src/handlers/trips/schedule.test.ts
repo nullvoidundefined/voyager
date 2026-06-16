@@ -2,7 +2,7 @@ import * as scheduleHandlers from 'app/handlers/trips/schedule.js';
 import { errorHandler } from 'app/middleware/errorHandler/errorHandler.js';
 import * as scheduleRepo from 'app/repositories/trips/scheduleRepository.js';
 import * as tripsRepo from 'app/repositories/trips/trips.js';
-import { uuid } from 'app/utils/tests/uuids.js';
+import { uuid } from 'app/test-fixtures/uuids.js';
 import express from 'express';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

@@ -1,5 +1,5 @@
+import { ApiError } from 'app/errors/ApiError.js';
 import { errorHandler } from 'app/middleware/errorHandler/errorHandler.js';
-import { ApiError } from 'app/utils/ApiError.js';
 import express, {
   type NextFunction,
   type Request,
@@ -8,7 +8,7 @@ import express, {
 import request from 'supertest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('app/utils/logs/logger.js', () => ({
+vi.mock('app/clients/logger.js', () => ({
   logger: { error: vi.fn() },
 }));
 

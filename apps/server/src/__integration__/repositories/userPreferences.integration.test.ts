@@ -2,7 +2,7 @@ import {
   deleteByUserId,
   findByUserId,
   upsert,
-} from 'app/repositories/userPreferences/userPreferences.js';
+} from 'app/repositories/userPreferences.js';
 import { describe, expect, it } from 'vitest';
 
 import { seedUser } from '../helpers/seed.js';

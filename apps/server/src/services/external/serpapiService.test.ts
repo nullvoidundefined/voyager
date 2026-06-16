@@ -5,13 +5,13 @@ vi.mock('app/services/cache/serpApiQuotaService.js', () => ({
   incrementMonthlyUsage: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('app/utils/logs/logger.js', () => ({
+vi.mock('app/clients/logger.js', () => ({
   logger: { debug: vi.fn(), warn: vi.fn(), error: vi.fn(), info: vi.fn() },
 }));
 
 // Circuit breaker must also be mocked or it will interfere with the hang test.
 // Simplest approach: mock the CircuitBreaker to call through directly.
-vi.mock('app/utils/CircuitBreaker.js', () => ({
+vi.mock('app/resilience/CircuitBreaker.js', () => ({
   CircuitBreaker: vi.fn().mockImplementation(() => ({
     call: (fn: () => unknown) => fn(),
   })),

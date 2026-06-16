@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { insertToolCallLog } from 'app/repositories/tool-call-log/tool-call-log.js';
+import { insertToolCallLog } from 'app/repositories/tool-call-log.js';
 import { executeTool } from 'app/tools/executor.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -34,10 +34,10 @@ vi.mock('app/tools/definitions.js', () => ({
 vi.mock('app/prompts/systemPrompt/systemPrompt.js', () => ({
   buildSystemPrompt: vi.fn().mockReturnValue('You are a travel planner.'),
 }));
-vi.mock('app/utils/logs/logger.js', () => ({
+vi.mock('app/clients/logger.js', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
-vi.mock('app/repositories/tool-call-log/tool-call-log.js', () => ({
+vi.mock('app/repositories/tool-call-log.js', () => ({
   insertToolCallLog: vi.fn().mockResolvedValue({}),
 }));
 

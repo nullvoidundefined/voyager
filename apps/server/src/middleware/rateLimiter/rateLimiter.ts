@@ -1,6 +1,6 @@
+import { logger } from 'app/clients/logger.js';
+import { getRedis } from 'app/clients/redis.js';
 import { isProduction } from 'app/config/env.js';
-import { getRedis } from 'app/services/cache/redisService.js';
-import { logger } from 'app/utils/logs/logger.js';
 import rateLimit, { type Store } from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
 

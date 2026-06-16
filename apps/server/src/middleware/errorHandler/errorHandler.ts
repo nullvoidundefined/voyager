@@ -1,6 +1,6 @@
-import posthog from 'app/services/analytics/posthog.js';
-import { ApiError } from 'app/utils/ApiError.js';
-import { logger } from 'app/utils/logs/logger.js';
+import { logger } from 'app/clients/logger.js';
+import { posthog } from 'app/clients/posthog.js';
+import { ApiError } from 'app/errors/ApiError.js';
 import type { NextFunction, Request, Response } from 'express';
 
 // Centralized error handler to ensure all uncaught errors are logged once and surfaced with a safe JSON response.

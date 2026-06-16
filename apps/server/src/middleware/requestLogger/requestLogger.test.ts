@@ -2,7 +2,7 @@ import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('app/utils/logs/logger.js', async () => {
+vi.mock('app/clients/logger.js', async () => {
   const pino = await import('pino');
   return { logger: pino.default({ level: 'silent' }) };
 });

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('app/services/cache/cacheService.js');
-vi.mock('app/utils/logs/logger.js', () => ({
+vi.mock('app/clients/logger.js', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
@@ -42,7 +42,7 @@ describe('experiencesTool', () => {
       cacheSet: vi.fn(),
       normalizeCacheKey: vi.fn().mockReturnValue('test-exp-cache-key'),
     }));
-    vi.doMock('app/utils/logs/logger.js', () => ({
+    vi.doMock('app/clients/logger.js', () => ({
       logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
     }));
     vi.doMock('app/tools/mock/isMockMode.js', () => ({

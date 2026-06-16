@@ -1,6 +1,8 @@
+import { logger } from 'app/clients/logger.js';
+import { posthog } from 'app/clients/posthog.js';
 import { corsConfig } from 'app/config/corsConfig.js';
 import { isProduction } from 'app/config/env.js';
-import pool, { query } from 'app/db/pool/pool.js';
+import { pool, query } from 'app/database/pool/pool.js';
 import { getSharedTripHandler } from 'app/handlers/trips/share.js';
 import { csrfGuard } from 'app/middleware/csrfGuard/csrfGuard.js';
 import { errorHandler } from 'app/middleware/errorHandler/errorHandler.js';
@@ -8,18 +10,16 @@ import { notFoundHandler } from 'app/middleware/notFoundHandler/notFoundHandler.
 import { rateLimiter } from 'app/middleware/rateLimiter/rateLimiter.js';
 import { requestLogger } from 'app/middleware/requestLogger/requestLogger.js';
 import { loadSession } from 'app/middleware/requireAuth/requireAuth.js';
-import { deleteExpiredSessions } from 'app/repositories/auth/auth.js';
+import { deleteExpiredSessions } from 'app/repositories/auth.js';
 import { authRouter } from 'app/routes/auth.js';
 import { placesRouter } from 'app/routes/places.js';
 import { tripRouter } from 'app/routes/trips.js';
 import { userPreferencesRouter } from 'app/routes/userPreferences.js';
-import posthog from 'app/services/analytics/posthog.js';
 import {
   type MockScenarioName,
   isAnthropicMockMode,
   setMockScenario,
 } from 'app/test-fixtures/mockAnthropicClient/mockAnthropicClient.js';
-import { logger } from 'app/utils/logs/logger.js';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import helmet from 'helmet';

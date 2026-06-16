@@ -1,4 +1,4 @@
-import { logger } from 'app/utils/logs/logger.js';
+import { logger } from 'app/clients/logger.js';
 import { Redis } from 'ioredis';
 
 let redis: Redis | null = null;

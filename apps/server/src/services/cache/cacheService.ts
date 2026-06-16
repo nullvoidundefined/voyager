@@ -1,6 +1,5 @@
-import { logger } from 'app/utils/logs/logger.js';
-
-import { connectRedis, disconnectRedis, getRedis } from './redisService.js';
+import { logger } from 'app/clients/logger.js';
+import { connectRedis, disconnectRedis, getRedis } from 'app/clients/redis.js';
 
 export { connectRedis, disconnectRedis, getRedis };
 

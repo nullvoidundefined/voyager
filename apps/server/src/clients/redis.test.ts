@@ -11,7 +11,7 @@ describe('redisService', () => {
 
   it('returns null when REDIS_URL is not set', async () => {
     delete process.env.REDIS_URL;
-    const { getRedis } = await import('./redisService.js');
+    const { getRedis } = await import('./redis.js');
     expect(getRedis()).toBeNull();
   });
 
@@ -24,7 +24,7 @@ describe('redisService', () => {
         quit: vi.fn(),
       })),
     }));
-    const { getRedis } = await import('./redisService.js');
+    const { getRedis } = await import('./redis.js');
     const a = getRedis();
     const b = getRedis();
     expect(a).toBe(b);
@@ -40,7 +40,7 @@ describe('redisService', () => {
         quit: mockQuit,
       })),
     }));
-    const { getRedis, disconnectRedis } = await import('./redisService.js');
+    const { getRedis, disconnectRedis } = await import('./redis.js');
     expect(getRedis()).not.toBeNull();
     await disconnectRedis();
     expect(mockQuit).toHaveBeenCalled();

@@ -1,4 +1,4 @@
-import { logger } from 'app/utils/logs/logger.js';
+import { logger } from 'app/clients/logger.js';
 import pg from 'pg';
 
 // Coerce Postgres NUMERIC columns to JavaScript numbers at the boundary.
@@ -74,4 +74,4 @@ export async function withTransaction<T>(
   }
 }
 
-export default pool;
+export { pool };

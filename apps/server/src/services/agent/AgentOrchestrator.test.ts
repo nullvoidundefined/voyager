@@ -9,7 +9,7 @@ import {
 // ---------------------------------------------------------------------------
 // Mock the logger so we don't pollute test output
 // ---------------------------------------------------------------------------
-vi.mock('app/utils/logs/logger.js', () => ({
+vi.mock('app/clients/logger.js', () => ({
   logger: {
     debug: vi.fn(),
     info: vi.fn(),

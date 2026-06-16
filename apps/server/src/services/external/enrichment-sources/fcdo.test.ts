@@ -4,12 +4,12 @@ vi.mock('app/services/cache/cacheService.js', () => ({
   cacheGet: vi.fn().mockResolvedValue(null),
   cacheSet: vi.fn(),
 }));
-vi.mock('app/utils/logs/logger.js', () => ({
+vi.mock('app/clients/logger.js', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
 let fetchFCDOAdvisory: typeof import('./fcdo.js').fetchFCDOAdvisory;
-let logger: typeof import('app/utils/logs/logger.js').logger;
+let logger: typeof import('app/clients/logger.js').logger;
 
 beforeEach(async () => {
   vi.clearAllMocks();
@@ -19,13 +19,13 @@ beforeEach(async () => {
     cacheGet: vi.fn().mockResolvedValue(null),
     cacheSet: vi.fn(),
   }));
-  vi.doMock('app/utils/logs/logger.js', () => ({
+  vi.doMock('app/clients/logger.js', () => ({
     logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
   }));
 
   const mod = await import('./fcdo.js');
   fetchFCDOAdvisory = mod.fetchFCDOAdvisory;
-  const loggerMod = await import('app/utils/logs/logger.js');
+  const loggerMod = await import('app/clients/logger.js');
   logger = loggerMod.logger;
 });
 

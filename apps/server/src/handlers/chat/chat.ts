@@ -1,4 +1,7 @@
 import type { ChatMessage, ChatNode } from '@voyager/shared-types';
+import { logger } from 'app/clients/logger.js';
+import { posthog } from 'app/clients/posthog.js';
+import { ApiError } from 'app/errors/ApiError.js';
 import { getAuthUser } from 'app/middleware/requireAuth/getAuthUser.js';
 import {
   DEFAULT_COMPLETION_TRACKER,
@@ -19,9 +22,9 @@ import {
   getOrCreateConversation,
   insertMessage,
   updateBookingState,
-} from 'app/repositories/conversations/conversations.js';
+} from 'app/repositories/conversations.js';
 import { getTripWithDetails } from 'app/repositories/trips/trips.js';
-import { findByUserId as findUserPreferences } from 'app/repositories/userPreferences/userPreferences.js';
+import { findByUserId as findUserPreferences } from 'app/repositories/userPreferences.js';
 import { planCardSchema } from 'app/schemas/planCard/planCard.js';
 import { runAgentLoop } from 'app/services/agent/agentService.js';
 import {
@@ -30,15 +33,12 @@ import {
   buildDefaultPlanCard,
   selectSubAgent,
 } from 'app/services/agent/subAgentService.js';
-import posthog from 'app/services/analytics/posthog.js';
 import {
   addTokenUsage,
   isOverDailyBudget,
 } from 'app/services/cache/tokenBudgetService.js';
 import { getEnrichmentNodes } from 'app/services/external/enrichment.js';
 import type { TripPlanCard } from 'app/types/planCard.js';
-import { ApiError } from 'app/utils/ApiError.js';
-import { logger } from 'app/utils/logs/logger.js';
 import type { Request, Response } from 'express';
 
 import {

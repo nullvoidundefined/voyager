@@ -1,3 +1,4 @@
+import { ApiError } from 'app/errors/ApiError.js';
 import { getAuthUser } from 'app/middleware/requireAuth/getAuthUser.js';
 import {
   createLeg,
@@ -6,7 +7,6 @@ import {
   reorderLegs as reorderLegsRepo,
 } from 'app/repositories/trips/tripLegsRepository.js';
 import { getTripWithDetails } from 'app/repositories/trips/trips.js';
-import { ApiError } from 'app/utils/ApiError.js';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 

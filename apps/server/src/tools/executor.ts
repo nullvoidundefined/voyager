@@ -1,3 +1,4 @@
+import { logger } from 'app/clients/logger.js';
 import type { AddItemInput } from 'app/repositories/trips/scheduleRepository.js';
 import {
   addScheduleItem,
@@ -48,7 +49,6 @@ import {
   selectHotelSchema,
   updateTripSchema,
 } from 'app/tools/schemas.js';
-import { logger } from 'app/utils/logs/logger.js';
 import type { ZodError, ZodSchema } from 'zod';
 
 export interface ToolContext {

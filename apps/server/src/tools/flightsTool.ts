@@ -1,3 +1,4 @@
+import { logger } from 'app/clients/logger.js';
 import {
   cacheGet,
   cacheSet,
@@ -9,7 +10,6 @@ import {
 } from 'app/services/external/serpapiService.js';
 import { generateMockFlights } from 'app/tools/mock/flightsMock.js';
 import { isMockMode } from 'app/tools/mock/isMockMode.js';
-import { logger } from 'app/utils/logs/logger.js';
 
 function addDays(dateStr: string, days: number): string {
   const d = new Date(dateStr + 'T00:00:00Z');

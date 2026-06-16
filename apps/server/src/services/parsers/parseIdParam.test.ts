@@ -1,4 +1,4 @@
-import { parseIdParam } from 'app/utils/parsers/parseIdParam/parseIdParam.js';
+import { parseIdParam } from 'app/services/parsers/parseIdParam.js';
 import { describe, expect, it } from 'vitest';
 
 describe('parseIdParam', () => {
