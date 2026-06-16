@@ -1,7 +1,8 @@
 /** select_hotel tool: persist the user's chosen hotel to the trip. */
+import { z } from 'zod';
+
 import { locationAllowlist } from 'app/tools/registry/primitives.js';
 import type { ToolModule } from 'app/tools/registry/toolModule.js';
-import { z } from 'zod';
 
 export const selectHotelSchema = z.object({
   name: locationAllowlist,

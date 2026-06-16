@@ -1,3 +1,7 @@
+/**
+ * Displays cumulative token usage and USD cost for a session, giving users visibility
+ * into the running expense of AI generation.
+ */
 import styles from './CostCounter.module.scss';
 
 interface CostCounterProps {

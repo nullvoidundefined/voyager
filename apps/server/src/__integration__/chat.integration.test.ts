@@ -14,7 +14,7 @@
  *
  * This spec closes that gap. It exercises the chat surface end-to-end
  * with:
- *   - real Postgres (via app/db/pool, the integration runner's pool)
+ *   - real Postgres (via app/database/pool, the integration runner's pool)
  *   - real repositories (no vi.mock of conversations / trips / users)
  *   - real Express app (the same `app` shipped to production)
  *   - mocked Anthropic SDK (via E2E_MOCK_ANTHROPIC=1, the deterministic
@@ -45,11 +45,12 @@
  *     That belongs in trip-selections.integration.test.ts when ENG-17
  *     lands.
  */
-import { app } from 'app/app.js';
-import pool from 'app/db/pool/pool.js';
 import type { Server } from 'http';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
+import { app } from 'app/app.js';
+import { pool } from 'app/database/pool.js';
 
 const TEST_EMAIL = 'chat-integration@integration-test.invalid';
 const TEST_PASSWORD = 'testpassword123';

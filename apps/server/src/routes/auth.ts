@@ -1,7 +1,13 @@
-import * as authHandlers from 'app/handlers/auth/auth.js';
-import { authRateLimiter } from 'app/middleware/rateLimiter/rateLimiter.js';
-import { requireAuth } from 'app/middleware/requireAuth/requireAuth.js';
+/**
+ * Express router for the auth surface, wiring auth handlers to their paths with
+ * the rate limiter and requireAuth guard. Isolates auth route wiring from the
+ * handler implementations.
+ */
 import express from 'express';
+
+import * as authHandlers from 'app/handlers/auth.js';
+import { authRateLimiter } from 'app/middleware/rateLimiter.js';
+import { requireAuth } from 'app/middleware/requireAuth/requireAuth.js';
 
 const authRouter = express.Router();
 

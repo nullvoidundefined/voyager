@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * Renders a hotel_tiles chat node as a selectable group of HotelCards, letting
+ * the user choose lodging inline so the conversation can record the selection
+ * without a dedicated hotel-search page.
+ */
 import type { ChatNodeOfType } from '@voyager/shared-types';
 
 import { HotelCard } from '../widgets/HotelCard';

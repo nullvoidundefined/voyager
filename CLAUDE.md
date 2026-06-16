@@ -75,13 +75,13 @@ Voyager is trunk-based. Push directly to `main`. No branch protection, no PR req
 
 - Make **separate commits** for unrelated tasks. Do not bundle unrelated changes into one commit.
 
-## docs/BUGS.md severity tagging
+## Bug and work-item severity tracking
 
-Every entry in `docs/BUGS.md` must tag its first line with `severity: P0|P1|P2|P3` and `effort: S|M|L`. Anything P0 or P1 must also be mirrored into the current `docs/audits/YYYY-MM-DD-triage.md`. The 2026-04-06 process retrospective found B14 (tile selections do not persist) sitting in the "Open" section as a P0 with no urgency signal, and four cases where P0 fixes were batched alongside P3 cosmetic items in a single commit (`5ab42753`, `15f86be5`, `8f7bae5b`, `047679bc`) precisely because the entries had no severity tags forcing the conversation. Without severity tags, BUGS.md becomes an unscoped bucket and the global "triage by severity" rule is bypassed.
+Bugs and work items live in `docs/todos/`, segmented by severity into `P1-high-priority.md`, `P2-medium-priority.md`, and `P3-low-priority.md`. The file an item lives in IS its severity, so no separate `severity:` tag is needed; P0 launch-blockers and any P0/P1 surfaced by an audit belong in the P1 file at the top. This per-file segregation is the structural enforcement of the global "triage by severity" rule. The 2026-04-06 process retrospective found B14 (tile selections do not persist) sitting with no urgency signal, and four cases where P0 fixes were batched alongside P3 cosmetic items in a single commit (`5ab42753`, `15f86be5`, `8f7bae5b`, `047679bc`); keeping each item in its severity file, plus one commit per item (see "Commit conventions"), is what prevents the unscoped-bucket failure those incidents exposed.
 
 ## ChatBox invariants
 
-Before landing any further fix to `apps/client/web/src/components/ChatBox/`, write a `apps/client/web/src/components/ChatBox/ChatBox.invariants.test.tsx` that enumerates the invariants the data model must hold:
+Before landing any further fix to `apps/client/web/src/components/ChatBox/`, write a `apps/client/web/src/components/ChatBox/__tests__/ChatBox.invariants.test.tsx` that enumerates the invariants the data model must hold:
 
 - Tool-result cards persist after the SSE stream ends.
 - Text nodes never duplicate when the agent re-emits text.
@@ -93,7 +93,7 @@ Every subsequent ChatBox fix must extend this spec, not create a new ad-hoc test
 
 ## Incident history
 
-Several rules in the global Claude Code rulebook (`~/.claude/CLAUDE.md`) were motivated by specific Voyager incidents. The rules themselves are codified globally and generalized across projects. This section records the Voyager-specific context so future auditors reviewing this repo understand which past events justified which disciplines. Treat this as authoritative historical context, not optional reading. This is distinct from the shorter retrospective callouts elsewhere in this file (severity tagging at "docs/BUGS.md severity tagging," ChatBox fix-storm at "ChatBox invariants," pre-push bypass discipline at "Pre-commit / pre-push verification"), which cite the retrospective inline with the rule they motivate.
+Several rules in the global Claude Code rulebook (`~/.claude/CLAUDE.md`) were motivated by specific Voyager incidents. The rules themselves are codified globally and generalized across projects. This section records the Voyager-specific context so future auditors reviewing this repo understand which past events justified which disciplines. Treat this as authoritative historical context, not optional reading. This is distinct from the shorter retrospective callouts elsewhere in this file (severity tracking at "Bug and work-item severity tracking," ChatBox fix-storm at "ChatBox invariants," pre-push bypass discipline at "Pre-commit / pre-push verification"), which cite the retrospective inline with the rule they motivate.
 
 ### 2026-04-06 retrospective
 

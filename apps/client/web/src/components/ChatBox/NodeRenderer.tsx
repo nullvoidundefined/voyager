@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * Dispatches a single chat node to its matching presentational component. Exists
+ * to keep the node-type-to-widget mapping in one switch so the transcript
+ * renderer stays agnostic of the growing set of node variants.
+ */
 import type { ChatNode, TripPlanCard } from '@voyager/shared-types';
 
 import { TripDetailsForm } from './TripDetailsForm';

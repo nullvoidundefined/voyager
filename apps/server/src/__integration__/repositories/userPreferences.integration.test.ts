@@ -1,9 +1,10 @@
+import { describe, expect, it } from 'vitest';
+
 import {
   deleteByUserId,
   findByUserId,
   upsert,
-} from 'app/repositories/userPreferences/userPreferences.js';
-import { describe, expect, it } from 'vitest';
+} from 'app/repositories/userPreferences.js';
 
 import { seedUser } from '../helpers/seed.js';
 

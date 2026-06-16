@@ -1,9 +1,15 @@
+/**
+ * Wraps live SerpApi requests with a circuit breaker and monthly-quota guard,
+ * throwing SerpApiQuotaExceededError when the cap is hit. Exists so flight and
+ * hotel tools share one resilient, budget-aware path to SerpApi instead of
+ * calling it directly.
+ */
+import { logger } from 'app/clients/logger.js';
+import { CircuitBreaker } from 'app/resilience/CircuitBreaker.js';
 import {
   incrementMonthlyUsage,
   isOverMonthlyCap,
 } from 'app/services/cache/serpApiQuotaService.js';
-import { CircuitBreaker } from 'app/utils/CircuitBreaker.js';
-import { logger } from 'app/utils/logs/logger.js';
 
 /**
  * Thrown when serpApiGet is called but the monthly SerpApi quota has

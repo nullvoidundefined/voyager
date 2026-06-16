@@ -1,9 +1,10 @@
+import { describe, expect, it } from 'vitest';
+
 import {
   getTripWithDetails,
   insertTripFlight,
   insertTripHotel,
 } from 'app/repositories/trips/trips.js';
-import { describe, expect, it } from 'vitest';
 
 import { seedTrip, seedUser } from '../helpers/seed.js';
 

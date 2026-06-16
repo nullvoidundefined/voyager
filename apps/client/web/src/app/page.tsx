@@ -1,14 +1,20 @@
 'use client';
 
+/**
+ * Landing page. Presents the marketing hero and scripted demo chat, and redirects
+ * already-authenticated visitors into the app so the public home is shown only to
+ * logged-out users.
+ */
 import { useEffect } from 'react';
+
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { DemoBanner } from '@/components/DemoBanner/DemoBanner';
 import { useAuth } from '@/context/AuthContext';
 import { DESTINATIONS } from '@/data/destinations';
-import { getDestinationImage } from '@/lib/destinationImage/destinationImage';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { getDestinationImage } from '@/lib/destinationImage';
 
 import styles from './page.module.scss';
 

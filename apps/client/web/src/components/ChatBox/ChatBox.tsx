@@ -1,5 +1,11 @@
 'use client';
 
+/**
+ * Top-level trip-planning chat surface. Owns message state, the SSE send
+ * pipeline, optimistic user messages, and form auto-save, wiring the
+ * virtualized transcript to the streaming hook so the assistant can plan,
+ * confirm bookings, and surface costs in one place.
+ */
 import {
   type FormEvent,
   useCallback,
@@ -9,15 +15,16 @@ import {
   useState,
 } from 'react';
 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { ChatMessage, TripPlanCard } from '@voyager/shared-types';
+
 import { AIDisclosure } from '@/components/AIDisclosure/AIDisclosure';
 import { CostCounter } from '@/components/CostCounter/CostCounter';
 import { Toast } from '@/components/Toast/Toast';
-import { ToolTimeline } from '@/components/ToolTimeline/ToolTimeline';
 import type { ToolCall } from '@/components/ToolTimeline/ToolTimeline';
-import { get, post, put } from '@/lib/api/api';
-import { runDemoScript } from '@/lib/demoScript/demoScript';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ChatMessage, TripPlanCard } from '@voyager/shared-types';
+import { ToolTimeline } from '@/components/ToolTimeline/ToolTimeline';
+import { get, post, put } from '@/lib/api';
+import { runDemoScript } from '@/lib/demoScript';
 
 import styles from './ChatBox.module.scss';
 import { VirtualizedChat } from './VirtualizedChat';

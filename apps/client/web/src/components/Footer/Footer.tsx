@@ -1,8 +1,13 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
-import { APP_NAME } from '@/lib/constants/constants';
+/**
+ * Site footer with navigation links and auth-aware content, rendered across pages to
+ * provide consistent secondary navigation and build/version context.
+ */
 import Link from 'next/link';
+
+import { useAuth } from '@/context/AuthContext';
+import { APP_NAME } from '@/lib/constants';
 
 import styles from './Footer.module.scss';
 

@@ -1,3 +1,9 @@
+/**
+ * Pure budget arithmetic for a trip: sums the selected flight, hotel, car, and
+ * experience costs and computes remaining amount, per-category percentage
+ * breakdown, and an over-budget warning. Kept side-effect free so the executor
+ * can feed it either DB-sourced or agent-supplied costs.
+ */
 export interface BudgetInput {
   total_budget: number;
   flight_cost: number;

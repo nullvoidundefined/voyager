@@ -1,7 +1,13 @@
-import { query } from 'app/db/pool/pool.js';
-import { getTripWithDetails } from 'app/repositories/trips/trips.js';
-import { ApiError } from 'app/utils/ApiError.js';
+/**
+ * Express handlers for trip sharing: mint and revoke public share links and
+ * resolve a share token to its trip. Exists to gate read-only public access to a
+ * trip without granting full account access.
+ */
 import type { Request, Response } from 'express';
+
+import { query } from 'app/database/pool.js';
+import { ApiError } from 'app/errors/ApiError.js';
+import { getTripWithDetails } from 'app/repositories/trips/trips.js';
 
 export async function createShareHandler(
   req: Request<{ id: string }>,

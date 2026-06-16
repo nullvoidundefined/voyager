@@ -1,3 +1,8 @@
+/**
+ * Row of one-tap quick-reply chips. Exists to let users answer the assistant
+ * with a single click from a suggested set instead of typing, emitting the
+ * chosen chip text back to the chat.
+ */
 import styles from './QuickReplyChips.module.scss';
 
 interface QuickReplyChipsProps {

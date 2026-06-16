@@ -1,9 +1,15 @@
 'use client';
 
+/**
+ * React context for the current authenticated user. Exposes the user query plus
+ * login/logout/refresh actions so any client component can read auth state and
+ * mutate the session through one shared TanStack Query cache.
+ */
 import { createContext, useCallback, useContext, useMemo } from 'react';
 
-import { ApiError, get, post } from '@/lib/api/api';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+
+import { ApiError, get, post } from '@/lib/api';
 
 export interface User {
   id: string;

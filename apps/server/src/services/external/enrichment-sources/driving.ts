@@ -1,3 +1,8 @@
+/**
+ * Provides per-country driving requirements (road side, IDP requirement, minimum
+ * age) from a static lookup table, returned as a ChatNode. Static data because
+ * these rules change rarely and need no external call.
+ */
 import type { ChatNode } from '@voyager/shared-types';
 
 interface DrivingRequirement {

@@ -1,6 +1,7 @@
 /** calculate_remaining_budget tool: remaining trip budget after selections. */
-import type { ToolModule } from 'app/tools/registry/toolModule.js';
 import { z } from 'zod';
+
+import type { ToolModule } from 'app/tools/registry/toolModule.js';
 
 export const calculateBudgetSchema = z.object({
   total_budget: z.number().describe('Total trip budget in USD'),

@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * Renders a text chat node as markdown with citation support, so assistant prose
+ * displays formatted (lists, links, emphasis) and inline source references
+ * remain clickable within the conversation.
+ */
 import type { ChatNodeOfType, Citation } from '@voyager/shared-types';
 import ReactMarkdown from 'react-markdown';
 

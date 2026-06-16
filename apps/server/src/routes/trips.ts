@@ -1,12 +1,18 @@
+/**
+ * Express router for the trips surface, composing trip, leg, cost, schedule,
+ * share, and chat handlers under one router. Centralizes trip route wiring and
+ * its auth guards apart from the handler logic.
+ */
+import express from 'express';
+
 import * as chatHandlers from 'app/handlers/chat/chat.js';
 import * as costsHandlers from 'app/handlers/trips/costs.js';
 import * as legsHandlers from 'app/handlers/trips/legs.js';
 import * as scheduleHandlers from 'app/handlers/trips/schedule.js';
 import * as shareHandlers from 'app/handlers/trips/share.js';
 import * as tripHandlers from 'app/handlers/trips/trips.js';
-import { chatRateLimiter } from 'app/middleware/rateLimiter/rateLimiter.js';
+import { chatRateLimiter } from 'app/middleware/rateLimiter.js';
 import { requireAuth } from 'app/middleware/requireAuth/requireAuth.js';
-import express from 'express';
 
 const tripRouter = express.Router();
 

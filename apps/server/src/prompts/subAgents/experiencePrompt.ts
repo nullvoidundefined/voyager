@@ -1,6 +1,11 @@
-import type { CompletionTracker } from 'app/prompts/bookingSteps/bookingSteps.js';
-import { formatTripContext } from 'app/prompts/tripContext/tripContext.js';
-import type { TripContext } from 'app/prompts/tripContext/tripContext.js';
+/**
+ * Builds the system prompt for the experiences sub-agent. Maps traveler
+ * interests to bookable experience categories and injects trip context so the
+ * agent recommends activities aligned with stated preferences.
+ */
+import type { CompletionTracker } from 'app/prompts/bookingSteps.js';
+import type { TripContext } from 'app/prompts/tripContext.js';
+import { formatTripContext } from 'app/prompts/tripContext.js';
 
 const INTEREST_CATEGORY_MAP: Record<string, string[]> = {
   dining: ['restaurant', 'food tour', 'local market', 'rooftop bar'],

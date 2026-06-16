@@ -1,3 +1,7 @@
+/**
+ * Generates the XML sitemap of public routes for search engines, building each
+ * URL from the configured app base URL so crawlers can discover indexable pages.
+ */
 import type { MetadataRoute } from 'next';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://voyager.app';

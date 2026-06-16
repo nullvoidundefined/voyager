@@ -1,3 +1,8 @@
+/**
+ * Provides a deterministic mock @anthropic-ai/sdk client for use as a test
+ * fixture. Drives scripted conversation scenarios so agent tests run without
+ * real LLM calls. Lives outside __tests__ so multiple suites can import it.
+ */
 import type Anthropic from '@anthropic-ai/sdk';
 
 /**

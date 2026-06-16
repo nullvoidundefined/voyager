@@ -1,7 +1,8 @@
 /** select_flight tool: persist the user's chosen flight to the trip. */
+import { z } from 'zod';
+
 import { locationAllowlist } from 'app/tools/registry/primitives.js';
 import type { ToolModule } from 'app/tools/registry/toolModule.js';
-import { z } from 'zod';
 
 export const selectFlightSchema = z.object({
   airline: locationAllowlist,

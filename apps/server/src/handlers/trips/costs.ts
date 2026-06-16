@@ -1,8 +1,14 @@
-import { query } from 'app/db/pool/pool.js';
+/**
+ * Express handlers for trip cost entries (list, create, update, delete).
+ * Enforces trip ownership before mutating cost rows so users cannot touch
+ * another user's budget data.
+ */
+import type { Request, Response } from 'express';
+
+import { query } from 'app/database/pool.js';
+import { ApiError } from 'app/errors/ApiError.js';
 import { getAuthUser } from 'app/middleware/requireAuth/getAuthUser.js';
 import { getTripWithDetails } from 'app/repositories/trips/trips.js';
-import { ApiError } from 'app/utils/ApiError.js';
-import type { Request, Response } from 'express';
 
 export async function getTripCostsHandler(
   req: Request<{ id: string }>,

@@ -1,5 +1,10 @@
-import { formatTripContext } from 'app/prompts/tripContext/tripContext.js';
-import type { TripContext } from 'app/prompts/tripContext/tripContext.js';
+/**
+ * Builds the system prompt for the planning sub-agent that assembles the trip
+ * plan card. Injects trip context and the current plan card so the agent
+ * proposes a coherent itinerary rather than isolated booking suggestions.
+ */
+import type { TripContext } from 'app/prompts/tripContext.js';
+import { formatTripContext } from 'app/prompts/tripContext.js';
 import type { TripPlanCard } from 'app/types/planCard.js';
 
 export function buildPlanAgentPrompt(

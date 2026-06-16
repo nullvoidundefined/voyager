@@ -1,7 +1,9 @@
-import {
-  GENDER_OPTIONS,
-  TRAVEL_PARTY_OPTIONS,
-} from '@/lib/preferenceOptions/preferenceOptions';
+/**
+ * Wizard step for who the user travels with, combining TRAVEL_PARTY_OPTIONS and
+ * GENDER_OPTIONS so the questionnaire captures party composition that shapes
+ * downstream trip recommendations.
+ */
+import { GENDER_OPTIONS, TRAVEL_PARTY_OPTIONS } from '@/lib/preferenceOptions';
 
 import styles from '../PreferencesWizard.module.scss';
 

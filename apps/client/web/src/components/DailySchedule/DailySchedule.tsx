@@ -1,5 +1,9 @@
 'use client';
 
+/**
+ * Collapsible per-day itinerary view that groups trip activities by date, letting
+ * users expand and scan a multi-day schedule one day at a time.
+ */
 import { useState } from 'react';
 
 import * as Collapsible from '@radix-ui/react-collapsible';

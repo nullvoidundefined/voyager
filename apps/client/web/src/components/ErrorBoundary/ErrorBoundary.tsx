@@ -1,7 +1,11 @@
 'use client';
 
-import { Component } from 'react';
+/**
+ * React error boundary that catches render-time exceptions in its subtree and shows a
+ * fallback UI, preventing a single component crash from taking down the whole page.
+ */
 import type { ErrorInfo, ReactNode } from 'react';
+import { Component } from 'react';
 
 import styles from './ErrorBoundary.module.scss';
 

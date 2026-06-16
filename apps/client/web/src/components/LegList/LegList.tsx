@@ -1,3 +1,7 @@
+/**
+ * Renders the ordered legs (origin-to-destination segments) of a travel itinerary so
+ * users can see the route structure of a multi-stop trip at a glance.
+ */
 import styles from './LegList.module.scss';
 
 export interface Leg {

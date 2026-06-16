@@ -1,3 +1,9 @@
+/**
+ * Top-level entry point for the conversational agent: assembles the system
+ * prompt from trip context and booking-step state, then hands off to the
+ * orchestration loop. Exists to keep prompt assembly and turn sequencing in
+ * one place that handlers can call without knowing LLM internals.
+ */
 import type Anthropic from '@anthropic-ai/sdk';
 import type {
   ChatNode,
@@ -5,18 +11,19 @@ import type {
   SSEEvent,
   TripPlanCard,
 } from '@voyager/shared-types';
+
+import { logger } from 'app/clients/logger.js';
 import {
   type CompletionTracker,
   type FlowPosition,
-} from 'app/prompts/bookingSteps/bookingSteps.js';
-import { buildSystemPrompt } from 'app/prompts/systemPrompt/systemPrompt.js';
-import type { TripContext } from 'app/prompts/tripContext/tripContext.js';
-import { insertAgentTurnCost } from 'app/repositories/agentTurnCost/agentTurnCost.js';
-import { insertToolCallLog } from 'app/repositories/tool-call-log/tool-call-log.js';
+} from 'app/prompts/bookingSteps.js';
+import { buildSystemPrompt } from 'app/prompts/systemPrompt.js';
+import type { TripContext } from 'app/prompts/tripContext.js';
+import { insertAgentTurnCost } from 'app/repositories/agentTurnCost.js';
+import { insertToolCallLog } from 'app/repositories/tool-call-log.js';
 import { getMockAnthropicClientIfEnabled } from 'app/test-fixtures/mockAnthropicClient/mockAnthropicClient.js';
 import { TOOL_DEFINITIONS } from 'app/tools/definitions.js';
 import { type ToolContext, executeTool } from 'app/tools/executor.js';
-import { logger } from 'app/utils/logs/logger.js';
 
 import {
   AgentOrchestrator,

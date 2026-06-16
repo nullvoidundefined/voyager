@@ -1,3 +1,7 @@
+/**
+ * Deterministic car-rental fixtures for eval and E2E runs, returned in place of
+ * a live SerpApi call so tests stay reproducible and quota-free.
+ */
 import type { CarRentalInput, CarRentalResult } from '../carRentalsTool.js';
 
 export function generateMockCarRentals(input: CarRentalInput): {

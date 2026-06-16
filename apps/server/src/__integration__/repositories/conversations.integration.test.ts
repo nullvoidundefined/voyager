@@ -1,12 +1,13 @@
-import pool from 'app/db/pool/pool.js';
-import { DEFAULT_COMPLETION_TRACKER } from 'app/prompts/bookingSteps/bookingSteps.js';
+import { describe, expect, it } from 'vitest';
+
+import { pool } from 'app/database/pool.js';
+import { DEFAULT_COMPLETION_TRACKER } from 'app/prompts/bookingSteps.js';
 import {
   getMessagesByConversation,
   getOrCreateConversation,
   insertMessage,
   updateBookingState,
-} from 'app/repositories/conversations/conversations.js';
-import { describe, expect, it } from 'vitest';
+} from 'app/repositories/conversations.js';
 
 import { seedConversation, seedTrip, seedUser } from '../helpers/seed.js';
 

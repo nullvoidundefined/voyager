@@ -1,3 +1,8 @@
+/**
+ * Static Google Maps thumbnail for a lat/long location, with a pin-icon
+ * fallback when no Maps API key is configured. Exists to give location-bearing
+ * cards a lightweight visual preview without an interactive map.
+ */
 import styles from './MapPreviewCard.module.scss';
 
 interface MapPreviewCardProps {

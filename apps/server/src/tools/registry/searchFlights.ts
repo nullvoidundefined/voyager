@@ -1,10 +1,11 @@
 /** search_flights tool: flight-offer search between two airports. */
+import { z } from 'zod';
+
 import {
   dateString,
   locationAllowlist,
 } from 'app/tools/registry/primitives.js';
 import type { ToolModule } from 'app/tools/registry/toolModule.js';
-import { z } from 'zod';
 
 export const searchFlightsSchema = z.object({
   origin: locationAllowlist.describe('Origin IATA airport code (e.g., SFO)'),

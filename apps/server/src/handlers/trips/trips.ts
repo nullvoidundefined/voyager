@@ -1,22 +1,28 @@
+/**
+ * Express handlers for the core trip resource (list, read, create, update,
+ * delete). Translates validated requests into repository calls and shapes the
+ * trip-with-details response returned to the client.
+ */
+import type { Request, Response } from 'express';
+import type { ZodError } from 'zod';
+
+import { logger } from 'app/clients/logger.js';
+import { posthog } from 'app/clients/posthog.js';
+import { ApiError } from 'app/errors/ApiError.js';
 import { getAuthUser } from 'app/middleware/requireAuth/getAuthUser.js';
-import { DEFAULT_COMPLETION_TRACKER } from 'app/prompts/bookingSteps/bookingSteps.js';
+import { DEFAULT_COMPLETION_TRACKER } from 'app/prompts/bookingSteps.js';
 import {
   getOrCreateConversation,
   updateBookingState,
-} from 'app/repositories/conversations/conversations.js';
+} from 'app/repositories/conversations.js';
 import * as tripRepo from 'app/repositories/trips/trips.js';
-import { createTripSchema, updateTripSchema } from 'app/schemas/trips/trips.js';
-import posthog from 'app/services/analytics/posthog.js';
+import { createTripSchema, updateTripSchema } from 'app/schemas/trips.js';
 import {
   selectCarRentalSchema,
   selectExperienceSchema,
   selectFlightSchema,
   selectHotelSchema,
 } from 'app/tools/schemas.js';
-import { ApiError } from 'app/utils/ApiError.js';
-import { logger } from 'app/utils/logs/logger.js';
-import type { Request, Response } from 'express';
-import type { ZodError } from 'zod';
 
 function formatZodError(error: ZodError): string {
   return error.issues

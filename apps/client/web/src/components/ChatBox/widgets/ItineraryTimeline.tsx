@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * Expandable day-by-day itinerary timeline. Exists to present a multi-day plan
+ * as collapsible day sections (first day open by default) so travelers can scan
+ * the trip shape and drill into any day's items.
+ */
 import { useState } from 'react';
 
 import styles from './ItineraryTimeline.module.scss';

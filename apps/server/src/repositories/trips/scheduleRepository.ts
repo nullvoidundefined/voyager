@@ -1,4 +1,9 @@
-import { query } from 'app/db/pool/pool.js';
+/**
+ * Schedule data access for a trip's day-by-day itinerary. Persists and reads
+ * schedule items so the planned timeline is stored separately from the trip's
+ * top-level booking records.
+ */
+import { query } from 'app/database/pool.js';
 
 export interface ScheduleItem {
   id: string;

@@ -1,14 +1,20 @@
 'use client';
 
+/**
+ * Virtualized chat transcript. Renders persisted messages plus in-flight
+ * streaming nodes through a windowed list (per-node-type height estimates) so
+ * long conversations stay performant, and auto-scrolls as new content streams.
+ */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { APP_NAME } from '@/lib/constants/constants';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import type {
   ChatMessage,
   ChatNode,
   TripPlanCard,
 } from '@voyager/shared-types';
+
+import { APP_NAME } from '@/lib/constants';
 
 import { NodeRenderer } from './NodeRenderer';
 import styles from './VirtualizedChat.module.scss';
@@ -111,7 +117,7 @@ export function VirtualizedChat({
             created_at: new Date().toISOString(),
           }
         : null,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [isSending, streamingNodes, toolProgress, streamingText, messages.length],
   );
 

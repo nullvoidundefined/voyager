@@ -1,10 +1,11 @@
 /** update_trip tool: persist destination, dates, party size, and budget. */
+import { z } from 'zod';
+
 import {
   dateString,
   locationAllowlist,
 } from 'app/tools/registry/primitives.js';
 import type { ToolModule } from 'app/tools/registry/toolModule.js';
-import { z } from 'zod';
 
 export const updateTripSchema = z.object({
   destination: locationAllowlist

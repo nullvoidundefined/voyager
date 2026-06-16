@@ -1,10 +1,11 @@
 /** search_car_rentals tool: rental-car availability at a destination. */
+import { z } from 'zod';
+
 import {
   dateString,
   locationAllowlist,
 } from 'app/tools/registry/primitives.js';
 import type { ToolModule } from 'app/tools/registry/toolModule.js';
-import { z } from 'zod';
 
 export const searchCarRentalsSchema = z.object({
   pickup_location: locationAllowlist.describe(

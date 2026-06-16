@@ -1,10 +1,15 @@
 'use client';
 
+/**
+ * Scripted, non-interactive chat playback used on marketing/demo surfaces to showcase
+ * the assistant experience without a live backend connection.
+ */
 import { useEffect, useRef, useState } from 'react';
 
-import { NodeRenderer } from '@/components/ChatBox/NodeRenderer';
-import { APP_NAME } from '@/lib/constants/constants';
 import type { ChatNode } from '@voyager/shared-types';
+
+import { NodeRenderer } from '@/components/ChatBox/NodeRenderer';
+import { APP_NAME } from '@/lib/constants';
 
 import styles from './MockChatBox.module.scss';
 

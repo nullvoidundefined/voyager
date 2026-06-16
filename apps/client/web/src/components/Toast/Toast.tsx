@@ -1,5 +1,9 @@
 'use client';
 
+/**
+ * Transient notification that surfaces a message and auto-dismisses after a timeout,
+ * giving users non-blocking feedback on the outcome of an action.
+ */
 import { useEffect } from 'react';
 
 import styles from './Toast.module.scss';

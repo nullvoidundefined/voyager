@@ -1,9 +1,15 @@
-import { DESTINATIONS, getDestinationBySlug } from '@/data/destinations';
-import { getDestinationImage } from '@/lib/destinationImage/destinationImage';
+/**
+ * Destination detail page. Server-renders a single curated destination by slug
+ * with metadata for SEO, returning notFound for unknown slugs so deep links and
+ * crawlers get a proper 404.
+ */
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+
+import { DESTINATIONS, getDestinationBySlug } from '@/data/destinations';
+import { getDestinationImage } from '@/lib/destinationImage';
 
 import styles from './page.module.scss';
 

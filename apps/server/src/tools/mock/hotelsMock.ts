@@ -1,3 +1,8 @@
+/**
+ * Deterministic hotel fixtures spanning 1 to 5 stars for eval and E2E runs,
+ * returned in place of a live SerpApi call so tests stay reproducible and
+ * quota-free.
+ */
 import type { HotelSearchInput, HotelSearchOutcome } from '../hotelsTool.js';
 
 export function generateMockHotels(

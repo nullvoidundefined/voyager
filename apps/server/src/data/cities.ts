@@ -1,3 +1,7 @@
+/**
+ * Static city reference data (coordinates, country, timezone, IATA) and the
+ * CityData type, so destination lookups resolve locally without a network call.
+ */
 export interface CityData {
   lat: number;
   lon: number;

@@ -1,4 +1,9 @@
-import { query } from 'app/db/pool/pool.js';
+/**
+ * Trip leg data access. Persists and reads the individual legs of a
+ * multi-destination trip so each segment's routing can be stored and queried
+ * independently of the parent trip record.
+ */
+import { query } from 'app/database/pool.js';
 
 export interface TripLeg {
   id: string;

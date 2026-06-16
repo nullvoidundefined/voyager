@@ -1,6 +1,11 @@
-import type { CompletionTracker } from 'app/prompts/bookingSteps/bookingSteps.js';
-import { formatTripContext } from 'app/prompts/tripContext/tripContext.js';
-import type { TripContext } from 'app/prompts/tripContext/tripContext.js';
+/**
+ * Builds the system prompt for the ground-transport sub-agent (car rental and
+ * local transit). Injects trip context and booking progress so the agent
+ * recommends ground options consistent with the rest of the itinerary.
+ */
+import type { CompletionTracker } from 'app/prompts/bookingSteps.js';
+import type { TripContext } from 'app/prompts/tripContext.js';
+import { formatTripContext } from 'app/prompts/tripContext.js';
 
 export function buildGroundAgentPrompt(
   tripContext: TripContext,

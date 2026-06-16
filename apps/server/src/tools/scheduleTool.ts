@@ -1,3 +1,9 @@
+/**
+ * Daily-schedule tool handler: persists the agent's day-by-day itinerary by
+ * upserting each schedule day and inserting its activity items. Takes an
+ * adapters object so the executor injects real repository writes and tests
+ * inject doubles, keeping the handler free of direct database coupling.
+ */
 import type {
   AddItemInput,
   ScheduleDay,

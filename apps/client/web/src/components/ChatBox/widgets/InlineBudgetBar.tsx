@@ -1,4 +1,9 @@
-import { formatCurrency } from '@/lib/format/format';
+/**
+ * Compact budget meter showing allocated spend against a total, flagging an
+ * over-budget state. Exists to give an at-a-glance cost signal inline within
+ * chat cards without the full budget widget.
+ */
+import { formatCurrency } from '@/lib/format';
 
 import styles from './InlineBudgetBar.module.scss';
 

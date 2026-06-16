@@ -1,4 +1,9 @@
-import { BUDGET_COMFORT_OPTIONS } from '@/lib/preferenceOptions/preferenceOptions';
+/**
+ * Wizard step for the user's budget-comfort tier, rendering BUDGET_COMFORT_OPTIONS
+ * as a single-select so the questionnaire records how much the user wants to
+ * spend versus economize.
+ */
+import { BUDGET_COMFORT_OPTIONS } from '@/lib/preferenceOptions';
 
 import styles from '../PreferencesWizard.module.scss';
 

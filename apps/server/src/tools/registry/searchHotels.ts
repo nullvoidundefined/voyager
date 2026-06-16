@@ -1,10 +1,11 @@
 /** search_hotels tool: hotel-offer search in a city. */
+import { z } from 'zod';
+
 import {
   dateString,
   locationAllowlist,
 } from 'app/tools/registry/primitives.js';
 import type { ToolModule } from 'app/tools/registry/toolModule.js';
-import { z } from 'zod';
 
 export const searchHotelsSchema = z.object({
   city: locationAllowlist.describe('City name (e.g., Barcelona, Paris, Tokyo)'),

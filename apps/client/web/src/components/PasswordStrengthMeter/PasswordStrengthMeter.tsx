@@ -1,3 +1,7 @@
+/**
+ * Visual gauge that classifies a password into strength tiers and gives users live
+ * feedback during signup so they can choose a stronger credential.
+ */
 import styles from './PasswordStrengthMeter.module.scss';
 
 type Strength = 'empty' | 'weak' | 'fair' | 'good' | 'strong';

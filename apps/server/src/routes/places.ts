@@ -1,5 +1,11 @@
-import { photoProxyHandler } from 'app/handlers/places/photoProxy.handler.js';
+/**
+ * Express router for the places surface, exposing the photo-proxy endpoint.
+ * Keeps places route wiring separate from the handler that hides the Google API
+ * key.
+ */
 import express from 'express';
+
+import { photoProxyHandler } from 'app/handlers/photoProxy.handler.js';
 
 const placesRouter = express.Router();
 

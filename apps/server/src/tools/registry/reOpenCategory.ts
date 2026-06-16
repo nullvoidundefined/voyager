@@ -1,6 +1,7 @@
 /** re_open_category tool: re-open a previously skipped booking category. */
-import type { ToolModule } from 'app/tools/registry/toolModule.js';
 import { z } from 'zod';
+
+import type { ToolModule } from 'app/tools/registry/toolModule.js';
 
 export const reOpenCategorySchema = z.object({
   category: z

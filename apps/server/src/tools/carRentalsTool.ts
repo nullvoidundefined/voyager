@@ -1,3 +1,9 @@
+/**
+ * Car-rental search tool: queries SerpApi's google_car_rental engine, normalizes
+ * provider results into the app's CarRentalResult shape, and caches responses to
+ * stay under the SerpApi quota. Falls back to mock fixtures in eval/E2E mode.
+ */
+import { logger } from 'app/clients/logger.js';
 import {
   cacheGet,
   cacheSet,
@@ -6,7 +12,6 @@ import {
 import { serpApiGet } from 'app/services/external/serpapiService.js';
 import { generateMockCarRentals } from 'app/tools/mock/carRentalsMock.js';
 import { isMockMode } from 'app/tools/mock/isMockMode.js';
-import { logger } from 'app/utils/logs/logger.js';
 
 const CACHE_TTL = 3600; // 1 hour
 

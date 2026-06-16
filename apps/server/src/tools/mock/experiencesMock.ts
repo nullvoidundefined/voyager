@@ -1,3 +1,7 @@
+/**
+ * Deterministic experience fixtures for eval and E2E runs, returned in place of
+ * a live Google Places call so tests stay reproducible and quota-free.
+ */
 import type {
   ExperienceResult,
   ExperienceSearchInput,

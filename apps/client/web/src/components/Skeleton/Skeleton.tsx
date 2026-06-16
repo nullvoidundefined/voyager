@@ -1,3 +1,7 @@
+/**
+ * Configurable placeholder block shown while content loads, reducing layout shift and
+ * signaling pending state in place of real UI.
+ */
 import styles from './Skeleton.module.scss';
 
 interface SkeletonProps {

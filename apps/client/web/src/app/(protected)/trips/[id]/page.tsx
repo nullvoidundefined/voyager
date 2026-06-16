@@ -1,29 +1,36 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+/**
+ * Trip detail page. Renders a single trip's itinerary, map, and budget for the
+ * id in the route, and drives the planning chat, lazy-loading the map to keep the
+ * initial payload small.
+ */
+import { useCallback, useState } from 'react';
+
+import dynamic from 'next/dynamic';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { BookingConfirmation } from '@/components/BookingConfirmation/BookingConfirmation';
 import type { BookingLink } from '@/components/BookingLinks/BookingLinks';
 import { BookingLinks } from '@/components/BookingLinks/BookingLinks';
 import { ChatBox } from '@/components/ChatBox/ChatBox';
-import { DailySchedule } from '@/components/DailySchedule/DailySchedule';
 import type { ScheduleDay } from '@/components/DailySchedule/DailySchedule';
-import { LegList } from '@/components/LegList/LegList';
+import { DailySchedule } from '@/components/DailySchedule/DailySchedule';
 import type { Leg } from '@/components/LegList/LegList';
+import { LegList } from '@/components/LegList/LegList';
 import { Skeleton } from '@/components/Skeleton/Skeleton';
 import { Toast } from '@/components/Toast/Toast';
 import type { MapPin } from '@/components/TripMap/TripMap';
 import { TripMap } from '@/components/TripMap/TripMap';
-import { del, get, post, put } from '@/lib/api/api';
-import { budgetBarDivisor, isOverBudget } from '@/lib/budget/budget';
-import { getDestinationImage } from '@/lib/destinationImage/destinationImage';
-import { downloadICS } from '@/lib/exportIcs/exportIcs';
-import { formatCurrency, formatShortDate } from '@/lib/format/format';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import dynamic from 'next/dynamic';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { del, get, post, put } from '@/lib/api';
+import { budgetBarDivisor, isOverBudget } from '@/lib/budget';
+import { getDestinationImage } from '@/lib/destinationImage';
+import { downloadICS } from '@/lib/exportIcs';
+import { formatCurrency, formatShortDate } from '@/lib/format';
 
 import styles from './tripDetail.module.scss';
 
@@ -98,7 +105,6 @@ export default function TripDetailPage() {
   const [toastMessage, setToastMessage] = useState('');
   const [activeTab, setActiveTab] = useState<'chat' | 'itinerary'>('chat');
   const [bannerImageLoaded, setBannerImageLoaded] = useState(false);
-  const [pins, setPins] = useState<MapPin[]>([]);
 
   const {
     data: trip,
@@ -121,93 +127,27 @@ export default function TripDetailPage() {
     enabled: !!id,
   });
 
-  useEffect(() => {
-    if (!trip) return;
-    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-    if (!token) return;
-
-    const geocode = async (query: string): Promise<[number, number] | null> => {
-      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${token}&limit=1`;
-      const res = await fetch(url);
-      if (!res.ok) return null;
-      const data = (await res.json()) as {
-        features: { center: [number, number] }[];
-      };
-      return data.features[0]?.center ?? null;
-    };
-
-    let cancelled = false;
-
-    async function buildPins() {
-      const tasks: Promise<MapPin | null>[] = [];
-
-      for (const hotel of trip!.hotels) {
-        const query = [hotel.name, hotel.city].filter(Boolean).join(', ');
-        if (!query) continue;
-        tasks.push(
-          geocode(query).then((coords) =>
-            coords
-              ? {
-                  id: hotel.id,
-                  lat: coords[1],
-                  lng: coords[0],
-                  label: hotel.name ?? 'Hotel',
-                  type: 'hotel' as const,
-                }
-              : null,
-          ),
-        );
-      }
-
-      for (const exp of trip!.experiences) {
-        if (!exp.name) continue;
-        tasks.push(
-          geocode(`${exp.name}, ${trip!.destination}`).then((coords) =>
-            coords
-              ? {
-                  id: exp.id,
-                  lat: coords[1],
-                  lng: coords[0],
-                  label: exp.name!,
-                  type: 'experience' as const,
-                }
-              : null,
-          ),
-        );
-      }
-
-      const seenAirports = new Set<string>();
-      for (const flight of trip!.flights) {
-        for (const code of [flight.origin, flight.destination]) {
-          if (!code || seenAirports.has(code)) continue;
-          seenAirports.add(code);
-          tasks.push(
-            geocode(`${code} airport`).then((coords) =>
-              coords
-                ? {
-                    id: `airport-${code}`,
-                    lat: coords[1],
-                    lng: coords[0],
-                    label: `${code} Airport`,
-                    type: 'leg' as const,
-                  }
-                : null,
-            ),
-          );
-        }
-      }
-
-      const results = await Promise.all(tasks);
-      if (cancelled) return;
-      setPins(results.filter((p): p is MapPin => p !== null));
-    }
-
-    void buildPins();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [trip]);
+  // Map pins are derived server state (Mapbox geocoding), so they live in
+  // TanStack Query, not a useEffect+fetch. The key carries a signature of the
+  // geocode inputs so pins re-resolve when hotels/experiences/flights change
+  // but stay cached (no re-geocoding) across navigation when they do not.
+  const { data: pins = [] } = useQuery({
+    queryKey: [
+      'trip-map-pins',
+      id,
+      trip
+        ? JSON.stringify({
+            destination: trip.destination,
+            experiences: trip.experiences.map((e) => [e.id, e.name]),
+            flights: trip.flights.map((f) => [f.origin, f.destination]),
+            hotels: trip.hotels.map((h) => [h.id, h.name, h.city]),
+          })
+        : null,
+    ],
+    enabled: !!trip && !!process.env.NEXT_PUBLIC_MAPBOX_TOKEN,
+    queryFn: () =>
+      buildTripMapPins(trip!, process.env.NEXT_PUBLIC_MAPBOX_TOKEN!),
+  });
 
   const handleConfirmBooking = useCallback(async () => {
     try {
@@ -745,4 +685,80 @@ export default function TripDetailPage() {
       )}
     </div>
   );
+}
+
+async function buildTripMapPins(trip: Trip, token: string): Promise<MapPin[]> {
+  const tasks: Promise<MapPin | null>[] = [];
+
+  for (const hotel of trip.hotels) {
+    const query = [hotel.name, hotel.city].filter(Boolean).join(', ');
+    if (!query) continue;
+    tasks.push(
+      geocodePlace(query, token).then((coords) =>
+        coords
+          ? {
+              id: hotel.id,
+              lat: coords[1],
+              lng: coords[0],
+              label: hotel.name ?? 'Hotel',
+              type: 'hotel' as const,
+            }
+          : null,
+      ),
+    );
+  }
+
+  for (const exp of trip.experiences) {
+    if (!exp.name) continue;
+    tasks.push(
+      geocodePlace(`${exp.name}, ${trip.destination}`, token).then((coords) =>
+        coords
+          ? {
+              id: exp.id,
+              lat: coords[1],
+              lng: coords[0],
+              label: exp.name!,
+              type: 'experience' as const,
+            }
+          : null,
+      ),
+    );
+  }
+
+  const seenAirports = new Set<string>();
+  for (const flight of trip.flights) {
+    for (const code of [flight.origin, flight.destination]) {
+      if (!code || seenAirports.has(code)) continue;
+      seenAirports.add(code);
+      tasks.push(
+        geocodePlace(`${code} airport`, token).then((coords) =>
+          coords
+            ? {
+                id: `airport-${code}`,
+                lat: coords[1],
+                lng: coords[0],
+                label: `${code} Airport`,
+                type: 'leg' as const,
+              }
+            : null,
+        ),
+      );
+    }
+  }
+
+  const results = await Promise.all(tasks);
+  return results.filter((p): p is MapPin => p !== null);
+}
+
+async function geocodePlace(
+  query: string,
+  token: string,
+): Promise<[number, number] | null> {
+  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${token}&limit=1`;
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  const data = (await res.json()) as {
+    features: { center: [number, number] }[];
+  };
+  return data.features[0]?.center ?? null;
 }

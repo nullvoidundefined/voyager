@@ -1,6 +1,7 @@
 /** reorder_legs tool: re-sequence the legs of a multi-city trip. */
-import type { ToolModule } from 'app/tools/registry/toolModule.js';
 import { z } from 'zod';
+
+import type { ToolModule } from 'app/tools/registry/toolModule.js';
 
 export const reorderLegsSchema = z.object({
   ordered_leg_ids: z

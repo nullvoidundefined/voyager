@@ -1,9 +1,15 @@
 'use client';
 
-import { getDestinationImage } from '@/lib/destinationImage/destinationImage';
-import { formatCurrency, formatShortDate } from '@/lib/format/format';
-import * as Dialog from '@radix-ui/react-dialog';
+/**
+ * Modal dialog confirming a completed booking, presenting the booking details and
+ * outcome to the user after a reservation action resolves.
+ */
 import Image from 'next/image';
+
+import * as Dialog from '@radix-ui/react-dialog';
+
+import { getDestinationImage } from '@/lib/destinationImage';
+import { formatCurrency, formatShortDate } from '@/lib/format';
 
 import styles from './BookingConfirmation.module.scss';
 

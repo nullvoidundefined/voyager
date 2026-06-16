@@ -1,10 +1,17 @@
 'use client';
 
+/**
+ * Hook that streams assistant replies over Server-Sent Events. Owns the fetch
+ * stream lifecycle, abort handling, and incremental accumulation of nodes,
+ * text deltas, tool progress, and live token counts, so the chat UI can render
+ * partial responses as they arrive instead of waiting for completion.
+ */
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { API_BASE } from '@/lib/api/api';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ChatNode, SSEEvent } from '@voyager/shared-types';
+
+import { API_BASE } from '@/lib/api';
 
 interface UseSSEChatOptions {
   tripId: string;

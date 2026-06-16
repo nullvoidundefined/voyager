@@ -1,3 +1,7 @@
+/**
+ * Chronological view of the assistant's tool calls during a turn, exposing the
+ * agentic steps so users can see what actions the AI took and in what order.
+ */
 import styles from './ToolTimeline.module.scss';
 
 export interface ToolCall {

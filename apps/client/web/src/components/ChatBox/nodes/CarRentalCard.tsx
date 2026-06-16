@@ -1,5 +1,11 @@
-import { formatCurrency, formatShortDate } from '@/lib/format/format';
+/**
+ * Presents a single car rental option as a selectable card with formatted price
+ * and dates. Exists as the per-item renderer that CarRentalTiles composes into a
+ * selectable group.
+ */
 import type { CarRental } from '@voyager/shared-types';
+
+import { formatCurrency, formatShortDate } from '@/lib/format';
 
 import styles from './CarRentalCard.module.scss';
 

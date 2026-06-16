@@ -1,3 +1,7 @@
+/**
+ * Renders a list of external booking links (flights, hotels, activities) so users can
+ * follow through to third-party providers from within an itinerary.
+ */
 import styles from './BookingLinks.module.scss';
 
 export interface BookingLink {

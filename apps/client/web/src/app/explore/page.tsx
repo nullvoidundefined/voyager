@@ -1,18 +1,20 @@
 'use client';
 
+/**
+ * Explore index page. Lets visitors browse and filter the curated destination
+ * catalog, the public discovery surface that seeds trip ideas before sign-in.
+ */
 import { useState } from 'react';
+
+import Image from 'next/image';
+import Link from 'next/link';
 
 import {
   CATEGORY_FILTERS,
   DESTINATIONS,
   type Destination,
 } from '@/data/destinations';
-import {
-  HERO_IMAGES,
-  getDestinationImage,
-} from '@/lib/destinationImage/destinationImage';
-import Image from 'next/image';
-import Link from 'next/link';
+import { HERO_IMAGES, getDestinationImage } from '@/lib/destinationImage';
 
 import styles from './page.module.scss';
 

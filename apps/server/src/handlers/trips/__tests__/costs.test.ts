@@ -1,13 +1,14 @@
-import * as pool from 'app/db/pool/pool.js';
-import * as costsHandlers from 'app/handlers/trips/costs.js';
-import { errorHandler } from 'app/middleware/errorHandler/errorHandler.js';
-import * as tripsRepo from 'app/repositories/trips/trips.js';
-import { uuid } from 'app/utils/tests/uuids.js';
 import express from 'express';
 import request from 'supertest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('app/db/pool/pool.js');
+import * as pool from 'app/database/pool.js';
+import * as costsHandlers from 'app/handlers/trips/costs.js';
+import { errorHandler } from 'app/middleware/errorHandler.js';
+import * as tripsRepo from 'app/repositories/trips/trips.js';
+import { uuid } from 'app/test-fixtures/uuids.js';
+
+vi.mock('app/database/pool.js');
 vi.mock('app/repositories/trips/trips.js');
 
 const userId = uuid(0);

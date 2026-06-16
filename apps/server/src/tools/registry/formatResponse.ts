@@ -1,6 +1,7 @@
 /** format_response tool: the required final tool call carrying the turn's reply. */
-import type { ToolModule } from 'app/tools/registry/toolModule.js';
 import { z } from 'zod';
+
+import type { ToolModule } from 'app/tools/registry/toolModule.js';
 
 const citationSchema = z.object({
   id: z.string(),

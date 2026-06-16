@@ -1,3 +1,9 @@
+/**
+ * Aggregates destination enrichment (visa, driving, weather, travel advisories)
+ * from the individual enrichment-source modules into a single set of ChatNodes.
+ * Exists as the one place that fans out to every source and assembles their
+ * results for a destination.
+ */
 import type { ChatNode } from '@voyager/shared-types';
 
 import { lookupCity } from '../../data/cities.js';

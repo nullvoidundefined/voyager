@@ -1,14 +1,17 @@
 'use client';
 
+/**
+ * Multi-step modal that collects a user's travel preferences and persists them
+ * via PUT, driving each step from WIZARD_STEPS so the questionnaire stays the
+ * single source of onboarding preference data feeding trip personalization.
+ */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { put } from '@/lib/api/api';
-import {
-  type UserPreferences,
-  WIZARD_STEPS,
-} from '@/lib/preferenceOptions/preferenceOptions';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useQueryClient } from '@tanstack/react-query';
+
+import { put } from '@/lib/api';
+import { type UserPreferences, WIZARD_STEPS } from '@/lib/preferenceOptions';
 
 import styles from './PreferencesWizard.module.scss';
 import { AccommodationStep } from './steps/AccommodationStep';

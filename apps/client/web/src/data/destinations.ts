@@ -1,3 +1,9 @@
+/**
+ * Static catalog of curated travel destinations and their metadata, plus lookup
+ * helpers. Exists as the client-side source of truth for the explore pages and
+ * for resolving slugs to destination records without a network round-trip.
+ */
+
 export interface Destination {
   slug: string;
   name: string;

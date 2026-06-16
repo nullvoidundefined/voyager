@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * Editable summary card for a proposed trip plan. Exists to let travelers review
+ * and tweak a draft plan before confirming, cloning the card locally so edits
+ * stay uncommitted until confirm emits the final card plus a summary message.
+ */
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { TripPlanCard } from '@voyager/shared-types';

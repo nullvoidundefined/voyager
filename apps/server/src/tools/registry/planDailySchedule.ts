@@ -1,7 +1,8 @@
 /** plan_daily_schedule tool: write a day-by-day itinerary for the trip. */
+import { z } from 'zod';
+
 import { dateString } from 'app/tools/registry/primitives.js';
 import type { ToolModule } from 'app/tools/registry/toolModule.js';
-import { z } from 'zod';
 
 const scheduleItemSchema = z.object({
   time_of_day: z.enum(['morning', 'afternoon', 'evening']),

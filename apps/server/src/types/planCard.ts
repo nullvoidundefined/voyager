@@ -1,3 +1,9 @@
+/**
+ * Shared TypeScript types for the trip plan card and its experience interests.
+ * Central type definitions consumed by prompt builders and handlers so the
+ * plan card shape stays consistent across the server.
+ */
+
 export type ExperienceInterest =
   | 'dining'
   | 'nightlife'

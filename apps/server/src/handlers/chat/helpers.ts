@@ -1,18 +1,24 @@
+/**
+ * Streaming helpers for the chat handlers: builds SSE events and tracks
+ * completion state across a chat turn. Extracted from the handler so the
+ * request/response plumbing stays separate from the incremental token logic.
+ */
 import type { ChatNode, SSEEvent } from '@voyager/shared-types';
+import type { Response } from 'express';
+
 import {
   type CompletionTracker,
   type TripState,
   getFlowPosition,
-} from 'app/prompts/bookingSteps/bookingSteps.js';
-import type { TripContext } from 'app/prompts/tripContext/tripContext.js';
-import type { TripWithDetails } from 'app/schemas/trips/trips.js';
-import type { UserPreferences } from 'app/schemas/userPreferences/userPreferences.js';
+} from 'app/prompts/bookingSteps.js';
+import type { TripContext } from 'app/prompts/tripContext.js';
+import type { TripWithDetails } from 'app/schemas/trips.js';
+import type { UserPreferences } from 'app/schemas/userPreferences.js';
 import {
   EXPERIENCE_INTEREST_OPTIONS,
   type ExperienceInterest,
   type TripPlanCard,
 } from 'app/types/planCard.js';
-import type { Response } from 'express';
 
 /** Map a TripWithDetails to the TripState shape needed by getFlowPosition. */
 export function toFlowInput(trip: TripWithDetails): TripState {

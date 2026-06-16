@@ -1,5 +1,11 @@
 'use client';
 
+/**
+ * Inline structured-input form rendered inside the chat for collecting trip
+ * details (destination, dates, budget, travelers). Exists so the assistant can
+ * gather required fields as a typed form rather than free text, emitting both
+ * machine-readable data and a human-readable display message on submit.
+ */
 import { type FormEvent, useEffect, useState } from 'react';
 
 import styles from './TripDetailsForm.module.scss';

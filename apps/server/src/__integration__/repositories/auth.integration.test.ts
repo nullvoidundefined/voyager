@@ -1,4 +1,7 @@
-import pool from 'app/db/pool/pool.js';
+import crypto from 'node:crypto';
+import { afterEach, describe, expect, it } from 'vitest';
+
+import { pool } from 'app/database/pool.js';
 import {
   createSession,
   createUser,
@@ -9,9 +12,7 @@ import {
   findUserById,
   getSessionWithUser,
   loginUser,
-} from 'app/repositories/auth/auth.js';
-import crypto from 'node:crypto';
-import { afterEach, describe, expect, it } from 'vitest';
+} from 'app/repositories/auth.js';
 
 import { seedUser } from '../helpers/seed.js';
 

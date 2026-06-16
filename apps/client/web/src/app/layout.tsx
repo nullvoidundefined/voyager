@@ -1,12 +1,18 @@
+/**
+ * Root App Router layout. Wraps every page in the global providers (auth, query),
+ * chrome (header, footer), and error boundary, and declares site-wide metadata
+ * and stylesheet imports so all routes share one shell.
+ */
+import type { Metadata } from 'next';
+
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary/ErrorBoundary';
 import { Footer } from '@/components/Footer/Footer';
 import { Header } from '@/components/Header/Header';
 import { AuthProvider } from '@/context/AuthContext';
-import { APP_NAME } from '@/lib/constants/constants';
+import { APP_NAME } from '@/lib/constants';
 import { QueryProvider } from '@/providers/QueryProvider';
-import type { Metadata } from 'next';
 
 import '../styles/animations.scss';
 import './globals.scss';

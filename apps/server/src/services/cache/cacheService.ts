@@ -1,6 +1,10 @@
-import { logger } from 'app/utils/logs/logger.js';
-
-import { connectRedis, disconnectRedis, getRedis } from './redisService.js';
+/**
+ * Thin JSON cache facade over Redis: get/set with safe fallback so a cache
+ * outage degrades to a miss rather than an error. Exists so callers can cache
+ * without handling Redis connection state or serialization themselves.
+ */
+import { logger } from 'app/clients/logger.js';
+import { connectRedis, disconnectRedis, getRedis } from 'app/clients/redis.js';
 
 export { connectRedis, disconnectRedis, getRedis };
 
