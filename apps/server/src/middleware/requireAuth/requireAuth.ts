@@ -1,3 +1,8 @@
+/**
+ * Express middleware that authenticates a request from its session cookie and
+ * attaches the resolved User. Gatekeeps protected routes and rejects missing or
+ * invalid sessions before any handler runs.
+ */
 import type { NextFunction, Request, Response } from 'express';
 
 import { SESSION_COOKIE_NAME } from 'app/constants/session.js';

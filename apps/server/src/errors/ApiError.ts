@@ -1,3 +1,8 @@
+/**
+ * Application error type that carries an HTTP status code, a stable machine
+ * code, and optional details, so handlers can throw domain failures and the
+ * error middleware can map them to consistent responses.
+ */
 export class ApiError extends Error {
   public readonly statusCode: number;
   public readonly code: string;

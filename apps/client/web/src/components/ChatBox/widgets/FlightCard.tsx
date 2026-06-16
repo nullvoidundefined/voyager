@@ -1,3 +1,8 @@
+/**
+ * Selectable card for a single flight option (airline, route, time, price, logo
+ * with code fallback). Exists as the per-item tile inside flight selection
+ * groups, rendering as a pressable button for accessible selection.
+ */
 import { formatCurrency } from '@/lib/format/format';
 
 import styles from './FlightCard.module.scss';

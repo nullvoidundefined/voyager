@@ -1,3 +1,8 @@
+/**
+ * Root App Router layout. Wraps every page in the global providers (auth, query),
+ * chrome (header, footer), and error boundary, and declares site-wide metadata
+ * and stylesheet imports so all routes share one shell.
+ */
 import type { Metadata } from 'next';
 
 import 'mapbox-gl/dist/mapbox-gl.css';

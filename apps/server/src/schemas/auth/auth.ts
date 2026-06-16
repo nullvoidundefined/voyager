@@ -1,3 +1,8 @@
+/**
+ * Zod request schemas for the auth endpoints (register, login). Validates and
+ * bounds untrusted credential input at the edge so handlers receive
+ * well-formed, length-checked data.
+ */
 import { z } from 'zod';
 
 export const registerSchema = z.object({

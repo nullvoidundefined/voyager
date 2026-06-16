@@ -1,3 +1,8 @@
+/**
+ * Express handlers for trip sharing: mint and revoke public share links and
+ * resolve a share token to its trip. Exists to gate read-only public access to a
+ * trip without granting full account access.
+ */
 import type { Request, Response } from 'express';
 
 import { query } from 'app/database/pool/pool.js';

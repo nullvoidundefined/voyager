@@ -1,5 +1,9 @@
 'use client';
 
+/**
+ * Interactive map rendering a trip's geographic locations and route, giving users a
+ * spatial view of their itinerary alongside the textual schedule.
+ */
 import { useEffect, useRef } from 'react';
 
 import styles from './TripMap.module.scss';

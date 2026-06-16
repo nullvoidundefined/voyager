@@ -1,3 +1,8 @@
+/**
+ * Wizard step for the user's activity interests, rendering ACTIVITY_OPTIONS as a
+ * multi-select so the questionnaire can capture several preferred activity types
+ * at once.
+ */
 import { ACTIVITY_OPTIONS } from '@/lib/preferenceOptions/preferenceOptions';
 
 import styles from '../PreferencesWizard.module.scss';

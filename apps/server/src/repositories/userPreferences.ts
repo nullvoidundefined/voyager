@@ -1,3 +1,8 @@
+/**
+ * User preferences data access. Reads and writes a user's travel preferences,
+ * normalizing legacy rows on read so older persisted shapes are migrated to the
+ * current schema before reaching the rest of the app.
+ */
 import { query } from 'app/database/pool/pool.js';
 import {
   type UserPreferences,

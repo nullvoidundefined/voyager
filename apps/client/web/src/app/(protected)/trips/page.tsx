@@ -1,5 +1,9 @@
 'use client';
 
+/**
+ * Trips list page. Shows the user's saved trips with cover imagery and supports
+ * creating and deleting trips, serving as the hub for managing planned travel.
+ */
 import { useState } from 'react';
 
 import Image from 'next/image';

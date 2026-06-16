@@ -1,3 +1,7 @@
+/**
+ * Deterministic flight fixtures for eval and E2E runs, returned in place of a
+ * live SerpApi call so tests stay reproducible and quota-free.
+ */
 import type { FlightSearchInput, FlightSearchOutcome } from '../flightsTool.js';
 
 export function generateMockFlights(

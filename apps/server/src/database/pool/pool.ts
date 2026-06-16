@@ -1,3 +1,9 @@
+/**
+ * The single PostgreSQL connection pool (node-postgres) and the query /
+ * withTransaction helpers built on it. This is the one database access point
+ * that sits below the repository layer; nothing above repositories touches pg
+ * directly.
+ */
 import pg from 'pg';
 
 import { logger } from 'app/clients/logger.js';

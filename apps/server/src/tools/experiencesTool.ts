@@ -1,3 +1,9 @@
+/**
+ * Experiences search tool: queries the Google Places text-search API, maps
+ * verbose place types to user-facing category buckets and price levels to
+ * estimated costs, and caches results behind a circuit breaker to survive
+ * upstream outages. Falls back to mock fixtures in eval/E2E mode.
+ */
 import { logger } from 'app/clients/logger.js';
 import { CircuitBreaker } from 'app/resilience/CircuitBreaker.js';
 import {

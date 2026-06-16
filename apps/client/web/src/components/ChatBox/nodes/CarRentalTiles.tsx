@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * Renders a car_rental_tiles chat node as a selectable group of CarRentalCards,
+ * letting the user pick a rental directly in the conversation and feed that
+ * choice back into the trip without a separate page.
+ */
 import type { ChatNodeOfType } from '@voyager/shared-types';
 
 import { SelectableCardGroup } from '../widgets/SelectableCardGroup';

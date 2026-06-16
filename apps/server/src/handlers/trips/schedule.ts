@@ -1,3 +1,7 @@
+/**
+ * Express handlers for a trip's day-by-day schedule. Exposes the schedule
+ * read/write surface while keeping ownership checks at the handler boundary.
+ */
 import type { Request, Response } from 'express';
 
 import { ApiError } from 'app/errors/ApiError.js';

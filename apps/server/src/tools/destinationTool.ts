@@ -1,3 +1,9 @@
+/**
+ * Destination-info tool: resolves a city name to its IATA codes, country,
+ * timezone, currency, and best-time-to-visit via the local cities dataset. Gives
+ * the agent canonical airport codes so downstream flight searches use real IATA
+ * identifiers rather than free-text city names.
+ */
 import { lookupCity } from '../data/cities.js';
 
 export interface DestinationInput {

@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * Renders a flight_tiles chat node as a selectable group of FlightCards, letting
+ * the user pick a flight inline so the conversation can capture the selection
+ * without routing to a separate booking screen.
+ */
 import type { ChatNodeOfType } from '@voyager/shared-types';
 
 import { FlightCard } from '../widgets/FlightCard';

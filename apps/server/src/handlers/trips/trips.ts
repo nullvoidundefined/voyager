@@ -1,3 +1,8 @@
+/**
+ * Express handlers for the core trip resource (list, read, create, update,
+ * delete). Translates validated requests into repository calls and shapes the
+ * trip-with-details response returned to the client.
+ */
 import type { Request, Response } from 'express';
 import type { ZodError } from 'zod';
 

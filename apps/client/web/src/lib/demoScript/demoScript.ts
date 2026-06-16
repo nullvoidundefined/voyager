@@ -1,3 +1,9 @@
+/**
+ * Drives the scripted demo conversation on the landing page, emitting canned
+ * user messages on a timer so visitors see the chat flow without an account.
+ * Returns a cancel function so the caller can stop playback on unmount.
+ */
+
 const SCRIPT = [
   'I want to plan a 7-day trip to Barcelona for 2 people in August with a $5,000 budget.',
   'We prefer boutique hotels near the Gothic Quarter.',

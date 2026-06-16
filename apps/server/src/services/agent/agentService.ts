@@ -1,3 +1,9 @@
+/**
+ * Top-level entry point for the conversational agent: assembles the system
+ * prompt from trip context and booking-step state, then hands off to the
+ * orchestration loop. Exists to keep prompt assembly and turn sequencing in
+ * one place that handlers can call without knowing LLM internals.
+ */
 import type Anthropic from '@anthropic-ai/sdk';
 import type {
   ChatNode,

@@ -1,3 +1,8 @@
+/**
+ * Express handlers for the chat surface, driving the conversational trip-planning
+ * flow. Owns request validation and SSE response wiring so the streaming
+ * completion logic stays isolated in its helpers.
+ */
 import type { ChatMessage, ChatNode } from '@voyager/shared-types';
 import type { Request, Response } from 'express';
 

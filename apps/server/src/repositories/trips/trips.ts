@@ -1,3 +1,8 @@
+/**
+ * Core trip data access: creates, reads, and updates trips and their nested
+ * booking records (flights, hotels, car rentals) within transactions. Central
+ * repository that keeps a trip and its bookings consistent below the handlers.
+ */
 import { query, withTransaction } from 'app/database/pool/pool.js';
 import type {
   CreateTripInput,

@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * Renders an experience_tiles chat node as a selectable group of ExperienceCards,
+ * letting the user choose activities inline so the conversation can collect
+ * experience selections without leaving the chat.
+ */
 import type { ChatNodeOfType } from '@voyager/shared-types';
 
 import { ExperienceCard } from '../widgets/ExperienceCard';

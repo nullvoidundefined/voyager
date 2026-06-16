@@ -1,4 +1,9 @@
-// Static destinations data — public, aggressively cached
+/**
+ * Express application setup and server bootstrap. Wires middleware, static
+ * assets, and route handlers into the app and exposes startServer, so the
+ * HTTP surface is assembled in one place separate from the process entry point.
+ */
+// Static destinations data: public, aggressively cached
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import helmet from 'helmet';

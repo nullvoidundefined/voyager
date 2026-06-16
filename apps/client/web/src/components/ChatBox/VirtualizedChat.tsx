@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * Virtualized chat transcript. Renders persisted messages plus in-flight
+ * streaming nodes through a windowed list (per-node-type height estimates) so
+ * long conversations stay performant, and auto-scrolls as new content streams.
+ */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useVirtualizer } from '@tanstack/react-virtual';

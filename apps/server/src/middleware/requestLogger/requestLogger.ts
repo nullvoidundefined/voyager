@@ -1,3 +1,8 @@
+/**
+ * Express request-logging middleware built on pino-http. Assigns a per-request
+ * UUID for correlation and emits structured access logs, giving every request a
+ * traceable identifier.
+ */
 import { randomUUID } from 'crypto';
 import { pinoHttp } from 'pino-http';
 

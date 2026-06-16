@@ -1,3 +1,7 @@
+/**
+ * Zod request schemas for trip create and update endpoints. Validates and
+ * bounds untrusted trip input at the edge so handlers receive well-formed data.
+ */
 import { z } from 'zod';
 
 export const createTripSchema = z.object({

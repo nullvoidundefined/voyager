@@ -1,3 +1,8 @@
+/**
+ * Auth data access: user creation with bcrypt password hashing and SHA-256
+ * session token storage and lookup. Isolates all credential and session
+ * persistence so hashing and TTL rules live in one place below the handlers.
+ */
 import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
 

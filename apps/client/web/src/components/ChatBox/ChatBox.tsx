@@ -1,5 +1,11 @@
 'use client';
 
+/**
+ * Top-level trip-planning chat surface. Owns message state, the SSE send
+ * pipeline, optimistic user messages, and form auto-save, wiring the
+ * virtualized transcript to the streaming hook so the assistant can plan,
+ * confirm bookings, and surface costs in one place.
+ */
 import {
   type FormEvent,
   useCallback,

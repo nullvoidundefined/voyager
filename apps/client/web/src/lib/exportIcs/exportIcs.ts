@@ -1,3 +1,8 @@
+/**
+ * Converts a trip's day-by-day schedule into an .ics calendar file and triggers
+ * a browser download. Exists so users can export an itinerary into any calendar
+ * app, mapping coarse time-of-day labels to concrete event times.
+ */
 import { createEvents } from 'ics';
 
 interface ScheduleItem {

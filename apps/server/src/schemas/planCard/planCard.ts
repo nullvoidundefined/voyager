@@ -1,3 +1,8 @@
+/**
+ * Zod schema for the plan confirmation payload persisted to the booking_state
+ * JSONB column. Exists to bound every nested collection and string from
+ * untrusted client input so a malicious payload cannot inflate the row.
+ */
 import { z } from 'zod';
 
 // SEC-04: planConfirmation arrives from the client and is persisted to

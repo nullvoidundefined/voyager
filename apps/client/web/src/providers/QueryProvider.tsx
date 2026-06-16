@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * Provides a per-client TanStack QueryClient via lazy useState init, so the
+ * instance is created once per browser session (never shared across SSR
+ * requests) and carries the app's default stale-time and retry policy.
+ */
 import { useState } from 'react';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

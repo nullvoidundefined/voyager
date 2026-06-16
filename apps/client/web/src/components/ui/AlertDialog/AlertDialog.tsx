@@ -1,5 +1,9 @@
 'use client';
 
+/**
+ * Project wrapper around Radix AlertDialog that applies app styling and a consistent
+ * confirm/cancel API, so destructive-action prompts look and behave uniformly.
+ */
 import type { ReactNode } from 'react';
 
 import * as RadixAlertDialog from '@radix-ui/react-alert-dialog';

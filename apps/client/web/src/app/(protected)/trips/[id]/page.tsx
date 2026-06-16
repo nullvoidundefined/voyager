@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * Trip detail page. Renders a single trip's itinerary, map, and budget for the
+ * id in the route, and drives the planning chat, lazy-loading the map to keep the
+ * initial payload small.
+ */
 import { useCallback, useState } from 'react';
 
 import dynamic from 'next/dynamic';

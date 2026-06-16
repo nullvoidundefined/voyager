@@ -1,3 +1,9 @@
+/**
+ * Re-exports shared preference option constants and holds the client-only wizard
+ * step ordering plus the looser client UserPreferences type. Exists so import
+ * sites keep one entry point while UI-specific concerns stay on the client.
+ */
+
 // Option constants now live in @voyager/shared-types.
 // Re-exported here for backwards compatibility with existing import sites.
 export {

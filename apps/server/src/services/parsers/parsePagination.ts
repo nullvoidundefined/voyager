@@ -1,3 +1,9 @@
+/**
+ * Parses and clamps list-endpoint pagination params into a safe { limit, offset },
+ * applying defaults and a maximum limit. Exists to keep pagination bounds
+ * consistent and prevent oversized queries across handlers.
+ */
+
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 100;
 

@@ -1,3 +1,8 @@
+/**
+ * Resolves a free-text city or country name to a static destination image URL.
+ * Exists so LLM-suggested place names (not just curated destinations) still get
+ * a representative hero image, with curated slugs winning over the extended list.
+ */
 import { DESTINATIONS } from '../../data/destinations';
 
 // Build the base lookup from curated destinations. Curated slugs take

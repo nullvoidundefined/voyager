@@ -1,3 +1,8 @@
+/**
+ * Builds the system prompt for the hotel-booking sub-agent. Folds trip context
+ * and booking progress into prompt text so the agent proposes accommodation
+ * matching the trip's dates, destination, and stated preferences.
+ */
 import type { CompletionTracker } from 'app/prompts/bookingSteps/bookingSteps.js';
 import type { TripContext } from 'app/prompts/tripContext/tripContext.js';
 import { formatTripContext } from 'app/prompts/tripContext/tripContext.js';

@@ -1,3 +1,8 @@
+/**
+ * Wizard step for the user's single accommodation-type preference, rendering the
+ * ACCOMMODATION_OPTIONS as a single-select so the questionnaire captures lodging
+ * style in one place.
+ */
 import { ACCOMMODATION_OPTIONS } from '@/lib/preferenceOptions/preferenceOptions';
 
 import styles from '../PreferencesWizard.module.scss';

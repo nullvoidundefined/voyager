@@ -1,3 +1,9 @@
+/**
+ * Central tool dispatcher: validates each tool call's input against its Zod
+ * schema, then routes to the matching tool implementation or repository write.
+ * The single switch is the one place tool names map to behavior, and the
+ * adapters seam lets tests swap external-API tools for deterministic doubles.
+ */
 import type { ZodError, ZodSchema } from 'zod';
 
 import { logger } from 'app/clients/logger.js';

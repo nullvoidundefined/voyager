@@ -1,3 +1,8 @@
+/**
+ * Progress bar for streaming chat work. Supports a determinate mode (done/total
+ * with a latest-step label) and an indeterminate mode, so the UI can show real
+ * tool progress when counts are known and an animated placeholder otherwise.
+ */
 import styles from './ChatProgressBar.module.scss';
 
 type ChatProgressBarProps =

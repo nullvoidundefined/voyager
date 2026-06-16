@@ -1,3 +1,8 @@
+/**
+ * Express handlers for trip legs (the ordered segments of a trip). Validates leg
+ * payloads with Zod and scopes every operation to the authenticated owner of the
+ * parent trip.
+ */
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 

@@ -1,3 +1,7 @@
+/**
+ * FAQ page. Server-renders static answers to common product questions with SEO
+ * metadata, giving prospective users a no-auth reference before they sign up.
+ */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 

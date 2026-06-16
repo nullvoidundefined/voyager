@@ -1,3 +1,8 @@
+/**
+ * Inline SVG of the Google brand mark, used on the Google sign-in button so the icon
+ * scales crisply and ships without an external asset request.
+ */
+
 export function GoogleIcon({ size = 18 }: { size?: number }) {
   return (
     <svg

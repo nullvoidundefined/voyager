@@ -1,3 +1,9 @@
+/**
+ * Fetches US State Department travel advisories from the official JSON feed and
+ * returns the matching destination advisory as a ChatNode, caching the feed for
+ * a day. Exists to surface official US government guidance as one enrichment
+ * source.
+ */
 import type { ChatNode } from '@voyager/shared-types';
 
 import { logger } from 'app/clients/logger.js';

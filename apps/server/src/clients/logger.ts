@@ -1,3 +1,8 @@
+/**
+ * Shared pino logger singleton used across every server layer so log output is
+ * structured JSON in production and human-readable in development. Centralized
+ * here to keep the level and transport configuration in one place.
+ */
 import pino from 'pino';
 
 const isProd = process.env.NODE_ENV === 'production';

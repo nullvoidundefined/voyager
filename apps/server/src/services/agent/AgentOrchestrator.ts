@@ -1,3 +1,9 @@
+/**
+ * Drives the multi-turn agent loop: repeatedly calls the LLM, executes any
+ * requested tool calls, and feeds results back until the model stops or the
+ * per-message iteration cap (DEFAULT_MAX_ITERATIONS) is hit. The cap exists to
+ * bound worst-case token burn per user message until cost is persisted.
+ */
 import type Anthropic from '@anthropic-ai/sdk';
 import type { ChatNode, SSEEvent } from '@voyager/shared-types';
 

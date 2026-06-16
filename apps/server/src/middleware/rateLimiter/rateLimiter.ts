@@ -1,3 +1,8 @@
+/**
+ * Express rate-limiting middleware backed by Redis. Provides shared limiters
+ * (including a stricter auth limiter) so abusive request volume is throttled
+ * consistently across instances via a distributed store.
+ */
 import rateLimit, { type Store } from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
 

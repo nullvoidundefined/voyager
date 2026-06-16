@@ -1,5 +1,11 @@
 'use client';
 
+/**
+ * Generic single-select group wrapper for option cards (flights, hotels, car
+ * rentals, experiences). Exists to centralize the select-then-confirm
+ * interaction and confirmed-state handling, rendering each item via a
+ * caller-supplied node so card visuals stay decoupled from selection logic.
+ */
 import { Fragment, type ReactNode, useState } from 'react';
 
 import styles from './SelectableCardGroup.module.scss';

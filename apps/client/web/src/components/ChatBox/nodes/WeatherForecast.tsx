@@ -1,3 +1,8 @@
+/**
+ * Renders a weather_forecast chat node as a day-by-day forecast strip, giving
+ * users destination weather inline so they can factor conditions into trip
+ * planning without leaving the conversation.
+ */
 import type { ChatNodeOfType, WeatherDay } from '@voyager/shared-types';
 
 import styles from './WeatherForecast.module.scss';

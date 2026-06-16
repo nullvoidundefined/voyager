@@ -1,3 +1,8 @@
+/**
+ * Express handlers for the authentication surface (signup, login, logout, and
+ * current-user lookup). Centralizes session cookie issuance and auth analytics
+ * so route definitions stay declarative.
+ */
 import type { Request, Response } from 'express';
 
 import { logger } from 'app/clients/logger.js';

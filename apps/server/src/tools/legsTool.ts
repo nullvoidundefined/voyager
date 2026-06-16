@@ -1,3 +1,9 @@
+/**
+ * Multi-leg itinerary tool handlers: add, remove, and reorder the trip legs that
+ * model a multi-city journey. Each handler takes an adapters object so the
+ * executor injects the real repository functions and tests inject doubles,
+ * keeping these handlers free of direct database coupling.
+ */
 import { z } from 'zod';
 
 import type {

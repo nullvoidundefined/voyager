@@ -1,5 +1,9 @@
 'use client';
 
+/**
+ * New-trip page. Captures the initial trip request and hands off to creation,
+ * the entry point for starting a fresh itinerary before the planning chat begins.
+ */
 import { useEffect, useRef, useState } from 'react';
 
 import Link from 'next/link';

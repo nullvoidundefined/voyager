@@ -1,3 +1,8 @@
+/**
+ * Tracks SerpApi usage against a monthly cap using a per-month Redis counter.
+ * Exists to enforce the paid-API budget so the agent stops issuing live
+ * searches once the cap is reached rather than overrunning cost.
+ */
 import { logger } from 'app/clients/logger.js';
 import { getRedis } from 'app/clients/redis.js';
 

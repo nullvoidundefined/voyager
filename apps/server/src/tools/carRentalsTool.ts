@@ -1,3 +1,8 @@
+/**
+ * Car-rental search tool: queries SerpApi's google_car_rental engine, normalizes
+ * provider results into the app's CarRentalResult shape, and caches responses to
+ * stay under the SerpApi quota. Falls back to mock fixtures in eval/E2E mode.
+ */
 import { logger } from 'app/clients/logger.js';
 import {
   cacheGet,

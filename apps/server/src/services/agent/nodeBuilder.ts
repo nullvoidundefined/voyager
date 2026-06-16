@@ -1,3 +1,9 @@
+/**
+ * Converts raw tool-result payloads (flights, hotels, car rentals, experiences)
+ * into normalized ChatNode objects the client can render. Centralizes the
+ * mapping from each provider's snake_case shape to the shared ChatNode schema
+ * so tool handlers stay thin.
+ */
 import type {
   CarRental,
   ChatNode,

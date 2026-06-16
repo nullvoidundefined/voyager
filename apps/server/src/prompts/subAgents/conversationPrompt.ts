@@ -1,3 +1,8 @@
+/**
+ * Builds the system prompt for the top-level conversation sub-agent that talks
+ * to the traveler. Summarizes booking progress and trip context into prompt
+ * text so the model can steer the conversation toward the next booking step.
+ */
 import type { CompletionTracker } from 'app/prompts/bookingSteps/bookingSteps.js';
 import type { TripContext } from 'app/prompts/tripContext/tripContext.js';
 import { formatTripContext } from 'app/prompts/tripContext/tripContext.js';

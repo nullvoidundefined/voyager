@@ -1,3 +1,8 @@
+/**
+ * Tracks per-user daily LLM output-token consumption with a per-day Redis
+ * counter. Exists to enforce a daily budget so a single user cannot run up
+ * unbounded model cost in one day.
+ */
 import { logger } from 'app/clients/logger.js';
 import { getRedis } from 'app/clients/redis.js';
 

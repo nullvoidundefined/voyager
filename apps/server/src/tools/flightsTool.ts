@@ -1,3 +1,9 @@
+/**
+ * Flight search tool: queries SerpApi's google_flights engine (with optional
+ * flexible-date fan-out), normalizes offers, and returns a discriminated outcome
+ * so the agent can distinguish no-results from timeout, quota-exhausted, and
+ * upstream-error states. Aggressive caching keeps it under the SerpApi quota.
+ */
 import { logger } from 'app/clients/logger.js';
 import {
   cacheGet,

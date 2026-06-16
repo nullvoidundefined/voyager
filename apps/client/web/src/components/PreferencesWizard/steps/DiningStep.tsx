@@ -1,3 +1,8 @@
+/**
+ * Wizard step for dining preferences, pairing multi-select dietary needs with a
+ * single-select dining style so the questionnaire captures both constraints and
+ * taste in one combined step.
+ */
 import {
   DIETARY_OPTIONS,
   DINING_STYLE_OPTIONS,

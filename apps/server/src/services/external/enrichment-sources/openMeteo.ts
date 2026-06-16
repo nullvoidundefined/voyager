@@ -1,3 +1,8 @@
+/**
+ * Fetches a weather forecast for a destination from the Open-Meteo API and maps
+ * WMO weather codes to display icons, returned as a ChatNode and cached for a few
+ * hours. Exists to give trips a near-term weather outlook.
+ */
 import type { ChatNode, WeatherDay } from '@voyager/shared-types';
 
 import { logger } from 'app/clients/logger.js';

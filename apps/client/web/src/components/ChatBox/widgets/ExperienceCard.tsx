@@ -1,3 +1,9 @@
+/**
+ * Selectable card for a single suggested experience (name, category, rating,
+ * cost, optional map preview). Exists as the per-item tile inside experience
+ * selection groups, rendering as a pressable button for keyboard and screen
+ * reader access.
+ */
 import { API_BASE } from '@/lib/api/api';
 import { formatCurrency } from '@/lib/format/format';
 

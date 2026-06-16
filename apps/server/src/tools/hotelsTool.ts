@@ -1,3 +1,9 @@
+/**
+ * Hotel search tool: queries SerpApi's google_hotels engine, normalizes
+ * properties (synthesizing an address from nearby landmarks and dropping
+ * unpriced listings), and returns a discriminated outcome so the agent can tell
+ * "no results" apart from missing pricing, timeout, quota, and error states.
+ */
 import { logger } from 'app/clients/logger.js';
 import {
   cacheGet,

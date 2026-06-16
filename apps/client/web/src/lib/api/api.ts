@@ -1,3 +1,9 @@
+/**
+ * Thin fetch wrapper for the Voyager API. Centralizes the base URL, credentialed
+ * cookie auth, CSRF header, and JSON error normalization (ApiError) so callers
+ * never repeat fetch boilerplate or per-call error parsing.
+ */
+
 // In production, use the rewrite proxy (/api/) so cookies are same-origin
 // and not blocked by Safari ITP. In dev, hit the Express server directly.
 export const API_BASE =

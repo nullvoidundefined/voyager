@@ -1,3 +1,7 @@
+/**
+ * Generates /robots.txt for crawlers, disallowing the API and authenticated app
+ * routes so private pages stay out of search indexes.
+ */
 import type { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {

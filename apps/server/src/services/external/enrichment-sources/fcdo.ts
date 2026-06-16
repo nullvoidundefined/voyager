@@ -1,3 +1,8 @@
+/**
+ * Fetches UK FCDO travel advisories for a destination from GOV.UK and returns
+ * them as a ChatNode, caching responses for a day. Exists to surface official UK
+ * government guidance as one enrichment source.
+ */
 import type { ChatNode } from '@voyager/shared-types';
 
 import { logger } from 'app/clients/logger.js';

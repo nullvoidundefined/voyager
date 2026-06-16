@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * Login page. Renders the sign-in form, authenticates via the auth context, and
+ * honors a post-login redirect target from the query string so users return to
+ * the page that sent them here.
+ */
 import { type FormEvent, useState } from 'react';
 
 import Link from 'next/link';

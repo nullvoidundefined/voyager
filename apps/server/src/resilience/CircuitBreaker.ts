@@ -1,3 +1,8 @@
+/**
+ * Circuit breaker that trips after a failure threshold and short-circuits calls
+ * during a cooldown window, protecting upstream dependencies (such as the LLM
+ * provider) from repeated calls while they are failing.
+ */
 import { logger } from 'app/clients/logger.js';
 
 type CircuitState = 'closed' | 'open' | 'half-open';

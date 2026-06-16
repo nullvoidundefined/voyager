@@ -1,3 +1,8 @@
+/**
+ * Express router for the trips surface, composing trip, leg, cost, schedule,
+ * share, and chat handlers under one router. Centralizes trip route wiring and
+ * its auth guards apart from the handler logic.
+ */
 import express from 'express';
 
 import * as chatHandlers from 'app/handlers/chat/chat.js';

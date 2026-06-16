@@ -1,5 +1,9 @@
 'use client';
 
+/**
+ * Generates and downloads a printable PDF of a trip itinerary, letting users take an
+ * offline, shareable copy of their plan away from the app.
+ */
 import { useState } from 'react';
 
 import {

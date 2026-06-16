@@ -1,3 +1,9 @@
+/**
+ * Shared display formatters for currency and short dates. Caches Intl formatters
+ * by currency to avoid re-instantiation, and parses date-only strings as local
+ * midnight to prevent timezone off-by-one shifts.
+ */
+
 const formatterCache = new Map<string, Intl.NumberFormat>();
 
 export function formatCurrency(

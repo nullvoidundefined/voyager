@@ -1,3 +1,8 @@
+/**
+ * CORS middleware configuration: builds the allowed-origin list from CORS_ORIGIN
+ * and additionally permits private-network origins in non-production so local
+ * devices on the LAN can reach the dev server.
+ */
 import cors from 'cors';
 
 const allowedOrigins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173')

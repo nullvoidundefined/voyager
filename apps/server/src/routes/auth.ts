@@ -1,3 +1,8 @@
+/**
+ * Express router for the auth surface, wiring auth handlers to their paths with
+ * the rate limiter and requireAuth guard. Isolates auth route wiring from the
+ * handler implementations.
+ */
 import express from 'express';
 
 import * as authHandlers from 'app/handlers/auth/auth.js';

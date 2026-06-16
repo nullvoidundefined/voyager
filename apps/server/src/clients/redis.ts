@@ -1,3 +1,8 @@
+/**
+ * Lazily-connected ioredis singleton used by the cache and rate-limit layers.
+ * Returns null when REDIS_URL is unset so those layers can degrade gracefully
+ * and tests can run without a live Redis instance.
+ */
 import { Redis } from 'ioredis';
 
 import { logger } from 'app/clients/logger.js';

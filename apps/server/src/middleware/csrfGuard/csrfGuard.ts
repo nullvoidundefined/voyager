@@ -1,3 +1,8 @@
+/**
+ * Express middleware enforcing header-only CSRF protection. Requires the
+ * X-Requested-With header on state-changing requests so cross-site form posts
+ * cannot mutate data without the SPA's explicit header.
+ */
 import type { NextFunction, Request, Response } from 'express';
 
 const STATE_CHANGING_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];

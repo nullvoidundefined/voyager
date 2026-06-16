@@ -1,3 +1,8 @@
+/**
+ * Selectable card for a single hotel option (name, city, stars, nightly and
+ * total price, stay dates, optional map preview). Exists as the per-item tile
+ * inside hotel selection groups, rendering as a pressable button.
+ */
 import { formatCurrency, formatShortDate } from '@/lib/format/format';
 
 import styles from './HotelCard.module.scss';

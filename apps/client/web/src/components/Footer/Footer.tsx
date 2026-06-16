@@ -1,5 +1,9 @@
 'use client';
 
+/**
+ * Site footer with navigation links and auth-aware content, rendered across pages to
+ * provide consistent secondary navigation and build/version context.
+ */
 import Link from 'next/link';
 
 import { useAuth } from '@/context/AuthContext';

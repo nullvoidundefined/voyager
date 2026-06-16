@@ -1,3 +1,8 @@
+/**
+ * Conversation data access: persists and reads chat nodes, booking state, and
+ * completion trackers for a trip's conversation. Keeps the conversation tree
+ * and its associated booking progress in one repository below the handlers.
+ */
 import type { ChatNode } from '@voyager/shared-types';
 
 import { query } from 'app/database/pool/pool.js';

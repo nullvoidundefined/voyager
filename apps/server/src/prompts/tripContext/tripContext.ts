@@ -1,3 +1,8 @@
+/**
+ * Defines the TripContext shape and formats it into prompt-ready text. Central
+ * place that turns structured trip data into the human-readable block every
+ * prompt builder embeds, so trip facts are rendered consistently.
+ */
 import {
   type CompletionTracker,
   type TrackerStatus,

@@ -1,3 +1,8 @@
+/**
+ * Pure budget-math helpers for the trip budget widget. Extracted from the page
+ * so the over-budget bar-normalization rules are unit-testable in isolation.
+ */
+
 // Helpers for the trip budget widget. Extracted from the page so the
 // over-budget rendering rules in F-03/F-14 are unit-testable in
 // isolation.

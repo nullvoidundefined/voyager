@@ -1,3 +1,8 @@
+/**
+ * Defines the sub-agent types (detail, etc.) and the logic for routing booking
+ * flow state to the appropriate specialized sub-agent. Exists to break the main
+ * agent's work into focused sub-tasks driven by trip and booking-step state.
+ */
 import type { CompletionTracker } from 'app/prompts/bookingSteps/bookingSteps.js';
 import type { FlowPosition } from 'app/prompts/bookingSteps/bookingSteps.js';
 import type { TripState } from 'app/prompts/bookingSteps/bookingSteps.js';

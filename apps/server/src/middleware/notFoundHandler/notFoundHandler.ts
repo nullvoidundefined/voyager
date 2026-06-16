@@ -1,3 +1,7 @@
+/**
+ * Express middleware that returns a consistent JSON 404 for any unmatched route,
+ * so API clients always receive JSON rather than Express's default HTML page.
+ */
 import type { Request, Response } from 'express';
 
 // Return a consistent JSON response for any unmatched route instead of the default HTML 404.

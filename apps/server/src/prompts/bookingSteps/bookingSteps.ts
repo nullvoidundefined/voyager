@@ -1,3 +1,10 @@
+/**
+ * Booking-flow domain model: category names, per-category completion tracker
+ * status, and flow position. Provides the shared vocabulary that prompt
+ * builders use to describe where a trip stands in the multi-step booking
+ * process, so every sub-agent reports progress consistently.
+ */
+
 // --- Types ---
 
 export type CategoryName = 'flights' | 'hotels' | 'car_rental' | 'experiences';

@@ -1,3 +1,8 @@
+/**
+ * Terminal Express error-handling middleware. Maps thrown errors (notably
+ * ApiError) to consistent JSON responses and logs unexpected failures, keeping
+ * error shaping out of individual handlers.
+ */
 import type { NextFunction, Request, Response } from 'express';
 
 import { logger } from 'app/clients/logger.js';

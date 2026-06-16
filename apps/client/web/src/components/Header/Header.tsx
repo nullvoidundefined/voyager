@@ -1,5 +1,9 @@
 'use client';
 
+/**
+ * Top site header with primary navigation and auth-aware controls, rendered across
+ * pages to give consistent global navigation and session affordances.
+ */
 import { useEffect, useState } from 'react';
 
 import Link from 'next/link';

@@ -1,3 +1,9 @@
+/**
+ * User preferences model: option constants, wizard steps, the UserPreferences
+ * type, and normalization that migrates legacy persisted shapes to the current
+ * schema version. Single source of truth for preference shape and defaults.
+ */
+
 // --- Option constants (shared with client via @voyager/shared-types) ---
 
 export {

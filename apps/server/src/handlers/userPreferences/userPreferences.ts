@@ -1,3 +1,8 @@
+/**
+ * Express handlers for reading and upserting a user's preferences. Backs the
+ * settings surface and keeps preference persistence scoped to the authenticated
+ * user.
+ */
 import type { Request, Response } from 'express';
 
 import { posthog } from 'app/clients/posthog.js';

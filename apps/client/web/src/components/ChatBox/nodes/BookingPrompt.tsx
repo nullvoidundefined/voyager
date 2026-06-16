@@ -1,3 +1,8 @@
+/**
+ * Prompts the user to proceed to booking once experiences and car rentals are
+ * resolved, pairing a "book now" action with quick-reply chips so the chat can
+ * advance the trip toward checkout without a free-text turn.
+ */
 import { QuickReplyChips } from '../widgets/QuickReplyChips';
 import styles from './BookingPrompt.module.scss';
 

@@ -1,3 +1,8 @@
+/**
+ * Persists and prices per-turn agent token usage. Converts raw token counts
+ * into dollar costs using the pricing table below and writes them to the
+ * agent_turn_cost table, so spend can be attributed to each conversation turn.
+ */
 import { query } from 'app/database/pool/pool.js';
 
 /**

@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * Account page. Lets the signed-in user review profile details and edit their
+ * saved travel preferences through the wizard, so personalization settings live
+ * in one place.
+ */
 import { useState } from 'react';
 
 import { useQuery } from '@tanstack/react-query';

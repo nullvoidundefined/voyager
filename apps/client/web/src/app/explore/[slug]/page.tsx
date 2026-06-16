@@ -1,3 +1,8 @@
+/**
+ * Destination detail page. Server-renders a single curated destination by slug
+ * with metadata for SEO, returning notFound for unknown slugs so deep links and
+ * crawlers get a proper 404.
+ */
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';

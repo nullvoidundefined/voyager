@@ -1,5 +1,9 @@
 'use client';
 
+/**
+ * Explore index page. Lets visitors browse and filter the curated destination
+ * catalog, the public discovery surface that seeds trip ideas before sign-in.
+ */
 import { useState } from 'react';
 
 import Image from 'next/image';

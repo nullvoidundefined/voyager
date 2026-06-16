@@ -1,3 +1,8 @@
+/**
+ * Wizard step for the user's preferred travel pace, rendering TRAVEL_PACE_OPTIONS
+ * as a single-select so the questionnaire records how packed or relaxed an
+ * itinerary should be.
+ */
 import { TRAVEL_PACE_OPTIONS } from '@/lib/preferenceOptions/preferenceOptions';
 
 import styles from '../PreferencesWizard.module.scss';

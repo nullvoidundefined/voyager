@@ -1,3 +1,7 @@
+/**
+ * UUID generation helper for test fixtures. Lives outside __tests__ so multiple
+ * suites can share one source of test identifiers.
+ */
 import crypto from 'node:crypto';
 
 /** Returns a new UUID v4 for use in tests. Optional index param is ignored (allows unique call sites). */

@@ -1,3 +1,8 @@
+/**
+ * Assembles the top-level orchestrator system prompt that frames the entire
+ * agent run. Combines booking flow position and completion state into a single
+ * prompt so the orchestrator knows which sub-agent to route to next.
+ */
 import type {
   CompletionTracker,
   FlowPosition,

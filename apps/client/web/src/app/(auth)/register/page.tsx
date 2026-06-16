@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * Registration page. Collects account details plus initial travel preferences,
+ * shows live password-strength feedback, and creates the account so new users
+ * onboard in a single flow.
+ */
 import { type FormEvent, useState } from 'react';
 
 import Link from 'next/link';

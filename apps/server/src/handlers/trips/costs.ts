@@ -1,3 +1,8 @@
+/**
+ * Express handlers for trip cost entries (list, create, update, delete).
+ * Enforces trip ownership before mutating cost rows so users cannot touch
+ * another user's budget data.
+ */
 import type { Request, Response } from 'express';
 
 import { query } from 'app/database/pool/pool.js';
