@@ -81,7 +81,7 @@ Every entry in `docs/BUGS.md` must tag its first line with `severity: P0|P1|P2|P
 
 ## ChatBox invariants
 
-Before landing any further fix to `apps/client/web/src/components/ChatBox/`, write a `apps/client/web/src/components/ChatBox/ChatBox.invariants.test.tsx` that enumerates the invariants the data model must hold:
+Before landing any further fix to `apps/client/web/src/components/ChatBox/`, write a `apps/client/web/src/components/ChatBox/__tests__/ChatBox.invariants.test.tsx` that enumerates the invariants the data model must hold:
 
 - Tool-result cards persist after the SSE stream ends.
 - Text nodes never duplicate when the agent re-emits text.

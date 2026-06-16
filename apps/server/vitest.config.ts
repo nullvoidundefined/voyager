@@ -14,7 +14,7 @@ export default defineConfig({
         '*.config.*',
         '**/config/**',
         '**/types/**',
-        '**/db/**',
+        '**/database/**',
         // rateLimiter.ts was previously excluded; the 2026-04-06
         // process retrospective traced a production boot crash
         // (the SEC-04 ioredis enableOfflineQueue:false bug) to
@@ -35,10 +35,10 @@ export default defineConfig({
         // vitest run, so the unit-coverage pass should not count
         // these files against the threshold. The repositories ARE
         // still covered, just at the integration layer.
-        'src/repositories/auth/auth.ts',
-        'src/repositories/conversations/conversations.ts',
-        'src/repositories/tool-call-log/tool-call-log.ts',
-        'src/repositories/userPreferences/userPreferences.ts',
+        'src/repositories/auth.ts',
+        'src/repositories/conversations.ts',
+        'src/repositories/tool-call-log.ts',
+        'src/repositories/userPreferences.ts',
       ],
       provider: 'v8',
       reporter: ['text', 'lcov'],
@@ -80,5 +80,6 @@ export default defineConfig({
       'dist/**',
     ],
     globals: true,
+    include: ['src/**/__tests__/**/*.test.ts'],
   },
 });
