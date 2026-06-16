@@ -8,7 +8,7 @@ Date: 2026-06-15. Time since implementation: same session.
 Follow-up to the tool-registry refactor (#43). Removes the dead `toolSchemas`
 name->schema map from `tools/schemas.ts`. Its only consumer was the old
 `schemaDrift.test.ts`, which #43 deleted (the derivation test replaced it), so the export
-has had no references since. `tools/schemas.ts` becomes a pure re-export barrel of the 17
+has had no code references since. `tools/schemas.ts` becomes a pure re-export barrel of the 17
 named per-tool schemas, which is all `executor.ts` actually imports.
 
 Resolves the Copilot review finding on #43 (the module comment described `toolSchemas` as
