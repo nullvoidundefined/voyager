@@ -5,19 +5,19 @@ WORKDIR /app
 # Copy workspace config
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
 
-# Copy server and shared-types package.json for dependency resolution
+# Copy server and types package.json for dependency resolution
 COPY apps/server/package.json apps/server/package.json
-COPY packages/shared-types/package.json packages/shared-types/package.json
+COPY packages/types/package.json packages/types/package.json
 
 # Install dependencies (production + dev for build)
-RUN pnpm install --frozen-lockfile --filter voyager-server --filter @voyager/shared-types --ignore-scripts
+RUN pnpm install --frozen-lockfile --filter voyager-server --filter @repo/types --ignore-scripts
 
-# Copy server source and shared-types
+# Copy server source and types
 COPY apps/server/ apps/server/
-COPY packages/shared-types/ packages/shared-types/
+COPY packages/types/ packages/types/
 
-# Build shared-types first so its dist/ exists when the server compiles + runs
-RUN pnpm --filter @voyager/shared-types run build
+# Build types first so its dist/ exists when the server compiles + runs
+RUN pnpm --filter @repo/types run build
 RUN pnpm --filter voyager-server run build
 
 # Production stage
@@ -27,10 +27,10 @@ WORKDIR /app
 
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
 COPY apps/server/package.json apps/server/package.json
-COPY packages/shared-types/package.json packages/shared-types/package.json
+COPY packages/types/package.json packages/types/package.json
 RUN pnpm install --frozen-lockfile --filter voyager-server --ignore-scripts --prod
 
-COPY --from=base /app/packages/shared-types/dist packages/shared-types/dist
+COPY --from=base /app/packages/types/dist packages/types/dist
 COPY --from=base /app/apps/server/dist apps/server/dist
 COPY apps/server/src/data/destinations.json apps/server/dist/data/destinations.json
 COPY apps/server/migrations apps/server/migrations

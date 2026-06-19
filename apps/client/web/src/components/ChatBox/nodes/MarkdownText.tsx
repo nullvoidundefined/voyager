@@ -5,7 +5,7 @@
  * displays formatted (lists, links, emphasis) and inline source references
  * remain clickable within the conversation.
  */
-import type { ChatNodeOfType, Citation } from '@voyager/shared-types';
+import type { ChatNodeOfType, Citation } from '@repo/types';
 import ReactMarkdown from 'react-markdown';
 
 import styles from './MarkdownText.module.scss';

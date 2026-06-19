@@ -4,7 +4,7 @@
  * sites keep one entry point while UI-specific concerns stay on the client.
  */
 
-// Option constants now live in @voyager/shared-types.
+// Option constants now live in @repo/types.
 // Re-exported here for backwards compatibility with existing import sites.
 export {
   ACCOMMODATION_OPTIONS,
@@ -15,7 +15,7 @@ export {
   GENDER_OPTIONS,
   TRAVEL_PACE_OPTIONS,
   TRAVEL_PARTY_OPTIONS,
-} from '@voyager/shared-types';
+} from '@repo/types';
 
 // WIZARD_STEPS is client-only (UI step ordering) and stays here.
 export const WIZARD_STEPS = [

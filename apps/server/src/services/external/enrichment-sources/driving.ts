@@ -3,7 +3,7 @@
  * age) from a static lookup table, returned as a ChatNode. Static data because
  * these rules change rarely and need no external call.
  */
-import type { ChatNode } from '@voyager/shared-types';
+import type { ChatNode } from '@repo/types';
 
 interface DrivingRequirement {
   driving_side: string;

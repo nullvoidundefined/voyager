@@ -5,7 +5,7 @@
  * the user choose lodging inline so the conversation can record the selection
  * without a dedicated hotel-search page.
  */
-import type { ChatNodeOfType } from '@voyager/shared-types';
+import type { ChatNodeOfType } from '@repo/types';
 
 import { HotelCard } from '../widgets/HotelCard';
 import { SelectableCardGroup } from '../widgets/SelectableCardGroup';

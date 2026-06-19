@@ -7,7 +7,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { TripPlanCard } from '@voyager/shared-types';
+import type { TripPlanCard } from '@repo/types';
 
 import styles from './TripPlanWidget.module.scss';
 

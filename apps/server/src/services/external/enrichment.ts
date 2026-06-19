@@ -4,7 +4,7 @@
  * Exists as the one place that fans out to every source and assembles their
  * results for a destination.
  */
-import type { ChatNode } from '@voyager/shared-types';
+import type { ChatNode } from '@repo/types';
 
 import { lookupCity } from '../../data/cities.js';
 import { getDrivingRequirements } from './enrichment-sources/driving.js';

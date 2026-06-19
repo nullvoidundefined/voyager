@@ -1,10 +1,10 @@
 import { spawnSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 
-describe('shared-types runtime contract', () => {
-  it('Node ESM can import @voyager/shared-types and read ACCOMMODATION_OPTIONS', () => {
+describe('types runtime contract', () => {
+  it('Node ESM can import @repo/types and read ACCOMMODATION_OPTIONS', () => {
     const probe = [
-      "import('@voyager/shared-types').then(m => {",
+      "import('@repo/types').then(m => {",
       '  if (!Array.isArray(m.ACCOMMODATION_OPTIONS) || m.ACCOMMODATION_OPTIONS.length === 0) {',
       "    console.error('missing-runtime-export');",
       '    process.exit(2);',

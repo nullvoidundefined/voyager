@@ -4,7 +4,7 @@
  * schema version. Single source of truth for preference shape and defaults.
  */
 
-// --- Option constants (shared with client via @voyager/shared-types) ---
+// --- Option constants (shared with client via @repo/types) ---
 
 export {
   ACCOMMODATION_OPTIONS,
@@ -14,7 +14,7 @@ export {
   DINING_STYLE_OPTIONS,
   TRAVEL_PACE_OPTIONS,
   TRAVEL_PARTY_OPTIONS,
-} from '@voyager/shared-types';
+} from '@repo/types';
 
 // --- Wizard steps ---
 

@@ -5,12 +5,7 @@
  * one place that handlers can call without knowing LLM internals.
  */
 import type Anthropic from '@anthropic-ai/sdk';
-import type {
-  ChatNode,
-  Citation,
-  SSEEvent,
-  TripPlanCard,
-} from '@voyager/shared-types';
+import type { ChatNode, Citation, SSEEvent, TripPlanCard } from '@repo/types';
 
 import { logger } from 'app/clients/logger.js';
 import {

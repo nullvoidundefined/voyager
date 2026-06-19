@@ -14,7 +14,7 @@
  * event, no empty response).
  */
 import Anthropic from '@anthropic-ai/sdk';
-import type { SSEEvent } from '@voyager/shared-types';
+import type { SSEEvent } from '@repo/types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { insertToolCallLog } from 'app/repositories/tool-call-log.js';

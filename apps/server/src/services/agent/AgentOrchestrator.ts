@@ -5,7 +5,7 @@
  * bound worst-case token burn per user message until cost is persisted.
  */
 import type Anthropic from '@anthropic-ai/sdk';
-import type { ChatNode, SSEEvent } from '@voyager/shared-types';
+import type { ChatNode, SSEEvent } from '@repo/types';
 
 import { getLlmClient } from 'app/clients/llm.js';
 import { logger } from 'app/clients/logger.js';

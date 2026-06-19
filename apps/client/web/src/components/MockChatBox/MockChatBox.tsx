@@ -6,7 +6,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 
-import type { ChatNode } from '@voyager/shared-types';
+import type { ChatNode } from '@repo/types';
 
 import { NodeRenderer } from '@/components/ChatBox/NodeRenderer';
 import { APP_NAME } from '@/lib/constants';

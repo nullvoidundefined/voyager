@@ -3,7 +3,7 @@
  * flow. Owns request validation and SSE response wiring so the streaming
  * completion logic stays isolated in its helpers.
  */
-import type { ChatMessage, ChatNode } from '@voyager/shared-types';
+import type { ChatMessage, ChatNode } from '@repo/types';
 import type { Request, Response } from 'express';
 
 import { logger } from 'app/clients/logger.js';

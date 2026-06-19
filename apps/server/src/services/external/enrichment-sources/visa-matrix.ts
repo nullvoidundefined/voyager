@@ -3,7 +3,7 @@
  * static visa-free matrix, returned as a ChatNode. Uses a simplified in-code
  * table as a stand-in for the full passport-index dataset.
  */
-import type { ChatNode } from '@voyager/shared-types';
+import type { ChatNode } from '@repo/types';
 
 // Simplified visa requirement lookup
 // In production, this would load from the passport-index CSV dataset

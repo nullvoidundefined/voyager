@@ -3,7 +3,7 @@
  * users destination weather inline so they can factor conditions into trip
  * planning without leaving the conversation.
  */
-import type { ChatNodeOfType, WeatherDay } from '@voyager/shared-types';
+import type { ChatNodeOfType, WeatherDay } from '@repo/types';
 
 import styles from './WeatherForecast.module.scss';
 

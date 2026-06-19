@@ -95,7 +95,7 @@ export default tseslint.config([
           './apps/server/tsconfig.json',
           './apps/client/web/tsconfig.json',
           './eval/tsconfig.json',
-          './packages/shared-types/tsconfig.json',
+          './packages/types/tsconfig.json',
         ],
         tsconfigRootDir: import.meta.dirname,
         sourceType: 'module',

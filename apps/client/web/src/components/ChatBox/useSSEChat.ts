@@ -8,8 +8,8 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import type { ChatNode, SSEEvent } from '@repo/types';
 import { useQueryClient } from '@tanstack/react-query';
-import type { ChatNode, SSEEvent } from '@voyager/shared-types';
 
 import { API_BASE } from '@/lib/api';
 

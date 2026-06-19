@@ -1,3 +1,4 @@
+import type { TripPlanCard } from '@repo/types';
 import {
   act,
   cleanup,
@@ -5,7 +6,6 @@ import {
   render,
   screen,
 } from '@testing-library/react';
-import type { TripPlanCard } from '@voyager/shared-types';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { TripPlanWidget } from '../TripPlanWidget';

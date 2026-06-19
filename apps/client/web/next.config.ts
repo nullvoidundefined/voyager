@@ -5,7 +5,7 @@ import path from 'node:path';
 const nextConfig: NextConfig = {
   output: 'standalone',
   outputFileTracingRoot: path.resolve(__dirname, '../../../'),
-  transpilePackages: ['@voyager/shared-types'],
+  transpilePackages: ['@repo/types'],
   images: {},
   webpack(config: Parameters<NonNullable<NextConfig['webpack']>>[0]) {
     config.resolve.extensionAlias = {

@@ -15,8 +15,8 @@ import {
   useState,
 } from 'react';
 
+import type { ChatMessage, TripPlanCard } from '@repo/types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ChatMessage, TripPlanCard } from '@voyager/shared-types';
 
 import { AIDisclosure } from '@/components/AIDisclosure/AIDisclosure';
 import { CostCounter } from '@/components/CostCounter/CostCounter';

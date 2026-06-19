@@ -10,7 +10,7 @@ import type {
   Experience,
   Flight,
   Hotel,
-} from '@voyager/shared-types';
+} from '@repo/types';
 import { randomUUID } from 'crypto';
 
 interface FlightRaw {

@@ -4,7 +4,7 @@
  * a day. Exists to surface official US government guidance as one enrichment
  * source.
  */
-import type { ChatNode } from '@voyager/shared-types';
+import type { ChatNode } from '@repo/types';
 
 import { logger } from 'app/clients/logger.js';
 import { cacheGet, cacheSet } from 'app/services/cache/cacheService.js';

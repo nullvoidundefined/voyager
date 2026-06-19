@@ -3,7 +3,7 @@
  * surfacing travel cautions inline in the assistant conversation so users see
  * safety and logistics notices without leaving the chat flow.
  */
-import type { ChatNodeOfType } from '@voyager/shared-types';
+import type { ChatNodeOfType } from '@repo/types';
 
 import styles from './AdvisoryCard.module.scss';
 
