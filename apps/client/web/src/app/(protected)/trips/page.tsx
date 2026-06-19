@@ -11,11 +11,11 @@ import Link from 'next/link';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { del, get } from '@/api/request';
 import { Skeleton } from '@/components/Skeleton/Skeleton';
 import { AlertDialog } from '@/components/ui/AlertDialog/AlertDialog';
-import { del, get } from '@/lib/api';
-import { getDestinationImage } from '@/lib/destinationImage';
-import { formatCurrency, formatShortDate } from '@/lib/format';
+import { getDestinationImage } from '@/services/destinationImage';
+import { formatCurrency, formatShortDate } from '@/services/format';
 
 import styles from './trips.module.scss';
 

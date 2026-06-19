@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ChatNode } from '@repo/types';
 
 import { NodeRenderer } from '@/components/ChatBox/NodeRenderer';
-import { APP_NAME } from '@/lib/constants';
+import { APP_NAME } from '@/constants';
 
 import styles from './MockChatBox.module.scss';
 

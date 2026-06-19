@@ -8,7 +8,7 @@ vi.mock('next/image', () => ({
   default: (props: Record<string, unknown>) => <img alt='' {...props} />,
 }));
 
-vi.mock('@/lib/destinationImage', () => ({
+vi.mock('@/services/destinationImage', () => ({
   getDestinationImage: () => ({ url: null }),
 }));
 

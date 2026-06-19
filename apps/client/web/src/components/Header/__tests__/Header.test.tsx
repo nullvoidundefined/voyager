@@ -9,11 +9,11 @@ vi.mock('next/navigation', () => ({
   usePathname: () => '/',
 }));
 
-vi.mock('@/context/AuthContext', () => ({
+vi.mock('@/state/AuthContext', () => ({
   useAuth: () => ({ user: null, logout: vi.fn() }),
 }));
 
-vi.mock('@/lib/api', () => ({
+vi.mock('@/api/request', () => ({
   get: vi.fn().mockResolvedValue({ preferences: null }),
 }));
 

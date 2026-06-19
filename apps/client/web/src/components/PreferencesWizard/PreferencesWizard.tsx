@@ -10,8 +10,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { put } from '@/lib/api';
-import { type UserPreferences, WIZARD_STEPS } from '@/lib/preferenceOptions';
+import { put } from '@/api/request';
+import {
+  type UserPreferences,
+  WIZARD_STEPS,
+} from '@/services/preferenceOptions';
 
 import styles from './PreferencesWizard.module.scss';
 import { AccommodationStep } from './steps/AccommodationStep';

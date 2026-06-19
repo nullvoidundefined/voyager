@@ -13,7 +13,7 @@ vi.mock('next/navigation', () => ({
 let mockUser: { id: string } | null = null;
 let mockIsLoading = false;
 
-vi.mock('@/context/AuthContext', () => ({
+vi.mock('@/state/AuthContext', () => ({
   useAuth: () => ({ user: mockUser, isLoading: mockIsLoading }),
 }));
 

@@ -10,7 +10,7 @@ vi.mock('next/image', () => ({
   },
 }));
 
-vi.mock('@/lib/destinationImage', () => ({
+vi.mock('@/services/destinationImage', () => ({
   getDestinationImage: () => ({ url: null, credit: null }),
 }));
 

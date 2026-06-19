@@ -10,12 +10,12 @@ import { type FormEvent, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+import { ApiError } from '@/api/request';
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter/PasswordStrengthMeter';
 import { PreferencesWizard } from '@/components/PreferencesWizard/PreferencesWizard';
 import { Toast } from '@/components/Toast/Toast';
-import { useAuth } from '@/context/AuthContext';
-import { ApiError } from '@/lib/api';
-import { APP_NAME } from '@/lib/constants';
+import { APP_NAME } from '@/constants';
+import { useAuth } from '@/state/AuthContext';
 
 import styles from '../auth.module.scss';
 

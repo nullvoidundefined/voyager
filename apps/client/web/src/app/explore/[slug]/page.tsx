@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { DESTINATIONS, getDestinationBySlug } from '@/data/destinations';
-import { getDestinationImage } from '@/lib/destinationImage';
+import { getDestinationImage } from '@/services/destinationImage';
 
 import styles from './page.module.scss';
 

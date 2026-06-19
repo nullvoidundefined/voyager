@@ -14,7 +14,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render } from '@testing-library/react';
 import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { get, put } from '@/lib/api';
+import { get, put } from '@/api/request';
 
 import { ChatBox } from '../ChatBox';
 
@@ -61,7 +61,7 @@ vi.mock('../useSSEChat', () => ({
   },
 }));
 
-vi.mock('@/lib/api', () => ({
+vi.mock('@/api/request', () => ({
   get: vi.fn().mockResolvedValue({ messages: [] }),
   post: vi.fn().mockResolvedValue(undefined),
   put: vi.fn().mockResolvedValue(undefined),
@@ -79,7 +79,7 @@ vi.mock('@/components/ToolTimeline/ToolTimeline', () => ({
   ToolTimeline: () => null,
 }));
 
-vi.mock('@/lib/demoScript', () => ({
+vi.mock('@/services/demoScript', () => ({
   runDemoScript: () => () => undefined,
 }));
 

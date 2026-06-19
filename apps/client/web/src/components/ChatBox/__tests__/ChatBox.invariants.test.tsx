@@ -656,12 +656,12 @@ describe('ChatBox invariants', () => {
           clearError: () => {},
         }),
       }));
-      vi.doMock('@/lib/api', () => ({
+      vi.doMock('@/api/request', () => ({
         get: vi.fn().mockResolvedValue({ messages: [] }),
         post: vi.fn().mockResolvedValue({}),
         put: vi.fn().mockResolvedValue({}),
       }));
-      vi.doMock('@/lib/demoScript', () => ({
+      vi.doMock('@/services/demoScript', () => ({
         runDemoScript: () => () => undefined,
       }));
 

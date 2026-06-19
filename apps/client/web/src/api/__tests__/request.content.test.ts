@@ -8,10 +8,10 @@ import { describe, expect, it } from 'vitest';
  * Guards against the "return undefined as T" type lie for 204 responses.
  */
 
-const apiPath = resolve(__dirname, '..', 'api.ts');
+const apiPath = resolve(__dirname, '..', 'request.ts');
 const apiSource = readFileSync(apiPath, 'utf-8');
 
-describe('api.ts content', () => {
+describe('request.ts content', () => {
   it('does not use "undefined as T" type assertion for 204 responses', () => {
     expect(apiSource).not.toContain('undefined as T');
   });

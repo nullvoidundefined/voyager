@@ -5,7 +5,7 @@
  */
 import type { CarRental } from '@repo/types';
 
-import { formatCurrency, formatShortDate } from '@/lib/format';
+import { formatCurrency, formatShortDate } from '@/services/format';
 
 import styles from './CarRentalCard.module.scss';
 

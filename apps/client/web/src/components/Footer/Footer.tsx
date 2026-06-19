@@ -6,8 +6,8 @@
  */
 import Link from 'next/link';
 
-import { useAuth } from '@/context/AuthContext';
-import { APP_NAME } from '@/lib/constants';
+import { APP_NAME } from '@/constants';
+import { useAuth } from '@/state/AuthContext';
 
 import styles from './Footer.module.scss';
 

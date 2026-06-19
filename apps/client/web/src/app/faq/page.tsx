@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { DemoBanner } from '@/components/DemoBanner/DemoBanner';
-import { APP_NAME } from '@/lib/constants';
+import { APP_NAME } from '@/constants';
 
 import styles from './faq.module.scss';
 
