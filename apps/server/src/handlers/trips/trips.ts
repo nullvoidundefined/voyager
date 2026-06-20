@@ -279,7 +279,7 @@ export async function selectItem(req: Request, res: Response): Promise<void> {
  * The handler returns 404 unless E2E_BYPASS_RATE_LIMITS=1 is set,
  * which means the endpoint is invisible in production. The env
  * flag is the same one playwright.config.ts and
- * src/__integration__/setup.ts already set for test mode.
+ * src/__tests__/integration/setup.ts already set for test mode.
  *
  * Payload shape mirrors the select_* tool schemas. See
  * selectFlightSchema, selectHotelSchema, etc. in src/tools/schemas.ts.

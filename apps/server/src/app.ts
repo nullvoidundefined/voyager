@@ -10,6 +10,11 @@ import helmet from 'helmet';
 import fs from 'node:fs';
 import path from 'node:path';
 
+import {
+  type MockScenarioName,
+  isAnthropicMockMode,
+  setMockScenario,
+} from 'app/__fixtures__/mockAnthropicClient/mockAnthropicClient.js';
 import { logger } from 'app/clients/logger.js';
 import { posthog } from 'app/clients/posthog.js';
 import { corsConfig } from 'app/config/corsConfig.js';
@@ -27,11 +32,6 @@ import { authRouter } from 'app/routes/auth.js';
 import { placesRouter } from 'app/routes/places.js';
 import { tripRouter } from 'app/routes/trips.js';
 import { userPreferencesRouter } from 'app/routes/userPreferences.js';
-import {
-  type MockScenarioName,
-  isAnthropicMockMode,
-  setMockScenario,
-} from 'app/test-fixtures/mockAnthropicClient/mockAnthropicClient.js';
 
 function readCommitSha(): string {
   try {

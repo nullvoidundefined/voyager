@@ -7,6 +7,7 @@
 import type Anthropic from '@anthropic-ai/sdk';
 import type { ChatNode, Citation, SSEEvent, TripPlanCard } from '@repo/types';
 
+import { getMockAnthropicClientIfEnabled } from 'app/__fixtures__/mockAnthropicClient/mockAnthropicClient.js';
 import { logger } from 'app/clients/logger.js';
 import {
   type CompletionTracker,
@@ -16,7 +17,6 @@ import { buildSystemPrompt } from 'app/prompts/systemPrompt.js';
 import type { TripContext } from 'app/prompts/tripContext.js';
 import { insertAgentTurnCost } from 'app/repositories/agentTurnCost.js';
 import { insertToolCallLog } from 'app/repositories/tool-call-log.js';
-import { getMockAnthropicClientIfEnabled } from 'app/test-fixtures/mockAnthropicClient/mockAnthropicClient.js';
 import { TOOL_DEFINITIONS } from 'app/tools/definitions.js';
 import { type ToolContext, executeTool } from 'app/tools/executor.js';
 

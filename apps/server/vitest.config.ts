@@ -30,7 +30,7 @@ export default defineConfig({
         // below were unit-tested via tautological pool mocks
         // (mockResolvedValue(row); expect(result).toEqual(row)). The
         // unit tests were deleted in favor of the integration tests
-        // in src/__integration__/repositories/* which hit a real
+        // in src/__tests__/integration/repositories/* which hit a real
         // Postgres. Integration tests are excluded from the default
         // vitest run, so the unit-coverage pass should not count
         // these files against the threshold. The repositories ARE
@@ -76,10 +76,10 @@ export default defineConfig({
     exclude: [
       ...configDefaults.exclude,
       'migrations/**',
-      'src/__integration__/**',
+      'src/__tests__/integration/**',
       'dist/**',
     ],
     globals: true,
-    include: ['src/**/__tests__/**/*.test.ts'],
+    include: ['src/__tests__/**/*.test.ts'],
   },
 });
