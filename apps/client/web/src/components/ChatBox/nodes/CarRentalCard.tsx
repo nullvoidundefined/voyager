@@ -3,9 +3,9 @@
  * and dates. Exists as the per-item renderer that CarRentalTiles composes into a
  * selectable group.
  */
-import type { CarRental } from '@voyager/shared-types';
+import type { CarRental } from '@repo/types';
 
-import { formatCurrency, formatShortDate } from '@/lib/format';
+import { formatCurrency, formatShortDate } from '@/services/format';
 
 import styles from './CarRentalCard.module.scss';
 

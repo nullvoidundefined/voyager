@@ -14,6 +14,7 @@ import { useParams } from 'next/navigation';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { del, get, post, put } from '@/api/request';
 import { BookingConfirmation } from '@/components/BookingConfirmation/BookingConfirmation';
 import type { BookingLink } from '@/components/BookingLinks/BookingLinks';
 import { BookingLinks } from '@/components/BookingLinks/BookingLinks';
@@ -26,11 +27,10 @@ import { Skeleton } from '@/components/Skeleton/Skeleton';
 import { Toast } from '@/components/Toast/Toast';
 import type { MapPin } from '@/components/TripMap/TripMap';
 import { TripMap } from '@/components/TripMap/TripMap';
-import { del, get, post, put } from '@/lib/api';
-import { budgetBarDivisor, isOverBudget } from '@/lib/budget';
-import { getDestinationImage } from '@/lib/destinationImage';
-import { downloadICS } from '@/lib/exportIcs';
-import { formatCurrency, formatShortDate } from '@/lib/format';
+import { budgetBarDivisor, isOverBudget } from '@/services/budget';
+import { getDestinationImage } from '@/services/destinationImage';
+import { downloadICS } from '@/services/exportIcs';
+import { formatCurrency, formatShortDate } from '@/services/format';
 
 import styles from './tripDetail.module.scss';
 

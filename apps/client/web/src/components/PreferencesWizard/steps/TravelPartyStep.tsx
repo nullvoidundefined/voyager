@@ -3,7 +3,10 @@
  * GENDER_OPTIONS so the questionnaire captures party composition that shapes
  * downstream trip recommendations.
  */
-import { GENDER_OPTIONS, TRAVEL_PARTY_OPTIONS } from '@/lib/preferenceOptions';
+import {
+  GENDER_OPTIONS,
+  TRAVEL_PARTY_OPTIONS,
+} from '@/services/preferenceOptions';
 
 import styles from '../PreferencesWizard.module.scss';
 

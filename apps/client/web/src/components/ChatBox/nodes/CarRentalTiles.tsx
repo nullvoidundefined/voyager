@@ -5,7 +5,7 @@
  * letting the user pick a rental directly in the conversation and feed that
  * choice back into the trip without a separate page.
  */
-import type { ChatNodeOfType } from '@voyager/shared-types';
+import type { ChatNodeOfType } from '@repo/types';
 
 import { SelectableCardGroup } from '../widgets/SelectableCardGroup';
 import { CarRentalCard } from './CarRentalCard';

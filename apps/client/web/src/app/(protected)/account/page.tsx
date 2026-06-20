@@ -9,10 +9,10 @@ import { useState } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 
+import { get } from '@/api/request';
 import { PreferencesWizard } from '@/components/PreferencesWizard/PreferencesWizard';
-import { useAuth } from '@/context/AuthContext';
-import { get } from '@/lib/api';
-import { type UserPreferences } from '@/lib/preferenceOptions';
+import { type UserPreferences } from '@/services/preferenceOptions';
+import { useAuth } from '@/state/AuthContext';
 
 import styles from './account.module.scss';
 

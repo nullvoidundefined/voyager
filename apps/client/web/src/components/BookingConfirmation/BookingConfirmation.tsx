@@ -8,8 +8,8 @@ import Image from 'next/image';
 
 import * as Dialog from '@radix-ui/react-dialog';
 
-import { getDestinationImage } from '@/lib/destinationImage';
-import { formatCurrency, formatShortDate } from '@/lib/format';
+import { getDestinationImage } from '@/services/destinationImage';
+import { formatCurrency, formatShortDate } from '@/services/format';
 
 import styles from './BookingConfirmation.module.scss';
 

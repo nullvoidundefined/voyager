@@ -3,7 +3,7 @@
  * the chat-node-to-widget mapping in one place so the conversation can show live
  * budget progress without the node type leaking into the widget.
  */
-import type { ChatNodeOfType } from '@voyager/shared-types';
+import type { ChatNodeOfType } from '@repo/types';
 
 import { InlineBudgetBar } from '../widgets/InlineBudgetBar';
 

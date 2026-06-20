@@ -1,5 +1,5 @@
 packages:
   - 'apps/server'
   - 'apps/client/web'
-  - 'packages/shared-types'
+  - 'packages/types'
   - 'eval'

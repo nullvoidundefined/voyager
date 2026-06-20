@@ -15,16 +15,16 @@ import {
   useState,
 } from 'react';
 
+import type { ChatMessage, TripPlanCard } from '@repo/types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ChatMessage, TripPlanCard } from '@voyager/shared-types';
 
+import { get, post, put } from '@/api/request';
 import { AIDisclosure } from '@/components/AIDisclosure/AIDisclosure';
 import { CostCounter } from '@/components/CostCounter/CostCounter';
 import { Toast } from '@/components/Toast/Toast';
 import type { ToolCall } from '@/components/ToolTimeline/ToolTimeline';
 import { ToolTimeline } from '@/components/ToolTimeline/ToolTimeline';
-import { get, post, put } from '@/lib/api';
-import { runDemoScript } from '@/lib/demoScript';
+import { runDemoScript } from '@/services/demoScript';
 
 import styles from './ChatBox.module.scss';
 import { VirtualizedChat } from './VirtualizedChat';

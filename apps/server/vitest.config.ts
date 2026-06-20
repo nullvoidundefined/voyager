@@ -30,14 +30,14 @@ export default defineConfig({
         // below were unit-tested via tautological pool mocks
         // (mockResolvedValue(row); expect(result).toEqual(row)). The
         // unit tests were deleted in favor of the integration tests
-        // in src/__integration__/repositories/* which hit a real
+        // in src/__tests__/integration/repositories/* which hit a real
         // Postgres. Integration tests are excluded from the default
         // vitest run, so the unit-coverage pass should not count
         // these files against the threshold. The repositories ARE
         // still covered, just at the integration layer.
         'src/repositories/auth.ts',
         'src/repositories/conversations.ts',
-        'src/repositories/tool-call-log.ts',
+        'src/repositories/toolCallLog.ts',
         'src/repositories/userPreferences.ts',
       ],
       provider: 'v8',
@@ -76,10 +76,15 @@ export default defineConfig({
     exclude: [
       ...configDefaults.exclude,
       'migrations/**',
-      'src/__integration__/**',
+      'src/__tests__/integration/**',
       'dist/**',
     ],
     globals: true,
-    include: ['src/**/__tests__/**/*.test.ts'],
+    // Match every unit test under src/ regardless of directory.
+    // A narrower allowlist (e.g. src/__tests__/**) silently skips
+    // test files that live beside a fixture, which once dropped the
+    // mockAnthropicClient suite from the run and collapsed its
+    // coverage. Integration tests are carved out via exclude above.
+    include: ['src/**/*.test.ts'],
   },
 });

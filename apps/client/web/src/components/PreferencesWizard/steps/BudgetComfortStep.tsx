@@ -3,7 +3,7 @@
  * as a single-select so the questionnaire records how much the user wants to
  * spend versus economize.
  */
-import { BUDGET_COMFORT_OPTIONS } from '@/lib/preferenceOptions';
+import { BUDGET_COMFORT_OPTIONS } from '@/services/preferenceOptions';
 
 import styles from '../PreferencesWizard.module.scss';
 

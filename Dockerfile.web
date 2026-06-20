@@ -5,19 +5,19 @@ WORKDIR /app
 # Copy workspace config
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
 
-# Copy web and shared-types package.json for dependency resolution
+# Copy web and types package.json for dependency resolution
 COPY apps/client/web/package.json apps/client/web/package.json
-COPY packages/shared-types/package.json packages/shared-types/package.json
+COPY packages/types/package.json packages/types/package.json
 
 # Install dependencies (production + dev for the Next.js build)
-RUN pnpm install --frozen-lockfile --filter voyager-web --filter @voyager/shared-types --ignore-scripts
+RUN pnpm install --frozen-lockfile --filter voyager-web --filter @repo/types --ignore-scripts
 
-# Copy web source and shared-types
+# Copy web source and types
 COPY apps/client/web/ apps/client/web/
-COPY packages/shared-types/ packages/shared-types/
+COPY packages/types/ packages/types/
 
-# Build shared-types first (web transpiles its source, but its dist is needed for type resolution)
-RUN pnpm --filter @voyager/shared-types run build
+# Build types first (web transpiles its source, but its dist is needed for type resolution)
+RUN pnpm --filter @repo/types run build
 
 # NEXT_PUBLIC_* values are inlined into the client bundle at build time.
 # Railway exposes service variables as build args automatically.

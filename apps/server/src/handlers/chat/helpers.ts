@@ -3,7 +3,7 @@
  * completion state across a chat turn. Extracted from the handler so the
  * request/response plumbing stays separate from the incremental token logic.
  */
-import type { ChatNode, SSEEvent } from '@voyager/shared-types';
+import type { ChatNode, SSEEvent } from '@repo/types';
 import type { Response } from 'express';
 
 import {

@@ -3,7 +3,7 @@
  * total price, stay dates, optional map preview). Exists as the per-item tile
  * inside hotel selection groups, rendering as a pressable button.
  */
-import { formatCurrency, formatShortDate } from '@/lib/format';
+import { formatCurrency, formatShortDate } from '@/services/format';
 
 import styles from './HotelCard.module.scss';
 import { MapPreviewCard } from './MapPreviewCard';

@@ -9,17 +9,14 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
-      '@voyager/shared-types': path.resolve(
-        __dirname,
-        '../../../packages/shared-types/src',
-      ),
+      '@repo/types': path.resolve(__dirname, '../../../packages/types/src'),
     },
   },
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
-    include: ['src/**/__tests__/**/*.test.{ts,tsx}'],
+    setupFiles: ['./src/__tests__/setup.ts'],
+    include: ['src/__tests__/**/*.test.{ts,tsx}'],
     exclude: ['node_modules', '.next', 'e2e'],
     coverage: {
       provider: 'v8',

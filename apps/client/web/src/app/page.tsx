@@ -12,9 +12,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { DemoBanner } from '@/components/DemoBanner/DemoBanner';
-import { useAuth } from '@/context/AuthContext';
 import { DESTINATIONS } from '@/data/destinations';
-import { getDestinationImage } from '@/lib/destinationImage';
+import { getDestinationImage } from '@/services/destinationImage';
+import { useAuth } from '@/state/AuthContext';
 
 import styles from './page.module.scss';
 

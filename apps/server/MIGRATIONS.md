@@ -53,11 +53,11 @@ The `nodes` JSONB column contains an ordered array of `ChatNode` objects. Each n
 | `quick_replies`    | Suggested response buttons               | No         |
 | `tool_progress`    | Tool execution status indicator          | No         |
 
-Full type definitions are in `packages/shared-types/src/nodes.ts`.
+Full type definitions are in `packages/types/src/nodes.ts`.
 
 ### Adding New Node Types
 
-1. Add the type to the `ChatNode` union in `packages/shared-types/src/nodes.ts`
+1. Add the type to the `ChatNode` union in `packages/types/src/nodes.ts`
 2. Add a node builder in `server/src/services/node-builder.ts` (if derived from a tool result)
 3. Add a React component and register it in `web-client/src/components/ChatBox/NodeRenderer.tsx`
 4. TypeScript will enforce exhaustiveness — the frontend won't compile until the component is registered

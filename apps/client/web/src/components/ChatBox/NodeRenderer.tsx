@@ -5,7 +5,7 @@
  * to keep the node-type-to-widget mapping in one switch so the transcript
  * renderer stays agnostic of the growing set of node variants.
  */
-import type { ChatNode, TripPlanCard } from '@voyager/shared-types';
+import type { ChatNode, TripPlanCard } from '@repo/types';
 
 import { TripDetailsForm } from './TripDetailsForm';
 import { AdvisoryCard } from './nodes/AdvisoryCard';
@@ -95,7 +95,7 @@ export function NodeRenderer({ node, callbacks = {} }: NodeRendererProps) {
       );
 
     case 'itinerary': {
-      // Adapt shared-types DayPlan (field: day) to ItineraryTimeline (field: dayNumber)
+      // Adapt types DayPlan (field: day) to ItineraryTimeline (field: dayNumber)
       const adaptedDays = node.days.map((d) => ({
         dayNumber: d.day,
         title: d.title,

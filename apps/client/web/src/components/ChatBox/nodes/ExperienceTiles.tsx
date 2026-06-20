@@ -5,7 +5,7 @@
  * letting the user choose activities inline so the conversation can collect
  * experience selections without leaving the chat.
  */
-import type { ChatNodeOfType } from '@voyager/shared-types';
+import type { ChatNodeOfType } from '@repo/types';
 
 import { ExperienceCard } from '../widgets/ExperienceCard';
 import { SelectableCardGroup } from '../widgets/SelectableCardGroup';

@@ -5,7 +5,7 @@
  * the user pick a flight inline so the conversation can capture the selection
  * without routing to a separate booking screen.
  */
-import type { ChatNodeOfType } from '@voyager/shared-types';
+import type { ChatNodeOfType } from '@repo/types';
 
 import { FlightCard } from '../widgets/FlightCard';
 import { SelectableCardGroup } from '../widgets/SelectableCardGroup';
