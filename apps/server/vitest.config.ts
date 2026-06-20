@@ -80,6 +80,11 @@ export default defineConfig({
       'dist/**',
     ],
     globals: true,
-    include: ['src/__tests__/**/*.test.ts'],
+    // Match every unit test under src/ regardless of directory.
+    // A narrower allowlist (e.g. src/__tests__/**) silently skips
+    // test files that live beside a fixture, which once dropped the
+    // mockAnthropicClient suite from the run and collapsed its
+    // coverage. Integration tests are carved out via exclude above.
+    include: ['src/**/*.test.ts'],
   },
 });
