@@ -7,11 +7,11 @@
 import type { ChatNode } from '@repo/types';
 
 import { lookupCity } from '../../data/cities.js';
-import { getDrivingRequirements } from './enrichment-sources/driving.js';
-import { fetchFCDOAdvisory } from './enrichment-sources/fcdo.js';
-import { fetchWeatherForecast } from './enrichment-sources/openMeteo.js';
-import { fetchStateDeptAdvisory } from './enrichment-sources/stateDept.js';
-import { getVisaRequirement } from './enrichment-sources/visa-matrix.js';
+import { getDrivingRequirements } from './enrichmentSources/driving.js';
+import { fetchFCDOAdvisory } from './enrichmentSources/fcdo.js';
+import { fetchWeatherForecast } from './enrichmentSources/openMeteo.js';
+import { fetchStateDeptAdvisory } from './enrichmentSources/stateDept.js';
+import { getVisaRequirement } from './enrichmentSources/visaMatrix.js';
 
 export async function getEnrichmentNodes(
   destination: string,

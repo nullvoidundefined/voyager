@@ -16,7 +16,7 @@ import {
 import { buildSystemPrompt } from 'app/prompts/systemPrompt.js';
 import type { TripContext } from 'app/prompts/tripContext.js';
 import { insertAgentTurnCost } from 'app/repositories/agentTurnCost.js';
-import { insertToolCallLog } from 'app/repositories/tool-call-log.js';
+import { insertToolCallLog } from 'app/repositories/toolCallLog.js';
 import { TOOL_DEFINITIONS } from 'app/tools/definitions.js';
 import { type ToolContext, executeTool } from 'app/tools/executor.js';
 

@@ -9,9 +9,9 @@ import { pool } from 'app/database/pool.js';
 import {
   getToolCallLogsByConversation,
   insertToolCallLog,
-} from 'app/repositories/tool-call-log.js';
+} from 'app/repositories/toolCallLog.js';
 
-describe('tool-call-log repository integration', () => {
+describe('toolCallLog repository integration', () => {
   describe('insertToolCallLog', () => {
     it('inserts a log entry and returns it with generated id', async () => {
       const user = await seedUser();

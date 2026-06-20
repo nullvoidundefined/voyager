@@ -37,7 +37,7 @@ export default defineConfig({
         // still covered, just at the integration layer.
         'src/repositories/auth.ts',
         'src/repositories/conversations.ts',
-        'src/repositories/tool-call-log.ts',
+        'src/repositories/toolCallLog.ts',
         'src/repositories/userPreferences.ts',
       ],
       provider: 'v8',

@@ -8,7 +8,7 @@ vi.mock('app/clients/logger.js', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
-let fetchWeatherForecast: typeof import('app/services/external/enrichment-sources/openMeteo.js').fetchWeatherForecast;
+let fetchStateDeptAdvisory: typeof import('app/services/external/enrichmentSources/stateDept.js').fetchStateDeptAdvisory;
 let logger: typeof import('app/clients/logger.js').logger;
 
 beforeEach(async () => {
@@ -24,33 +24,34 @@ beforeEach(async () => {
   }));
 
   const mod =
-    await import('app/services/external/enrichment-sources/openMeteo.js');
-  fetchWeatherForecast = mod.fetchWeatherForecast;
+    await import('app/services/external/enrichmentSources/stateDept.js');
+  fetchStateDeptAdvisory = mod.fetchStateDeptAdvisory;
   const loggerMod = await import('app/clients/logger.js');
   logger = loggerMod.logger;
 });
 
-describe('fetchWeatherForecast', () => {
+describe('fetchStateDeptAdvisory', () => {
   it('returns null and logs warn when fetch throws', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('timeout')));
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('ECONNRESET')));
 
-    const result = await fetchWeatherForecast(41.4, 2.2);
+    const result = await fetchStateDeptAdvisory('US');
 
     expect(result).toBeNull();
     expect(logger.warn).toHaveBeenCalledWith(
-      expect.objectContaining({ source: 'open_meteo' }),
+      expect.objectContaining({ source: 'state_dept' }),
       expect.any(String),
     );
+
     vi.unstubAllGlobals();
   });
 
-  it('returns null when Open-Meteo responds non-ok', async () => {
+  it('returns null when feed responds non-ok', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue({ ok: false, status: 500 } as Response),
+      vi.fn().mockResolvedValue({ ok: false, status: 503 } as Response),
     );
 
-    const result = await fetchWeatherForecast(41.4, 2.2);
+    const result = await fetchStateDeptAdvisory('US');
 
     expect(result).toBeNull();
     vi.unstubAllGlobals();
@@ -59,50 +60,37 @@ describe('fetchWeatherForecast', () => {
   it('passes an AbortSignal with a finite timeout to fetch', async () => {
     const fetchSpy = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({
-        daily: {
-          time: [],
-          temperature_2m_max: [],
-          temperature_2m_min: [],
-          weathercode: [],
-          precipitation_probability_max: [],
-        },
-      }),
+      json: async () => ({ advisories: [] }),
     } as Response);
     vi.stubGlobal('fetch', fetchSpy);
 
-    await fetchWeatherForecast(41.4, 2.2);
+    await fetchStateDeptAdvisory('US');
 
     const init = fetchSpy.mock.calls[0]?.[1] as RequestInit | undefined;
     expect(init?.signal).toBeInstanceOf(AbortSignal);
     vi.unstubAllGlobals();
   });
 
-  it('returns weather_forecast node with parsed daily data', async () => {
+  it('returns advisory node when match found in feed', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({
-          daily: {
-            time: ['2026-07-01'],
-            temperature_2m_max: [30],
-            temperature_2m_min: [22],
-            weathercode: [0],
-            precipitation_probability_max: [10],
-          },
+          advisories: [
+            { iso_code: 'US', advisory_level: 2, advisory_text: 'Caution' },
+          ],
         }),
       } as Response),
     );
 
-    const result = await fetchWeatherForecast(41.4, 2.2);
+    const result = await fetchStateDeptAdvisory('US');
 
     expect(result).not.toBeNull();
-    expect(result?.type).toBe('weather_forecast');
-    if (result?.type === 'weather_forecast') {
-      expect(result.forecast).toHaveLength(1);
-      expect(result.forecast[0]?.high_c).toBe(30);
-      expect(result.forecast[0]?.condition).toBe('Clear');
+    expect(result?.type).toBe('advisory');
+    if (result?.type === 'advisory') {
+      expect(result.title).toContain('Level 2');
+      expect(result.body).toBe('Caution');
     }
     vi.unstubAllGlobals();
   });

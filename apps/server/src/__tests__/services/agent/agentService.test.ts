@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { insertToolCallLog } from 'app/repositories/tool-call-log.js';
+import { insertToolCallLog } from 'app/repositories/toolCallLog.js';
 import { runAgentLoop } from 'app/services/agent/agentService.js';
 import { executeTool } from 'app/tools/executor.js';
 
@@ -37,7 +37,7 @@ vi.mock('app/prompts/systemPrompt.js', () => ({
 vi.mock('app/clients/logger.js', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
-vi.mock('app/repositories/tool-call-log.js', () => ({
+vi.mock('app/repositories/toolCallLog.js', () => ({
   insertToolCallLog: vi.fn().mockResolvedValue({}),
 }));
 

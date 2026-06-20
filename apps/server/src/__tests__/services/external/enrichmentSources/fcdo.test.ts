@@ -8,7 +8,7 @@ vi.mock('app/clients/logger.js', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
-let fetchFCDOAdvisory: typeof import('app/services/external/enrichment-sources/fcdo.js').fetchFCDOAdvisory;
+let fetchFCDOAdvisory: typeof import('app/services/external/enrichmentSources/fcdo.js').fetchFCDOAdvisory;
 let logger: typeof import('app/clients/logger.js').logger;
 
 beforeEach(async () => {
@@ -23,7 +23,7 @@ beforeEach(async () => {
     logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
   }));
 
-  const mod = await import('app/services/external/enrichment-sources/fcdo.js');
+  const mod = await import('app/services/external/enrichmentSources/fcdo.js');
   fetchFCDOAdvisory = mod.fetchFCDOAdvisory;
   const loggerMod = await import('app/clients/logger.js');
   logger = loggerMod.logger;

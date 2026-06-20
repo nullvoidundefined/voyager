@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { getDrivingRequirements } from 'app/services/external/enrichment-sources/driving.js';
-import { getVisaRequirement } from 'app/services/external/enrichment-sources/visa-matrix.js';
+import { getDrivingRequirements } from 'app/services/external/enrichmentSources/driving.js';
+import { getVisaRequirement } from 'app/services/external/enrichmentSources/visaMatrix.js';
 
 describe('getDrivingRequirements', () => {
   it('returns advisory node for known country', () => {
