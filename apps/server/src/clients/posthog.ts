@@ -5,7 +5,9 @@
  */
 import { PostHog } from 'posthog-node';
 
-export const posthog = new PostHog(process.env.POSTHOG_API_KEY ?? '', {
-  host: process.env.POSTHOG_HOST,
+import { env } from 'app/config/env.js';
+
+export const posthog = new PostHog(env.POSTHOG_API_KEY ?? '', {
+  host: env.POSTHOG_HOST,
   enableExceptionAutocapture: true,
 });

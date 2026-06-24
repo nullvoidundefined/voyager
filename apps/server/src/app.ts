@@ -18,7 +18,7 @@ import {
 import { logger } from 'app/clients/logger.js';
 import { posthog } from 'app/clients/posthog.js';
 import { corsConfig } from 'app/config/corsConfig.js';
-import { isProduction } from 'app/config/env.js';
+import { env, validateProductionEnv } from 'app/config/env.js';
 import { pool, query } from 'app/database/pool.js';
 import { getSharedTripHandler } from 'app/handlers/trips/share.js';
 import { csrfGuard } from 'app/middleware/csrfGuard.js';
@@ -50,18 +50,14 @@ function readCommitSha(): string {
 }
 
 function validateEnv(): void {
-  if (!process.env.DATABASE_URL) {
+  if (!env.DATABASE_URL) {
     console.error('Fatal: DATABASE_URL is required');
     process.exit(1);
   }
-  if (isProduction() && !process.env.CORS_ORIGIN) {
-    console.error('Fatal: CORS_ORIGIN is required in production');
-    process.exit(1);
-  }
-  if (isProduction() && !process.env.NEXT_PUBLIC_APP_URL) {
-    console.error(
-      'Fatal: NEXT_PUBLIC_APP_URL is required in production (used for share-link generation)',
-    );
+  try {
+    validateProductionEnv();
+  } catch (err) {
+    console.error(`Fatal: ${(err as Error).message}`);
     process.exit(1);
   }
 }

@@ -5,6 +5,7 @@
  * upstream outages. Falls back to mock fixtures in eval/E2E mode.
  */
 import { logger } from 'app/clients/logger.js';
+import { env } from 'app/config/env.js';
 import { CircuitBreaker } from 'app/resilience/CircuitBreaker.js';
 import {
   cacheGet,
@@ -137,7 +138,7 @@ export async function searchExperiences(
     return cached;
   }
 
-  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  const apiKey = env.GOOGLE_PLACES_API_KEY;
   if (!apiKey) {
     throw new Error('GOOGLE_PLACES_API_KEY is not set');
   }
