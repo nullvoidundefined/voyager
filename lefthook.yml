@@ -67,6 +67,12 @@ pre-push:
       run: pnpm lint
     build:
       run: pnpm --filter voyager-server build
+    # Unit tests run locally before push, matching the CI gate, so a red branch
+    # or coverage regression fails here instead of only in CI (P2-08).
+    test-server:
+      run: pnpm test:coverage
+    test-web:
+      run: pnpm --filter voyager-web run test
     e2e-precheck:
       run: ./scripts/e2e-precheck.sh
     # e2e-fast runs in WARNING mode by default. PR-I landed
