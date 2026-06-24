@@ -28,6 +28,7 @@ import { rateLimiter } from 'app/middleware/rateLimiter.js';
 import { requestLogger } from 'app/middleware/requestLogger.js';
 import { loadSession } from 'app/middleware/requireAuth/requireAuth.js';
 import { deleteExpiredSessions } from 'app/repositories/auth.js';
+import { deleteExpiredIdempotencyKeys } from 'app/repositories/idempotency.js';
 import { authRouter } from 'app/routes/auth.js';
 import { placesRouter } from 'app/routes/places.js';
 import { tripRouter } from 'app/routes/trips.js';
@@ -235,18 +236,7 @@ export function startServer(): void {
       logger.error({ err }, 'Database connection failed'),
     );
 
-  const CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
-  setInterval(() => {
-    deleteExpiredSessions()
-      .then((count) => {
-        if (count > 0) {
-          logger.info({ count }, 'Cleaned up expired sessions');
-        }
-      })
-      .catch((err: unknown) => {
-        logger.error({ err }, 'Failed to clean up expired sessions');
-      });
-  }, CLEANUP_INTERVAL_MS);
+  scheduleExpiryCleanup();
 
   process.on('uncaughtException', (err) => {
     logger.fatal({ err }, 'Uncaught exception – shutting down');
@@ -286,4 +276,27 @@ export function startServer(): void {
 
   process.on('SIGTERM', () => shutdown('SIGTERM'));
   process.on('SIGINT', () => shutdown('SIGINT'));
+}
+
+const CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
+
+/** Hourly sweep dropping expired sessions and idempotency keys from the database. */
+function scheduleExpiryCleanup(): void {
+  setInterval(() => {
+    runCleanupSweep('expired sessions', deleteExpiredSessions);
+    runCleanupSweep('expired idempotency keys', deleteExpiredIdempotencyKeys);
+  }, CLEANUP_INTERVAL_MS);
+}
+
+/** Runs one cleanup query, logging the removed count and swallowing failures. */
+function runCleanupSweep(label: string, sweep: () => Promise<number>): void {
+  sweep()
+    .then((count) => {
+      if (count > 0) {
+        logger.info({ count }, `Cleaned up ${label}`);
+      }
+    })
+    .catch((err: unknown) => {
+      logger.error({ err }, `Failed to clean up ${label}`);
+    });
 }
