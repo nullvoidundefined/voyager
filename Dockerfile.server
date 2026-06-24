@@ -34,7 +34,11 @@ COPY --from=base /app/packages/types/dist packages/types/dist
 COPY --from=base /app/apps/server/dist apps/server/dist
 COPY apps/server/src/data/destinations.json apps/server/dist/data/destinations.json
 COPY apps/server/migrations apps/server/migrations
+COPY apps/server/scripts/migrate-and-start.sh apps/server/scripts/migrate-and-start.sh
+RUN chmod +x apps/server/scripts/migrate-and-start.sh
 
 EXPOSE 3001
 USER node
-CMD ["node", "apps/server/dist/index.js"]
+# Apply pending migrations before starting so a deployed schema change reaches
+# the database before traffic; see apps/server/scripts/migrate-and-start.sh.
+CMD ["apps/server/scripts/migrate-and-start.sh"]
