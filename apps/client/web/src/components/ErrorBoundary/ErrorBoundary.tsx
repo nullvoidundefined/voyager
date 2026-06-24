@@ -7,6 +7,8 @@
 import type { ErrorInfo, ReactNode } from 'react';
 import { Component } from 'react';
 
+import { captureClientException } from '@/clients/posthog';
+
 import styles from './ErrorBoundary.module.scss';
 
 interface Props {
@@ -29,7 +31,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('ErrorBoundary caught:', error, info.componentStack);
+    captureClientException(error, { componentStack: info.componentStack });
   }
 
   render() {
