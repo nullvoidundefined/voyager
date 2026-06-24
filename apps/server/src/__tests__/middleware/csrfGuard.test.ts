@@ -36,6 +36,25 @@ describe('csrfGuard', () => {
     expect(res.body).toEqual({ ok: true });
   });
 
+  it('rejects POST with a disallowed Origin even when X-Requested-With is set', async () => {
+    const res = await request(app)
+      .post('/post-ok')
+      .set('X-Requested-With', 'XMLHttpRequest')
+      .set('Origin', 'http://evil.example')
+      .send({});
+    expect(res.status).toBe(403);
+    expect(res.body.message).toBe('Origin not allowed');
+  });
+
+  it('allows POST with an allowed Origin', async () => {
+    const res = await request(app)
+      .post('/post-ok')
+      .set('X-Requested-With', 'XMLHttpRequest')
+      .set('Origin', 'http://localhost:5173')
+      .send({});
+    expect(res.status).toBe(200);
+  });
+
   it('rejects PUT without header with 403', async () => {
     const res = await request(app).put('/put-ok').send({});
     expect(res.status).toBe(403);
