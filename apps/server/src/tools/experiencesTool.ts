@@ -22,6 +22,9 @@ const placesBreaker = new CircuitBreaker('GooglePlaces', {
 });
 
 const CACHE_TTL = 3600;
+// Bounds the outbound Places call so a hung socket cannot stall the synchronous
+// agent loop; the breaker only trips on a thrown error, never on a stuck socket.
+const PLACES_FETCH_TIMEOUT_MS = 15_000;
 const PLACES_API_URL = 'https://places.googleapis.com/v1/places:searchText';
 const FIELD_MASK =
   'places.id,places.displayName,places.formattedAddress,places.rating,places.priceLevel,places.primaryTypeDisplayName,places.photos,places.location';
@@ -159,6 +162,7 @@ export async function searchExperiences(
         textQuery,
         maxResultCount: input.limit || 5,
       }),
+      signal: AbortSignal.timeout(PLACES_FETCH_TIMEOUT_MS),
     });
 
     if (!response.ok) {
