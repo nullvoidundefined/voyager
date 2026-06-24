@@ -101,9 +101,8 @@ test.describe('authenticated smoke', () => {
     await login(page, { email: SMOKE_EMAIL, password: SMOKE_PASSWORD });
     await expect(
       page
-        .locator(
-          'a:has-text("New Trip"), button:has-text("New Trip"), a:has-text("New trip"), button:has-text("New trip"), text=/No trips yet/i',
-        )
+        .locator('a:has-text("New Trip"), button:has-text("New Trip")')
+        .or(page.getByText(/No trips yet/i))
         .first(),
     ).toBeVisible({ timeout: 10_000 });
     await logout(page);
