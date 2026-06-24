@@ -7,6 +7,7 @@
 import { logger } from 'app/clients/logger.js';
 import { env } from 'app/config/env.js';
 import { CircuitBreaker } from 'app/resilience/CircuitBreaker.js';
+import { retryWithJitter } from 'app/resilience/retryWithJitter.js';
 import {
   cacheGet,
   cacheSet,
@@ -151,19 +152,26 @@ export async function searchExperiences(
   const textQuery = `${categoryText}in ${input.location}`;
 
   const data = await placesBreaker.call(async () => {
-    const response = await fetch(PLACES_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Goog-Api-Key': apiKey,
-        'X-Goog-FieldMask': FIELD_MASK,
-      },
-      body: JSON.stringify({
-        textQuery,
-        maxResultCount: input.limit || 5,
-      }),
-      signal: AbortSignal.timeout(PLACES_FETCH_TIMEOUT_MS),
-    });
+    // fetch rejects only on network/abort/timeout (all transient), so a single
+    // retry is always safe here. An HTTP 4xx/5xx resolves with ok=false and is
+    // handled below, never retried. A fresh timeout signal per attempt.
+    const response = await retryWithJitter(
+      () =>
+        fetch(PLACES_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': apiKey,
+            'X-Goog-FieldMask': FIELD_MASK,
+          },
+          body: JSON.stringify({
+            textQuery,
+            maxResultCount: input.limit || 5,
+          }),
+          signal: AbortSignal.timeout(PLACES_FETCH_TIMEOUT_MS),
+        }),
+      { shouldRetry: () => true },
+    );
 
     if (!response.ok) {
       const text = await response.text();
