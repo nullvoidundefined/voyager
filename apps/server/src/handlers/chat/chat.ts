@@ -8,6 +8,7 @@ import type { Request, Response } from 'express';
 
 import { logger } from 'app/clients/logger.js';
 import { posthog } from 'app/clients/posthog.js';
+import { ERROR_CODES } from 'app/constants/errorCodes.js';
 import { ApiError } from 'app/errors/ApiError.js';
 import { getAuthUser } from 'app/middleware/requireAuth/getAuthUser.js';
 import {
@@ -138,7 +139,7 @@ export async function chat(req: Request, res: Response) {
     });
     throw new ApiError(
       429,
-      'DAILY_BUDGET_EXCEEDED',
+      ERROR_CODES.DAILY_BUDGET_EXCEEDED,
       "You have reached today's agent usage limit. This is a portfolio demo with a conservative per-user daily budget to keep LLM costs bounded. The limit resets at UTC midnight.",
     );
   }
@@ -154,7 +155,7 @@ export async function chat(req: Request, res: Response) {
   if (!(await acquireConversationLock(conversation.id))) {
     throw new ApiError(
       409,
-      'CONFLICT',
+      ERROR_CODES.CONFLICT,
       'A response is already being generated for this trip. Please wait.',
     );
   }

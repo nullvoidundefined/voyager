@@ -18,7 +18,7 @@ import {
 import { logger } from 'app/clients/logger.js';
 import { posthog } from 'app/clients/posthog.js';
 import { corsConfig } from 'app/config/corsConfig.js';
-import { isProduction } from 'app/config/env.js';
+import { env, validateProductionEnv } from 'app/config/env.js';
 import { pool, query } from 'app/database/pool.js';
 import { getSharedTripHandler } from 'app/handlers/trips/share.js';
 import { csrfGuard } from 'app/middleware/csrfGuard.js';
@@ -28,6 +28,7 @@ import { rateLimiter } from 'app/middleware/rateLimiter.js';
 import { requestLogger } from 'app/middleware/requestLogger.js';
 import { loadSession } from 'app/middleware/requireAuth/requireAuth.js';
 import { deleteExpiredSessions } from 'app/repositories/auth.js';
+import { deleteExpiredIdempotencyKeys } from 'app/repositories/idempotency.js';
 import { authRouter } from 'app/routes/auth.js';
 import { placesRouter } from 'app/routes/places.js';
 import { tripRouter } from 'app/routes/trips.js';
@@ -49,18 +50,14 @@ function readCommitSha(): string {
 }
 
 function validateEnv(): void {
-  if (!process.env.DATABASE_URL) {
+  if (!env.DATABASE_URL) {
     console.error('Fatal: DATABASE_URL is required');
     process.exit(1);
   }
-  if (isProduction() && !process.env.CORS_ORIGIN) {
-    console.error('Fatal: CORS_ORIGIN is required in production');
-    process.exit(1);
-  }
-  if (isProduction() && !process.env.NEXT_PUBLIC_APP_URL) {
-    console.error(
-      'Fatal: NEXT_PUBLIC_APP_URL is required in production (used for share-link generation)',
-    );
+  try {
+    validateProductionEnv();
+  } catch (err) {
+    console.error(`Fatal: ${(err as Error).message}`);
     process.exit(1);
   }
 }
@@ -235,18 +232,7 @@ export function startServer(): void {
       logger.error({ err }, 'Database connection failed'),
     );
 
-  const CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
-  setInterval(() => {
-    deleteExpiredSessions()
-      .then((count) => {
-        if (count > 0) {
-          logger.info({ count }, 'Cleaned up expired sessions');
-        }
-      })
-      .catch((err: unknown) => {
-        logger.error({ err }, 'Failed to clean up expired sessions');
-      });
-  }, CLEANUP_INTERVAL_MS);
+  scheduleExpiryCleanup();
 
   process.on('uncaughtException', (err) => {
     logger.fatal({ err }, 'Uncaught exception – shutting down');
@@ -286,4 +272,27 @@ export function startServer(): void {
 
   process.on('SIGTERM', () => shutdown('SIGTERM'));
   process.on('SIGINT', () => shutdown('SIGINT'));
+}
+
+const CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
+
+/** Hourly sweep dropping expired sessions and idempotency keys from the database. */
+function scheduleExpiryCleanup(): void {
+  setInterval(() => {
+    runCleanupSweep('expired sessions', deleteExpiredSessions);
+    runCleanupSweep('expired idempotency keys', deleteExpiredIdempotencyKeys);
+  }, CLEANUP_INTERVAL_MS);
+}
+
+/** Runs one cleanup query, logging the removed count and swallowing failures. */
+function runCleanupSweep(label: string, sweep: () => Promise<number>): void {
+  sweep()
+    .then((count) => {
+      if (count > 0) {
+        logger.info({ count }, `Cleaned up ${label}`);
+      }
+    })
+    .catch((err: unknown) => {
+      logger.error({ err }, `Failed to clean up ${label}`);
+    });
 }

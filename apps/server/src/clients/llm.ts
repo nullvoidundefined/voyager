@@ -8,6 +8,15 @@
  */
 import Anthropic from '@anthropic-ai/sdk';
 
+// Per-request timeout bounds a single hung LLM call (the SDK default is ~10
+// minutes, far longer than the agent loop's 120s wall-clock budget). maxRetries
+// keeps the SDK's built-in backoff for transient 429/5xx.
+const LLM_MAX_RETRIES = 2;
+const LLM_REQUEST_TIMEOUT_MS = 45_000;
+
 export function getLlmClient(): Anthropic {
-  return new Anthropic();
+  return new Anthropic({
+    maxRetries: LLM_MAX_RETRIES,
+    timeout: LLM_REQUEST_TIMEOUT_MS,
+  });
 }

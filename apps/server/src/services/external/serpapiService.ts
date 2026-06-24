@@ -5,6 +5,7 @@
  * calling it directly.
  */
 import { logger } from 'app/clients/logger.js';
+import { env } from 'app/config/env.js';
 import { CircuitBreaker } from 'app/resilience/CircuitBreaker.js';
 import {
   incrementMonthlyUsage,
@@ -34,7 +35,7 @@ const serpApiBreaker = new CircuitBreaker('SerpApi', {
 });
 
 function getApiKey(): string {
-  const key = process.env.SERPAPI_API_KEY;
+  const key = env.SERPAPI_API_KEY;
   if (!key) {
     throw new Error('SERPAPI_API_KEY is required');
   }

@@ -13,6 +13,7 @@ import { Header } from '@/components/Header/Header';
 import { APP_NAME } from '@/constants';
 import { AuthProvider } from '@/state/AuthContext';
 import { QueryProvider } from '@/state/QueryProvider';
+import { TelemetryProvider } from '@/state/TelemetryProvider';
 
 import '../styles/animations.scss';
 import './globals.scss';
@@ -55,17 +56,19 @@ export default function RootLayout({
         <a href='#main-content' className={styles.skipLink}>
           Skip to main content
         </a>
-        <QueryProvider>
-          <AuthProvider>
-            <div className={styles.appShell}>
-              <Header />
-              <main id='main-content' tabIndex={-1} className={styles.main}>
-                <ErrorBoundary>{children}</ErrorBoundary>
-              </main>
-              <Footer />
-            </div>
-          </AuthProvider>
-        </QueryProvider>
+        <TelemetryProvider>
+          <QueryProvider>
+            <AuthProvider>
+              <div className={styles.appShell}>
+                <Header />
+                <main id='main-content' tabIndex={-1} className={styles.main}>
+                  <ErrorBoundary>{children}</ErrorBoundary>
+                </main>
+                <Footer />
+              </div>
+            </AuthProvider>
+          </QueryProvider>
+        </TelemetryProvider>
       </body>
     </html>
   );

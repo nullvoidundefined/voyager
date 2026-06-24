@@ -10,8 +10,21 @@ import type { ChatNode, SSEEvent } from '@repo/types';
 import { getLlmClient } from 'app/clients/llm.js';
 import { logger } from 'app/clients/logger.js';
 import { DEFAULT_MAX_TOKENS, DEFAULT_MODEL } from 'app/constants/models.js';
+import { CircuitBreaker } from 'app/resilience/CircuitBreaker.js';
+import { isTransientAnthropicError } from 'app/resilience/isTransientAnthropicError.js';
 
 import { buildNodeFromToolResult } from './nodeBuilder.js';
+
+// Shared across requests so a sustained Anthropic outage short-circuits the
+// agent loop rather than burning every iteration waiting on a degraded
+// provider. Only transient failures (429/5xx/timeout) count toward the trip.
+const ANTHROPIC_BREAKER_FAILURE_THRESHOLD = 5;
+const ANTHROPIC_BREAKER_COOLDOWN_MS = 30_000;
+const anthropicBreaker = new CircuitBreaker('Anthropic', {
+  failureThreshold: ANTHROPIC_BREAKER_FAILURE_THRESHOLD,
+  cooldownMs: ANTHROPIC_BREAKER_COOLDOWN_MS,
+  isRetryable: isTransientAnthropicError,
+});
 
 // Lowered from 15 to 8 per FIN-06 (2026-04-06 audit). The original cap
 // predates any cost observability. Until per-turn token cost is persisted
@@ -177,29 +190,33 @@ export class AgentOrchestrator {
 
       iterations++;
 
-      const stream = this.client.messages.stream({
-        model: this.model,
-        max_tokens: this.maxTokens,
-        system: [
-          {
-            type: 'text',
-            text: systemPrompt,
-            cache_control: { type: 'ephemeral' },
-          },
-        ],
-        tools: toolsWithCache,
-        messages: conversationMessages,
-      });
+      // The breaker short-circuits when Anthropic is sustained-down; the SDK
+      // client carries the per-request timeout and retry policy (see llm.ts).
+      const response = await anthropicBreaker.call(async () => {
+        const stream = this.client.messages.stream({
+          model: this.model,
+          max_tokens: this.maxTokens,
+          system: [
+            {
+              type: 'text',
+              text: systemPrompt,
+              cache_control: { type: 'ephemeral' },
+            },
+          ],
+          tools: toolsWithCache,
+          messages: conversationMessages,
+        });
 
-      // Emit text tokens as they arrive (real-time typing animation)
-      stream.on('text', (text) => {
-        if (!formatResponseData) {
-          onEvent?.({ type: 'text_delta', content: text });
-        }
-      });
+        // Emit text tokens as they arrive (real-time typing animation)
+        stream.on('text', (text) => {
+          if (!formatResponseData) {
+            onEvent?.({ type: 'text_delta', content: text });
+          }
+        });
 
-      // Wait for the complete response
-      const response = await stream.finalMessage();
+        // Wait for the complete response
+        return stream.finalMessage();
+      });
 
       tokensUsed.input += response.usage.input_tokens;
       tokensUsed.output += response.usage.output_tokens;

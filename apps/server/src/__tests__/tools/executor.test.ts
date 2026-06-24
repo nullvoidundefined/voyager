@@ -54,6 +54,7 @@ vi.mock('app/repositories/trips/tripLegsRepository.js', () => ({
 }));
 vi.mock('app/repositories/trips/scheduleRepository.js', () => ({
   addScheduleItem: vi.fn(),
+  runScheduleTransaction: vi.fn(),
   upsertScheduleDay: vi.fn(),
 }));
 vi.mock('app/clients/logger.js', () => ({

@@ -7,7 +7,9 @@ import type { Request, Response } from 'express';
 import { Readable } from 'node:stream';
 import type { ReadableStream as WebReadableStream } from 'node:stream/web';
 
-const GOOGLE_API_KEY = process.env.GOOGLE_PLACES_API_KEY ?? '';
+import { env } from 'app/config/env.js';
+
+const GOOGLE_API_KEY = env.GOOGLE_PLACES_API_KEY ?? '';
 
 // SEC-01 (2026-04-06 audit): strict allowlist for the `ref` query
 // parameter. Google Places photo references follow the format

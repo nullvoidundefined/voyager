@@ -3,7 +3,8 @@
  * schedule items so the planned timeline is stored separately from the trip's
  * top-level booking records.
  */
-import { query } from 'app/database/pool.js';
+import type { PoolClient } from 'app/database/pool.js';
+import { query, withTransaction } from 'app/database/pool.js';
 
 export interface ScheduleItem {
   id: string;
@@ -44,9 +45,17 @@ export interface AddItemInput {
   price_usd?: number;
 }
 
+/** Runs the daily-schedule writes in one transaction so a day and its items commit atomically. */
+export async function runScheduleTransaction<T>(
+  fn: (client: PoolClient) => Promise<T>,
+): Promise<T> {
+  return withTransaction(fn);
+}
+
 export async function upsertScheduleDay(
   tripId: string,
   input: UpsertDayInput,
+  client?: PoolClient,
 ): Promise<ScheduleDay> {
   const result = await query<Omit<ScheduleDay, 'items'>>(
     `INSERT INTO trip_schedule (trip_id, day_date, day_number)
@@ -54,6 +63,7 @@ export async function upsertScheduleDay(
      ON CONFLICT (trip_id, day_number) DO UPDATE SET day_date = EXCLUDED.day_date
      RETURNING *`,
     [tripId, input.day_date, input.day_number],
+    client,
   );
   return { ...result.rows[0]!, items: [] };
 }
@@ -61,11 +71,20 @@ export async function upsertScheduleDay(
 export async function addScheduleItem(
   scheduleId: string,
   input: AddItemInput,
+  client?: PoolClient,
 ): Promise<ScheduleItem> {
   const result = await query<ScheduleItem>(
     `INSERT INTO trip_schedule_items
      (schedule_id, time_of_day, title, description, item_type, item_order, place_id, booking_url, price_usd)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+     ON CONFLICT (schedule_id, item_order) DO UPDATE SET
+       time_of_day = EXCLUDED.time_of_day,
+       title = EXCLUDED.title,
+       description = EXCLUDED.description,
+       item_type = EXCLUDED.item_type,
+       place_id = EXCLUDED.place_id,
+       booking_url = EXCLUDED.booking_url,
+       price_usd = EXCLUDED.price_usd
      RETURNING *`,
     [
       scheduleId,
@@ -78,6 +97,7 @@ export async function addScheduleItem(
       input.booking_url ?? null,
       input.price_usd ?? null,
     ],
+    client,
   );
   return result.rows[0]!;
 }

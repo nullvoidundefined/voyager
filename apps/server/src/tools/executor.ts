@@ -10,6 +10,7 @@ import { logger } from 'app/clients/logger.js';
 import type { AddItemInput } from 'app/repositories/trips/scheduleRepository.js';
 import {
   addScheduleItem,
+  runScheduleTransaction,
   upsertScheduleDay,
 } from 'app/repositories/trips/scheduleRepository.js';
 import {
@@ -241,7 +242,11 @@ export async function executeTool(
           }>;
         },
         context,
-        { upsertScheduleDay, addScheduleItem },
+        {
+          runInTransaction: runScheduleTransaction,
+          upsertScheduleDay,
+          addScheduleItem,
+        },
       );
     }
 

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { query } from 'app/database/pool.js';
 import {
+  buildSelectionKey,
   getActualCostsForTrip,
   insertTripFlight,
   updateTrip,
@@ -157,6 +158,53 @@ describe('insertTripFlight string-price coercion', () => {
     const priceIndex = values.indexOf(293);
     expect(priceIndex).toBeGreaterThan(-1);
     expect(typeof values[priceIndex]).toBe('number');
+  });
+
+  it('upserts via ON CONFLICT on the selection dedupe key', async () => {
+    await insertTripFlight('trip-789', {
+      airline: 'Iberia',
+      flight_number: 'IB3156',
+      origin: 'JFK',
+      destination: 'MAD',
+      departure_time: '2026-07-01T10:00:00Z',
+      booking_url: 'https://book/xyz',
+    });
+    const sql = mockQuery.mock.calls[0]![0] as string;
+    const values = mockQuery.mock.calls[0]![1] as unknown[];
+    expect(sql).toContain('ON CONFLICT (trip_id, selection_key) DO UPDATE');
+    // selection_key is derived from booking_url and bound as the last value.
+    expect(values[values.length - 1]).toBe('https://book/xyz');
+  });
+});
+
+describe('buildSelectionKey', () => {
+  it('uses booking_url as the key when present', () => {
+    expect(
+      buildSelectionKey({ booking_url: 'https://book/abc', name: 'X' }, [
+        'name',
+      ]),
+    ).toBe('https://book/abc');
+  });
+
+  it('falls back to joined key columns when booking_url is absent', () => {
+    expect(
+      buildSelectionKey({ airline: 'Iberia', flight_number: 'IB3156' }, [
+        'airline',
+        'flight_number',
+      ]),
+    ).toBe('Iberia|IB3156');
+  });
+
+  it('treats an empty booking_url as absent', () => {
+    expect(
+      buildSelectionKey({ booking_url: '', name: 'Louvre' }, ['name']),
+    ).toBe('Louvre');
+  });
+
+  it('renders missing key columns as empty segments', () => {
+    expect(buildSelectionKey({ name: 'Louvre' }, ['name', 'category'])).toBe(
+      'Louvre|',
+    );
   });
 });
 

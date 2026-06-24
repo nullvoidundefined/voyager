@@ -5,7 +5,9 @@
  * upstream outages. Falls back to mock fixtures in eval/E2E mode.
  */
 import { logger } from 'app/clients/logger.js';
+import { env } from 'app/config/env.js';
 import { CircuitBreaker } from 'app/resilience/CircuitBreaker.js';
+import { retryWithJitter } from 'app/resilience/retryWithJitter.js';
 import {
   cacheGet,
   cacheSet,
@@ -21,6 +23,9 @@ const placesBreaker = new CircuitBreaker('GooglePlaces', {
 });
 
 const CACHE_TTL = 3600;
+// Bounds the outbound Places call so a hung socket cannot stall the synchronous
+// agent loop; the breaker only trips on a thrown error, never on a stuck socket.
+const PLACES_FETCH_TIMEOUT_MS = 15_000;
 const PLACES_API_URL = 'https://places.googleapis.com/v1/places:searchText';
 const FIELD_MASK =
   'places.id,places.displayName,places.formattedAddress,places.rating,places.priceLevel,places.primaryTypeDisplayName,places.photos,places.location';
@@ -137,7 +142,7 @@ export async function searchExperiences(
     return cached;
   }
 
-  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  const apiKey = env.GOOGLE_PLACES_API_KEY;
   if (!apiKey) {
     throw new Error('GOOGLE_PLACES_API_KEY is not set');
   }
@@ -147,18 +152,26 @@ export async function searchExperiences(
   const textQuery = `${categoryText}in ${input.location}`;
 
   const data = await placesBreaker.call(async () => {
-    const response = await fetch(PLACES_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Goog-Api-Key': apiKey,
-        'X-Goog-FieldMask': FIELD_MASK,
-      },
-      body: JSON.stringify({
-        textQuery,
-        maxResultCount: input.limit || 5,
-      }),
-    });
+    // fetch rejects only on network/abort/timeout (all transient), so a single
+    // retry is always safe here. An HTTP 4xx/5xx resolves with ok=false and is
+    // handled below, never retried. A fresh timeout signal per attempt.
+    const response = await retryWithJitter(
+      () =>
+        fetch(PLACES_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': apiKey,
+            'X-Goog-FieldMask': FIELD_MASK,
+          },
+          body: JSON.stringify({
+            textQuery,
+            maxResultCount: input.limit || 5,
+          }),
+          signal: AbortSignal.timeout(PLACES_FETCH_TIMEOUT_MS),
+        }),
+      { shouldRetry: () => true },
+    );
 
     if (!response.ok) {
       const text = await response.text();

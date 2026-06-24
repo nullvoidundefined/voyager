@@ -141,30 +141,59 @@ export async function updateTrip(
   return result.rows[0] ?? null;
 }
 
-/** Generic helper for inserting a trip selection row with `selected = true`. */
+/**
+ * Derives a stable per-trip dedupe key for a selection. Prefers the booking_url
+ * (the most specific identifier); falls back to joining the natural-key columns
+ * so re-selecting the same item never inserts a duplicate row.
+ */
+export function buildSelectionKey(
+  input: Record<string, unknown>,
+  keyColumns: string[],
+): string {
+  const bookingUrl = input.booking_url;
+  if (typeof bookingUrl === 'string' && bookingUrl.length > 0) {
+    return bookingUrl;
+  }
+  return keyColumns.map((column) => String(input[column] ?? '')).join('|');
+}
+
+/**
+ * Generic helper for upserting a trip selection row with `selected = true`.
+ * Dedupes on (trip_id, selection_key): a retried or re-emitted selection of the
+ * same item refreshes the existing row instead of inserting a duplicate, which
+ * would otherwise double-count in getActualCostsForTrip.
+ */
 async function insertTripSelection(
   table: string,
   tripId: string,
   columns: string[],
+  keyColumns: string[],
   input: Record<string, unknown>,
   numericColumns: ReadonlySet<string> = new Set(),
 ): Promise<void> {
-  const allCols = ['trip_id', ...columns, 'selected'];
+  const selectionKey = buildSelectionKey(input, keyColumns);
+  const allCols = ['trip_id', ...columns, 'selected', 'selection_key'];
   const values = [
     tripId,
-    ...columns.map((c) => {
-      const v = input[c] ?? null;
-      if (v !== null && numericColumns.has(c)) {
-        const n = Number(v);
-        return Number.isFinite(n) ? n : null;
+    ...columns.map((column) => {
+      const value = input[column] ?? null;
+      if (value !== null && numericColumns.has(column)) {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : null;
       }
-      return v;
+      return value;
     }),
     true,
+    selectionKey,
   ];
   const placeholders = allCols.map((_, i) => `$${i + 1}`).join(', ');
+  const updates = columns
+    .map((column) => `${column} = EXCLUDED.${column}`)
+    .concat('selected = EXCLUDED.selected')
+    .join(', ');
   await query(
-    `INSERT INTO ${table} (${allCols.join(', ')}) VALUES (${placeholders})`,
+    `INSERT INTO ${table} (${allCols.join(', ')}) VALUES (${placeholders})
+     ON CONFLICT (trip_id, selection_key) DO UPDATE SET ${updates}`,
     values,
   );
 }
@@ -187,6 +216,7 @@ export async function insertTripFlight(
       'currency',
       'booking_url',
     ],
+    ['airline', 'flight_number', 'origin', 'destination', 'departure_time'],
     input,
     new Set(['price']),
   );
@@ -210,6 +240,7 @@ export async function insertTripHotel(
       'check_out',
       'booking_url',
     ],
+    ['name', 'check_in', 'check_out'],
     input,
     new Set(['star_rating', 'price_per_night', 'total_price']),
   );
@@ -231,6 +262,7 @@ export async function insertTripCarRental(
       'currency',
       'booking_url',
     ],
+    ['provider', 'car_name', 'car_type'],
     input,
     new Set(['price_per_day', 'total_price']),
   );
@@ -244,6 +276,7 @@ export async function insertTripExperience(
     'trip_experiences',
     tripId,
     ['name', 'category', 'estimated_cost', 'rating', 'booking_url'],
+    ['name', 'category'],
     input,
     new Set(['estimated_cost', 'rating']),
   );

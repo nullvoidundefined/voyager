@@ -173,6 +173,22 @@ describe('experiencesTool', () => {
       expect(fetchCall[1].headers['X-Goog-FieldMask']).toBeDefined();
     });
 
+    it('bounds the Places request with an abort-timeout signal (P2-05)', async () => {
+      vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ places: [] }),
+      });
+
+      await searchExperiences({
+        location: 'Barcelona',
+        categories: ['museum'],
+      });
+
+      const fetchCall = mockFetch.mock.calls[0]!;
+      expect(fetchCall[1].signal).toBeInstanceOf(AbortSignal);
+    });
+
     it('constructs text query from location and categories', async () => {
       vi.mocked(cacheService.cacheGet).mockResolvedValueOnce(null);
       mockFetch.mockResolvedValueOnce({
