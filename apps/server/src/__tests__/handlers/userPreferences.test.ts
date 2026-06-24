@@ -149,6 +149,18 @@ describe('userPreferences handlers', () => {
       });
     });
 
+    it('returns 400 and does not persist when a value is malformed (P3-04)', async () => {
+      const app = buildApp();
+
+      const res = await request(app)
+        .put('/user-preferences')
+        .send({ accommodation: 'not-a-real-option', dietary: 'not-an-array' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('VALIDATION_ERROR');
+      expect(prefsRepo.upsert).not.toHaveBeenCalled();
+    });
+
     it('returns 500 when repo throws', async () => {
       const app = buildApp();
       vi.mocked(prefsRepo.upsert).mockRejectedValueOnce(new Error('DB error'));
