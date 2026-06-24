@@ -18,6 +18,7 @@ import {
 import { logger } from 'app/clients/logger.js';
 import { posthog } from 'app/clients/posthog.js';
 import { corsConfig } from 'app/config/corsConfig.js';
+import { readDeployedCommit } from 'app/config/deployedCommit.js';
 import { env, validateProductionEnv } from 'app/config/env.js';
 import { pool, query } from 'app/database/pool.js';
 import { getSharedTripHandler } from 'app/handlers/trips/share.js';
@@ -35,18 +36,11 @@ import { tripRouter } from 'app/routes/trips.js';
 import { userPreferencesRouter } from 'app/routes/userPreferences.js';
 
 function readCommitSha(): string {
-  try {
-    const versionPath = path.resolve(
-      path.dirname(new URL(import.meta.url).pathname),
-      'data/version.json',
-    );
-    const { commit } = JSON.parse(fs.readFileSync(versionPath, 'utf-8')) as {
-      commit: string;
-    };
-    return commit || 'unknown';
-  } catch {
-    return 'unknown';
-  }
+  const versionPath = path.resolve(
+    path.dirname(new URL(import.meta.url).pathname),
+    'data/version.json',
+  );
+  return readDeployedCommit(versionPath);
 }
 
 function validateEnv(): void {
