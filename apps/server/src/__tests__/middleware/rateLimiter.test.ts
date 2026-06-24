@@ -124,16 +124,20 @@ describe('E2E_BYPASS_RATE_LIMITS', () => {
     }
   });
 
+  // 20 requests is twice the 10/15-min auth limit, enough to prove the bypass
+  // skips the limiter, without the 50 sequential round-trips that intermittently
+  // blew the default 5s timeout under full-suite CPU load. Explicit timeout adds
+  // headroom so the test cannot flake on a loaded CI/pre-push run.
   it('skips the auth limiter entirely when set to "1"', async () => {
     process.env.E2E_BYPASS_RATE_LIMITS = '1';
     const app = buildApp(authRateLimiter);
 
     // Send well past the 10/15-min limit. None should 429.
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 20; i++) {
       const res = await request(app).get('/test');
       expect(res.status).toBe(200);
     }
-  });
+  }, 15_000);
 
   it('does not skip when unset', async () => {
     delete process.env.E2E_BYPASS_RATE_LIMITS;
