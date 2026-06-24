@@ -5,8 +5,11 @@
  */
 import type { Request, Response } from 'express';
 
-import { query } from 'app/database/pool.js';
 import { ApiError } from 'app/errors/ApiError.js';
+import {
+  createShareLink,
+  getSharedTripRef,
+} from 'app/repositories/sharedTrips.js';
 import { getTripWithDetails } from 'app/repositories/trips/trips.js';
 
 export async function createShareHandler(
@@ -21,29 +24,23 @@ export async function createShareHandler(
     throw ApiError.forbidden('You do not have permission to share this trip');
   }
 
-  const result = await query<{ id: string }>(
-    `INSERT INTO shared_trips (trip_id, created_by) VALUES ($1, $2) RETURNING id`,
-    [tripId, userId],
-  );
-  const shareId = result.rows[0]!.id;
+  const shareId = await createShareLink(tripId, userId);
   const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/shared/${shareId}`;
   res.status(201).json({ share_id: shareId, share_url: shareUrl });
 }
 
-export async function getSharedTripHandler(req: Request, res: Response) {
+export async function getSharedTripHandler(
+  req: Request<{ shareId: string }>,
+  res: Response,
+) {
   const { shareId } = req.params;
 
-  const result = await query<{ trip_id: string; created_by: string }>(
-    `SELECT trip_id, created_by FROM shared_trips WHERE id = $1`,
-    [shareId],
-  );
-
-  if (!result.rows.length) {
+  const ref = await getSharedTripRef(shareId);
+  if (!ref) {
     res.status(404).json({ error: 'Share link not found' });
     return;
   }
 
-  const { trip_id, created_by } = result.rows[0]!;
-  const trip = await getTripWithDetails(trip_id, created_by);
+  const trip = await getTripWithDetails(ref.trip_id, ref.created_by);
   res.json({ trip });
 }
