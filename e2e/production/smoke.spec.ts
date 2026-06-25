@@ -108,65 +108,11 @@ test.describe('authenticated smoke', () => {
     await logout(page);
   });
 
-  test('agent turn: trip creation and tile response', async ({ page }) => {
-    test.setTimeout(180_000);
-
-    await login(page, { email: SMOKE_EMAIL, password: SMOKE_PASSWORD });
-
-    const tripCreated = page.waitForResponse(
-      (res) =>
-        res.url().includes('/trips') &&
-        res.request().method() === 'POST' &&
-        res.status() === 201,
-      { timeout: 30_000 },
-    );
-    await page
-      .locator(
-        'a:has-text("New Trip"), button:has-text("New Trip"), a:has-text("New trip"), button:has-text("New trip")',
-      )
-      .first()
-      .click();
-    await tripCreated;
-    await expect(page).toHaveURL(
-      /\/trips\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/,
-      { timeout: 15_000 },
-    );
-
-    const input = page
-      .locator(
-        'input[aria-label="Ask the agent to plan your trip..."], input[placeholder="Ask the agent to plan your trip..."]',
-      )
-      .first();
-    await input.fill(
-      'Plan a 3-day trip to Lisbon, June 20 to June 23, for 2 people, budget $2000. Flights from JFK.',
-    );
-    await page
-      .locator('form')
-      .filter({ has: input })
-      .locator('button[type="submit"]')
-      .first()
-      .click();
-
-    const startPlanning = page
-      .locator('button:has-text("Start planning")')
-      .first();
-    try {
-      await startPlanning.waitFor({ state: 'visible', timeout: 45_000 });
-      await startPlanning.click();
-    } catch {
-      // Agent went straight to search without a plan-confirmation step.
-    }
-
-    const tileCard = page
-      .locator('[data-tile-card="flight"], [data-tile-card="hotel"]')
-      .first();
-    await expect(tileCard).toBeVisible({ timeout: 120_000 });
-
-    const ariaLabel = await tileCard.getAttribute('aria-label');
-    expect(ariaLabel).toBeTruthy();
-    expect(ariaLabel).not.toMatch(/undefined/i);
-    expect(ariaLabel).not.toMatch(/\bNaN\b/);
-  });
+  // The agent-turn tile-response assertion lives in the mocked e2e lane
+  // (chat-booking-flow.spec.ts US-22, E2E_MOCK_TOOLS=1), where flight/hotel
+  // tiles are deterministic. It is intentionally not duplicated here: against
+  // the live deployment it depended on real SerpApi results and burned the
+  // 250/month quota on every deploy, which is what made this gate flaky.
 
   test('trip persists across sessions: appears in list after navigation and reload', async ({
     page,
@@ -201,30 +147,10 @@ test.describe('authenticated smoke', () => {
       { timeout: 15_000 },
     );
 
-    // Send an initial message so the trip has a title/content
-    const input = page
-      .locator(
-        'input[aria-label="Ask the agent to plan your trip..."], input[placeholder="Ask the agent to plan your trip..."]',
-      )
-      .first();
-    await input.fill(
-      'Plan a 3-day trip to Barcelona, July 10 to July 13, for 2 people, budget $2500.',
-    );
-    await page
-      .locator('form')
-      .filter({ has: input })
-      .locator('button[type="submit"]')
-      .first()
-      .click();
-
-    // Wait for the agent to respond (at minimum, wait for the plan step)
-    await page
-      .locator('button:has-text("Start planning"), [data-tile-card]')
-      .first()
-      .waitFor({ state: 'visible', timeout: 120_000 })
-      .catch(() => {
-        // Agent may respond differently; continue regardless
-      });
+    // Persistence is established by trip creation (POST /trips) alone; the
+    // list assertion below keys off the created tripId. We intentionally do not
+    // send an agent message here, so this test does not drive a live SerpApi
+    // search (that path is covered, mocked, in the e2e fast lane).
 
     // Navigate to the trips list
     await page.goto('/trips');
