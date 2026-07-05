@@ -65,7 +65,7 @@ test.describe('Chat and booking flow', () => {
     // The mock Anthropic emits search_flights + search_hotels
     // tool_use on iteration 1. The orchestrator runs them via
     // the existing mock adapters and buildNodeFromToolResult
-    // creates flight_tiles and hotel_tiles nodes.
+    // creates flight and hotel offer_tiles nodes.
     await expect(page.locator('[data-tile-card="flight"]').first()).toBeVisible(
       { timeout: 30_000 },
     );
