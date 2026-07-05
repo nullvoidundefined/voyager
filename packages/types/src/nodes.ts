@@ -1,4 +1,5 @@
 import type { TripPlanCard } from './planCard.js';
+import type { Offer, OfferKind } from './segments.js';
 
 // --- Citation ---
 
@@ -110,6 +111,12 @@ export type ChatNode =
   | { type: 'hotel_tiles'; hotels: Hotel[]; selectable: boolean }
   | { type: 'car_rental_tiles'; rentals: CarRental[]; selectable: boolean }
   | { type: 'experience_tiles'; experiences: Experience[]; selectable: boolean }
+  | {
+      type: 'offer_tiles';
+      offer_kind: OfferKind;
+      offers: Offer[];
+      selectable: boolean;
+    }
   | { type: 'travel_plan_form'; fields: FormField[] }
   | { type: 'itinerary'; days: DayPlan[] }
   | {

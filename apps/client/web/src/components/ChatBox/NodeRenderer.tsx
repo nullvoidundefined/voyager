@@ -94,6 +94,11 @@ export function NodeRenderer({ node, callbacks = {} }: NodeRendererProps) {
         />
       );
 
+    case 'offer_tiles':
+      // Emitted from Phase 2 of the multimodal-journeys refactor onward;
+      // rendered by OfferTiles then.
+      return null;
+
     case 'itinerary': {
       // Adapt types DayPlan (field: day) to ItineraryTimeline (field: dayNumber)
       const adaptedDays = node.days.map((d) => ({

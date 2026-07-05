@@ -42,6 +42,7 @@ const NODE_HEIGHT_ESTIMATES: Partial<Record<ChatNode['type'], number>> = {
   hotel_tiles: 240,
   car_rental_tiles: 240,
   experience_tiles: 200,
+  offer_tiles: 240,
   travel_plan_form: 300,
   itinerary: 200,
   advisory: 80,
