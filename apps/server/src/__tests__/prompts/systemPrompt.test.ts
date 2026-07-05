@@ -158,3 +158,41 @@ describe('buildSystemPrompt personality', () => {
     expect(prompt.toLowerCase()).toContain('budget');
   });
 });
+
+describe('presentation order block', () => {
+  it('emits journey segments in order with legacy dependency gates', () => {
+    const prompt = buildSystemPrompt(
+      undefined,
+      undefined,
+      undefined,
+      DEFAULT_COMPLETION_TRACKER,
+    );
+    const flightIdx = prompt.indexOf('1. Flight');
+    const hotelIdx = prompt.indexOf('2. Hotel');
+    const experienceIdx = prompt.indexOf('3. Experiences');
+    const carIdx = prompt.indexOf('4. Car rental');
+    expect(flightIdx).toBeGreaterThan(-1);
+    expect(hotelIdx).toBeGreaterThan(flightIdx);
+    expect(experienceIdx).toBeGreaterThan(hotelIdx);
+    expect(carIdx).toBeGreaterThan(experienceIdx);
+    expect(prompt).toContain('one segment at a time');
+    expect(prompt).toContain('at most one selectable tile set');
+    // Legacy gate parity (critic finding 1): hotel gated on flight; experiences
+    // gated on HOTEL in the prose even though routing unblocks after flight.
+    expect(prompt).toMatch(
+      /2\. Hotel:.*Only after the user has selected a flight/,
+    );
+    expect(prompt).toMatch(
+      /3\. Experiences:.*Only after the user has selected a hotel/,
+    );
+    expect(prompt).toContain('call the appropriate select_* tool immediately');
+    // Car rental is the only default-disabled slot; legacy 'Ask if needed'.
+    expect(prompt).toMatch(/4\. Car rental: Ask if needed/);
+  });
+
+  it('emits the block even without a tracker (defaults to flight_trip)', () => {
+    const prompt = buildSystemPrompt();
+    expect(prompt).toContain('one segment at a time');
+    expect(prompt).toContain('1. Flight');
+  });
+});

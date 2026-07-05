@@ -3,6 +3,8 @@
  * agent run. Combines booking flow position and completion state into a single
  * prompt so the orchestrator knows which sub-agent to route to next.
  */
+import type { JourneyType } from 'app/journeys/journeyType.js';
+import { getJourneyType } from 'app/journeys/registry.js';
 import type {
   CompletionTracker,
   FlowPosition,
@@ -12,6 +14,7 @@ import {
   formatChecklist,
   formatTripContext,
 } from 'app/prompts/tripContext.js';
+import { getSegmentCapability } from 'app/segments/registry/index.js';
 
 const CORE_PROMPT = `You are Voyager, an expert travel planning advisor. Help users plan trips by searching for flights, hotels, car rentals, and experiences. You're knowledgeable, concise for transactional exchanges, and more detailed when advising.
 
@@ -27,18 +30,7 @@ const CORE_PROMPT = `You are Voyager, an expert travel planning advisor. Help us
 - Off-topic questions: answer briefly, steer back. Multi-city: one destination per trip.
 - Destination changes after bookings: warn about clearing selections, confirm before updating.
 - Surface health/safety advisories proactively from travel advisory context.
-
-## STRICT Presentation Order: one category per turn
-Present bookings one category at a time. Never show flight tiles AND hotel tiles in the same response. Each turn must present at most one selectable tile set.
-
-1. Flights first: Search and present flight options. End your turn there. Do NOT search hotels in the same turn.
-2. Hotels next: Only after the user has selected a flight (their message contains a flight selection), search and present hotel options. End your turn there.
-3. Experiences next: Only after hotel is selected. Search if the user has expressed interest or ask.
-4. Car rental last: Ask if needed, then present options.
-
-When the user's message contains a selection (e.g., "I've selected the JetBlue B6 75 flight"), call the appropriate select_* tool immediately, then proceed to the next category. Do not ask for confirmation -- the selection message is confirmation.
-
-Keep format_response text to 1-2 sentences when showing selectable tiles. The tiles speak for themselves.`;
+`;
 
 const COLLECT_DETAILS_ADDENDUM = `\n\n## Current Phase: Collecting Details
 A form is being shown to collect trip details (origin, dates, budget). If the user provides any of these details in their chat message, call update_trip immediately to save them — don't wait for the form. Acknowledge what you've saved in one friendly sentence.`;
@@ -51,6 +43,38 @@ export interface PromptOptions {
   nudge?: string | null;
 }
 
+/**
+ * Generates the STRICT Presentation Order block from the journey definition:
+ * segment order and dependency gates come from the registries, so a new mode
+ * changes this text by registration, never by editing prose here.
+ */
+function buildPresentationOrder(journey: JourneyType): string {
+  const lines = journey.segments.map((slot, index) => {
+    const capability = getSegmentCapability(slot.kind);
+    const gates = (
+      capability.presentationRequires ??
+      capability.requires ??
+      []
+    ).map((dependency) => getSegmentCapability(dependency).label.toLowerCase());
+    const gate =
+      gates.length > 0
+        ? ` Only after the user has selected a ${gates.join(' and a ')} (their message contains that selection).`
+        : ' End your turn there. Do NOT search the next segment in the same turn.';
+    const action = slot.defaultEnabled
+      ? 'Search and present options, then end your turn.'
+      : 'Ask if needed, then present options.';
+    return `${index + 1}. ${capability.label}: ${action}${gate}`;
+  });
+  return `## STRICT Presentation Order: one segment at a time
+Present bookings one segment at a time. Never show two different selectable tile sets in the same response. Each turn must present at most one selectable tile set.
+
+${lines.join('\n')}
+
+When the user's message contains a selection (e.g., "I've selected the JetBlue B6 75 flight"), call the appropriate select_* tool immediately, then proceed to the next segment. Do not ask for confirmation -- the selection message is confirmation.
+
+Keep format_response text to 1-2 sentences when showing selectable tiles. The tiles speak for themselves.`;
+}
+
 export function buildSystemPrompt(
   tripContext?: TripContext,
   flowPosition?: FlowPosition,
@@ -58,6 +82,13 @@ export function buildSystemPrompt(
   tracker?: CompletionTracker,
 ): string {
   const parts = [CORE_PROMPT];
+
+  // Presentation order, generated from the tracker's journey (the block was
+  // previously a static section of CORE_PROMPT; emitted unconditionally for
+  // parity with that placement).
+  parts.push(
+    `\n\n${buildPresentationOrder(getJourneyType(tracker?.journeyType ?? 'flight_trip'))}`,
+  );
 
   // Phase-specific addendum
   if (!flowPosition || flowPosition.phase === 'COLLECT_DETAILS') {
