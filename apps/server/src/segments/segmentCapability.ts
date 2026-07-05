@@ -4,7 +4,12 @@
  * buildDefaultPlanCard. Adding a travel mode registers one of these instead of
  * editing six files.
  */
-import type { OfferKind, SegmentKind, TripPlanCategoryId } from '@repo/types';
+import type {
+  Offer,
+  OfferKind,
+  SegmentKind,
+  TripPlanCategoryId,
+} from '@repo/types';
 
 export interface SegmentCapability {
   kind: SegmentKind;
@@ -14,6 +19,11 @@ export interface SegmentCapability {
   /** Trip-context selection collection name (legacy plural). */
   selectionKey: string;
   tileKind: OfferKind;
+  /** Key of the offers array in the search tool's result payload
+   *  ('flights' | 'hotels' | 'rentals' | 'experiences' | ...). */
+  resultListKey: string;
+  /** Maps one raw search-result item to the generic Offer shape. */
+  toOffer: (item: unknown) => Offer;
   /** Plan-card category id; legacy plural ids for the original four kinds. */
   planCategoryId: TripPlanCategoryId;
   /** Tools available to this segment's sub-agent turn (legacy lists verbatim). */

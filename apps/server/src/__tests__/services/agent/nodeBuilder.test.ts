@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { buildNodeFromToolResult } from 'app/services/agent/nodeBuilder.js';
 
 describe('buildNodeFromToolResult', () => {
-  it('maps search_flights result to flight_tiles node', () => {
+  it('maps search_flights result to a flight offer_tiles node', () => {
     // Tool results are arrays, not { flights: [...] }
     const result = [
       {
@@ -21,17 +21,19 @@ describe('buildNodeFromToolResult', () => {
 
     const node = buildNodeFromToolResult('search_flights', result);
     expect(node).not.toBeNull();
-    expect(node!.type).toBe('flight_tiles');
-    if (node!.type === 'flight_tiles') {
-      expect(node!.flights).toHaveLength(1);
-      expect(node!.flights[0]!.airline).toBe('Delta');
-      expect(node!.flights[0]!.origin).toBe('JFK');
-      expect(node!.flights[0]!.destination).toBe('NRT');
+    expect(node!.type).toBe('offer_tiles');
+    if (node!.type === 'offer_tiles') {
+      expect(node!.offer_kind).toBe('flight');
+      expect(node!.offers).toHaveLength(1);
+      expect(node!.offers[0]!.detail?.airline).toBe('Delta');
+      expect(node!.offers[0]!.detail?.origin).toBe('JFK');
+      expect(node!.offers[0]!.detail?.destination).toBe('NRT');
+      expect(node!.offers[0]!.title).toBe('Delta DL123');
       expect(node!.selectable).toBe(true);
     }
   });
 
-  it('maps search_hotels result to hotel_tiles node', () => {
+  it('maps search_hotels result to a hotel offer_tiles node', () => {
     const result = [
       {
         name: 'Tokyo Grand',
@@ -47,15 +49,16 @@ describe('buildNodeFromToolResult', () => {
 
     const node = buildNodeFromToolResult('search_hotels', result);
     expect(node).not.toBeNull();
-    expect(node!.type).toBe('hotel_tiles');
-    if (node!.type === 'hotel_tiles') {
-      expect(node!.hotels).toHaveLength(1);
-      expect(node!.hotels[0]!.name).toBe('Tokyo Grand');
+    expect(node!.type).toBe('offer_tiles');
+    if (node!.type === 'offer_tiles') {
+      expect(node!.offer_kind).toBe('hotel');
+      expect(node!.offers).toHaveLength(1);
+      expect(node!.offers[0]!.title).toBe('Tokyo Grand');
       expect(node!.selectable).toBe(true);
     }
   });
 
-  it('maps search_car_rentals result to car_rental_tiles node', () => {
+  it('maps search_car_rentals result to a car_rental offer_tiles node', () => {
     const result = [
       {
         provider: 'Hertz',
@@ -74,15 +77,16 @@ describe('buildNodeFromToolResult', () => {
 
     const node = buildNodeFromToolResult('search_car_rentals', result);
     expect(node).not.toBeNull();
-    expect(node!.type).toBe('car_rental_tiles');
-    if (node!.type === 'car_rental_tiles') {
-      expect(node!.rentals).toHaveLength(1);
-      expect(node!.rentals[0]!.provider).toBe('Hertz');
+    expect(node!.type).toBe('offer_tiles');
+    if (node!.type === 'offer_tiles') {
+      expect(node!.offer_kind).toBe('car_rental');
+      expect(node!.offers).toHaveLength(1);
+      expect(node!.offers[0]!.detail?.provider).toBe('Hertz');
       expect(node!.selectable).toBe(true);
     }
   });
 
-  it('maps search_experiences result to experience_tiles node', () => {
+  it('maps search_experiences result to an experience offer_tiles node', () => {
     const result = [
       {
         name: 'Senso-ji Temple',
@@ -94,7 +98,10 @@ describe('buildNodeFromToolResult', () => {
 
     const node = buildNodeFromToolResult('search_experiences', result);
     expect(node).not.toBeNull();
-    expect(node!.type).toBe('experience_tiles');
+    expect(node!.type).toBe('offer_tiles');
+    if (node!.type === 'offer_tiles') {
+      expect(node!.offer_kind).toBe('experience');
+    }
   });
 
   it('maps calculate_remaining_budget to budget_bar node', () => {
@@ -121,6 +128,15 @@ describe('buildNodeFromToolResult', () => {
     expect(buildNodeFromToolResult('format_response', {})).toBeNull();
   });
 
+  it('returns null for structured search failures (F-17)', () => {
+    expect(
+      buildNodeFromToolResult('search_flights', { status: 'timeout' }),
+    ).toBeNull();
+    expect(
+      buildNodeFromToolResult('search_hotels', { status: 'quota_exhausted' }),
+    ).toBeNull();
+  });
+
   describe('edge cases in normalization', () => {
     it('handles object-shape tool results with named keys', () => {
       const node = buildNodeFromToolResult('search_flights', {
@@ -139,18 +155,18 @@ describe('buildNodeFromToolResult', () => {
         ],
       });
       expect(node).not.toBeNull();
-      if (node!.type === 'flight_tiles') {
-        expect(node!.flights).toHaveLength(1);
+      if (node!.type === 'offer_tiles') {
+        expect(node!.offers).toHaveLength(1);
       }
     });
 
-    it('returns an empty flights array when the result has neither array nor named key', () => {
+    it('returns an empty offers array when the result has neither array nor named key', () => {
       const node = buildNodeFromToolResult('search_flights', {
         unrelated: 'field',
       });
       expect(node).not.toBeNull();
-      if (node!.type === 'flight_tiles') {
-        expect(node!.flights).toEqual([]);
+      if (node!.type === 'offer_tiles') {
+        expect(node!.offers).toEqual([]);
       }
     });
 
@@ -158,9 +174,10 @@ describe('buildNodeFromToolResult', () => {
       const node = buildNodeFromToolResult('search_hotels', [
         { name: 'Cheap Hotel', currency: 'USD' },
       ]);
-      if (node!.type === 'hotel_tiles') {
-        expect(node!.hotels[0]?.price_per_night).toBe(0);
-        expect(node!.hotels[0]?.total_price).toBe(0);
+      if (node!.type === 'offer_tiles') {
+        expect(node!.offers[0]?.detail?.price_per_night).toBe(0);
+        expect(node!.offers[0]?.detail?.total_price).toBe(0);
+        expect(node!.offers[0]?.price).toBe(0);
       }
     });
 
@@ -183,15 +200,15 @@ describe('buildNodeFromToolResult', () => {
           lon: 2.3,
         },
       ]);
-      if (node!.type === 'hotel_tiles') {
-        expect(node!.hotels[0]?.lat).toBe(37.7);
-        expect(node!.hotels[0]?.lon).toBe(-122.4);
-        expect(node!.hotels[1]?.lat).toBe(48.8);
-        expect(node!.hotels[1]?.lon).toBe(2.3);
+      if (node!.type === 'offer_tiles') {
+        expect(node!.offers[0]?.lat).toBe(37.7);
+        expect(node!.offers[0]?.lon).toBe(-122.4);
+        expect(node!.offers[1]?.lat).toBe(48.8);
+        expect(node!.offers[1]?.lon).toBe(2.3);
       }
     });
 
-    it('defaults car rental features to empty array when missing', () => {
+    it('defaults car rental features to empty badges when missing', () => {
       const node = buildNodeFromToolResult('search_car_rentals', [
         {
           provider: 'Avis',
@@ -202,8 +219,8 @@ describe('buildNodeFromToolResult', () => {
           currency: 'USD',
         },
       ]);
-      if (node!.type === 'car_rental_tiles') {
-        expect(node!.rentals[0]?.features).toEqual([]);
+      if (node!.type === 'offer_tiles') {
+        expect(node!.offers[0]?.badges).toEqual([]);
       }
     });
 

@@ -1,4 +1,5 @@
 /** Hotel segment capability: legacy hotel sub-agent wiring as registry data. */
+import { hotelToOffer } from 'app/segments/offerMappers/hotelToOffer.js';
 import type { SegmentCapability } from 'app/segments/segmentCapability.js';
 
 export const hotelCapability: SegmentCapability = {
@@ -7,6 +8,7 @@ export const hotelCapability: SegmentCapability = {
   planCategoryId: 'hotels',
   requiredTools: ['search_hotels'],
   requires: ['flight'],
+  resultListKey: 'hotels',
   searchTool: 'search_hotels',
   selectTool: 'select_hotel',
   selectionKey: 'hotels',
@@ -17,5 +19,6 @@ export const hotelCapability: SegmentCapability = {
     'calculate_remaining_budget',
     'format_response',
   ],
+  toOffer: hotelToOffer,
   tileKind: 'hotel',
 };

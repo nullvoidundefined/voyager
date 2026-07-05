@@ -1,4 +1,5 @@
 /** Flight segment capability: legacy flight sub-agent wiring as registry data. */
+import { flightToOffer } from 'app/segments/offerMappers/flightToOffer.js';
 import type { SegmentCapability } from 'app/segments/segmentCapability.js';
 
 export const flightCapability: SegmentCapability = {
@@ -6,6 +7,7 @@ export const flightCapability: SegmentCapability = {
   label: 'Flight',
   planCategoryId: 'flights',
   requiredTools: ['search_flights'],
+  resultListKey: 'flights',
   searchTool: 'search_flights',
   selectTool: 'select_flight',
   selectionKey: 'flights',
@@ -21,5 +23,6 @@ export const flightCapability: SegmentCapability = {
     'reorder_legs',
     'format_response',
   ],
+  toOffer: flightToOffer,
   tileKind: 'flight',
 };

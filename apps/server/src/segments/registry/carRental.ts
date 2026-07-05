@@ -1,4 +1,5 @@
 /** Car-rental segment capability: legacy ground sub-agent wiring as registry data. */
+import { carRentalToOffer } from 'app/segments/offerMappers/carRentalToOffer.js';
 import type { SegmentCapability } from 'app/segments/segmentCapability.js';
 
 export const carRentalCapability: SegmentCapability = {
@@ -7,6 +8,7 @@ export const carRentalCapability: SegmentCapability = {
   planCategoryId: 'car_rental',
   requiredTools: [],
   requires: ['hotel'],
+  resultListKey: 'rentals',
   searchTool: 'search_car_rentals',
   selectTool: 'select_car_rental',
   selectionKey: 'car_rentals',
@@ -16,5 +18,6 @@ export const carRentalCapability: SegmentCapability = {
     'calculate_remaining_budget',
     'format_response',
   ],
+  toOffer: carRentalToOffer,
   tileKind: 'car_rental',
 };

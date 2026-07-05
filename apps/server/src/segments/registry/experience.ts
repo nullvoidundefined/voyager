@@ -1,4 +1,5 @@
 /** Experience segment capability: legacy experience sub-agent wiring as registry data. */
+import { experienceToOffer } from 'app/segments/offerMappers/experienceToOffer.js';
 import type { SegmentCapability } from 'app/segments/segmentCapability.js';
 
 export const experienceCapability: SegmentCapability = {
@@ -11,6 +12,7 @@ export const experienceCapability: SegmentCapability = {
   presentationRequires: ['hotel'],
   requiredTools: [],
   requires: ['flight'],
+  resultListKey: 'experiences',
   searchTool: 'search_experiences',
   selectTool: 'select_experience',
   selectionKey: 'experiences',
@@ -22,5 +24,6 @@ export const experienceCapability: SegmentCapability = {
     'plan_daily_schedule',
     'format_response',
   ],
+  toOffer: experienceToOffer,
   tileKind: 'experience',
 };

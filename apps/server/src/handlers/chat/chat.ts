@@ -32,6 +32,7 @@ import { findByUserId as findUserPreferences } from 'app/repositories/userPrefer
 import { planCardSchema } from 'app/schemas/planCard.js';
 import { SEGMENT_PROMPT_BUILDERS } from 'app/segments/segmentPrompts.js';
 import { runAgentLoop } from 'app/services/agent/agentService.js';
+import { normalizeLegacyNode } from 'app/services/agent/normalizeLegacyNode.js';
 import {
   buildDefaultPlanCard,
   getSubAgentRequiredTools,
@@ -377,7 +378,7 @@ export async function getMessages(req: Request, res: Response) {
       role: m.role as 'user' | 'assistant',
       nodes:
         m.nodes && m.nodes.length > 0
-          ? m.nodes
+          ? m.nodes.map(normalizeLegacyNode)
           : [{ type: 'text' as const, content: m.content ?? '' }],
       sequence: m.sequence,
       created_at: m.created_at,
