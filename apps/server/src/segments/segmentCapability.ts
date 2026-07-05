@@ -1,0 +1,29 @@
+/**
+ * Segment capability descriptor: the per-kind data that used to be threaded
+ * through SEARCH_TOOLS / SELECTION_KEYS / SELECT_TOOLS / SUB_AGENT_TOOLS and
+ * buildDefaultPlanCard. Adding a travel mode registers one of these instead of
+ * editing six files.
+ */
+import type { OfferKind, SegmentKind, TripPlanCategoryId } from '@repo/types';
+
+export interface SegmentCapability {
+  kind: SegmentKind;
+  label: string;
+  searchTool: string;
+  selectTool: string;
+  /** Trip-context selection collection name (legacy plural). */
+  selectionKey: string;
+  tileKind: OfferKind;
+  /** Plan-card category id; legacy plural ids for the original four kinds. */
+  planCategoryId: TripPlanCategoryId;
+  /** Tools available to this segment's sub-agent turn (legacy lists verbatim). */
+  subAgentTools: string[];
+  /** Tools that must be present for the turn to proceed. */
+  requiredTools: string[];
+  /** Segment kinds that must be resolved before this one is worked (routing). */
+  requires?: SegmentKind[];
+  /** Presentation-order gate when it differs from the routing gate: the legacy
+   *  prompt gates experiences on hotel while routing gates on flight. Prompt
+   *  generation uses presentationRequires ?? requires. */
+  presentationRequires?: SegmentKind[];
+}
