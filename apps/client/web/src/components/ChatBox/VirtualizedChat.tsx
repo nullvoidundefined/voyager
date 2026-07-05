@@ -14,6 +14,10 @@ import { APP_NAME } from '@/constants';
 
 import { NodeRenderer } from './NodeRenderer';
 import styles from './VirtualizedChat.module.scss';
+import {
+  buildOfferSelectionMessage,
+  getOfferTileHeightEstimate,
+} from './nodes/offerCardRegistry';
 import { ChatProgressBar } from './widgets/ChatProgressBar';
 
 interface VirtualizedChatProps {
@@ -42,7 +46,6 @@ const NODE_HEIGHT_ESTIMATES: Partial<Record<ChatNode['type'], number>> = {
   hotel_tiles: 240,
   car_rental_tiles: 240,
   experience_tiles: 200,
-  offer_tiles: 240,
   travel_plan_form: 300,
   itinerary: 200,
   advisory: 80,
@@ -69,10 +72,17 @@ function getToolLabelForName(toolName: string): string {
   return TOOL_LABELS[toolName] ?? toolName.replace(/_/g, ' ');
 }
 
+function estimateNodeHeight(node: ChatNode): number {
+  if (node.type === 'offer_tiles') {
+    return getOfferTileHeightEstimate(node.offer_kind);
+  }
+  return NODE_HEIGHT_ESTIMATES[node.type] ?? 60;
+}
+
 function estimateMessageHeight(nodes: ChatNode[]): number {
   if (nodes.length === 0) return 40;
   return nodes.reduce(
-    (sum, node) => sum + (NODE_HEIGHT_ESTIMATES[node.type] ?? 60),
+    (sum, node) => sum + estimateNodeHeight(node),
     16, // base padding
   );
 }
@@ -272,6 +282,12 @@ export function VirtualizedChat({
                                 initialDestination !== 'Planning...'
                                   ? { destination: initialDestination }
                                   : undefined,
+                              onConfirmOffer: (kind, label, data) => {
+                                onSelectItem?.(kind, data);
+                                onQuickReply(
+                                  buildOfferSelectionMessage(kind, label),
+                                );
+                              },
                               onConfirmFlight: (label, data) => {
                                 onSelectItem?.('flight', data);
                                 onQuickReply(

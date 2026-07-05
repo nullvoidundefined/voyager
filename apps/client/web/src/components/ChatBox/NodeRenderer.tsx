@@ -5,7 +5,7 @@
  * to keep the node-type-to-widget mapping in one switch so the transcript
  * renderer stays agnostic of the growing set of node variants.
  */
-import type { ChatNode, TripPlanCard } from '@repo/types';
+import type { ChatNode, OfferKind, TripPlanCard } from '@repo/types';
 
 import { TripDetailsForm } from './TripDetailsForm';
 import { AdvisoryCard } from './nodes/AdvisoryCard';
@@ -16,12 +16,21 @@ import { ExperienceTiles } from './nodes/ExperienceTiles';
 import { FlightTiles } from './nodes/FlightTiles';
 import { HotelTiles } from './nodes/HotelTiles';
 import { MarkdownText } from './nodes/MarkdownText';
+import { OfferTiles } from './nodes/OfferTiles';
 import { WeatherForecast } from './nodes/WeatherForecast';
 import { ItineraryTimeline } from './widgets/ItineraryTimeline';
 import { QuickReplyChips } from './widgets/QuickReplyChips';
 import { TripPlanWidget } from './widgets/TripPlanWidget';
 
 export interface NodeRendererCallbacks {
+  onConfirmOffer?: (
+    kind: OfferKind,
+    label: string,
+    data: Record<string, unknown>,
+  ) => void;
+  /** Dead plumbing carried over from the legacy confirmed*Id props: no
+   *  producer exists today (P3 todo: wire or delete). */
+  confirmedOfferIds?: Partial<Record<OfferKind, string | null>>;
   onConfirmFlight?: (label: string, data: Record<string, unknown>) => void;
   onConfirmHotel?: (label: string, data: Record<string, unknown>) => void;
   onConfirmCarRental?: (label: string, data: Record<string, unknown>) => void;
@@ -95,9 +104,16 @@ export function NodeRenderer({ node, callbacks = {} }: NodeRendererProps) {
       );
 
     case 'offer_tiles':
-      // Emitted from Phase 2 of the multimodal-journeys refactor onward;
-      // rendered by OfferTiles then.
-      return null;
+      return (
+        <OfferTiles
+          node={node}
+          onConfirm={(label, data) =>
+            cb.onConfirmOffer?.(node.offer_kind, label, data)
+          }
+          disabled={cb.disabled}
+          confirmedId={cb.confirmedOfferIds?.[node.offer_kind]}
+        />
+      );
 
     case 'itinerary': {
       // Adapt types DayPlan (field: day) to ItineraryTimeline (field: dayNumber)
