@@ -6,8 +6,16 @@ import {
   type TripState,
 } from 'app/prompts/bookingSteps.js';
 import {
-  SUB_AGENT_TOOLS,
+  type FlowPosition,
+  type TrackerStatus,
+  isResolved,
+  needsWork,
+} from 'app/prompts/bookingSteps.js';
+import {
+  type SubAgentType,
   buildDefaultPlanCard,
+  getSubAgentRequiredTools,
+  getSubAgentTools,
   selectSubAgent,
 } from 'app/services/agent/subAgentService.js';
 
@@ -290,7 +298,7 @@ describe('selectSubAgent', () => {
           car_rental: 'pending',
         },
       };
-      expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('ground');
+      expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('car_rental');
     });
 
     it('routes to ground agent when hotels are skipped and car_rental is pending', () => {
@@ -304,7 +312,7 @@ describe('selectSubAgent', () => {
           car_rental: 'pending',
         },
       };
-      expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('ground');
+      expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('car_rental');
     });
 
     it('routes to conversation agent when all categories are resolved', () => {
@@ -396,46 +404,58 @@ describe('selectSubAgent', () => {
           car_rental: 'searching',
         },
       };
-      expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('ground');
+      expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('car_rental');
     });
   });
 });
 
-describe('SUB_AGENT_TOOLS', () => {
+const ALL_SUB_AGENT_TYPES: SubAgentType[] = [
+  'detail',
+  'plan',
+  'conversation',
+  'flight',
+  'hotel',
+  'car_rental',
+  'experience',
+];
+
+describe('getSubAgentTools', () => {
   it('detail agent has update_trip and format_response but no search tools', () => {
-    expect(SUB_AGENT_TOOLS.detail).toContain('update_trip');
-    expect(SUB_AGENT_TOOLS.detail).toContain('format_response');
-    expect(SUB_AGENT_TOOLS.detail).not.toContain('search_flights');
-    expect(SUB_AGENT_TOOLS.detail).not.toContain('search_hotels');
+    expect(getSubAgentTools('detail')).toContain('update_trip');
+    expect(getSubAgentTools('detail')).toContain('format_response');
+    expect(getSubAgentTools('detail')).not.toContain('search_flights');
+    expect(getSubAgentTools('detail')).not.toContain('search_hotels');
   });
 
   it('flight agent has search_flights and select_flight but not search_hotels', () => {
-    expect(SUB_AGENT_TOOLS.flight).toContain('search_flights');
-    expect(SUB_AGENT_TOOLS.flight).toContain('select_flight');
-    expect(SUB_AGENT_TOOLS.flight).not.toContain('search_hotels');
-    expect(SUB_AGENT_TOOLS.flight).not.toContain('search_experiences');
+    expect(getSubAgentTools('flight')).toContain('search_flights');
+    expect(getSubAgentTools('flight')).toContain('select_flight');
+    expect(getSubAgentTools('flight')).not.toContain('search_hotels');
+    expect(getSubAgentTools('flight')).not.toContain('search_experiences');
   });
 
   it('hotel agent has search_hotels and select_hotel but not search_flights', () => {
-    expect(SUB_AGENT_TOOLS.hotel).toContain('search_hotels');
-    expect(SUB_AGENT_TOOLS.hotel).toContain('select_hotel');
-    expect(SUB_AGENT_TOOLS.hotel).not.toContain('search_flights');
+    expect(getSubAgentTools('hotel')).toContain('search_hotels');
+    expect(getSubAgentTools('hotel')).toContain('select_hotel');
+    expect(getSubAgentTools('hotel')).not.toContain('search_flights');
   });
 
   it('experience agent has search_experiences but not search_flights', () => {
-    expect(SUB_AGENT_TOOLS.experience).toContain('search_experiences');
-    expect(SUB_AGENT_TOOLS.experience).toContain('select_experience');
-    expect(SUB_AGENT_TOOLS.experience).not.toContain('search_flights');
-    expect(SUB_AGENT_TOOLS.experience).not.toContain('search_hotels');
+    expect(getSubAgentTools('experience')).toContain('search_experiences');
+    expect(getSubAgentTools('experience')).toContain('select_experience');
+    expect(getSubAgentTools('experience')).not.toContain('search_flights');
+    expect(getSubAgentTools('experience')).not.toContain('search_hotels');
   });
 
   it('conversation agent has re_open_category', () => {
-    expect(SUB_AGENT_TOOLS.conversation).toContain('re_open_category');
-    expect(SUB_AGENT_TOOLS.conversation).not.toContain('search_flights');
+    expect(getSubAgentTools('conversation')).toContain('re_open_category');
+    expect(getSubAgentTools('conversation')).not.toContain('search_flights');
   });
 
   it('ORC-01: every executor-implemented leg/schedule tool is in at least one partition', () => {
-    const allPartitionedTools = new Set(Object.values(SUB_AGENT_TOOLS).flat());
+    const allPartitionedTools = new Set(
+      ALL_SUB_AGENT_TYPES.flatMap((subAgent) => getSubAgentTools(subAgent)),
+    );
     expect(allPartitionedTools).toContain('add_leg');
     expect(allPartitionedTools).toContain('remove_leg');
     expect(allPartitionedTools).toContain('reorder_legs');
@@ -443,19 +463,87 @@ describe('SUB_AGENT_TOOLS', () => {
   });
 
   it('ORC-01: flight agent can add/remove/reorder legs for multi-city planning', () => {
-    expect(SUB_AGENT_TOOLS.flight).toContain('add_leg');
-    expect(SUB_AGENT_TOOLS.flight).toContain('remove_leg');
-    expect(SUB_AGENT_TOOLS.flight).toContain('reorder_legs');
+    expect(getSubAgentTools('flight')).toContain('add_leg');
+    expect(getSubAgentTools('flight')).toContain('remove_leg');
+    expect(getSubAgentTools('flight')).toContain('reorder_legs');
   });
 
   it('ORC-01: experience agent can plan_daily_schedule from confirmed selections', () => {
-    expect(SUB_AGENT_TOOLS.experience).toContain('plan_daily_schedule');
+    expect(getSubAgentTools('experience')).toContain('plan_daily_schedule');
   });
 
   it('ORC-01: conversation agent can edit legs and schedule post-PLANNING', () => {
-    expect(SUB_AGENT_TOOLS.conversation).toContain('add_leg');
-    expect(SUB_AGENT_TOOLS.conversation).toContain('remove_leg');
-    expect(SUB_AGENT_TOOLS.conversation).toContain('reorder_legs');
-    expect(SUB_AGENT_TOOLS.conversation).toContain('plan_daily_schedule');
+    expect(getSubAgentTools('conversation')).toContain('add_leg');
+    expect(getSubAgentTools('conversation')).toContain('remove_leg');
+    expect(getSubAgentTools('conversation')).toContain('reorder_legs');
+    expect(getSubAgentTools('conversation')).toContain('plan_daily_schedule');
+  });
+});
+
+describe('getSubAgentRequiredTools', () => {
+  it('preserves the legacy required-tool partition verbatim', () => {
+    expect(getSubAgentRequiredTools('detail')).toEqual([]);
+    expect(getSubAgentRequiredTools('plan')).toEqual([]);
+    expect(getSubAgentRequiredTools('conversation')).toEqual([]);
+    expect(getSubAgentRequiredTools('flight')).toEqual(['search_flights']);
+    expect(getSubAgentRequiredTools('hotel')).toEqual(['search_hotels']);
+    expect(getSubAgentRequiredTools('car_rental')).toEqual([]);
+    expect(getSubAgentRequiredTools('experience')).toEqual([]);
+  });
+});
+
+describe('selectSubAgent parity oracle', () => {
+  const STATUSES: TrackerStatus[] = [
+    'pending',
+    'searching',
+    'selected',
+    'skipped',
+    'not_applicable',
+  ];
+
+  /** The pre-refactor if-ladder, kept verbatim as the oracle. */
+  function legacySelect(t: {
+    flights: TrackerStatus;
+    hotels: TrackerStatus;
+    car_rental: TrackerStatus;
+    experiences: TrackerStatus;
+  }): string {
+    if (needsWork(t.flights)) return 'flight';
+    if (needsWork(t.hotels) && isResolved(t.flights)) return 'hotel';
+    if (needsWork(t.experiences) && isResolved(t.flights)) return 'experience';
+    if (needsWork(t.car_rental) && isResolved(t.hotels)) return 'ground';
+    return 'conversation';
+  }
+
+  const LEGACY_NAME: Record<string, string> = {
+    car_rental: 'ground',
+    conversation: 'conversation',
+    experience: 'experience',
+    flight: 'flight',
+    hotel: 'hotel',
+  };
+
+  it('matches the legacy ladder on all 625 status combinations', () => {
+    const planning: FlowPosition = { phase: 'PLANNING' };
+    for (const flights of STATUSES) {
+      for (const hotels of STATUSES) {
+        for (const car_rental of STATUSES) {
+          for (const experiences of STATUSES) {
+            const tracker: CompletionTracker = {
+              ...DEFAULT_COMPLETION_TRACKER,
+              segments: {
+                flight: flights,
+                hotel: hotels,
+                car_rental,
+                experience: experiences,
+              },
+            };
+            expect(LEGACY_NAME[selectSubAgent(planning, tracker)]).toBe(
+              legacySelect({ flights, hotels, car_rental, experiences }),
+            );
+          }
+        }
+      }
+    }
   });
 });

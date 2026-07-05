@@ -20,10 +20,6 @@ import {
   updateCompletionTracker,
 } from 'app/prompts/bookingSteps.js';
 import { buildConversationAgentPrompt } from 'app/prompts/subAgents/conversationPrompt.js';
-import { buildExperienceAgentPrompt } from 'app/prompts/subAgents/experiencePrompt.js';
-import { buildFlightAgentPrompt } from 'app/prompts/subAgents/flightPrompt.js';
-import { buildGroundAgentPrompt } from 'app/prompts/subAgents/groundPrompt.js';
-import { buildHotelAgentPrompt } from 'app/prompts/subAgents/hotelPrompt.js';
 import { buildPlanAgentPrompt } from 'app/prompts/subAgents/planPrompt.js';
 import {
   getMessagesByConversation,
@@ -34,11 +30,12 @@ import {
 import { getTripWithDetails } from 'app/repositories/trips/trips.js';
 import { findByUserId as findUserPreferences } from 'app/repositories/userPreferences.js';
 import { planCardSchema } from 'app/schemas/planCard.js';
+import { SEGMENT_PROMPT_BUILDERS } from 'app/segments/segmentPrompts.js';
 import { runAgentLoop } from 'app/services/agent/agentService.js';
 import {
-  SUB_AGENT_REQUIRED_TOOLS,
-  SUB_AGENT_TOOLS,
   buildDefaultPlanCard,
+  getSubAgentRequiredTools,
+  getSubAgentTools,
   selectSubAgent,
 } from 'app/services/agent/subAgentService.js';
 import {
@@ -237,33 +234,23 @@ export async function chat(req: Request, res: Response) {
   const nudge = computeNudge(tracker);
 
   const subAgentType = selectSubAgent(flowPosition, tracker);
-  const allowedTools = SUB_AGENT_TOOLS[subAgentType];
+  const allowedTools = getSubAgentTools(subAgentType);
 
   let systemPromptOverride: string | undefined;
-  switch (subAgentType) {
-    case 'plan':
-      systemPromptOverride = buildPlanAgentPrompt(
-        buildDefaultPlanCard(toFlowInput(trip)),
-        tripContext,
-      );
-      break;
-    case 'flight':
-      systemPromptOverride = buildFlightAgentPrompt(tripContext, tracker);
-      break;
-    case 'hotel':
-      systemPromptOverride = buildHotelAgentPrompt(tripContext, tracker);
-      break;
-    case 'ground':
-      systemPromptOverride = buildGroundAgentPrompt(tripContext, tracker);
-      break;
-    case 'experience':
-      systemPromptOverride = buildExperienceAgentPrompt(tripContext, tracker);
-      break;
-    case 'conversation':
-      systemPromptOverride = buildConversationAgentPrompt(tripContext, tracker);
-      break;
-    default:
-      systemPromptOverride = undefined;
+  if (subAgentType === 'plan') {
+    systemPromptOverride = buildPlanAgentPrompt(
+      buildDefaultPlanCard(toFlowInput(trip)),
+      tripContext,
+    );
+  } else if (subAgentType === 'conversation') {
+    systemPromptOverride = buildConversationAgentPrompt(tripContext, tracker);
+  } else if (subAgentType !== 'detail') {
+    // Segment sub-agents route through the registry; a new mode adds a
+    // SEGMENT_PROMPT_BUILDERS entry, never a case here.
+    systemPromptOverride = SEGMENT_PROMPT_BUILDERS[subAgentType](
+      tripContext,
+      tracker,
+    );
   }
 
   try {
@@ -279,7 +266,7 @@ export async function chat(req: Request, res: Response) {
       tracker,
       systemPromptOverride,
       allowedTools,
-      SUB_AGENT_REQUIRED_TOOLS[subAgentType],
+      getSubAgentRequiredTools(subAgentType),
     );
 
     // FIN-01 / FIN-05: increment the per-user daily token counter with
