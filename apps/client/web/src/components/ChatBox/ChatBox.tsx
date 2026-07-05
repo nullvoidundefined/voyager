@@ -142,12 +142,7 @@ export function ChatBox({
     .find((m) => m.role === 'assistant');
   const hasActiveTileSelection =
     lastAssistantMessage?.nodes.some(
-      (n) =>
-        (n.type === 'flight_tiles' ||
-          n.type === 'hotel_tiles' ||
-          n.type === 'car_rental_tiles' ||
-          n.type === 'experience_tiles') &&
-        n.selectable,
+      (n) => n.type === 'offer_tiles' && n.selectable,
     ) ?? false;
 
   const showBookingActions =

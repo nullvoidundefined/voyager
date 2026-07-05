@@ -83,22 +83,26 @@ const noop = () => undefined;
 
 describe('ChatBox invariants', () => {
   describe('invariant 1: tool-result cards persist after the stream ends', () => {
-    it('keeps a flight_tiles node visible after isSending flips from true to false', () => {
+    it('keeps a flight offer_tiles node visible after isSending flips from true to false', () => {
       const flightTilesMessage = makeAssistantMessage('msg-1', [
         {
-          type: 'flight_tiles',
-          flights: [
+          type: 'offer_tiles',
+          offer_kind: 'flight',
+          offers: [
             {
               id: 'F1',
-              airline: 'Delta',
-              flight_number: 'DL100',
-              origin: 'DEN',
-              destination: 'SFO',
-              departure_time: '2026-06-01T08:00:00',
-              arrival_time: '2026-06-01T10:00:00',
+              title: 'Delta DL100',
+              subtitle: 'DEN to SFO',
+              selection_label: 'Delta DL100 - DEN to SFO',
               price: 300,
               currency: 'USD',
-              cabin_class: 'ECONOMY',
+              detail: {
+                airline: 'Delta',
+                flight_number: 'DL100',
+                origin: 'DEN',
+                destination: 'SFO',
+                departure_time: '2026-06-01T08:00:00',
+              },
             },
           ],
           selectable: true,
@@ -691,5 +695,134 @@ describe('ChatBox invariants', () => {
       expect(onBookTrip).toHaveBeenCalledTimes(1);
       expect(sendMessage).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('ChatBox invariants: generic offer tiles (multimodal refactor)', () => {
+  function makeOfferTilesNode(
+    kind: string,
+    id: string,
+    title: string,
+  ): ChatMessage['nodes'][number] {
+    return {
+      type: 'offer_tiles',
+      offer_kind: kind,
+      offers: [{ id, title, price: 100, currency: 'USD' }],
+      selectable: true,
+    } as ChatMessage['nodes'][number];
+  }
+
+  it('invariant 13: offer_tiles cards persist after the stream ends for every kind', () => {
+    const kinds = ['flight', 'hotel', 'car_rental', 'experience'] as const;
+    const messages = kinds.map((kind, i) =>
+      makeAssistantMessage(
+        `offer-${kind}`,
+        [makeOfferTilesNode(kind, `${kind}-1`, `Offer ${kind}`)],
+        i + 2,
+      ),
+    );
+    const { rerender } = render(
+      <VirtualizedChat
+        messages={messages}
+        streamingNodes={[]}
+        toolProgress={[]}
+        streamingText=''
+        isSending
+        onQuickReply={noop}
+      />,
+    );
+    rerender(
+      <VirtualizedChat
+        messages={messages}
+        streamingNodes={[]}
+        toolProgress={[]}
+        streamingText=''
+        isSending={false}
+        onQuickReply={noop}
+      />,
+    );
+    for (const kind of kinds) {
+      expect(screen.getByText(new RegExp(`Offer ${kind}`))).toBeInTheDocument();
+    }
+  });
+
+  it('invariant 14: an unknown offer kind renders the fallback card, never throws', () => {
+    const message = makeAssistantMessage('offer-unknown', [
+      makeOfferTilesNode('hovercraft', 'hv-1', 'Hover Deluxe'),
+    ]);
+    expect(() =>
+      render(
+        <VirtualizedChat
+          messages={[message]}
+          streamingNodes={[]}
+          toolProgress={[]}
+          streamingText=''
+          isSending={false}
+          onQuickReply={noop}
+        />,
+      ),
+    ).not.toThrow();
+    expect(screen.getByText('Hover Deluxe')).toBeInTheDocument();
+  });
+
+  it('invariant 15: layout stays stable when offer_tiles of different kinds append', () => {
+    const first = makeAssistantMessage('mix-1', [
+      makeOfferTilesNode('flight', 'f1', 'Mixed Flight'),
+    ]);
+    const second = makeAssistantMessage(
+      'mix-2',
+      [makeOfferTilesNode('hotel', 'h1', 'Mixed Hotel')],
+      3,
+    );
+    const { rerender } = render(
+      <VirtualizedChat
+        messages={[first]}
+        streamingNodes={[]}
+        toolProgress={[]}
+        streamingText=''
+        isSending={false}
+        onQuickReply={noop}
+      />,
+    );
+    expect(screen.getByText(/Mixed Flight/)).toBeInTheDocument();
+    rerender(
+      <VirtualizedChat
+        messages={[first, second]}
+        streamingNodes={[]}
+        toolProgress={[]}
+        streamingText=''
+        isSending={false}
+        onQuickReply={noop}
+      />,
+    );
+    expect(screen.getByText(/Mixed Flight/)).toBeInTheDocument();
+    expect(screen.getByText(/Mixed Hotel/)).toBeInTheDocument();
+  });
+
+  it('invariant 16: QuickReplyChips still render only after the final assistant message when offer tiles are present', () => {
+    const withTiles = makeAssistantMessage('qr-1', [
+      makeOfferTilesNode('flight', 'f1', 'QR Flight'),
+      { type: 'quick_replies', options: ['Skip flights'] },
+    ]);
+    const later = makeAssistantMessage(
+      'qr-2',
+      [{ type: 'text', content: 'Anything else?' }],
+      3,
+    );
+    render(
+      <VirtualizedChat
+        messages={[withTiles, later]}
+        streamingNodes={[]}
+        toolProgress={[]}
+        streamingText=''
+        isSending={false}
+        onQuickReply={noop}
+      />,
+    );
+    // Chips on a non-final assistant message must be disabled or absent.
+    const chip = screen.queryByRole('button', { name: 'Skip flights' });
+    if (chip) {
+      expect(chip).toBeDisabled();
+    }
   });
 });

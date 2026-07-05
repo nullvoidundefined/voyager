@@ -42,10 +42,6 @@ interface VirtualizedChatProps {
 // Height estimates by node type for initial virtualized sizing
 const NODE_HEIGHT_ESTIMATES: Partial<Record<ChatNode['type'], number>> = {
   text: 60,
-  flight_tiles: 240,
-  hotel_tiles: 240,
-  car_rental_tiles: 240,
-  experience_tiles: 200,
   travel_plan_form: 300,
   itinerary: 200,
   advisory: 80,
@@ -287,26 +283,6 @@ export function VirtualizedChat({
                                 onQuickReply(
                                   buildOfferSelectionMessage(kind, label),
                                 );
-                              },
-                              onConfirmFlight: (label, data) => {
-                                onSelectItem?.('flight', data);
-                                onQuickReply(
-                                  `I've selected the ${label} flight`,
-                                );
-                              },
-                              onConfirmHotel: (label, data) => {
-                                onSelectItem?.('hotel', data);
-                                onQuickReply(`I've selected ${label}`);
-                              },
-                              onConfirmCarRental: (label, data) => {
-                                onSelectItem?.('car_rental', data);
-                                onQuickReply(
-                                  `I've selected the ${label} rental`,
-                                );
-                              },
-                              onConfirmExperience: (label, data) => {
-                                onSelectItem?.('experience', data);
-                                onQuickReply(`I've selected ${label}`);
                               },
                             }}
                           />

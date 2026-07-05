@@ -1,6 +1,6 @@
 /**
  * Presents a single car rental option as a selectable card with formatted price
- * and dates. Exists as the per-item renderer that CarRentalTiles composes into a
+ * and dates. Exists as the per-item renderer that OfferTiles composes into a
  * selectable group.
  */
 import type { CarRental } from '@repo/types';

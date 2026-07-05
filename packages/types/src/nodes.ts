@@ -107,10 +107,6 @@ export interface WeatherDay {
 
 export type ChatNode =
   | { type: 'text'; content: string; citations?: Citation[] }
-  | { type: 'flight_tiles'; flights: Flight[]; selectable: boolean }
-  | { type: 'hotel_tiles'; hotels: Hotel[]; selectable: boolean }
-  | { type: 'car_rental_tiles'; rentals: CarRental[]; selectable: boolean }
-  | { type: 'experience_tiles'; experiences: Experience[]; selectable: boolean }
   | {
       type: 'offer_tiles';
       offer_kind: OfferKind;

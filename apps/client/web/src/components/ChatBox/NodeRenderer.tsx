@@ -11,10 +11,6 @@ import { TripDetailsForm } from './TripDetailsForm';
 import { AdvisoryCard } from './nodes/AdvisoryCard';
 import { BookingPrompt } from './nodes/BookingPrompt';
 import { BudgetBar } from './nodes/BudgetBar';
-import { CarRentalTiles } from './nodes/CarRentalTiles';
-import { ExperienceTiles } from './nodes/ExperienceTiles';
-import { FlightTiles } from './nodes/FlightTiles';
-import { HotelTiles } from './nodes/HotelTiles';
 import { MarkdownText } from './nodes/MarkdownText';
 import { OfferTiles } from './nodes/OfferTiles';
 import { WeatherForecast } from './nodes/WeatherForecast';
@@ -31,10 +27,6 @@ export interface NodeRendererCallbacks {
   /** Dead plumbing carried over from the legacy confirmed*Id props: no
    *  producer exists today (P3 todo: wire or delete). */
   confirmedOfferIds?: Partial<Record<OfferKind, string | null>>;
-  onConfirmFlight?: (label: string, data: Record<string, unknown>) => void;
-  onConfirmHotel?: (label: string, data: Record<string, unknown>) => void;
-  onConfirmCarRental?: (label: string, data: Record<string, unknown>) => void;
-  onConfirmExperience?: (label: string, data: Record<string, unknown>) => void;
   onConfirmPlan?: (confirmedCard: TripPlanCard, summaryMessage: string) => void;
   onQuickReply?: (text: string) => void;
   onBookNow?: () => void;
@@ -45,10 +37,6 @@ export interface NodeRendererCallbacks {
   onFormValuesChange?: (values: Record<string, string>) => void;
   initialValues?: Record<string, string>;
   disabled?: boolean;
-  confirmedFlightId?: string | null;
-  confirmedHotelId?: string | null;
-  confirmedCarRentalId?: string | null;
-  confirmedExperienceId?: string | null;
 }
 
 interface NodeRendererProps {
@@ -62,46 +50,6 @@ export function NodeRenderer({ node, callbacks = {} }: NodeRendererProps) {
   switch (node.type) {
     case 'text':
       return <MarkdownText node={node} />;
-
-    case 'flight_tiles':
-      return (
-        <FlightTiles
-          node={node}
-          onConfirm={cb.onConfirmFlight}
-          disabled={cb.disabled}
-          confirmedId={cb.confirmedFlightId}
-        />
-      );
-
-    case 'hotel_tiles':
-      return (
-        <HotelTiles
-          node={node}
-          onConfirm={cb.onConfirmHotel}
-          disabled={cb.disabled}
-          confirmedId={cb.confirmedHotelId}
-        />
-      );
-
-    case 'car_rental_tiles':
-      return (
-        <CarRentalTiles
-          node={node}
-          onConfirm={cb.onConfirmCarRental}
-          disabled={cb.disabled}
-          confirmedId={cb.confirmedCarRentalId}
-        />
-      );
-
-    case 'experience_tiles':
-      return (
-        <ExperienceTiles
-          node={node}
-          onConfirm={cb.onConfirmExperience}
-          disabled={cb.disabled}
-          confirmedId={cb.confirmedExperienceId}
-        />
-      );
 
     case 'offer_tiles':
       return (
