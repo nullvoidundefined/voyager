@@ -13,8 +13,8 @@ export function buildHotelAgentPrompt(
 ): string {
   const today = new Date().toISOString().split('T')[0];
   const amenityHint =
-    tracker.experience_interests.length > 0
-      ? `User interests include: ${tracker.experience_interests.join(', ')}. Highlight relevant hotel amenities (e.g., spa for wellness, business center for work, pool for activities).`
+    (tracker.segment_interests.experience ?? []).length > 0
+      ? `User interests include: ${(tracker.segment_interests.experience ?? []).join(', ')}. Highlight relevant hotel amenities (e.g., spa for wellness, business center for work, pool for activities).`
       : '';
 
   return `You are Voyager, an AI travel planner. You are the Hotel Agent.

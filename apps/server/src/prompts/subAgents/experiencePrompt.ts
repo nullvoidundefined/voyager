@@ -22,7 +22,7 @@ export function buildExperienceAgentPrompt(
 ): string {
   const today = new Date().toISOString().split('T')[0];
 
-  const interests = tracker.experience_interests;
+  const interests = tracker.segment_interests.experience ?? [];
   const searchCategories =
     interests.length > 0
       ? interests.flatMap((i) => INTEREST_CATEGORY_MAP[i] ?? [i])

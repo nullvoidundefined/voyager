@@ -14,6 +14,7 @@ import {
 import type { TripContext } from 'app/prompts/tripContext.js';
 import type { TripWithDetails } from 'app/schemas/trips.js';
 import type { UserPreferences } from 'app/schemas/userPreferences.js';
+import { getSegmentKindForPlanCategory } from 'app/segments/planCategoryIndex.js';
 import {
   EXPERIENCE_INTEREST_OPTIONS,
   type ExperienceInterest,
@@ -46,60 +47,63 @@ export function computeFlowPosition(
   return getFlowPosition(toFlowInput(trip), tracker);
 }
 
-const VALID_CATEGORY_IDS = new Set([
-  'flights',
-  'hotels',
-  'car_rental',
-  'experiences',
-]);
-
 /**
  * Apply a user-confirmed TripPlanCard to the tracker.
- * Sets plan_confirmed=true, updates category statuses, and extracts
- * experience interests. Does not overwrite already-selected categories.
+ * Sets plan_confirmed=true, updates segment statuses, and extracts
+ * experience interests. Does not overwrite already-selected segments.
+ * Card category ids are legacy plural wire values, bridged to SegmentKind.
  */
 export function applyPlanConfirmation(
   tracker: CompletionTracker,
   card: TripPlanCard,
 ): CompletionTracker {
-  const updated = { ...tracker };
+  const updated = { ...tracker, segments: { ...tracker.segments } };
 
   for (const category of card.categories) {
-    if (!VALID_CATEGORY_IDS.has(category.id)) continue;
-    const id = category.id as keyof Pick<
-      CompletionTracker,
-      'flights' | 'hotels' | 'car_rental' | 'experiences'
-    >;
-    if (updated[id] === 'selected') continue;
+    const kind = getSegmentKindForPlanCategory(category.id);
+    if (kind === undefined) continue;
+    if (updated.segments[kind] === 'selected') continue;
 
     if (category.not_applicable) {
-      updated[id] = 'not_applicable';
+      updated.segments[kind] = 'not_applicable';
     } else if (!category.enabled) {
-      updated[id] = 'skipped';
+      updated.segments[kind] = 'skipped';
     } else {
-      updated[id] = 'pending';
+      updated.segments[kind] = 'pending';
     }
   }
 
-  const expCategory = card.categories.find((c) => c.id === 'experiences');
-  const interestsOpt = expCategory?.sub_options?.find(
-    (o) => o.id === 'interests',
-  );
-  if (interestsOpt?.type === 'multi') {
-    // SEC-03: values flow verbatim into sub-agent system prompts on every
-    // subsequent LLM turn. Restrict to the canonical allowlist so a
-    // crafted plan card cannot inject prompts via this field.
-    const validInterestIds = new Set<string>(
-      EXPERIENCE_INTEREST_OPTIONS.map((o) => o.id),
-    );
-    updated.experience_interests = interestsOpt.values.filter(
-      (v): v is ExperienceInterest =>
-        typeof v === 'string' && validInterestIds.has(v),
-    );
+  const interests = extractExperienceInterests(card);
+  if (interests !== null) {
+    updated.segment_interests = {
+      ...updated.segment_interests,
+      experience: interests,
+    };
   }
 
   updated.plan_confirmed = true;
   return updated;
+}
+
+/** Extracts allowlisted experience interests from a plan card, or null when absent. */
+function extractExperienceInterests(
+  card: TripPlanCard,
+): ExperienceInterest[] | null {
+  const expCategory = card.categories.find((c) => c.id === 'experiences');
+  const interestsOpt = expCategory?.sub_options?.find(
+    (o) => o.id === 'interests',
+  );
+  if (interestsOpt?.type !== 'multi') return null;
+  // SEC-03: values flow verbatim into sub-agent system prompts on every
+  // subsequent LLM turn. Restrict to the canonical allowlist so a
+  // crafted plan card cannot inject prompts via this field.
+  const validInterestIds = new Set<string>(
+    EXPERIENCE_INTEREST_OPTIONS.map((o) => o.id),
+  );
+  return interestsOpt.values.filter(
+    (v): v is ExperienceInterest =>
+      typeof v === 'string' && validInterestIds.has(v),
+  );
 }
 
 /** Flush SSE data through any proxy buffering. */

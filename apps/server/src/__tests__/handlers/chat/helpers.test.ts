@@ -533,7 +533,7 @@ describe('chat helpers', () => {
         { ...DEFAULT_COMPLETION_TRACKER },
         card,
       );
-      expect(result.flights).toBe('not_applicable');
+      expect(result.segments.flight).toBe('not_applicable');
     });
 
     it('sets skipped when category is enabled=false and not_applicable=false', () => {
@@ -541,7 +541,7 @@ describe('chat helpers', () => {
         { ...DEFAULT_COMPLETION_TRACKER },
         baseCard,
       );
-      expect(result.car_rental).toBe('skipped');
+      expect(result.segments.car_rental).toBe('skipped');
     });
 
     it('keeps pending for enabled categories', () => {
@@ -549,18 +549,21 @@ describe('chat helpers', () => {
         { ...DEFAULT_COMPLETION_TRACKER },
         baseCard,
       );
-      expect(result.flights).toBe('pending');
-      expect(result.hotels).toBe('pending');
-      expect(result.experiences).toBe('pending');
+      expect(result.segments.flight).toBe('pending');
+      expect(result.segments.hotel).toBe('pending');
+      expect(result.segments.experience).toBe('pending');
     });
 
     it('does not overwrite already-selected status', () => {
       const tracker = {
         ...DEFAULT_COMPLETION_TRACKER,
-        flights: 'selected' as const,
+        segments: {
+          ...DEFAULT_COMPLETION_TRACKER.segments,
+          flight: 'selected' as const,
+        },
       };
       const result = applyPlanConfirmation(tracker, baseCard);
-      expect(result.flights).toBe('selected');
+      expect(result.segments.flight).toBe('selected');
     });
 
     it('extracts experience interests from multi sub-option', () => {
@@ -568,7 +571,10 @@ describe('chat helpers', () => {
         { ...DEFAULT_COMPLETION_TRACKER },
         baseCard,
       );
-      expect(result.experience_interests).toEqual(['dining', 'activities']);
+      expect(result.segment_interests.experience).toEqual([
+        'dining',
+        'activities',
+      ]);
     });
 
     it('drops interest values that are not in the canonical allowlist (SEC-03)', () => {
@@ -599,7 +605,10 @@ describe('chat helpers', () => {
         { ...DEFAULT_COMPLETION_TRACKER },
         card,
       );
-      expect(result.experience_interests).toEqual(['dining', 'wellness']);
+      expect(result.segment_interests.experience).toEqual([
+        'dining',
+        'wellness',
+      ]);
     });
 
     it('sets empty interests when none are selected', () => {
@@ -625,7 +634,7 @@ describe('chat helpers', () => {
         { ...DEFAULT_COMPLETION_TRACKER },
         card,
       );
-      expect(result.experience_interests).toEqual([]);
+      expect(result.segment_interests.experience).toEqual([]);
     });
 
     it('does not mutate the input tracker', () => {

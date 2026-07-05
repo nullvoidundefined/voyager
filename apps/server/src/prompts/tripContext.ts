@@ -6,6 +6,7 @@
 import {
   type CompletionTracker,
   type TrackerStatus,
+  getSegmentStatus,
   statusLabel,
 } from 'app/prompts/bookingSteps.js';
 
@@ -214,28 +215,34 @@ export function formatChecklist(
   }
 
   // Flights
-  if (tracker.flights === 'selected' && ctx.selected_flights.length > 0) {
+  if (
+    getSegmentStatus(tracker, 'flight') === 'selected' &&
+    ctx.selected_flights.length > 0
+  ) {
     const f = ctx.selected_flights[0]!;
     lines.push(`- ✅ Flights: ${f.airline} ${f.flight_number} — $${f.price}`);
   } else {
     lines.push(
-      `- ${icon(tracker.flights)} Flights: ${statusLabel(tracker.flights)}`,
+      `- ${icon(getSegmentStatus(tracker, 'flight'))} Flights: ${statusLabel(getSegmentStatus(tracker, 'flight'))}`,
     );
   }
 
   // Hotels
-  if (tracker.hotels === 'selected' && ctx.selected_hotels.length > 0) {
+  if (
+    getSegmentStatus(tracker, 'hotel') === 'selected' &&
+    ctx.selected_hotels.length > 0
+  ) {
     const h = ctx.selected_hotels[0]!;
     lines.push(`- ✅ Hotels: ${h.name} — $${h.total_price} total`);
   } else {
     lines.push(
-      `- ${icon(tracker.hotels)} Hotels: ${statusLabel(tracker.hotels)}`,
+      `- ${icon(getSegmentStatus(tracker, 'hotel'))} Hotels: ${statusLabel(getSegmentStatus(tracker, 'hotel'))}`,
     );
   }
 
   // Car rental
   if (
-    tracker.car_rental === 'selected' &&
+    getSegmentStatus(tracker, 'car_rental') === 'selected' &&
     ctx.selected_car_rentals.length > 0
   ) {
     const c = ctx.selected_car_rentals[0]!;
@@ -244,13 +251,13 @@ export function formatChecklist(
     );
   } else {
     lines.push(
-      `- ${icon(tracker.car_rental)} Car Rental: ${statusLabel(tracker.car_rental)}`,
+      `- ${icon(getSegmentStatus(tracker, 'car_rental'))} Car Rental: ${statusLabel(getSegmentStatus(tracker, 'car_rental'))}`,
     );
   }
 
   // Experiences
   if (
-    tracker.experiences === 'selected' &&
+    getSegmentStatus(tracker, 'experience') === 'selected' &&
     ctx.selected_experiences.length > 0
   ) {
     lines.push(
@@ -258,7 +265,7 @@ export function formatChecklist(
     );
   } else {
     lines.push(
-      `- ${icon(tracker.experiences)} Experiences: ${statusLabel(tracker.experiences)}`,
+      `- ${icon(getSegmentStatus(tracker, 'experience'))} Experiences: ${statusLabel(getSegmentStatus(tracker, 'experience'))}`,
     );
   }
 

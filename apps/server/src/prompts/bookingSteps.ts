@@ -1,13 +1,20 @@
 /**
- * Booking-flow domain model: category names, per-category completion tracker
- * status, and flow position. Provides the shared vocabulary that prompt
- * builders use to describe where a trip stands in the multi-step booking
- * process, so every sub-agent reports progress consistently.
+ * Booking-flow domain model: per-segment completion tracker status and flow
+ * position, keyed by the active journey's segment list. Provides the shared
+ * vocabulary that prompt builders use to describe where a trip stands in the
+ * multi-step booking process, so every sub-agent reports progress consistently.
  */
+import {
+  JOURNEY_TYPE_IDS,
+  type JourneyTypeId,
+  type SegmentKind,
+} from '@repo/types';
+
+import { getJourneyType } from 'app/journeys/registry.js';
+import { getSegmentKindForPlanCategory } from 'app/segments/planCategoryIndex.js';
+import { getSegmentCapability } from 'app/segments/registry/index.js';
 
 // --- Types ---
-
-export type CategoryName = 'flights' | 'hotels' | 'car_rental' | 'experiences';
 
 export type TrackerStatus =
   | 'pending'
@@ -18,7 +25,7 @@ export type TrackerStatus =
 
 // --- Status predicates (exhaustive switches so TS errors on new variants) ---
 
-/** Category needs agent attention: not yet started or results shown but unselected. */
+/** Segment needs agent attention: not yet started or results shown but unselected. */
 export function needsWork(status: TrackerStatus): boolean {
   switch (status) {
     case 'pending':
@@ -31,7 +38,7 @@ export function needsWork(status: TrackerStatus): boolean {
   }
 }
 
-/** Category requires no further action. */
+/** Segment requires no further action. */
 export function isResolved(status: TrackerStatus): boolean {
   switch (status) {
     case 'selected':
@@ -62,55 +69,52 @@ export function statusLabel(status: TrackerStatus): string {
 
 export interface CompletionTracker {
   version: number;
+  journeyType: JourneyTypeId;
+  /** Retained for v3 parity; journey inference replaces it in Phase 5. */
   transport: 'pending' | 'flying' | 'driving';
-  flights: TrackerStatus;
-  hotels: TrackerStatus;
-  car_rental: TrackerStatus;
-  experiences: TrackerStatus;
+  segments: Partial<Record<SegmentKind, TrackerStatus>>;
   plan_confirmed: boolean;
-  experience_interests: string[];
+  segment_interests: Partial<Record<SegmentKind, string[]>>;
   turns_since_last_progress: number;
 }
 
-export const CURRENT_TRACKER_VERSION = 3;
+export const CURRENT_TRACKER_VERSION = 4;
+
+function buildDefaultSegments(
+  journeyType: JourneyTypeId,
+): Partial<Record<SegmentKind, TrackerStatus>> {
+  const segments: Partial<Record<SegmentKind, TrackerStatus>> = {};
+  for (const slot of getJourneyType(journeyType).segments) {
+    segments[slot.kind] = 'pending';
+  }
+  return segments;
+}
 
 export const DEFAULT_COMPLETION_TRACKER: CompletionTracker = {
   version: CURRENT_TRACKER_VERSION,
+  journeyType: 'flight_trip',
   transport: 'pending',
-  flights: 'pending',
-  hotels: 'pending',
-  car_rental: 'pending',
-  experiences: 'pending',
+  segments: buildDefaultSegments('flight_trip'),
   plan_confirmed: false,
-  experience_interests: [],
+  segment_interests: {},
   turns_since_last_progress: 0,
 };
 
-export const SEARCH_TOOLS: Record<CategoryName, string> = {
-  flights: 'search_flights',
-  hotels: 'search_hotels',
-  car_rental: 'search_car_rentals',
-  experiences: 'search_experiences',
-};
+// --- Segment lookups ---
 
-export const SELECTION_KEYS: Record<
-  CategoryName,
-  'flights' | 'hotels' | 'car_rentals' | 'experiences'
-> = {
-  flights: 'flights',
-  hotels: 'hotels',
-  car_rental: 'car_rentals',
-  experiences: 'experiences',
-};
+/** Segment kinds of the tracker's journey, in journey (routing) order. */
+export function listJourneySegments(tracker: CompletionTracker): SegmentKind[] {
+  return getJourneyType(tracker.journeyType).segments.map((slot) => slot.kind);
+}
 
-const SELECT_TOOLS: Record<string, CategoryName> = {
-  select_flight: 'flights',
-  select_hotel: 'hotels',
-  select_car_rental: 'car_rental',
-  select_experience: 'experiences',
-};
+export function getSegmentStatus(
+  tracker: CompletionTracker,
+  kind: SegmentKind,
+): TrackerStatus {
+  return tracker.segments[kind] ?? 'pending';
+}
 
-// --- v1 → v3 migration helpers ---
+// --- v1/v2 -> v3 migration helpers ---
 
 const V1_STATUS_MAP: Record<string, TrackerStatus> = {
   idle: 'pending',
@@ -151,55 +155,68 @@ function validStatus(val: unknown): TrackerStatus {
     : 'pending';
 }
 
-export function normalizeCompletionTracker(raw: unknown): CompletionTracker {
-  if (raw === null || raw === undefined) {
-    return { ...DEFAULT_COMPLETION_TRACKER };
-  }
+function validTransport(val: unknown): CompletionTracker['transport'] {
+  return VALID_TRANSPORT.includes(val as string)
+    ? (val as CompletionTracker['transport'])
+    : 'pending';
+}
 
-  const obj = raw as Record<string, unknown>;
+/** The v3 named-field shape, used only as a migration intermediate. */
+interface V3Tracker {
+  transport: CompletionTracker['transport'];
+  flights: TrackerStatus;
+  hotels: TrackerStatus;
+  car_rental: TrackerStatus;
+  experiences: TrackerStatus;
+  plan_confirmed: boolean;
+  experience_interests: string[];
+  turns_since_last_progress: number;
+}
 
-  // v1 migration: BookingState with { status: 'idle' } objects
+/** The pre-v4 branches, verbatim: v1 object-statuses, v2 missing plan fields, v3. */
+function normalizeToV3(obj: Record<string, unknown>): V3Tracker {
   if (!('version' in obj) || (obj.version as number) < 2) {
-    return {
-      version: CURRENT_TRACKER_VERSION,
-      transport: 'pending',
-      flights: migrateV1Status(obj.flights),
-      hotels: migrateV1Status(obj.hotels),
-      car_rental: migrateV1Status(obj.car_rental),
-      experiences: migrateV1Status(obj.experiences),
-      plan_confirmed: false,
-      experience_interests: [],
-      turns_since_last_progress: 0,
-    };
+    return migrateV1ToV3(obj);
   }
-
-  // v2 → v3: add plan_confirmed and experience_interests
-  // All existing trips re-enter the plan phase on next message.
   if ((obj.version as number) < 3) {
-    return {
-      version: CURRENT_TRACKER_VERSION,
-      transport: VALID_TRANSPORT.includes(obj.transport as string)
-        ? (obj.transport as CompletionTracker['transport'])
-        : 'pending',
-      flights: validStatus(obj.flights),
-      hotels: validStatus(obj.hotels),
-      car_rental: validStatus(obj.car_rental),
-      experiences: validStatus(obj.experiences),
-      plan_confirmed: false,
-      experience_interests: [],
-      turns_since_last_progress:
-        typeof obj.turns_since_last_progress === 'number'
-          ? obj.turns_since_last_progress
-          : 0,
-    };
+    return migrateV2ToV3(obj);
   }
+  return sanitizeV3(obj);
+}
 
-  // v3: current format
+/** v1 migration: BookingState with { status: 'idle' } objects. */
+function migrateV1ToV3(obj: Record<string, unknown>): V3Tracker {
   return {
-    version: CURRENT_TRACKER_VERSION,
-    transport: VALID_TRANSPORT.includes(obj.transport as string)
-      ? (obj.transport as CompletionTracker['transport'])
-      : 'pending',
+    transport: 'pending',
+    flights: migrateV1Status(obj.flights),
+    hotels: migrateV1Status(obj.hotels),
+    car_rental: migrateV1Status(obj.car_rental),
+    experiences: migrateV1Status(obj.experiences),
+    plan_confirmed: false,
+    experience_interests: [],
+    turns_since_last_progress: 0,
+  };
+}
+
+/** v2 -> v3: adds plan_confirmed and experience_interests, so all existing
+ *  trips re-enter the plan phase on next message. */
+function migrateV2ToV3(obj: Record<string, unknown>): V3Tracker {
+  return {
+    transport: validTransport(obj.transport),
+    flights: validStatus(obj.flights),
+    hotels: validStatus(obj.hotels),
+    car_rental: validStatus(obj.car_rental),
+    experiences: validStatus(obj.experiences),
+    plan_confirmed: false,
+    experience_interests: [],
+    turns_since_last_progress: validTurnCount(obj.turns_since_last_progress),
+  };
+}
+
+/** Field-validates an object already carrying the v3 shape. */
+function sanitizeV3(obj: Record<string, unknown>): V3Tracker {
+  return {
+    transport: validTransport(obj.transport),
     flights: validStatus(obj.flights),
     hotels: validStatus(obj.hotels),
     car_rental: validStatus(obj.car_rental),
@@ -211,10 +228,90 @@ export function normalizeCompletionTracker(raw: unknown): CompletionTracker {
           (i): i is string => typeof i === 'string',
         )
       : [],
-    turns_since_last_progress:
-      typeof obj.turns_since_last_progress === 'number'
-        ? obj.turns_since_last_progress
-        : 0,
+    turns_since_last_progress: validTurnCount(obj.turns_since_last_progress),
+  };
+}
+
+function validTurnCount(val: unknown): number {
+  return typeof val === 'number' ? val : 0;
+}
+
+function validJourneyType(val: unknown): JourneyTypeId {
+  return JOURNEY_TYPE_IDS.includes(val as JourneyTypeId)
+    ? (val as JourneyTypeId)
+    : 'flight_trip';
+}
+
+function normalizeSegments(
+  raw: unknown,
+): Partial<Record<SegmentKind, TrackerStatus>> {
+  const segments: Partial<Record<SegmentKind, TrackerStatus>> = {};
+  if (typeof raw !== 'object' || raw === null) return segments;
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (getSegmentKindForPlanCategory(key) !== undefined) continue; // plural keys never valid here
+    segments[key as SegmentKind] = validStatus(value);
+  }
+  return segments;
+}
+
+function normalizeSegmentInterests(
+  raw: unknown,
+): Partial<Record<SegmentKind, string[]>> {
+  const interests: Partial<Record<SegmentKind, string[]>> = {};
+  if (typeof raw !== 'object' || raw === null) return interests;
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (!Array.isArray(value)) continue;
+    interests[key as SegmentKind] = value.filter(
+      (i): i is string => typeof i === 'string',
+    );
+  }
+  return interests;
+}
+
+export function normalizeCompletionTracker(raw: unknown): CompletionTracker {
+  if (raw === null || raw === undefined) {
+    return structuredClone(DEFAULT_COMPLETION_TRACKER);
+  }
+  const obj = raw as Record<string, unknown>;
+  if (typeof obj.version === 'number' && obj.version >= 4) {
+    return sanitizeV4(obj);
+  }
+  return migrateV3ToV4(normalizeToV3(obj));
+}
+
+/** Field-validates an object already carrying the v4 shape. */
+function sanitizeV4(obj: Record<string, unknown>): CompletionTracker {
+  return {
+    version: CURRENT_TRACKER_VERSION,
+    journeyType: validJourneyType(obj.journeyType),
+    transport: validTransport(obj.transport),
+    segments: normalizeSegments(obj.segments),
+    plan_confirmed:
+      typeof obj.plan_confirmed === 'boolean' ? obj.plan_confirmed : false,
+    segment_interests: normalizeSegmentInterests(obj.segment_interests),
+    turns_since_last_progress: validTurnCount(obj.turns_since_last_progress),
+  };
+}
+
+/** v3 -> v4: named category fields become the segment map under the only
+ *  journey that existed before v4. */
+function migrateV3ToV4(v3: V3Tracker): CompletionTracker {
+  return {
+    version: CURRENT_TRACKER_VERSION,
+    journeyType: 'flight_trip',
+    transport: v3.transport,
+    segments: {
+      flight: v3.flights,
+      hotel: v3.hotels,
+      car_rental: v3.car_rental,
+      experience: v3.experiences,
+    },
+    plan_confirmed: v3.plan_confirmed,
+    segment_interests:
+      v3.experience_interests.length > 0
+        ? { experience: v3.experience_interests }
+        : {},
+    turns_since_last_progress: v3.turns_since_last_progress,
   };
 }
 
@@ -258,7 +355,7 @@ export function getFlowPosition(
     return { phase: 'COLLECT_DETAILS' };
   }
 
-  // When a v3 tracker is provided, gate on plan_confirmed
+  // When a plan-aware tracker is provided, gate on plan_confirmed
   if (
     tracker !== null &&
     tracker !== undefined &&
@@ -277,105 +374,151 @@ export function getFlowPosition(
 
 interface AgentResultForTracker {
   tool_calls: Array<{ tool_name: string; input?: Record<string, unknown> }>;
-  formatResponse?: { skip_category?: CategoryName | boolean } | null;
+  formatResponse?: { skip_category?: string | boolean } | null;
 }
 
-const CATEGORIES: CategoryName[] = [
-  'flights',
-  'hotels',
-  'car_rental',
-  'experiences',
-];
+/** Read a trip's selection collection by the capability's selectionKey. */
+function getTripSelections(
+  trip: TripState,
+  selectionKey: string,
+): Array<{ id: string }> {
+  const collection = (trip as unknown as Record<string, unknown>)[selectionKey];
+  return Array.isArray(collection) ? (collection as Array<{ id: string }>) : [];
+}
 
 export function updateCompletionTracker(
   tracker: CompletionTracker,
   agentResult: AgentResultForTracker,
   updatedTrip: TripState,
 ): CompletionTracker {
-  const newTracker = { ...tracker };
+  const newTracker: CompletionTracker = {
+    ...tracker,
+    segments: { ...tracker.segments },
+  };
+
+  const changed = [
+    recordTransportMode(newTracker, updatedTrip),
+    markSearchedSegments(newTracker, agentResult),
+    markSelectedSegments(newTracker, agentResult, updatedTrip),
+    markSelectionsFromTripRecord(newTracker, updatedTrip),
+    markSkippedCategory(newTracker, agentResult),
+    reopenRequestedCategories(newTracker, agentResult),
+  ].some(Boolean);
+
+  newTracker.turns_since_last_progress = changed
+    ? 0
+    : tracker.turns_since_last_progress + 1;
+
+  return newTracker;
+}
+
+/** Records a decided transport mode; driving skips a still-pending flight. */
+function recordTransportMode(
+  tracker: CompletionTracker,
+  updatedTrip: TripState,
+): boolean {
+  if (!updatedTrip.transport_mode || tracker.transport !== 'pending') {
+    return false;
+  }
+  tracker.transport = updatedTrip.transport_mode;
+  if (
+    updatedTrip.transport_mode === 'driving' &&
+    getSegmentStatus(tracker, 'flight') === 'pending'
+  ) {
+    tracker.segments.flight = 'skipped';
+  }
+  return true;
+}
+
+/** Search tool calls move segments to searching (never downgrading selected/not_applicable). */
+function markSearchedSegments(
+  tracker: CompletionTracker,
+  agentResult: AgentResultForTracker,
+): boolean {
   let changed = false;
-
-  // 1. Transport mode
-  if (updatedTrip.transport_mode && newTracker.transport === 'pending') {
-    newTracker.transport = updatedTrip.transport_mode;
-    changed = true;
-    if (
-      updatedTrip.transport_mode === 'driving' &&
-      newTracker.flights === 'pending'
-    ) {
-      newTracker.flights = 'skipped';
-    }
-  }
-
-  // 2. Search tools → searching (don't downgrade selected/not_applicable)
-  for (const cat of CATEGORIES) {
-    const searchTool = SEARCH_TOOLS[cat];
+  for (const kind of listJourneySegments(tracker)) {
+    const { searchTool } = getSegmentCapability(kind);
     if (agentResult.tool_calls.some((tc) => tc.tool_name === searchTool)) {
-      if (needsWork(newTracker[cat]) || newTracker[cat] === 'skipped') {
-        newTracker[cat] = 'searching';
+      const status = getSegmentStatus(tracker, kind);
+      if (needsWork(status) || status === 'skipped') {
+        tracker.segments[kind] = 'searching';
         changed = true;
       }
     }
   }
+  return changed;
+}
 
-  // 3. Select tools + trip record → selected
-  for (const [toolName, cat] of Object.entries(SELECT_TOOLS)) {
-    if (agentResult.tool_calls.some((tc) => tc.tool_name === toolName)) {
-      const selKey = SELECTION_KEYS[cat];
-      const selections =
-        selKey === 'car_rentals'
-          ? (updatedTrip.car_rentals ?? [])
-          : updatedTrip[selKey];
-      if (selections.length > 0) {
-        newTracker[cat] = 'selected';
-        changed = true;
-      }
-    }
-  }
-
-  // 4. Ground truth: trip record selections override tracker
-  for (const cat of CATEGORIES) {
-    const selKey = SELECTION_KEYS[cat];
-    const selections =
-      selKey === 'car_rentals'
-        ? (updatedTrip.car_rentals ?? [])
-        : updatedTrip[selKey];
-    if (selections.length > 0 && newTracker[cat] !== 'selected') {
-      newTracker[cat] = 'selected';
+/** Select tool calls backed by a persisted trip selection mark the segment selected. */
+function markSelectedSegments(
+  tracker: CompletionTracker,
+  agentResult: AgentResultForTracker,
+  updatedTrip: TripState,
+): boolean {
+  let changed = false;
+  for (const kind of listJourneySegments(tracker)) {
+    const capability = getSegmentCapability(kind);
+    if (
+      agentResult.tool_calls.some(
+        (tc) => tc.tool_name === capability.selectTool,
+      ) &&
+      getTripSelections(updatedTrip, capability.selectionKey).length > 0
+    ) {
+      tracker.segments[kind] = 'selected';
       changed = true;
     }
   }
+  return changed;
+}
 
-  // 5. skip_category
-  const skipCat = agentResult.formatResponse?.skip_category;
-  if (
-    typeof skipCat === 'string' &&
-    CATEGORIES.includes(skipCat as CategoryName)
-  ) {
-    newTracker[skipCat as CategoryName] = 'skipped';
-    changed = true;
-  }
-
-  // 6. re_open_category tool calls
-  for (const tc of agentResult.tool_calls) {
-    if (tc.tool_name === 're_open_category') {
-      const cat = tc.input?.category;
-      if (typeof cat === 'string' && CATEGORIES.includes(cat as CategoryName)) {
-        newTracker[cat as CategoryName] = 'pending';
-        changed = true;
-      }
+/** Ground truth: trip record selections override the tracker. */
+function markSelectionsFromTripRecord(
+  tracker: CompletionTracker,
+  updatedTrip: TripState,
+): boolean {
+  let changed = false;
+  for (const kind of listJourneySegments(tracker)) {
+    const { selectionKey } = getSegmentCapability(kind);
+    if (
+      getTripSelections(updatedTrip, selectionKey).length > 0 &&
+      getSegmentStatus(tracker, kind) !== 'selected'
+    ) {
+      tracker.segments[kind] = 'selected';
+      changed = true;
     }
   }
+  return changed;
+}
 
-  // 8. Progress counter
-  if (changed) {
-    newTracker.turns_since_last_progress = 0;
-  } else {
-    newTracker.turns_since_last_progress =
-      tracker.turns_since_last_progress + 1;
+/** skip_category carries a legacy plural wire value ('flights', 'hotels', ...). */
+function markSkippedCategory(
+  tracker: CompletionTracker,
+  agentResult: AgentResultForTracker,
+): boolean {
+  const skipCat = agentResult.formatResponse?.skip_category;
+  if (typeof skipCat !== 'string') return false;
+  const kind = getSegmentKindForPlanCategory(skipCat);
+  if (kind === undefined) return false;
+  tracker.segments[kind] = 'skipped';
+  return true;
+}
+
+/** re_open_category carries a legacy plural wire value ('flights', 'hotels', ...). */
+function reopenRequestedCategories(
+  tracker: CompletionTracker,
+  agentResult: AgentResultForTracker,
+): boolean {
+  let changed = false;
+  for (const tc of agentResult.tool_calls) {
+    if (tc.tool_name !== 're_open_category') continue;
+    const cat = tc.input?.category;
+    if (typeof cat !== 'string') continue;
+    const kind = getSegmentKindForPlanCategory(cat);
+    if (kind === undefined) continue;
+    tracker.segments[kind] = 'pending';
+    changed = true;
   }
-
-  return newTracker;
+  return changed;
 }
 
 // --- Nudge computation ---
@@ -385,10 +528,12 @@ export function computeNudge(tracker: CompletionTracker): string | null {
 
   const unstarted: string[] = [];
   const stalled: string[] = [];
-  for (const cat of CATEGORIES) {
-    const label = cat.replace('_', ' ');
-    if (tracker[cat] === 'pending') unstarted.push(label);
-    else if (tracker[cat] === 'searching') stalled.push(label);
+  for (const kind of listJourneySegments(tracker)) {
+    // Legacy plural label ('flights', 'car rental') for prompt parity.
+    const label = getSegmentCapability(kind).planCategoryId.replace('_', ' ');
+    const status = getSegmentStatus(tracker, kind);
+    if (status === 'pending') unstarted.push(label);
+    else if (status === 'searching') stalled.push(label);
   }
 
   const parts: string[] = [];
@@ -410,16 +555,21 @@ export function computeNudge(tracker: CompletionTracker): string | null {
 // --- Empty itinerary check ---
 
 export function hasAnySelection(tracker: CompletionTracker): boolean {
-  return CATEGORIES.some((cat) => tracker[cat] === 'selected');
+  return listJourneySegments(tracker).some(
+    (kind) => getSegmentStatus(tracker, kind) === 'selected',
+  );
 }
 
 export function allCategoriesResolved(tracker: CompletionTracker): boolean {
-  return CATEGORIES.every((cat) => isResolved(tracker[cat]));
+  return listJourneySegments(tracker).every((kind) =>
+    isResolved(getSegmentStatus(tracker, kind)),
+  );
 }
 
-/** Every category is either unstarted or explicitly skipped -- no active engagement. */
+/** Every segment is either unstarted or explicitly skipped -- no active engagement. */
 export function noEngagement(tracker: CompletionTracker): boolean {
-  return CATEGORIES.every(
-    (cat) => tracker[cat] === 'pending' || tracker[cat] === 'skipped',
-  );
+  return listJourneySegments(tracker).every((kind) => {
+    const status = getSegmentStatus(tracker, kind);
+    return status === 'pending' || status === 'skipped';
+  });
 }

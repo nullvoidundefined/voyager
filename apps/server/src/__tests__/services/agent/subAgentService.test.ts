@@ -220,7 +220,10 @@ describe('selectSubAgent', () => {
     it('routes to flight agent when flights are pending', () => {
       const tracker: CompletionTracker = {
         ...confirmedTracker,
-        flights: 'pending',
+        segments: {
+          ...confirmedTracker.segments,
+          flight: 'pending',
+        },
       };
       expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('flight');
     });
@@ -228,8 +231,11 @@ describe('selectSubAgent', () => {
     it('routes to hotel agent when flights are resolved and hotels are pending', () => {
       const tracker: CompletionTracker = {
         ...confirmedTracker,
-        flights: 'selected',
-        hotels: 'pending',
+        segments: {
+          ...confirmedTracker.segments,
+          flight: 'selected',
+          hotel: 'pending',
+        },
       };
       expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('hotel');
     });
@@ -237,8 +243,11 @@ describe('selectSubAgent', () => {
     it('routes to hotel agent when flights are skipped and hotels are pending', () => {
       const tracker: CompletionTracker = {
         ...confirmedTracker,
-        flights: 'skipped',
-        hotels: 'pending',
+        segments: {
+          ...confirmedTracker.segments,
+          flight: 'skipped',
+          hotel: 'pending',
+        },
       };
       expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('hotel');
     });
@@ -246,8 +255,11 @@ describe('selectSubAgent', () => {
     it('routes to hotel agent when flights are not_applicable and hotels are pending', () => {
       const tracker: CompletionTracker = {
         ...confirmedTracker,
-        flights: 'not_applicable',
-        hotels: 'pending',
+        segments: {
+          ...confirmedTracker.segments,
+          flight: 'not_applicable',
+          hotel: 'pending',
+        },
       };
       expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('hotel');
     });
@@ -255,10 +267,13 @@ describe('selectSubAgent', () => {
     it('routes to experience agent when flights+hotels resolved and experiences pending', () => {
       const tracker: CompletionTracker = {
         ...confirmedTracker,
-        flights: 'selected',
-        hotels: 'selected',
-        experiences: 'pending',
-        car_rental: 'pending',
+        segments: {
+          ...confirmedTracker.segments,
+          flight: 'selected',
+          hotel: 'selected',
+          experience: 'pending',
+          car_rental: 'pending',
+        },
       };
       // experiences before ground per spec ordering
       expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('experience');
@@ -267,10 +282,13 @@ describe('selectSubAgent', () => {
     it('routes to ground agent when flights+hotels resolved, experiences resolved, car_rental pending', () => {
       const tracker: CompletionTracker = {
         ...confirmedTracker,
-        flights: 'selected',
-        hotels: 'selected',
-        experiences: 'selected',
-        car_rental: 'pending',
+        segments: {
+          ...confirmedTracker.segments,
+          flight: 'selected',
+          hotel: 'selected',
+          experience: 'selected',
+          car_rental: 'pending',
+        },
       };
       expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('ground');
     });
@@ -278,10 +296,13 @@ describe('selectSubAgent', () => {
     it('routes to ground agent when hotels are skipped and car_rental is pending', () => {
       const tracker: CompletionTracker = {
         ...confirmedTracker,
-        flights: 'selected',
-        hotels: 'skipped',
-        experiences: 'selected',
-        car_rental: 'pending',
+        segments: {
+          ...confirmedTracker.segments,
+          flight: 'selected',
+          hotel: 'skipped',
+          experience: 'selected',
+          car_rental: 'pending',
+        },
       };
       expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('ground');
     });
@@ -289,10 +310,13 @@ describe('selectSubAgent', () => {
     it('routes to conversation agent when all categories are resolved', () => {
       const tracker: CompletionTracker = {
         ...confirmedTracker,
-        flights: 'selected',
-        hotels: 'selected',
-        experiences: 'selected',
-        car_rental: 'skipped',
+        segments: {
+          ...confirmedTracker.segments,
+          flight: 'selected',
+          hotel: 'selected',
+          experience: 'selected',
+          car_rental: 'skipped',
+        },
       };
       expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe(
         'conversation',
@@ -302,8 +326,11 @@ describe('selectSubAgent', () => {
     it('does not route to hotel when flights are still pending', () => {
       const tracker: CompletionTracker = {
         ...confirmedTracker,
-        flights: 'pending',
-        hotels: 'pending',
+        segments: {
+          ...confirmedTracker.segments,
+          flight: 'pending',
+          hotel: 'pending',
+        },
       };
       // flights pending takes priority
       expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('flight');
@@ -312,9 +339,12 @@ describe('selectSubAgent', () => {
     it('does not route to ground when hotels are still pending', () => {
       const tracker: CompletionTracker = {
         ...confirmedTracker,
-        flights: 'selected',
-        hotels: 'pending',
-        car_rental: 'pending',
+        segments: {
+          ...confirmedTracker.segments,
+          flight: 'selected',
+          hotel: 'pending',
+          car_rental: 'pending',
+        },
       };
       expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('hotel');
     });
@@ -322,7 +352,10 @@ describe('selectSubAgent', () => {
     it('routes to flight agent when flights are searching (user selecting)', () => {
       const tracker: CompletionTracker = {
         ...confirmedTracker,
-        flights: 'searching',
+        segments: {
+          ...confirmedTracker.segments,
+          flight: 'searching',
+        },
       };
       expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('flight');
     });
@@ -330,8 +363,11 @@ describe('selectSubAgent', () => {
     it('routes to hotel agent when hotels are searching and flights resolved', () => {
       const tracker: CompletionTracker = {
         ...confirmedTracker,
-        flights: 'selected',
-        hotels: 'searching',
+        segments: {
+          ...confirmedTracker.segments,
+          flight: 'selected',
+          hotel: 'searching',
+        },
       };
       expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('hotel');
     });
@@ -339,9 +375,12 @@ describe('selectSubAgent', () => {
     it('routes to experience agent when experiences are searching and flights resolved', () => {
       const tracker: CompletionTracker = {
         ...confirmedTracker,
-        flights: 'selected',
-        hotels: 'selected',
-        experiences: 'searching',
+        segments: {
+          ...confirmedTracker.segments,
+          flight: 'selected',
+          hotel: 'selected',
+          experience: 'searching',
+        },
       };
       expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('experience');
     });
@@ -349,10 +388,13 @@ describe('selectSubAgent', () => {
     it('routes to ground agent when car_rental is searching and hotels resolved', () => {
       const tracker: CompletionTracker = {
         ...confirmedTracker,
-        flights: 'selected',
-        hotels: 'selected',
-        experiences: 'selected',
-        car_rental: 'searching',
+        segments: {
+          ...confirmedTracker.segments,
+          flight: 'selected',
+          hotel: 'selected',
+          experience: 'selected',
+          car_rental: 'searching',
+        },
       };
       expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('ground');
     });

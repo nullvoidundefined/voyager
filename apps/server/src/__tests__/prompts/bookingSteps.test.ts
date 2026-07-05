@@ -1,3 +1,4 @@
+import type { SegmentKind } from '@repo/types';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -8,7 +9,9 @@ import {
   allCategoriesResolved,
   computeNudge,
   getFlowPosition,
+  getSegmentStatus,
   isResolved,
+  listJourneySegments,
   needsWork,
   noEngagement,
   normalizeCompletionTracker,
@@ -29,6 +32,18 @@ const baseTripState: TripState = {
   status: 'planning',
 };
 
+/** Tracker with per-segment status overrides on top of the default. */
+function segTracker(
+  overrides: Partial<Record<SegmentKind, TrackerStatus>>,
+  extra?: Partial<Omit<CompletionTracker, 'segments'>>,
+): CompletionTracker {
+  return {
+    ...DEFAULT_COMPLETION_TRACKER,
+    ...extra,
+    segments: { ...DEFAULT_COMPLETION_TRACKER.segments, ...overrides },
+  };
+}
+
 const confirmedTracker: CompletionTracker = {
   ...DEFAULT_COMPLETION_TRACKER,
   plan_confirmed: true,
@@ -45,7 +60,7 @@ describe('normalizeCompletionTracker', () => {
     expect(result).toEqual(DEFAULT_COMPLETION_TRACKER);
   });
 
-  it('migrates v1 BookingState to v3 CompletionTracker', () => {
+  it('migrates v1 BookingState to v4 CompletionTracker', () => {
     const v1 = {
       version: 1,
       flights: { status: 'idle' },
@@ -54,14 +69,34 @@ describe('normalizeCompletionTracker', () => {
       experiences: { status: 'done' },
     };
     const result = normalizeCompletionTracker(v1);
-    expect(result.version).toBe(3);
-    expect(result.flights).toBe('pending');
-    expect(result.hotels).toBe('pending');
-    expect(result.car_rental).toBe('searching');
-    expect(result.experiences).toBe('selected');
+    expect(result.version).toBe(4);
+    expect(result.journeyType).toBe('flight_trip');
+    expect(result.segments.flight).toBe('pending');
+    expect(result.segments.hotel).toBe('pending');
+    expect(result.segments.car_rental).toBe('searching');
+    expect(result.segments.experience).toBe('selected');
     expect(result.plan_confirmed).toBe(false);
-    expect(result.experience_interests).toEqual([]);
+    expect(result.segment_interests).toEqual({});
     expect(result.turns_since_last_progress).toBe(0);
+  });
+
+  it('migrates the v1 DB-default shape (no version key) to v4 under flight_trip', () => {
+    // Verbatim column default from 1771879388556_add-booking-state.js
+    const v1DbDefault = {
+      flights: { status: 'idle' },
+      hotels: { status: 'idle' },
+      car_rental: { status: 'idle' },
+      experiences: { status: 'idle' },
+    };
+    const result = normalizeCompletionTracker(v1DbDefault);
+    expect(result.version).toBe(4);
+    expect(result.journeyType).toBe('flight_trip');
+    expect(result.segments).toEqual({
+      flight: 'pending',
+      hotel: 'pending',
+      car_rental: 'pending',
+      experience: 'pending',
+    });
   });
 
   it('migrates v1 skipped status', () => {
@@ -73,10 +108,10 @@ describe('normalizeCompletionTracker', () => {
       experiences: { status: 'idle' },
     };
     const result = normalizeCompletionTracker(v1);
-    expect(result.flights).toBe('skipped');
+    expect(result.segments.flight).toBe('skipped');
   });
 
-  it('migrates v2 to v3 with plan_confirmed: false and empty experience_interests', () => {
+  it('migrates v2 to v4 with plan_confirmed: false and empty segment_interests', () => {
     const v2 = {
       version: 2,
       transport: 'flying',
@@ -87,16 +122,16 @@ describe('normalizeCompletionTracker', () => {
       turns_since_last_progress: 2,
     };
     const result = normalizeCompletionTracker(v2);
-    expect(result.version).toBe(3);
-    expect(result.flights).toBe('selected');
-    expect(result.hotels).toBe('searching');
+    expect(result.version).toBe(4);
+    expect(result.segments.flight).toBe('selected');
+    expect(result.segments.hotel).toBe('searching');
     expect(result.plan_confirmed).toBe(false);
-    expect(result.experience_interests).toEqual([]);
+    expect(result.segment_interests).toEqual({});
     expect(result.turns_since_last_progress).toBe(2);
   });
 
-  it('passes through valid v3 data', () => {
-    const v3: CompletionTracker = {
+  it('migrates a v3 tracker preserving every status and interest', () => {
+    const v3 = {
       version: 3,
       transport: 'flying',
       flights: 'selected',
@@ -108,34 +143,97 @@ describe('normalizeCompletionTracker', () => {
       turns_since_last_progress: 2,
     };
     const result = normalizeCompletionTracker(v3);
-    expect(result).toEqual(v3);
+    expect(result).toEqual({
+      version: 4,
+      journeyType: 'flight_trip',
+      transport: 'flying',
+      segments: {
+        flight: 'selected',
+        hotel: 'searching',
+        car_rental: 'not_applicable',
+        experience: 'pending',
+      },
+      plan_confirmed: true,
+      segment_interests: { experience: ['dining', 'nightlife'] },
+      turns_since_last_progress: 2,
+    });
+  });
+
+  it('passes a valid v4 tracker through unchanged', () => {
+    const v4: CompletionTracker = {
+      version: 4,
+      journeyType: 'flight_trip',
+      transport: 'pending',
+      segments: { flight: 'selected', hotel: 'pending' },
+      plan_confirmed: false,
+      segment_interests: {},
+      turns_since_last_progress: 0,
+    };
+    expect(normalizeCompletionTracker(v4)).toEqual(v4);
+  });
+
+  it('coerces an unknown journeyType to flight_trip', () => {
+    const bad = { version: 4, journeyType: 'teleporting', segments: {} };
+    expect(normalizeCompletionTracker(bad).journeyType).toBe('flight_trip');
+  });
+
+  it('drops non-status values from v4 segments', () => {
+    const raw = {
+      version: 4,
+      journeyType: 'flight_trip',
+      segments: { flight: 'warp_speed', hotel: 'selected' },
+    };
+    const result = normalizeCompletionTracker(raw);
+    expect(result.segments.flight).toBe('pending');
+    expect(result.segments.hotel).toBe('selected');
   });
 
   it('fills missing fields in v3 data', () => {
     const partial = { version: 3, flights: 'selected' };
     const result = normalizeCompletionTracker(partial);
-    expect(result.flights).toBe('selected');
-    expect(result.hotels).toBe('pending');
+    expect(result.segments.flight).toBe('selected');
+    expect(result.segments.hotel).toBe('pending');
     expect(result.transport).toBe('pending');
     expect(result.plan_confirmed).toBe(false);
-    expect(result.experience_interests).toEqual([]);
+    expect(result.segment_interests).toEqual({});
     expect(result.turns_since_last_progress).toBe(0);
   });
 
-  it('filters non-string values out of experience_interests', () => {
+  it('filters non-string values out of experience interests', () => {
     const raw = {
       version: 3,
       plan_confirmed: true,
       experience_interests: ['dining', 42, null, 'wellness'],
     };
     const result = normalizeCompletionTracker(raw);
-    expect(result.experience_interests).toEqual(['dining', 'wellness']);
+    expect(result.segment_interests).toEqual({
+      experience: ['dining', 'wellness'],
+    });
   });
 
   it('preserves not_applicable status in v3 data', () => {
     const raw = { version: 3, flights: 'not_applicable', plan_confirmed: true };
     const result = normalizeCompletionTracker(raw);
-    expect(result.flights).toBe('not_applicable');
+    expect(result.segments.flight).toBe('not_applicable');
+  });
+});
+
+describe('tracker segment helpers', () => {
+  it('listJourneySegments returns the flight_trip journey order', () => {
+    expect(listJourneySegments(DEFAULT_COMPLETION_TRACKER)).toEqual([
+      'flight',
+      'hotel',
+      'experience',
+      'car_rental',
+    ]);
+  });
+
+  it('getSegmentStatus defaults a missing segment to pending', () => {
+    const tracker: CompletionTracker = {
+      ...DEFAULT_COMPLETION_TRACKER,
+      segments: {},
+    };
+    expect(getSegmentStatus(tracker, 'flight')).toBe('pending');
   });
 });
 
@@ -204,91 +302,101 @@ describe('getFlowPosition', () => {
 });
 
 describe('allCategoriesResolved', () => {
-  it('returns false when any category is pending', () => {
+  it('returns false when any segment is pending', () => {
     expect(allCategoriesResolved(DEFAULT_COMPLETION_TRACKER)).toBe(false);
   });
 
-  it('returns true when all categories are selected or skipped', () => {
-    const tracker: CompletionTracker = {
-      ...DEFAULT_COMPLETION_TRACKER,
-      flights: 'selected',
-      hotels: 'selected',
+  it('returns true when all segments are selected or skipped', () => {
+    const tracker = segTracker({
+      flight: 'selected',
+      hotel: 'selected',
       car_rental: 'skipped',
-      experiences: 'selected',
-    };
+      experience: 'selected',
+    });
     expect(allCategoriesResolved(tracker)).toBe(true);
   });
 
-  it('returns true when a category is not_applicable', () => {
-    const tracker: CompletionTracker = {
-      ...DEFAULT_COMPLETION_TRACKER,
-      flights: 'not_applicable',
-      hotels: 'selected',
+  it('returns true when a segment is not_applicable', () => {
+    const tracker = segTracker({
+      flight: 'not_applicable',
+      hotel: 'selected',
       car_rental: 'skipped',
-      experiences: 'selected',
-    };
+      experience: 'selected',
+    });
     expect(allCategoriesResolved(tracker)).toBe(true);
   });
 
-  it('returns false when a category is searching', () => {
-    const tracker: CompletionTracker = {
-      ...DEFAULT_COMPLETION_TRACKER,
-      flights: 'selected',
-      hotels: 'searching',
+  it('returns false when a segment is searching', () => {
+    const tracker = segTracker({
+      flight: 'selected',
+      hotel: 'searching',
       car_rental: 'skipped',
-      experiences: 'selected',
-    };
+      experience: 'selected',
+    });
     expect(allCategoriesResolved(tracker)).toBe(false);
   });
 });
 
 describe('updateCompletionTracker', () => {
-  it('marks category as searching when search tool is called', () => {
+  it('marks segment as searching when search tool is called', () => {
     const tracker = { ...DEFAULT_COMPLETION_TRACKER };
     const result = updateCompletionTracker(
       tracker,
       { tool_calls: [{ tool_name: 'search_flights' }], formatResponse: null },
       baseTripState,
     );
-    expect(result.flights).toBe('searching');
+    expect(result.segments.flight).toBe('searching');
     expect(result.turns_since_last_progress).toBe(0);
   });
 
+  it('does not mutate the input tracker segments (defensive clone)', () => {
+    const tracker = { ...DEFAULT_COMPLETION_TRACKER };
+    updateCompletionTracker(
+      tracker,
+      { tool_calls: [{ tool_name: 'search_flights' }], formatResponse: null },
+      baseTripState,
+    );
+    expect(tracker.segments.flight).toBe('pending');
+  });
+
   it('does not overwrite not_applicable with searching', () => {
-    const tracker: CompletionTracker = {
-      ...DEFAULT_COMPLETION_TRACKER,
-      flights: 'not_applicable',
-    };
+    const tracker = segTracker({ flight: 'not_applicable' });
     const result = updateCompletionTracker(
       tracker,
       { tool_calls: [{ tool_name: 'search_flights' }], formatResponse: null },
       baseTripState,
     );
-    expect(result.flights).toBe('not_applicable');
+    expect(result.segments.flight).toBe('not_applicable');
   });
 
-  it('marks category as selected when trip has selections', () => {
-    const tracker = {
-      ...DEFAULT_COMPLETION_TRACKER,
-      flights: 'searching' as const,
-    };
+  it('marks segment as selected when trip has selections', () => {
+    const tracker = segTracker({ flight: 'searching' });
     const tripWithFlight = { ...baseTripState, flights: [{ id: '1' }] };
     const result = updateCompletionTracker(
       tracker,
       { tool_calls: [{ tool_name: 'select_flight' }], formatResponse: null },
       tripWithFlight,
     );
-    expect(result.flights).toBe('selected');
+    expect(result.segments.flight).toBe('selected');
   });
 
-  it('marks category as skipped when skip_category names it', () => {
+  it('marks segment as skipped when skip_category names it (legacy plural wire value)', () => {
     const tracker = { ...DEFAULT_COMPLETION_TRACKER };
     const result = updateCompletionTracker(
       tracker,
       { tool_calls: [], formatResponse: { skip_category: 'hotels' } },
       baseTripState,
     );
-    expect(result.hotels).toBe('skipped');
+    expect(result.segments.hotel).toBe('skipped');
+  });
+
+  it('maps skip_category "flights" onto the flight segment (wire pin)', () => {
+    const result = updateCompletionTracker(
+      { ...DEFAULT_COMPLETION_TRACKER },
+      { tool_calls: [], formatResponse: { skip_category: 'flights' } },
+      baseTripState,
+    );
+    expect(result.segments.flight).toBe('skipped');
   });
 
   it('updates transport when update_trip sets transport_mode', () => {
@@ -303,13 +411,13 @@ describe('updateCompletionTracker', () => {
       tripDriving,
     );
     expect(result.transport).toBe('driving');
-    expect(result.flights).toBe('skipped');
+    expect(result.segments.flight).toBe('skipped');
   });
 
   it('increments turns_since_last_progress when no status changes', () => {
-    const tracker = {
+    const tracker: CompletionTracker = {
       ...DEFAULT_COMPLETION_TRACKER,
-      transport: 'flying' as const,
+      transport: 'flying',
       turns_since_last_progress: 1,
     };
     const result = updateCompletionTracker(
@@ -321,7 +429,7 @@ describe('updateCompletionTracker', () => {
   });
 
   it('resets turns_since_last_progress when any status changes', () => {
-    const tracker = {
+    const tracker: CompletionTracker = {
       ...DEFAULT_COMPLETION_TRACKER,
       turns_since_last_progress: 5,
     };
@@ -333,11 +441,11 @@ describe('updateCompletionTracker', () => {
     expect(result.turns_since_last_progress).toBe(0);
   });
 
-  it('preserves plan_confirmed and experience_interests through updates', () => {
+  it('preserves plan_confirmed and segment interests through updates', () => {
     const tracker: CompletionTracker = {
       ...DEFAULT_COMPLETION_TRACKER,
       plan_confirmed: true,
-      experience_interests: ['dining', 'nightlife'],
+      segment_interests: { experience: ['dining', 'nightlife'] },
     };
     const result = updateCompletionTracker(
       tracker,
@@ -345,16 +453,17 @@ describe('updateCompletionTracker', () => {
       baseTripState,
     );
     expect(result.plan_confirmed).toBe(true);
-    expect(result.experience_interests).toEqual(['dining', 'nightlife']);
+    expect(result.segment_interests).toEqual({
+      experience: ['dining', 'nightlife'],
+    });
   });
 
   describe('re_open_category tool', () => {
     it('sets the specified category back to pending', () => {
-      const tracker: CompletionTracker = {
-        ...DEFAULT_COMPLETION_TRACKER,
-        plan_confirmed: true,
-        hotels: 'skipped',
-      };
+      const tracker = segTracker(
+        { hotel: 'skipped' },
+        { plan_confirmed: true },
+      );
       const result = updateCompletionTracker(
         tracker,
         {
@@ -365,15 +474,14 @@ describe('updateCompletionTracker', () => {
         },
         baseTripState,
       );
-      expect(result.hotels).toBe('pending');
+      expect(result.segments.hotel).toBe('pending');
     });
 
     it('sets not_applicable category back to pending', () => {
-      const tracker: CompletionTracker = {
-        ...DEFAULT_COMPLETION_TRACKER,
-        plan_confirmed: true,
-        flights: 'not_applicable',
-      };
+      const tracker = segTracker(
+        { flight: 'not_applicable' },
+        { plan_confirmed: true },
+      );
       const result = updateCompletionTracker(
         tracker,
         {
@@ -384,15 +492,35 @@ describe('updateCompletionTracker', () => {
         },
         baseTripState,
       );
-      expect(result.flights).toBe('pending');
+      expect(result.segments.flight).toBe('pending');
+    });
+
+    it('maps re_open_category "experiences" onto the experience segment (wire pin)', () => {
+      const tracker = segTracker(
+        { experience: 'skipped' },
+        { plan_confirmed: true },
+      );
+      const result = updateCompletionTracker(
+        tracker,
+        {
+          tool_calls: [
+            {
+              tool_name: 're_open_category',
+              input: { category: 'experiences' },
+            },
+          ],
+          formatResponse: null,
+        },
+        baseTripState,
+      );
+      expect(result.segments.experience).toBe('pending');
     });
 
     it('ignores invalid category values', () => {
-      const tracker: CompletionTracker = {
-        ...DEFAULT_COMPLETION_TRACKER,
-        plan_confirmed: true,
-        hotels: 'skipped',
-      };
+      const tracker = segTracker(
+        { hotel: 'skipped' },
+        { plan_confirmed: true },
+      );
       const result = updateCompletionTracker(
         tracker,
         {
@@ -406,34 +534,28 @@ describe('updateCompletionTracker', () => {
         },
         baseTripState,
       );
-      expect(result.hotels).toBe('skipped');
+      expect(result.segments.hotel).toBe('skipped');
     });
   });
 
   it('does not overwrite selected with searching', () => {
-    const tracker: CompletionTracker = {
-      ...DEFAULT_COMPLETION_TRACKER,
-      flights: 'selected',
-    };
+    const tracker = segTracker({ flight: 'selected' });
     const result = updateCompletionTracker(
       tracker,
       { tool_calls: [{ tool_name: 'search_flights' }], formatResponse: null },
       baseTripState,
     );
-    expect(result.flights).toBe('selected');
+    expect(result.segments.flight).toBe('selected');
   });
 
   it('overwrites skipped with searching when search tool fires', () => {
-    const tracker: CompletionTracker = {
-      ...DEFAULT_COMPLETION_TRACKER,
-      hotels: 'skipped',
-    };
+    const tracker = segTracker({ hotel: 'skipped' });
     const result = updateCompletionTracker(
       tracker,
       { tool_calls: [{ tool_name: 'search_hotels' }], formatResponse: null },
       baseTripState,
     );
-    expect(result.hotels).toBe('searching');
+    expect(result.segments.hotel).toBe('searching');
   });
 });
 
@@ -474,32 +596,22 @@ describe('statusLabel', () => {
 });
 
 describe('noEngagement', () => {
-  it('returns true when all categories are pending', () => {
+  it('returns true when all segments are pending', () => {
     expect(noEngagement(DEFAULT_COMPLETION_TRACKER)).toBe(true);
   });
 
-  it('returns true when categories are pending or skipped', () => {
-    const tracker: CompletionTracker = {
-      ...DEFAULT_COMPLETION_TRACKER,
-      flights: 'skipped',
-      car_rental: 'skipped',
-    };
+  it('returns true when segments are pending or skipped', () => {
+    const tracker = segTracker({ flight: 'skipped', car_rental: 'skipped' });
     expect(noEngagement(tracker)).toBe(true);
   });
 
-  it('returns false when any category is searching', () => {
-    const tracker: CompletionTracker = {
-      ...DEFAULT_COMPLETION_TRACKER,
-      flights: 'searching',
-    };
+  it('returns false when any segment is searching', () => {
+    const tracker = segTracker({ flight: 'searching' });
     expect(noEngagement(tracker)).toBe(false);
   });
 
-  it('returns false when any category is selected', () => {
-    const tracker: CompletionTracker = {
-      ...DEFAULT_COMPLETION_TRACKER,
-      hotels: 'selected',
-    };
+  it('returns false when any segment is selected', () => {
+    const tracker = segTracker({ hotel: 'selected' });
     expect(noEngagement(tracker)).toBe(false);
   });
 });
@@ -513,43 +625,59 @@ describe('computeNudge', () => {
     expect(computeNudge(tracker)).toBeNull();
   });
 
-  it('mentions pending categories as not discussed', () => {
-    const tracker: CompletionTracker = {
-      ...DEFAULT_COMPLETION_TRACKER,
-      flights: 'selected',
-      hotels: 'selected',
-      car_rental: 'skipped',
-      experiences: 'pending',
-      turns_since_last_progress: 3,
-    };
+  it('mentions pending categories as not discussed with legacy plural labels', () => {
+    const tracker = segTracker(
+      {
+        flight: 'selected',
+        hotel: 'selected',
+        car_rental: 'skipped',
+        experience: 'pending',
+      },
+      { turns_since_last_progress: 3 },
+    );
     const nudge = computeNudge(tracker);
     expect(nudge).toContain('experiences');
     expect(nudge).toContain("haven't discussed");
   });
 
   it('mentions searching categories as stalled', () => {
-    const tracker: CompletionTracker = {
-      ...DEFAULT_COMPLETION_TRACKER,
-      flights: 'selected',
-      hotels: 'searching',
-      car_rental: 'skipped',
-      experiences: 'selected',
-      turns_since_last_progress: 3,
-    };
+    const tracker = segTracker(
+      {
+        flight: 'selected',
+        hotel: 'searching',
+        car_rental: 'skipped',
+        experience: 'selected',
+      },
+      { turns_since_last_progress: 3 },
+    );
     const nudge = computeNudge(tracker);
     expect(nudge).toContain('hotels');
     expect(nudge).toContain('pick or skip');
   });
 
+  it('uses the space-separated label for car rental', () => {
+    const tracker = segTracker(
+      {
+        flight: 'selected',
+        hotel: 'selected',
+        car_rental: 'pending',
+        experience: 'selected',
+      },
+      { turns_since_last_progress: 3 },
+    );
+    expect(computeNudge(tracker)).toContain('car rental');
+  });
+
   it('returns null when all categories are resolved', () => {
-    const tracker: CompletionTracker = {
-      ...DEFAULT_COMPLETION_TRACKER,
-      flights: 'selected',
-      hotels: 'selected',
-      car_rental: 'skipped',
-      experiences: 'selected',
-      turns_since_last_progress: 5,
-    };
+    const tracker = segTracker(
+      {
+        flight: 'selected',
+        hotel: 'selected',
+        car_rental: 'skipped',
+        experience: 'selected',
+      },
+      { turns_since_last_progress: 5 },
+    );
     expect(computeNudge(tracker)).toBeNull();
   });
 });

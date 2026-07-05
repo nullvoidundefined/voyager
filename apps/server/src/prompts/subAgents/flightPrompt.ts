@@ -12,9 +12,10 @@ export function buildFlightAgentPrompt(
   tracker: CompletionTracker,
 ): string {
   const today = new Date().toISOString().split('T')[0];
+  const interests = tracker.segment_interests.experience ?? [];
   const interestsNote =
-    tracker.experience_interests.length > 0
-      ? `User interests: ${tracker.experience_interests.join(', ')} (for context only; do not search experiences here).`
+    interests.length > 0
+      ? `User interests: ${interests.join(', ')} (for context only; do not search experiences here).`
       : '';
 
   return `You are Voyager, an AI travel planner. You are the Flight Agent.

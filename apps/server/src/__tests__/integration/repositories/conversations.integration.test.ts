@@ -136,7 +136,10 @@ describe('conversations repository integration', () => {
 
       const newState: typeof DEFAULT_COMPLETION_TRACKER = {
         ...DEFAULT_COMPLETION_TRACKER,
-        flights: 'selected',
+        segments: {
+          ...DEFAULT_COMPLETION_TRACKER.segments,
+          flight: 'selected',
+        },
       };
 
       await updateBookingState(conversation.id, newState);
@@ -145,7 +148,7 @@ describe('conversations repository integration', () => {
         'SELECT booking_state FROM conversations WHERE id = $1',
         [conversation.id],
       );
-      expect(dbResult.rows[0].booking_state.flights).toBe('selected');
+      expect(dbResult.rows[0].booking_state.segments.flight).toBe('selected');
     });
   });
 });

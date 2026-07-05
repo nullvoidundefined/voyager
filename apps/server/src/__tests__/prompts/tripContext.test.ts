@@ -351,14 +351,17 @@ describe('formatChecklist', () => {
     overrides: Partial<CompletionTracker> = {},
   ): CompletionTracker {
     return {
-      version: 3,
+      version: 4,
+      journeyType: 'flight_trip',
       transport: 'pending',
-      flights: 'pending',
-      hotels: 'pending',
-      car_rental: 'pending',
-      experiences: 'pending',
+      segments: {
+        flight: 'pending',
+        hotel: 'pending',
+        car_rental: 'pending',
+        experience: 'pending',
+      },
       plan_confirmed: false,
-      experience_interests: [],
+      segment_interests: {},
       turns_since_last_progress: 0,
       ...overrides,
     };
@@ -406,14 +409,17 @@ describe('formatChecklist', () => {
           },
         ],
       });
-      const out = formatChecklist(baseTracker({ flights: 'selected' }), ctx);
+      const out = formatChecklist(
+        baseTracker({ segments: { flight: 'selected' } }),
+        ctx,
+      );
       expect(out).toContain('✅ Flights: Delta DL100');
       expect(out).toContain('$300');
     });
 
     it('shows skipped marker when flights=skipped', () => {
       const out = formatChecklist(
-        baseTracker({ flights: 'skipped' }),
+        baseTracker({ segments: { flight: 'skipped' } }),
         baseContext(),
       );
       expect(out).toContain('Flights: Skipped');
@@ -421,7 +427,7 @@ describe('formatChecklist', () => {
 
     it('shows browsing when flights=searching', () => {
       const out = formatChecklist(
-        baseTracker({ flights: 'searching' }),
+        baseTracker({ segments: { flight: 'searching' } }),
         baseContext(),
       );
       expect(out).toContain('Flights: Browsing options');
@@ -440,7 +446,10 @@ describe('formatChecklist', () => {
           },
         ],
       });
-      const out = formatChecklist(baseTracker({ hotels: 'selected' }), ctx);
+      const out = formatChecklist(
+        baseTracker({ segments: { hotel: 'selected' } }),
+        ctx,
+      );
       expect(out).toContain('✅ Hotels: Test Hotel');
       expect(out).toContain('$800 total');
     });
@@ -459,7 +468,10 @@ describe('formatChecklist', () => {
           },
         ],
       });
-      const out = formatChecklist(baseTracker({ car_rental: 'selected' }), ctx);
+      const out = formatChecklist(
+        baseTracker({ segments: { car_rental: 'selected' } }),
+        ctx,
+      );
       expect(out).toContain('✅ Car Rental: Camry from Hertz');
     });
   });
@@ -473,7 +485,7 @@ describe('formatChecklist', () => {
         ],
       });
       const out = formatChecklist(
-        baseTracker({ experiences: 'selected' }),
+        baseTracker({ segments: { experience: 'selected' } }),
         ctx,
       );
       expect(out).toContain('✅ Experiences: 2 selected');

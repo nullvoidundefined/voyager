@@ -29,7 +29,7 @@ describe('journey type registry', () => {
       departure_date: '2026-06-01',
       return_date: '2026-06-10',
       budget_total: 5000,
-      transport_mode: 'driving',
+      transport_mode: 'driving' as const,
       flights: [],
       hotels: [],
       experiences: [],
@@ -38,7 +38,7 @@ describe('journey type registry', () => {
     expect(flightSlot?.notApplicableWhen?.(drivingTrip)).toBe('Driving trip');
     const dayTrip = {
       ...drivingTrip,
-      transport_mode: 'flying',
+      transport_mode: 'flying' as const,
       return_date: '2026-06-01',
     };
     expect(flightSlot?.notApplicableWhen?.(dayTrip)).toBeUndefined();

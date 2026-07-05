@@ -78,7 +78,7 @@ describe('buildFlightAgentPrompt', () => {
   it('includes interests note when interests are set', () => {
     const tracker = {
       ...DEFAULT_COMPLETION_TRACKER,
-      experience_interests: ['dining', 'activities'],
+      segment_interests: { experience: ['dining', 'activities'] },
     };
     const result = buildFlightAgentPrompt(baseContext(), tracker);
     expect(result).toContain('dining');
@@ -106,7 +106,7 @@ describe('buildHotelAgentPrompt', () => {
   it('includes amenity hint when interests are set', () => {
     const tracker = {
       ...DEFAULT_COMPLETION_TRACKER,
-      experience_interests: ['wellness'],
+      segment_interests: { experience: ['wellness'] },
     };
     const result = buildHotelAgentPrompt(baseContext(), tracker);
     expect(result).toContain('wellness');
@@ -152,7 +152,7 @@ describe('buildExperienceAgentPrompt', () => {
   it('uses interest-based categories when interests are set', () => {
     const tracker = {
       ...DEFAULT_COMPLETION_TRACKER,
-      experience_interests: ['dining', 'theater'],
+      segment_interests: { experience: ['dining', 'theater'] },
     };
     const result = buildExperienceAgentPrompt(baseContext(), tracker);
     expect(result).toContain('dining');

@@ -604,7 +604,9 @@ describe('chat handlers', () => {
       // search_flights tool call should advance flights to 'searching'
       expect(convRepo.updateBookingState).toHaveBeenCalledWith(
         convId,
-        expect.objectContaining({ flights: 'searching' }),
+        expect.objectContaining({
+          segments: expect.objectContaining({ flight: 'searching' }),
+        }),
       );
     });
   });

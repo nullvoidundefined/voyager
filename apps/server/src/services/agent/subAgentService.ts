@@ -6,7 +6,11 @@
 import type { CompletionTracker } from 'app/prompts/bookingSteps.js';
 import type { FlowPosition } from 'app/prompts/bookingSteps.js';
 import type { TripState } from 'app/prompts/bookingSteps.js';
-import { isResolved, needsWork } from 'app/prompts/bookingSteps.js';
+import {
+  getSegmentStatus,
+  isResolved,
+  needsWork,
+} from 'app/prompts/bookingSteps.js';
 import {
   EXPERIENCE_INTEREST_OPTIONS,
   FLIGHT_TRIP_TYPE_OPTIONS,
@@ -94,12 +98,23 @@ export function selectSubAgent(
   if (flowPosition.phase === 'PLAN_TRIP') return 'plan';
   if (flowPosition.phase === 'COMPLETE') return 'conversation';
 
-  // PLANNING phase -- route by tracker state
-  if (needsWork(tracker.flights)) return 'flight';
-  if (needsWork(tracker.hotels) && isResolved(tracker.flights)) return 'hotel';
-  if (needsWork(tracker.experiences) && isResolved(tracker.flights))
+  // PLANNING phase -- route by tracker state (journey-order walk lands in the
+  // next commit; this is the mechanical v4 segment-map adaptation)
+  if (needsWork(getSegmentStatus(tracker, 'flight'))) return 'flight';
+  if (
+    needsWork(getSegmentStatus(tracker, 'hotel')) &&
+    isResolved(getSegmentStatus(tracker, 'flight'))
+  )
+    return 'hotel';
+  if (
+    needsWork(getSegmentStatus(tracker, 'experience')) &&
+    isResolved(getSegmentStatus(tracker, 'flight'))
+  )
     return 'experience';
-  if (needsWork(tracker.car_rental) && isResolved(tracker.hotels))
+  if (
+    needsWork(getSegmentStatus(tracker, 'car_rental')) &&
+    isResolved(getSegmentStatus(tracker, 'hotel'))
+  )
     return 'ground';
 
   return 'conversation';

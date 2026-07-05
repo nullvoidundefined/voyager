@@ -4,16 +4,17 @@
  * text so the model can steer the conversation toward the next booking step.
  */
 import type { CompletionTracker } from 'app/prompts/bookingSteps.js';
+import { getSegmentStatus } from 'app/prompts/bookingSteps.js';
 import type { TripContext } from 'app/prompts/tripContext.js';
 import { formatTripContext } from 'app/prompts/tripContext.js';
 
 function summarizeTracker(tracker: CompletionTracker): string {
   const lines: string[] = [];
   const cats = [
-    ['flights', tracker.flights],
-    ['hotels', tracker.hotels],
-    ['car_rental', tracker.car_rental],
-    ['experiences', tracker.experiences],
+    ['flights', getSegmentStatus(tracker, 'flight')],
+    ['hotels', getSegmentStatus(tracker, 'hotel')],
+    ['car_rental', getSegmentStatus(tracker, 'car_rental')],
+    ['experiences', getSegmentStatus(tracker, 'experience')],
   ] as const;
   for (const [cat, status] of cats) {
     lines.push(`- ${cat}: ${status}`);
