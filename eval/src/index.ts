@@ -21,6 +21,7 @@ import {
   runAssertions,
 } from './scoring/assertions.js';
 import { computeJudgeScore, runJudge } from './scoring/judge.js';
+import { resolveServerPoolPath } from './serverPoolPath.js';
 import type { Archetype, EvalReport, Persona, PersonaResult } from './types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -130,19 +131,7 @@ async function main() {
   // Eval user — ensure a test user exists in the database
   const EVAL_USER_ID = '00000000-0000-0000-0000-e00000000001';
   try {
-    const dbModule = await import(
-      join(
-        __dirname,
-        '..',
-        '..',
-        'apps',
-        'server',
-        'dist',
-        'db',
-        'pool',
-        'pool.js',
-      )
-    );
+    const dbModule = await import(resolveServerPoolPath());
     const query = dbModule.query as (
       text: string,
       values?: unknown[],
