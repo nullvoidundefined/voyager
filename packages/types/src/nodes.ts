@@ -1,3 +1,5 @@
+import type { TripPlanCard } from './planCard.js';
+
 // --- Citation ---
 
 export interface Citation {
@@ -99,43 +101,6 @@ export interface WeatherDay {
   icon: string; // emoji or icon identifier
   precipitation_chance: number;
 }
-
-// --- TripPlanCard ---
-
-export type TripPlanCategoryId =
-  | 'flights'
-  | 'hotels'
-  | 'car_rental'
-  | 'experiences';
-
-export interface TripPlanCard {
-  categories: TripPlanCategory[];
-}
-
-export interface TripPlanCategory {
-  id: TripPlanCategoryId;
-  label: string;
-  enabled: boolean;
-  not_applicable: boolean;
-  not_applicable_reason?: string;
-  sub_options?: TripPlanSubOption[];
-}
-
-export type TripPlanSubOption =
-  | {
-      type: 'radio';
-      id: string;
-      label: string;
-      options: Array<{ id: string; label: string }>;
-      value: string;
-    }
-  | {
-      type: 'multi';
-      id: string;
-      label: string;
-      options: Array<{ id: string; label: string }>;
-      values: string[];
-    };
 
 // --- ChatNode discriminated union ---
 
