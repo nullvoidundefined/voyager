@@ -1,72 +1,31 @@
-# Session Handoff -- 2026-05-28 (Opus sweep)
+# Session Handoff: 2026-07-06
 
 ## Last commit
 
-`bcd7502` chore(marketing): portfolio-appropriate final CTA copy
+- `2a98056` chore: point eval:cross-model-judge at the renamed crossModelJudge.ts (pushed; CI for this SHA was in progress at handoff time, one watcher outstanding)
 
 ## Production state
 
-No deploy. All changes on `main`, not pushed.
+- Server: Railway `server` service healthy on commit `2c57315`, db + cache connected; `inventory_items` migration applied on Neon (verified in deploy logs of build `b6abfcdb`).
+- Web: Railway `web` service deployed, frontend 200 at voyager.iangreenoughdeveloper.com.
+- Deploy trigger reminder: Railway does NOT auto-deploy on push. Server ships via `bash scripts/deploy.sh` (stamps version.json; raw `railway up` recreates issue #59), web via `railway up --detach --service web`.
 
-## What shipped
+## What shipped this session
 
-**Bug fixes (TDD)**
+- Multimodal journeys Phases 0-3 (plan: `docs/superpowers/plans/2026-07-05-multimodal-journeys.md`): segment/journey registries (`apps/server/src/segments/`), generic offer_tiles node + client card registry, CompletionTracker v4 with legacy wire bridging, inventory KB (repositories/inventory, confidence-scored, Tavily-gated discovery), adversarial eval Categories A-H. ~36 commits, pushed as `c775297..bfd055a`.
+- Push-gate reconciliation: trivago sort-imports v5, `node:` builtin prefixes repo-wide, prettier importOrder regex fix (`46560db`, `bfd055a`); mirrored gate change in `~/.claude/enforce` (`6bff579`, plus Opus follow-up `1962e0c`, both pushed to claude-global-rules).
+- Engineering audit 2026-07-06: report at `docs/audits/2026-07-06-engineering.md` (untracked by convention), all 7 findings verified, triaged into `docs/todos/` (`495205c`).
+- Audit fixes: F-03 null-guard crash in buildOfferTilesNode (`8199ef6`, test-first), F-01 eval suite wired into CI (`2c57315`), plus the import-time `void main()` bug F-01 caught on its first run (`fix` + `2a98056`).
 
-- `dfad2a8` fix(SEC-01) -- IDOR on leg delete/reorder closed. Repo SQL scopes to `trip_id`. 3 integration tests + 2 handler tests. CVSS 7.1 closed.
-- `94914a1` fix(ORC-01) -- `add_leg`/`remove_leg`/`reorder_legs` added to `flight`+`conversation` partitions; `plan_daily_schedule` added to `experience`+`conversation`. 4 partition tests.
-- `bcd7502` chore(marketing) -- "Get Started Free" -> "Try the live demo".
+## Pending, by urgency
 
-**Audits + todo cleanup**
+- P2 (each ~30-60 min): F-02 move co-located eval tests into `eval/src/__tests__/`; F-04 wire `adjustInventoryConfidence` into the serving path or defer spec 4.3 explicitly; F-05 wire-or-delete `confirmedOfferIds` in NodeRenderer. Details in `docs/todos/P2-medium-priority.md`.
+- P3: F-06 judge default model mismatch (`adversarial/judge.ts` vs `scoring/judge.ts`); F-07 recorded only. `docs/todos/P3-low-priority.md`.
+- Phase 4 of the plan (cruise/road_trip/rail modes + Category I attacks) and Phase 5 unstarted; plan file has per-phase specs.
+- Confirm CI green for `2a98056` if the session closed before the watcher reported (GitHub Actions, unit-tests job, "Eval harness tests" step).
 
-- `c10e3df` 3 Opus second-opinion audits (criticism, security, UX); engineering Opus at `8096a61`.
-- `a502275` Audit findings folded into P1/P2/P3 todos.
-- `8e6eaba` Worktree-merge P1 split into 3 forward-port entries (worktree predates monorepo restructure `2672b52`; cherry-pick fails).
-- `5388cb6` + `c16c515` + `6ee5545` Removed 12 stale P1s (OG metadata, BILLING.md, Toast role, focus traps, US-5/US-12, useSSEChat, trips/new, handleNext, DemoBanner, schemas allowlist, chat length cap, SEC-01, ORC-01).
+## Next session: read first
 
-**Net P1: 25 -> 13.** 10 of the deletions were stale audit recommendations already addressed but never removed from the todos.
-
-## Pending P1 (`docs/todos/P1-high-priority.md`)
-
-**Highest impact / smallest scope:**
-
-1. CQS-16 hotel address empty -- `apps/server/src/tools/hotels.tool.ts:81` `address: ''`. ~30 min.
-2. F-06 instant tile selection -- `SelectableCardGroup.tsx:33-38` removed Confirm. Re-add gate or surface Undo chip. ~45 min.
-3. B13 agent ignores explicit selections -- tune `apps/server/src/prompts/sub-agents/{flight,hotel,experience}.prompt.ts`. ~1 hr.
-
-**Larger scope:**
-
-4. Forward-port P1-03 (DB-truth budget) -- add `getActualCostsForTrip(tripId)` to `apps/server/src/repositories/trips/trips.ts`, wire executor. Reference worktree `4aa4fce`. ~2 hr.
-5. Forward-port P1-05 (multi-airport) -- extend `apps/server/src/data/cities.ts` schema, update `destination.tool.ts`. Reference `ebf2c6b`. ~1 hr.
-6. CQS-11 enrichment swallows errors -- `enrichment.ts:23-39` rejection branch needs `logger.warn`. ~30 min.
-7. B18 itinerary above chat -- swap layout in `apps/client/web/src/app/(protected)/trips/[id]/page.tsx`. ~30 min.
-8. B20 double confirm buttons on flight tile -- locate duplicate site below SelectableCardGroup. ~30 min.
-9. trips/[id] PUT errors -- `handleConfirmBooking:211-219` needs optimistic rollback + Toast. ~30 min.
-10. AI disclosure at chat entry (EU AI Act Art. 52). ~30 min.
-
-**Marketing / docs:**
-
-11. GitHub source link in `apps/client/web/src/components/Header/Header.tsx`. ~15 min.
-12. Font-size pixel literals -> design tokens. 574 instances. Dedicated session, sed-rewrite + smoke.
-
-**Manual external (user action):**
-
-13. Sign Anthropic DPA.
-14. Verify GCP Places billing cap.
-15. Rotate Mapbox public token (still retrievable via `git show f36d7d6:web-client/.env.example`).
-
-## Worktree cleanup gate
-
-`.claude/worktrees/investigate-llm-orchestration` has 5 unmerged commits. Delete only after forward-ports for P1-03, P1-05, P2-01 (Redis lock), P2-04 (car_rental_cost), P3-08 (experience categories) land on main.
-
-## Next session entry
-
-1. Read `docs/todos/P1-high-priority.md` (13 entries).
-2. Start CQS-16 -- smallest, most visible, ~30 min TDD.
-3. Strict TDD per R-511 still in force; the SEC-01 / ORC-01 RED -> GREEN pattern worked cleanly.
-4. P2 and P3 likely contain similar ~30-50% staleness. Audit before fixing.
-
-## Lessons (avoid repeating)
-
-- Verify audit-as-todos against current code before fixing. The 2026-05-27 sweep was 40%+ stale.
-- Don't auto-cherry-pick worktrees that predate the monorepo restructure.
-- Copy changes are `chore:` / `style:`, not `fix:` -- the gate hook will block.
+- `docs/superpowers/plans/2026-07-05-multimodal-journeys.md` (execution log at bottom)
+- `docs/todos/P2-medium-priority.md`, `docs/audits/2026-07-06-engineering.md`
+- For Phase 4: `docs/specs/2026-07-05-multimodal-journeys.md` section on new modes; registry entry pattern in `apps/server/src/segments/registry/`
