@@ -159,6 +159,17 @@ describe('buildSystemPrompt personality', () => {
   });
 });
 
+describe('fabrication guardrails', () => {
+  it('bans unbacked price estimates, not just fabricated options (H1)', () => {
+    const prompt = buildSystemPrompt();
+    expect(prompt).toContain('Never fabricate options');
+    expect(prompt).toContain(
+      'Never state prices, price ranges, or ballpark figures',
+    );
+    expect(prompt).toContain('do not estimate');
+  });
+});
+
 describe('presentation order block', () => {
   it('emits journey segments in order with legacy dependency gates', () => {
     const prompt = buildSystemPrompt(
