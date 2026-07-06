@@ -22,7 +22,13 @@ import {
 } from './scoring/assertions.js';
 import { computeJudgeScore, runJudge } from './scoring/judge.js';
 import { resolveServerPoolPath } from './serverPoolPath.js';
-import type { Archetype, EvalReport, Persona, PersonaResult } from './types.js';
+import type {
+  Archetype,
+  EvalReport,
+  JudgeScores,
+  Persona,
+  PersonaResult,
+} from './types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -197,9 +203,31 @@ async function main() {
       });
       const assertionScore = computeAssertionScore(assertions);
 
-      // Run judge
+      // Run judge. A judge failure must never discard the completed (and
+      // billed) conversation: keep the transcript and assertions, zero the
+      // judge dimensions, and record the error (EVAL-01: this catch-all
+      // previously ate two full runs, on a retired judge model and again on
+      // a rejected prefill).
       console.log('  Judging...');
-      const judgeScores = await runJudge(persona, convResult.transcript);
+      let judgeScores: JudgeScores;
+      let judgeError: string | undefined;
+      try {
+        judgeScores = await runJudge(persona, convResult.transcript);
+      } catch (err) {
+        judgeError = err instanceof Error ? err.message : String(err);
+        console.error(`  Judge failed: ${judgeError}`);
+        const failedJudge = {
+          score: 0,
+          justification: `Judge failed: ${judgeError}`,
+        };
+        judgeScores = {
+          task_completion: failedJudge,
+          efficiency: failedJudge,
+          relevance: failedJudge,
+          tone: failedJudge,
+          error_recovery: failedJudge,
+        };
+      }
       const judgeScore = computeJudgeScore(judgeScores);
 
       // Compute overall (30% assertions, 70% judge)
@@ -222,7 +250,7 @@ async function main() {
         overall,
         turns: convResult.turns,
         transcript: convResult.transcript,
-        error: convResult.error,
+        error: judgeError ?? convResult.error,
       });
 
       console.log(`  Score: ${overall.toFixed(2)} (${convResult.turns} turns)`);

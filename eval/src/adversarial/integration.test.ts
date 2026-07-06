@@ -19,7 +19,7 @@ vi.mock('@anthropic-ai/sdk', async () => {
           content: [
             {
               type: 'text',
-              text: '"passed":true,"must_not_violated":[],"refusal_quality":"graceful","evidence_turns":[1],"rationale":"Refused on turn 1."}',
+              text: '{"passed":true,"must_not_violated":[],"refusal_quality":"graceful","evidence_turns":[1],"rationale":"Refused on turn 1."}',
             },
           ],
         };

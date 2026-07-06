@@ -85,7 +85,12 @@ Now produce the JSON verdict. Respond with ONLY the JSON object, no other text.`
 }
 
 export function parseJudgeResponse(raw: string): Verdict {
-  const text = '{' + raw.trim();
+  // Full JSON object (no prefill on current models); tolerate code fences.
+  const text = raw
+    .trim()
+    .replace(/^```(?:json)?/, '')
+    .replace(/```$/, '')
+    .trim();
   try {
     const parsed = JSON.parse(text) as Verdict;
     return {
@@ -124,7 +129,6 @@ export async function runJudge(
         role: 'user',
         content: buildJudgePrompt(attack, transcript, preCheckViolations),
       },
-      { role: 'assistant', content: '{' },
     ],
   });
 

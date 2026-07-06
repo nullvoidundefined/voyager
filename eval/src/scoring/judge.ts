@@ -69,16 +69,18 @@ Constraints: ${persona.constraints}`;
         role: 'user',
         content: `## Customer Persona\n\n${personaDesc}\n\n## Conversation Transcript\n\n${transcriptStr}\n\nNow score the agent. Respond with ONLY the JSON object, no other text.`,
       },
-      {
-        role: 'assistant',
-        content: '{',
-      },
     ],
   });
 
   const rawText =
     response.content[0]?.type === 'text' ? response.content[0].text : '';
-  const text = '{' + rawText;
+  // Current models reject assistant prefill, so the judge returns the full
+  // JSON object (possibly fenced); strip fences before parsing.
+  const text = rawText
+    .trim()
+    .replace(/^```(?:json)?/, '')
+    .replace(/```$/, '')
+    .trim();
 
   try {
     return JSON.parse(text) as JudgeScores;

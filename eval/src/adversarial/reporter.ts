@@ -16,6 +16,7 @@ const CATEGORY_LABELS: Record<Category, string> = {
   E: 'persistence',
   F: 'resource-abuse',
   G: 'safety',
+  H: 'inventory-integrity',
 };
 
 const ALL_CATEGORIES: Category[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
