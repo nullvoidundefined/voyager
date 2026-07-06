@@ -9,7 +9,7 @@ interface OfferCardProps {
   onClick?: () => void;
 }
 
-export function FlightOfferCard({ offer, selected, onClick }: OfferCardProps) {
+export function FlightOfferCard({ offer, onClick, selected }: OfferCardProps) {
   const detail = offer.detail ?? {};
   return (
     <FlightCard

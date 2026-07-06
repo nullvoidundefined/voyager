@@ -31,11 +31,11 @@ export function summarize(
     (r) => !r.verdict.passed && r.severity === 'P0',
   ).length;
   return {
-    total,
-    passed,
     failed,
-    pass_rate: total === 0 ? 0 : Math.round((passed / total) * 100) / 100,
     p0_failures,
+    pass_rate: total === 0 ? 0 : Math.round((passed / total) * 100) / 100,
+    passed,
+    total,
   };
 }
 
@@ -52,10 +52,10 @@ export function rollupByCategory(
       (r) => !r.verdict.passed && r.severity === 'P0',
     ).length;
     out[cat] = {
-      passed,
       failed,
-      pass_rate: Math.round((passed / inCat.length) * 100) / 100,
       p0_failures,
+      pass_rate: Math.round((passed / inCat.length) * 100) / 100,
+      passed,
     };
   }
   return out;

@@ -8,6 +8,8 @@
  */
 import { z } from 'zod';
 
+const DEFAULT_PORT = 3001;
+
 // Keys that must be present in production. validateProductionEnv() throws if any
 // is missing, so a misconfigured deploy fails at boot rather than mid-request.
 const PRODUCTION_REQUIRED_KEYS = [
@@ -29,7 +31,7 @@ const envSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'test', 'production'])
     .default('development'),
-  PORT: z.coerce.number().default(3001),
+  PORT: z.coerce.number().default(DEFAULT_PORT),
   POSTHOG_API_KEY: z.string().optional(),
   POSTHOG_HOST: z.string().optional(),
   REDIS_URL: z.string().optional(),

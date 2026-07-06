@@ -45,8 +45,8 @@ const OFFER_CARD_REGISTRY: Partial<Record<OfferKind, OfferCardEntry>> = {
   flight: {
     Card: FlightOfferCard,
     heightEstimate: 240,
-    stackVertically: true,
     selectionMessage: (label) => `I've selected the ${label} flight`,
+    stackVertically: true,
   },
   hotel: {
     Card: HotelOfferCard,

@@ -67,13 +67,13 @@ export async function runSegmentSearch(
     const outcome = await fromApi(input.params);
     if (isSuccessfulOutcome(outcome, capability.resultListKey)) {
       await writeBackApiResults(capability, input, outcome, deps);
-      return { outcome, source: 'api', indicative: false };
+      return { indicative: false, outcome, source: 'api' };
     }
     if (isQuotaExhausted(outcome)) {
       const warm = await serveWarmInventory(capability, input, deps);
       if (warm) return warm;
     }
-    return { outcome, source: 'none', indicative: false };
+    return { indicative: false, outcome, source: 'none' };
   }
 
   const warm = await serveWarmInventory(capability, input, deps);
@@ -83,9 +83,9 @@ export async function runSegmentSearch(
   if (cold) return cold;
 
   return {
-    outcome: { status: 'no_results', [capability.resultListKey]: [] },
-    source: 'none',
     indicative: false,
+    outcome: { [capability.resultListKey]: [], status: 'no_results' },
+    source: 'none',
   };
 }
 
@@ -137,8 +137,8 @@ function toInventoryItemFromApi(
     ...(offer.price > 0 ? { indicative_price: offer.price } : {}),
     currency: offer.currency,
     ...(offer.booking_url ? { booking_url: offer.booking_url } : {}),
-    source: 'serpapi',
     provenance: [],
+    source: 'serpapi',
   };
 }
 
@@ -158,14 +158,14 @@ async function serveWarmInventory(
 
   await Promise.all(fresh.map((row) => deps.recordInventoryHit(row.id)));
   return {
+    indicative: true,
     outcome: {
-      status: 'ok',
+      [capability.resultListKey]: fresh.map((row) => row.attributes),
       indicative: true,
       message: INDICATIVE_MESSAGE,
-      [capability.resultListKey]: fresh.map((row) => row.attributes),
+      status: 'ok',
     },
     source: 'knowledge_base',
-    indicative: true,
   };
 }
 
@@ -203,14 +203,14 @@ async function serveWebDiscovery(
   }
 
   return {
+    indicative: true,
     outcome: {
-      status: 'ok',
+      [capability.resultListKey]: discovered,
       indicative: true,
       message: INDICATIVE_MESSAGE,
-      [capability.resultListKey]: discovered,
+      status: 'ok',
     },
     source: 'web',
-    indicative: true,
   };
 }
 
@@ -228,7 +228,7 @@ function toInventoryItemFromWeb(
     ...(offer.price > 0 ? { indicative_price: offer.price } : {}),
     currency: offer.currency,
     ...(offer.booking_url ? { booking_url: offer.booking_url } : {}),
-    source: 'web_search',
     provenance: offer.provenance,
+    source: 'web_search',
   };
 }

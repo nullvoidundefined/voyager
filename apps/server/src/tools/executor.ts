@@ -83,11 +83,11 @@ export interface ToolAdapters {
 }
 
 export const DEFAULT_TOOL_ADAPTERS: ToolAdapters = {
+  getDestinationInfo,
+  searchCarRentals,
+  searchExperiences,
   searchFlights,
   searchHotels,
-  searchExperiences,
-  searchCarRentals,
-  getDestinationInfo,
 };
 
 function formatZodError(error: ZodError): string {
@@ -105,7 +105,7 @@ function parseInput<T>(
   if (!result.success) {
     const details = formatZodError(result.error);
     logger.warn(
-      { toolName, issues: result.error.issues },
+      { issues: result.error.issues, toolName },
       'Tool input validation failed',
     );
     return {
@@ -121,7 +121,7 @@ export async function executeTool(
   context?: ToolContext,
   adapters: ToolAdapters = DEFAULT_TOOL_ADAPTERS,
 ): Promise<unknown> {
-  logger.debug({ toolName, input }, 'Executing tool');
+  logger.debug({ input, toolName }, 'Executing tool');
 
   switch (toolName) {
     case 'search_flights': {
@@ -187,7 +187,7 @@ export async function executeTool(
         parsed.data,
       );
       return updated
-        ? { success: true, message: 'Trip updated successfully' }
+        ? { message: 'Trip updated successfully', success: true }
         : {
             error:
               'Failed to update trip: no fields to update or trip not found.',
@@ -210,7 +210,7 @@ export async function executeTool(
       const parsed = parseInput(toolName, selectFlightSchema, input);
       if ('error' in parsed) return parsed;
       await insertTripFlight(context.tripId, parsed.data);
-      return { success: true, message: 'Flight selection saved' };
+      return { message: 'Flight selection saved', success: true };
     }
 
     case 'select_hotel': {
@@ -218,7 +218,7 @@ export async function executeTool(
       const parsed = parseInput(toolName, selectHotelSchema, input);
       if ('error' in parsed) return parsed;
       await insertTripHotel(context.tripId, parsed.data);
-      return { success: true, message: 'Hotel selection saved' };
+      return { message: 'Hotel selection saved', success: true };
     }
 
     case 'select_car_rental': {
@@ -226,7 +226,7 @@ export async function executeTool(
       const parsed = parseInput(toolName, selectCarRentalSchema, input);
       if ('error' in parsed) return parsed;
       await insertTripCarRental(context.tripId, parsed.data);
-      return { success: true, message: 'Car rental selection saved' };
+      return { message: 'Car rental selection saved', success: true };
     }
 
     case 'select_experience': {
@@ -234,7 +234,7 @@ export async function executeTool(
       const parsed = parseInput(toolName, selectExperienceSchema, input);
       if ('error' in parsed) return parsed;
       await insertTripExperience(context.tripId, parsed.data);
-      return { success: true, message: 'Experience selection saved' };
+      return { message: 'Experience selection saved', success: true };
     }
 
     case 're_open_category': {
@@ -264,9 +264,9 @@ export async function executeTool(
         },
         context,
         {
+          addScheduleItem,
           runInTransaction: runScheduleTransaction,
           upsertScheduleDay,
-          addScheduleItem,
         },
       );
     }
@@ -277,8 +277,8 @@ export async function executeTool(
       if ('error' in parsed) return parsed;
       return handleAddLeg(parsed.data, context, {
         createLeg,
-        listLegs,
         deleteLeg,
+        listLegs,
         reorderLegs,
       });
     }
@@ -289,8 +289,8 @@ export async function executeTool(
       if ('error' in parsed) return parsed;
       return handleRemoveLeg(parsed.data, context, {
         createLeg,
-        listLegs,
         deleteLeg,
+        listLegs,
         reorderLegs,
       });
     }
@@ -301,8 +301,8 @@ export async function executeTool(
       if ('error' in parsed) return parsed;
       return handleReorderLegs(parsed.data, context, {
         createLeg,
-        listLegs,
         deleteLeg,
+        listLegs,
         reorderLegs,
       });
     }

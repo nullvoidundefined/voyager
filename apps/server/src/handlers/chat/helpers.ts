@@ -24,18 +24,18 @@ import {
 /** Map a TripWithDetails to the TripState shape needed by getFlowPosition. */
 export function toFlowInput(trip: TripWithDetails): TripState {
   return {
-    destination: trip.destination,
-    origin: trip.origin ?? null,
-    departure_date: trip.departure_date ?? null,
-    return_date: trip.return_date ?? null,
     budget_total: trip.budget_total ?? null,
-    transport_mode: trip.transport_mode ?? null,
-    trip_type: trip.trip_type ?? undefined,
+    car_rentals: (trip.car_rentals ?? []).map((c) => ({ id: c.id })),
+    departure_date: trip.departure_date ?? null,
+    destination: trip.destination,
+    experiences: (trip.experiences ?? []).map((e) => ({ id: e.id })),
     flights: (trip.flights ?? []).map((f) => ({ id: f.id })),
     hotels: (trip.hotels ?? []).map((h) => ({ id: h.id })),
-    car_rentals: (trip.car_rentals ?? []).map((c) => ({ id: c.id })),
-    experiences: (trip.experiences ?? []).map((e) => ({ id: e.id })),
+    origin: trip.origin ?? null,
+    return_date: trip.return_date ?? null,
     status: trip.status ?? 'planning',
+    transport_mode: trip.transport_mode ?? null,
+    trip_type: trip.trip_type ?? undefined,
   };
 }
 
@@ -134,11 +134,11 @@ export function buildClaudeMessages(
         m.content !== '',
     )
     .map((m) => ({
-      role: m.role as 'user' | 'assistant',
       content: m.content!,
+      role: m.role as 'user' | 'assistant',
     }));
 
-  messages.push({ role: 'user', content: currentMessage });
+  messages.push({ content: currentMessage, role: 'user' });
 
   if (messages.length > MAX_HISTORY_MESSAGES + 1) {
     messages.splice(1, messages.length - MAX_HISTORY_MESSAGES - 1);
@@ -153,54 +153,38 @@ export function buildTripContext(
   userPrefs: UserPreferences | null,
 ): TripContext {
   return {
-    destination: trip.destination,
-    origin: trip.origin ?? null,
-    departure_date: trip.departure_date ?? null,
-    return_date: trip.return_date ?? null,
-    budget_total: trip.budget_total ?? 0,
     budget_currency: trip.budget_currency ?? 'USD',
-    travelers: trip.travelers ?? 1,
-    transport_mode: trip.transport_mode ?? null,
-    trip_type: trip.trip_type ?? null,
+    budget_total: trip.budget_total ?? 0,
+    departure_date: trip.departure_date ?? null,
+    destination: trip.destination,
     flexible_dates: trip.flexible_dates ?? false,
+    origin: trip.origin ?? null,
     preferences: {},
-    user_preferences: userPrefs
-      ? {
-          accommodation: userPrefs.accommodation,
-          travel_pace: userPrefs.travel_pace,
-          dietary: userPrefs.dietary,
-          dining_style: userPrefs.dining_style,
-          activities: userPrefs.activities,
-          travel_party: userPrefs.travel_party,
-          budget_comfort: userPrefs.budget_comfort,
-          lgbtq_safety: userPrefs.lgbtq_safety ?? false,
-          gender: userPrefs.gender ?? null,
-        }
-      : undefined,
+    return_date: trip.return_date ?? null,
+    selected_car_rentals: (trip.car_rentals ?? []).map((c) => ({
+      car_name: c.car_name,
+      car_type: c.car_type,
+      price_per_day: c.price_per_day,
+      provider: c.provider,
+      total_price: c.total_price,
+    })),
+    selected_experiences: (trip.experiences ?? []).map((e) => ({
+      category: e.category ?? '',
+      estimated_cost: e.estimated_cost ?? 0,
+      name: e.name ?? '',
+    })),
     selected_flights: (trip.flights ?? []).map((f) => ({
       airline: f.airline ?? '',
+      arrival_time: f.arrival_time ? f.arrival_time.toISOString() : '',
+      departure_time: f.departure_time ? f.departure_time.toISOString() : '',
       flight_number: f.flight_number ?? '',
       price: f.price ?? 0,
-      departure_time: f.departure_time ? f.departure_time.toISOString() : '',
-      arrival_time: f.arrival_time ? f.arrival_time.toISOString() : '',
     })),
     selected_hotels: (trip.hotels ?? []).map((h) => ({
       name: h.name ?? '',
       price_per_night: h.price_per_night ?? 0,
-      total_price: h.total_price ?? 0,
       star_rating: h.star_rating ?? 0,
-    })),
-    selected_car_rentals: (trip.car_rentals ?? []).map((c) => ({
-      provider: c.provider,
-      car_name: c.car_name,
-      car_type: c.car_type,
-      price_per_day: c.price_per_day,
-      total_price: c.total_price,
-    })),
-    selected_experiences: (trip.experiences ?? []).map((e) => ({
-      name: e.name ?? '',
-      estimated_cost: e.estimated_cost ?? 0,
-      category: e.category ?? '',
+      total_price: h.total_price ?? 0,
     })),
     total_spent:
       (trip.flights ?? []).reduce((sum, f) => sum + (f.price ?? 0), 0) +
@@ -213,6 +197,22 @@ export function buildTripContext(
         (sum, e) => sum + (e.estimated_cost ?? 0),
         0,
       ),
+    transport_mode: trip.transport_mode ?? null,
+    travelers: trip.travelers ?? 1,
+    trip_type: trip.trip_type ?? null,
+    user_preferences: userPrefs
+      ? {
+          accommodation: userPrefs.accommodation,
+          activities: userPrefs.activities,
+          budget_comfort: userPrefs.budget_comfort,
+          dietary: userPrefs.dietary,
+          dining_style: userPrefs.dining_style,
+          gender: userPrefs.gender ?? null,
+          lgbtq_safety: userPrefs.lgbtq_safety ?? false,
+          travel_pace: userPrefs.travel_pace,
+          travel_party: userPrefs.travel_party,
+        }
+      : undefined,
   };
 }
 
@@ -233,63 +233,63 @@ export function buildMissingFieldsForm(trip: TripWithDetails): ChatNode | null {
 
   if (isPlaceholder) {
     missingFields.push({
-      name: 'destination',
-      label: 'Where do you want to go?',
       field_type: 'text',
+      label: 'Where do you want to go?',
+      name: 'destination',
       required: true,
     });
   }
   if (!trip.origin) {
     missingFields.push({
-      name: 'origin',
-      label: 'Where are you traveling from?',
       field_type: 'text',
+      label: 'Where are you traveling from?',
+      name: 'origin',
       required: true,
     });
   }
   if (!trip.departure_date) {
     missingFields.push({
-      name: 'departure_date',
-      label: 'Departure date',
       field_type: 'date',
+      label: 'Departure date',
+      name: 'departure_date',
       required: true,
     });
     // F-05: surface the Fixed/Flexible toggle alongside the date field
     // so the user can express flexibility while planning dates. The
     // toggle defaults to Fixed on the client when no value is supplied.
     missingFields.push({
-      name: 'flexible_dates',
-      label: 'Date flexibility',
       field_type: 'select',
+      label: 'Date flexibility',
+      name: 'flexible_dates',
       required: false,
     });
   }
   const isOneWay = trip.trip_type === 'one_way';
   if (!isOneWay && !trip.return_date) {
     missingFields.push({
-      name: 'return_date',
-      label: 'Return date',
       field_type: 'date',
+      label: 'Return date',
+      name: 'return_date',
       required: true,
     });
   }
   if (!trip.budget_total) {
     missingFields.push({
-      name: 'budget',
-      label: 'Total budget in USD (optional)',
       field_type: 'number',
+      label: 'Total budget in USD (optional)',
+      name: 'budget',
       required: false,
     });
   }
   if (!trip.travelers || trip.travelers < 1) {
     missingFields.push({
-      name: 'travelers',
-      label: 'Number of travelers',
       field_type: 'number',
+      label: 'Number of travelers',
+      name: 'travelers',
       required: true,
     });
   }
 
   if (missingFields.length === 0) return null;
-  return { type: 'travel_plan_form', fields: missingFields };
+  return { fields: missingFields, type: 'travel_plan_form' };
 }

@@ -11,8 +11,8 @@ interface OfferCardProps {
 
 export function ExperienceOfferCard({
   offer,
-  selected,
   onClick,
+  selected,
 }: OfferCardProps) {
   const detail = offer.detail ?? {};
   return (

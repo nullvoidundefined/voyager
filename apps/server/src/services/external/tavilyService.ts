@@ -5,19 +5,14 @@
  */
 import { env } from 'app/config/env.js';
 import { CircuitBreaker } from 'app/resilience/CircuitBreaker.js';
+import type { TavilySearchResult } from 'app/services/external/tavilyTypes.js';
 
 const TAVILY_ENDPOINT = 'https://api.tavily.com/search';
 const DEFAULT_MAX_RESULTS = 5;
 
-export interface TavilySearchResult {
-  title: string;
-  url: string;
-  content: string;
-}
-
 const tavilyBreaker = new CircuitBreaker('Tavily', {
-  failureThreshold: 3,
   cooldownMs: 60_000,
+  failureThreshold: 3,
   isRetryable: (err) => !err.message.includes('400'),
 });
 
@@ -32,15 +27,15 @@ export async function tavilySearch(
 
   return tavilyBreaker.call(async () => {
     const response = await fetch(TAVILY_ENDPOINT, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         api_key: apiKey,
-        query,
-        max_results: options?.maxResults ?? DEFAULT_MAX_RESULTS,
-        search_depth: 'basic',
         include_answer: false,
+        max_results: options?.maxResults ?? DEFAULT_MAX_RESULTS,
+        query,
+        search_depth: 'basic',
       }),
+      headers: { 'content-type': 'application/json' },
+      method: 'POST',
     });
     if (!response.ok) {
       throw new Error(`Tavily search failed: ${response.status}`);
@@ -53,9 +48,9 @@ export async function tavilySearch(
         (result) => typeof result.url === 'string' && result.url.length > 0,
       )
       .map((result) => ({
+        content: result.content ?? '',
         title: result.title ?? '',
         url: result.url as string,
-        content: result.content ?? '',
       }));
   });
 }

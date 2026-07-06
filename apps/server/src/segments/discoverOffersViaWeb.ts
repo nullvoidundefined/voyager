@@ -12,10 +12,16 @@ import { getLlmClient } from 'app/clients/llm.js';
 import { logger } from 'app/clients/logger.js';
 import { DEFAULT_MODEL } from 'app/constants/models.js';
 import type { DiscoveredOffer } from 'app/segments/segmentProvider.js';
-import type { TavilySearchResult } from 'app/services/external/tavilyService.js';
 import { tavilySearch } from 'app/services/external/tavilyService.js';
+import type { TavilySearchResult } from 'app/services/external/tavilyTypes.js';
 
 const EXTRACTION_MAX_TOKENS = 2048;
+const MAX_TITLE_LENGTH = 200;
+const MAX_PROVIDER_LENGTH = 120;
+const CURRENCY_CODE_LENGTH = 3;
+const MAX_URL_LENGTH = 500;
+const MAX_SUMMARY_LENGTH = 500;
+const RESULTS_JSON_INDENT = 2;
 const DEFAULT_MAX_RESULTS = 5;
 
 export interface WebDiscoveryInput {
@@ -28,12 +34,12 @@ export interface WebDiscoveryInput {
 }
 
 const extractedOfferSchema = z.object({
-  title: z.string().min(1).max(200),
-  provider: z.string().max(120).optional(),
+  booking_url: z.url().max(MAX_URL_LENGTH).optional(),
+  currency: z.string().length(CURRENCY_CODE_LENGTH).optional(),
   price_estimate: z.number().positive().optional(),
-  currency: z.string().length(3).optional(),
-  booking_url: z.url().max(500).optional(),
-  summary: z.string().max(500).optional(),
+  provider: z.string().max(MAX_PROVIDER_LENGTH).optional(),
+  summary: z.string().max(MAX_SUMMARY_LENGTH).optional(),
+  title: z.string().min(1).max(MAX_TITLE_LENGTH),
 });
 
 type ExtractedOffer = z.infer<typeof extractedOfferSchema>;
@@ -58,8 +64,8 @@ export async function discoverOffersViaWeb(
   const allowedHosts = collectResultHosts(results);
   const fetchedAt = new Date().toISOString();
   const provenance = results.map((result) => ({
-    url: result.url,
     fetched_at: fetchedAt,
+    url: result.url,
   }));
 
   return rows.map((row) =>
@@ -79,7 +85,7 @@ async function extractOfferRows(
   const response = await getLlmClient().messages.create({
     max_tokens: EXTRACTION_MAX_TOKENS,
     messages: [
-      { role: 'user', content: buildExtractionPrompt(input, results) },
+      { content: buildExtractionPrompt(input, results), role: 'user' },
     ],
     model: DEFAULT_MODEL,
   });
@@ -122,7 +128,7 @@ function validateOfferRows(
       rows.push(result.data);
     } else {
       logger.warn(
-        { kind, issues: result.error.issues },
+        { issues: result.error.issues, kind },
         'Web discovery row failed validation; dropped',
       );
     }
@@ -146,7 +152,7 @@ Respond with a JSON array only (no markdown, no code fences). Each element:
 Omit any field you cannot support from the results. Return [] if the results contain no real options.
 
 Search results:
-${JSON.stringify(results, null, 2)}`;
+${JSON.stringify(results, null, RESULTS_JSON_INDENT)}`;
 }
 
 function parseJsonArray(text: string): unknown[] | null {
@@ -189,12 +195,12 @@ function toDiscoveredOffer(
     id: randomUUID(),
     title: row.title,
     ...(row.provider ? { subtitle: row.provider } : {}),
-    selection_label: row.title,
-    price: row.price_estimate ?? 0,
-    currency: row.currency ?? 'USD',
-    price_unit: 'per_person',
     badges: [],
+    currency: row.currency ?? 'USD',
     detail,
+    price: row.price_estimate ?? 0,
+    price_unit: 'per_person',
+    selection_label: row.title,
     ...(isUrlFromResults(row.booking_url, allowedHosts)
       ? { booking_url: row.booking_url }
       : {}),

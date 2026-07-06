@@ -8,9 +8,9 @@ import type { TripContext } from 'app/prompts/tripContext.js';
 import { formatTripContext } from 'app/prompts/tripContext.js';
 
 const INTEREST_CATEGORY_MAP: Record<string, string[]> = {
+  activities: ['tour', 'sightseeing', 'outdoor activity', 'cultural landmark'],
   dining: ['restaurant', 'food tour', 'local market', 'rooftop bar'],
   nightlife: ['bar', 'live music', 'club', 'late-night spot'],
-  activities: ['tour', 'sightseeing', 'outdoor activity', 'cultural landmark'],
   theater: ['theater', 'museum', 'gallery', 'live performance'],
   wellness: ['spa', 'yoga', 'meditation', 'day retreat'],
   work: ['co-working space', 'cafe with wifi', 'business center'],

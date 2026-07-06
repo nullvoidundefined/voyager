@@ -28,21 +28,21 @@ interface LegacyTileConversion {
 
 const LEGACY_TILE_CONVERSIONS: Record<string, LegacyTileConversion> = {
   car_rental_tiles: {
-    offerKind: 'car_rental',
     listKey: 'rentals',
+    offerKind: 'car_rental',
     toOffer: carRentalToOffer,
   },
   experience_tiles: {
-    offerKind: 'experience',
     listKey: 'experiences',
+    offerKind: 'experience',
     toOffer: experienceToOffer,
   },
   flight_tiles: {
-    offerKind: 'flight',
     listKey: 'flights',
+    offerKind: 'flight',
     toOffer: flightToOffer,
   },
-  hotel_tiles: { offerKind: 'hotel', listKey: 'hotels', toOffer: hotelToOffer },
+  hotel_tiles: { listKey: 'hotels', offerKind: 'hotel', toOffer: hotelToOffer },
 };
 
 export function normalizeLegacyNode(node: unknown): ChatNode {
@@ -54,9 +54,9 @@ export function normalizeLegacyNode(node: unknown): ChatNode {
 
   const items = candidate[conversion.listKey];
   return {
-    type: 'offer_tiles',
     offer_kind: conversion.offerKind,
     offers: Array.isArray(items) ? items.map(conversion.toOffer) : [],
     selectable: candidate.selectable ?? false,
+    type: 'offer_tiles',
   };
 }

@@ -44,7 +44,7 @@ interface NodeRendererProps {
   callbacks?: NodeRendererCallbacks;
 }
 
-export function NodeRenderer({ node, callbacks = {} }: NodeRendererProps) {
+export function NodeRenderer({ callbacks = {}, node }: NodeRendererProps) {
   const cb: NodeRendererCallbacks = callbacks;
 
   switch (node.type) {
@@ -67,8 +67,8 @@ export function NodeRenderer({ node, callbacks = {} }: NodeRendererProps) {
       // Adapt types DayPlan (field: day) to ItineraryTimeline (field: dayNumber)
       const adaptedDays = node.days.map((d) => ({
         dayNumber: d.day,
-        title: d.title,
         items: d.items,
+        title: d.title,
       }));
       return <ItineraryTimeline days={adaptedDays} />;
     }
@@ -99,6 +99,7 @@ export function NodeRenderer({ node, callbacks = {} }: NodeRendererProps) {
     case 'travel_plan_form': {
       // Map FormField to TripField for the TripDetailsForm component
       const tripFields = node.fields.map((f) => ({
+        label: f.label,
         type: f.name as
           | 'destination'
           | 'origin'
@@ -108,7 +109,6 @@ export function NodeRenderer({ node, callbacks = {} }: NodeRendererProps) {
           | 'travelers'
           | 'trip_type'
           | 'flexible_dates',
-        label: f.label,
       }));
       return (
         <TripDetailsForm

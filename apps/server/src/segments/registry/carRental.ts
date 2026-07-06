@@ -13,14 +13,14 @@ export const carRentalCapability: SegmentCapability = {
   requires: ['hotel'],
   resultListKey: 'rentals',
   searchTool: 'search_car_rentals',
-  selectTool: 'select_car_rental',
   selectionKey: 'car_rentals',
+  selectTool: 'select_car_rental',
   subAgentTools: [
     'search_car_rentals',
     'select_car_rental',
     'calculate_remaining_budget',
     'format_response',
   ],
-  toOffer: carRentalToOffer,
   tileKind: 'car_rental',
+  toOffer: carRentalToOffer,
 };

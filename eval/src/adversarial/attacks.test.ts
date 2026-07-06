@@ -6,6 +6,7 @@ import type { Category, Severity } from './types.js';
 const CATEGORIES: Category[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 const SEVERITIES: Severity[] = ['P0', 'P1', 'P2'];
 const EXPECTED_TOTAL = 54;
+const MAX_ALLOWED_TURNS = 10;
 const EXPECTED_PER_CATEGORY: Record<Category, number> = {
   A: 10,
   B: 8,
@@ -64,7 +65,7 @@ describe('attack catalog', () => {
   it('max_turns is between 1 and 10', () => {
     for (const a of ATTACKS) {
       expect(a.max_turns).toBeGreaterThanOrEqual(1);
-      expect(a.max_turns).toBeLessThanOrEqual(10);
+      expect(a.max_turns).toBeLessThanOrEqual(MAX_ALLOWED_TURNS);
     }
   });
 

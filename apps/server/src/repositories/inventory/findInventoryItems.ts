@@ -39,8 +39,8 @@ export async function findInventoryItems(
 function normalizeInventoryRow(row: InventoryItem): InventoryItem {
   return {
     ...row,
+    confidence: Number(row.confidence),
     indicative_price:
       row.indicative_price === null ? null : Number(row.indicative_price),
-    confidence: Number(row.confidence),
   };
 }

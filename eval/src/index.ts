@@ -72,8 +72,8 @@ async function main() {
     console.log(`Loaded ${personas.length} cached personas`);
   } else {
     personas = generatePersonas({
-      count: personaCount,
       archetype: archetypeFilter,
+      count: personaCount,
     });
     // Save to cache (only for full runs without filters)
     if (!archetypeFilter && !personaCount) {
@@ -193,12 +193,12 @@ async function main() {
 
       // Run assertions
       const assertions = runAssertions({
-        transcript: convResult.transcript,
         completed: convResult.completed,
-        tool_calls: convResult.tool_calls,
-        tool_results: convResult.tool_results,
         error: convResult.error,
         persona,
+        tool_calls: convResult.tool_calls,
+        tool_results: convResult.tool_results,
+        transcript: convResult.transcript,
         tripRecord,
       });
       const assertionScore = computeAssertionScore(assertions);
@@ -217,15 +217,15 @@ async function main() {
         judgeError = err instanceof Error ? err.message : String(err);
         console.error(`  Judge failed: ${judgeError}`);
         const failedJudge = {
-          score: 0,
           justification: `Judge failed: ${judgeError}`,
+          score: 0,
         };
         judgeScores = {
-          task_completion: failedJudge,
           efficiency: failedJudge,
-          relevance: failedJudge,
-          tone: failedJudge,
           error_recovery: failedJudge,
+          relevance: failedJudge,
+          task_completion: failedJudge,
+          tone: failedJudge,
         };
       }
       const judgeScore = computeJudgeScore(judgeScores);
@@ -240,17 +240,17 @@ async function main() {
       totalTurns += convResult.turns;
 
       results.push({
-        name: persona.name,
         archetype: persona.archetype,
-        config: persona,
-        assertions,
         assertion_score: assertionScore,
-        judge_scores: judgeScores,
-        judge_score: judgeScore,
-        overall,
-        turns: convResult.turns,
-        transcript: convResult.transcript,
+        assertions,
+        config: persona,
         error: judgeError ?? convResult.error,
+        judge_score: judgeScore,
+        judge_scores: judgeScores,
+        name: persona.name,
+        overall,
+        transcript: convResult.transcript,
+        turns: convResult.turns,
       });
 
       console.log(`  Score: ${overall.toFixed(2)} (${convResult.turns} turns)`);
@@ -260,37 +260,37 @@ async function main() {
       );
       // Push a failed result
       const defaultJudge = {
-        score: 0,
         justification: 'Conversation failed to run',
+        score: 0,
       };
       results.push({
-        name: persona.name,
         archetype: persona.archetype,
-        config: persona,
+        assertion_score: 0,
         assertions: {
+          budget_respected: true,
+          conversation_completed: false,
           details_collected: false,
-          search_executed: false,
+          format_response_used: false,
           no_errors: false,
           response_length: true,
-          budget_respected: true,
-          format_response_used: false,
-          conversation_completed: false,
-          search_results_have_prices: true,
+          search_executed: false,
           search_results_have_names: true,
+          search_results_have_prices: true,
         },
-        assertion_score: 0,
-        judge_scores: {
-          task_completion: defaultJudge,
-          efficiency: defaultJudge,
-          relevance: defaultJudge,
-          tone: defaultJudge,
-          error_recovery: defaultJudge,
-        },
-        judge_score: 0,
-        overall: 0,
-        turns: 0,
-        transcript: [],
+        config: persona,
         error: err instanceof Error ? err.message : String(err),
+        judge_score: 0,
+        judge_scores: {
+          efficiency: defaultJudge,
+          error_recovery: defaultJudge,
+          relevance: defaultJudge,
+          task_completion: defaultJudge,
+          tone: defaultJudge,
+        },
+        name: persona.name,
+        overall: 0,
+        transcript: [],
+        turns: 0,
       });
     } finally {
       // Clean up test trip
@@ -319,16 +319,16 @@ async function main() {
   );
 
   const report: EvalReport = {
-    timestamp: new Date().toISOString(),
     duration_ms: Date.now() - startTime,
+    personas: results,
     summary: {
+      assertions_passed: assertionsPassed,
+      assertions_total: assertionsTotal,
       overall: overallScore,
       personas: results.length,
       turns: totalTurns,
-      assertions_passed: assertionsPassed,
-      assertions_total: assertionsTotal,
     },
-    personas: results,
+    timestamp: new Date().toISOString(),
   };
 
   // 5. Output

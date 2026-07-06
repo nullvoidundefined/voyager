@@ -14,8 +14,8 @@ export const flightCapability: SegmentCapability = {
   requiredTools: ['search_flights'],
   resultListKey: 'flights',
   searchTool: 'search_flights',
-  selectTool: 'select_flight',
   selectionKey: 'flights',
+  selectTool: 'select_flight',
   subAgentTools: [
     'search_flights',
     'get_destination_info',
@@ -28,6 +28,6 @@ export const flightCapability: SegmentCapability = {
     'reorder_legs',
     'format_response',
   ],
-  toOffer: flightToOffer,
   tileKind: 'flight',
+  toOffer: flightToOffer,
 };

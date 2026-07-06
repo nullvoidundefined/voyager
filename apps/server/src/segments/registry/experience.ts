@@ -17,8 +17,8 @@ export const experienceCapability: SegmentCapability = {
   requires: ['flight'],
   resultListKey: 'experiences',
   searchTool: 'search_experiences',
-  selectTool: 'select_experience',
   selectionKey: 'experiences',
+  selectTool: 'select_experience',
   subAgentTools: [
     'search_experiences',
     'select_experience',
@@ -27,6 +27,6 @@ export const experienceCapability: SegmentCapability = {
     'plan_daily_schedule',
     'format_response',
   ],
-  toOffer: experienceToOffer,
   tileKind: 'experience',
+  toOffer: experienceToOffer,
 };

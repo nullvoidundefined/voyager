@@ -150,14 +150,14 @@ async function main() {
         await chatHandler(req, res);
         if (res.statusCode !== 200 || res.jsonData) {
           return {
+            error: `HTTP ${res.statusCode}: ${JSON.stringify(res.jsonData)}`,
+            tool_results: [],
             transcript: [
               {
-                role: 'assistant' as const,
                 content: `[HTTP ${res.statusCode}]`,
+                role: 'assistant' as const,
               },
             ],
-            tool_results: [],
-            error: `HTTP ${res.statusCode}: ${JSON.stringify(res.jsonData)}`,
           };
         }
         const events = parseSSEChunks(res.chunks);
@@ -165,10 +165,10 @@ async function main() {
         let agentText = '';
         const tool_results: Array<{ tool_name: string; result: unknown }> = [];
         const nodeTypeToTool: Record<string, string> = {
-          flight_tiles: 'search_flights',
-          hotel_tiles: 'search_hotels',
           car_rental_tiles: 'search_car_rentals',
           experience_tiles: 'search_experiences',
+          flight_tiles: 'search_flights',
+          hotel_tiles: 'search_hotels',
         };
         const tool_calls: string[] = [];
         if (doneEvent?.data?.message) {
@@ -180,20 +180,20 @@ async function main() {
             }
             const toolName = nodeTypeToTool[node.type as string];
             if (toolName) {
-              tool_results.push({ tool_name: toolName, result: node });
+              tool_results.push({ result: node, tool_name: toolName });
               tool_calls.push(toolName);
             }
           }
         }
         return {
+          tool_results,
           transcript: [
             {
-              role: 'assistant' as const,
               content: agentText.trim() || '[No text response]',
+              role: 'assistant' as const,
               tool_calls,
             },
           ],
-          tool_results,
         };
       };
 
@@ -210,14 +210,14 @@ async function main() {
       );
 
       results.push({
+        antagonist_outcome: runOut.antagonist_outcome,
         attack_id: attack.id,
         category: attack.category,
-        severity: attack.severity,
-        turns: runOut.turns,
-        transcript: runOut.transcript,
-        verdict,
-        antagonist_outcome: runOut.antagonist_outcome,
         error: runOut.error,
+        severity: attack.severity,
+        transcript: runOut.transcript,
+        turns: runOut.turns,
+        verdict,
       });
       console.log(
         `  -> ${verdict.passed ? 'PASS' : 'FAIL'} (${runOut.antagonist_outcome})`,
@@ -227,20 +227,20 @@ async function main() {
         `  -> ERROR: ${err instanceof Error ? err.message : String(err)}`,
       );
       results.push({
+        antagonist_outcome: 'agent_failed',
         attack_id: attack.id,
         category: attack.category,
-        severity: attack.severity,
-        turns: 0,
-        transcript: [],
-        verdict: {
-          passed: false,
-          must_not_violated: [],
-          refusal_quality: 'n/a',
-          evidence_turns: [],
-          rationale: `Run error: ${err instanceof Error ? err.message : String(err)}`,
-        },
-        antagonist_outcome: 'agent_failed',
         error: err instanceof Error ? err.message : String(err),
+        severity: attack.severity,
+        transcript: [],
+        turns: 0,
+        verdict: {
+          evidence_turns: [],
+          must_not_violated: [],
+          passed: false,
+          rationale: `Run error: ${err instanceof Error ? err.message : String(err)}`,
+          refusal_quality: 'n/a',
+        },
       });
     } finally {
       if (tripId) await deleteTrip(tripId, EVAL_USER_ID).catch(() => {});
@@ -248,11 +248,11 @@ async function main() {
   }
 
   const report: AdversarialReport = {
-    timestamp: new Date().toISOString(),
+    attacks: results,
+    by_category: rollupByCategory(results),
     duration_ms: Date.now() - startTime,
     summary: summarize(results),
-    by_category: rollupByCategory(results),
-    attacks: results,
+    timestamp: new Date().toISOString(),
   };
 
   printReport(report);

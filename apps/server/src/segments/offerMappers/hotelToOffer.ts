@@ -39,14 +39,14 @@ export function hotelToOffer(item: unknown): Offer {
     ...(city ? { subtitle: city } : {}),
     selection_label: `${hotel.name}, ${city}`,
     ...(hotel.image_url ? { image_url: hotel.image_url } : {}),
-    price: totalPrice,
-    currency: hotel.currency,
-    price_unit: 'total',
     badges:
       typeof hotel.star_rating === 'number'
         ? [`${hotel.star_rating}-star`]
         : [],
+    currency: hotel.currency,
     detail,
+    price: totalPrice,
+    price_unit: 'total',
     ...(hotel.booking_url ? { booking_url: hotel.booking_url } : {}),
     ...(typeof lat === 'number' ? { lat } : {}),
     ...(typeof lon === 'number' ? { lon } : {}),
@@ -60,8 +60,8 @@ function buildHotelDetail(
   totalPrice: number,
 ): Record<string, string | number> {
   const detail: Record<string, string | number> = {
-    name: hotel.name,
     city,
+    name: hotel.name,
     price_per_night: hotel.price_per_night ?? 0,
     total_price: totalPrice,
   };

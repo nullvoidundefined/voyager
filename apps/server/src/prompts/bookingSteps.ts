@@ -80,6 +80,10 @@ export interface CompletionTracker {
 
 export const CURRENT_TRACKER_VERSION = 4;
 
+const TRACKER_VERSION_V2 = 2;
+const TRACKER_VERSION_V3 = 3;
+const NUDGE_AFTER_STALLED_TURNS = 3;
+
 function buildDefaultSegments(
   journeyType: JourneyTypeId,
 ): Partial<Record<SegmentKind, TrackerStatus>> {
@@ -91,13 +95,13 @@ function buildDefaultSegments(
 }
 
 export const DEFAULT_COMPLETION_TRACKER: CompletionTracker = {
-  version: CURRENT_TRACKER_VERSION,
   journeyType: 'flight_trip',
-  transport: 'pending',
-  segments: buildDefaultSegments('flight_trip'),
   plan_confirmed: false,
   segment_interests: {},
+  segments: buildDefaultSegments('flight_trip'),
+  transport: 'pending',
   turns_since_last_progress: 0,
+  version: CURRENT_TRACKER_VERSION,
 };
 
 // --- Segment lookups ---
@@ -117,10 +121,10 @@ export function getSegmentStatus(
 // --- v1/v2 -> v3 migration helpers ---
 
 const V1_STATUS_MAP: Record<string, TrackerStatus> = {
-  idle: 'pending',
   asking: 'pending',
-  presented: 'searching',
   done: 'selected',
+  idle: 'pending',
+  presented: 'searching',
   skipped: 'skipped',
 };
 
@@ -175,10 +179,10 @@ interface V3Tracker {
 
 /** The pre-v4 branches, verbatim: v1 object-statuses, v2 missing plan fields, v3. */
 function normalizeToV3(obj: Record<string, unknown>): V3Tracker {
-  if (!('version' in obj) || (obj.version as number) < 2) {
+  if (!('version' in obj) || (obj.version as number) < TRACKER_VERSION_V2) {
     return migrateV1ToV3(obj);
   }
-  if ((obj.version as number) < 3) {
+  if ((obj.version as number) < TRACKER_VERSION_V3) {
     return migrateV2ToV3(obj);
   }
   return sanitizeV3(obj);
@@ -187,13 +191,13 @@ function normalizeToV3(obj: Record<string, unknown>): V3Tracker {
 /** v1 migration: BookingState with { status: 'idle' } objects. */
 function migrateV1ToV3(obj: Record<string, unknown>): V3Tracker {
   return {
-    transport: 'pending',
+    car_rental: migrateV1Status(obj.car_rental),
+    experience_interests: [],
+    experiences: migrateV1Status(obj.experiences),
     flights: migrateV1Status(obj.flights),
     hotels: migrateV1Status(obj.hotels),
-    car_rental: migrateV1Status(obj.car_rental),
-    experiences: migrateV1Status(obj.experiences),
     plan_confirmed: false,
-    experience_interests: [],
+    transport: 'pending',
     turns_since_last_progress: 0,
   };
 }
@@ -202,13 +206,13 @@ function migrateV1ToV3(obj: Record<string, unknown>): V3Tracker {
  *  trips re-enter the plan phase on next message. */
 function migrateV2ToV3(obj: Record<string, unknown>): V3Tracker {
   return {
-    transport: validTransport(obj.transport),
+    car_rental: validStatus(obj.car_rental),
+    experience_interests: [],
+    experiences: validStatus(obj.experiences),
     flights: validStatus(obj.flights),
     hotels: validStatus(obj.hotels),
-    car_rental: validStatus(obj.car_rental),
-    experiences: validStatus(obj.experiences),
     plan_confirmed: false,
-    experience_interests: [],
+    transport: validTransport(obj.transport),
     turns_since_last_progress: validTurnCount(obj.turns_since_last_progress),
   };
 }
@@ -216,18 +220,18 @@ function migrateV2ToV3(obj: Record<string, unknown>): V3Tracker {
 /** Field-validates an object already carrying the v3 shape. */
 function sanitizeV3(obj: Record<string, unknown>): V3Tracker {
   return {
-    transport: validTransport(obj.transport),
-    flights: validStatus(obj.flights),
-    hotels: validStatus(obj.hotels),
     car_rental: validStatus(obj.car_rental),
-    experiences: validStatus(obj.experiences),
-    plan_confirmed:
-      typeof obj.plan_confirmed === 'boolean' ? obj.plan_confirmed : false,
     experience_interests: Array.isArray(obj.experience_interests)
       ? obj.experience_interests.filter(
           (i): i is string => typeof i === 'string',
         )
       : [],
+    experiences: validStatus(obj.experiences),
+    flights: validStatus(obj.flights),
+    hotels: validStatus(obj.hotels),
+    plan_confirmed:
+      typeof obj.plan_confirmed === 'boolean' ? obj.plan_confirmed : false,
+    transport: validTransport(obj.transport),
     turns_since_last_progress: validTurnCount(obj.turns_since_last_progress),
   };
 }
@@ -273,7 +277,10 @@ export function normalizeCompletionTracker(raw: unknown): CompletionTracker {
     return structuredClone(DEFAULT_COMPLETION_TRACKER);
   }
   const obj = raw as Record<string, unknown>;
-  if (typeof obj.version === 'number' && obj.version >= 4) {
+  if (
+    typeof obj.version === 'number' &&
+    obj.version >= CURRENT_TRACKER_VERSION
+  ) {
     return sanitizeV4(obj);
   }
   return migrateV3ToV4(normalizeToV3(obj));
@@ -282,14 +289,14 @@ export function normalizeCompletionTracker(raw: unknown): CompletionTracker {
 /** Field-validates an object already carrying the v4 shape. */
 function sanitizeV4(obj: Record<string, unknown>): CompletionTracker {
   return {
-    version: CURRENT_TRACKER_VERSION,
     journeyType: validJourneyType(obj.journeyType),
-    transport: validTransport(obj.transport),
-    segments: normalizeSegments(obj.segments),
     plan_confirmed:
       typeof obj.plan_confirmed === 'boolean' ? obj.plan_confirmed : false,
     segment_interests: normalizeSegmentInterests(obj.segment_interests),
+    segments: normalizeSegments(obj.segments),
+    transport: validTransport(obj.transport),
     turns_since_last_progress: validTurnCount(obj.turns_since_last_progress),
+    version: CURRENT_TRACKER_VERSION,
   };
 }
 
@@ -297,21 +304,21 @@ function sanitizeV4(obj: Record<string, unknown>): CompletionTracker {
  *  journey that existed before v4. */
 function migrateV3ToV4(v3: V3Tracker): CompletionTracker {
   return {
-    version: CURRENT_TRACKER_VERSION,
     journeyType: 'flight_trip',
-    transport: v3.transport,
-    segments: {
-      flight: v3.flights,
-      hotel: v3.hotels,
-      car_rental: v3.car_rental,
-      experience: v3.experiences,
-    },
     plan_confirmed: v3.plan_confirmed,
     segment_interests:
       v3.experience_interests.length > 0
         ? { experience: v3.experience_interests }
         : {},
+    segments: {
+      car_rental: v3.car_rental,
+      experience: v3.experiences,
+      flight: v3.flights,
+      hotel: v3.hotels,
+    },
+    transport: v3.transport,
     turns_since_last_progress: v3.turns_since_last_progress,
+    version: CURRENT_TRACKER_VERSION,
   };
 }
 
@@ -524,7 +531,8 @@ function reopenRequestedCategories(
 // --- Nudge computation ---
 
 export function computeNudge(tracker: CompletionTracker): string | null {
-  if (tracker.turns_since_last_progress < 3) return null;
+  if (tracker.turns_since_last_progress < NUDGE_AFTER_STALLED_TURNS)
+    return null;
 
   const unstarted: string[] = [];
   const stalled: string[] = [];

@@ -15,10 +15,10 @@ export function buildOfferTilesNode(
   if (!shouldRenderTiles(result)) return null;
   const items = extractItems(result, capability.resultListKey);
   return {
-    type: 'offer_tiles',
     offer_kind: capability.tileKind,
     offers: items.map((item) => capability.toOffer(item)),
     selectable: true,
+    type: 'offer_tiles',
   };
 }
 

@@ -32,10 +32,10 @@ export function buildNodeFromToolResult(
   if (toolName === 'calculate_remaining_budget') {
     const data = result as Record<string, unknown>;
     return {
-      type: 'budget_bar',
       allocated: (data.total_spent as number) ?? 0,
-      total: (data.total_budget as number) ?? 0,
       currency: (data.currency as string) ?? 'USD',
+      total: (data.total_budget as number) ?? 0,
+      type: 'budget_bar',
     };
   }
 

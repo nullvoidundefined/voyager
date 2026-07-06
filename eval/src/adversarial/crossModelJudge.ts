@@ -69,17 +69,17 @@ function parsePassRate(stdout: string): number | null {
 async function runOne(model: string): Promise<RunSummary> {
   console.log(`\n=== Running adversarial eval with judge model: ${model} ===`);
   const result = spawnSync('npx', ['tsx', path.join(__dirname, 'index.ts')], {
-    env: { ...process.env, EVAL_JUDGE_MODEL: model },
-    encoding: 'utf-8',
-    stdio: ['inherit', 'pipe', 'inherit'],
     cwd: path.resolve(__dirname, '..', '..'),
+    encoding: 'utf-8',
+    env: { ...process.env, EVAL_JUDGE_MODEL: model },
+    stdio: ['inherit', 'pipe', 'inherit'],
   });
   const stdout = result.stdout ?? '';
   process.stdout.write(stdout);
   return {
+    exitCode: result.status,
     model,
     passRate: parsePassRate(stdout),
-    exitCode: result.status,
     rawOutputTail: stdout.slice(-500),
   };
 }

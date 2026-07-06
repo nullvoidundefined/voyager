@@ -19,200 +19,202 @@ interface DemoMessage {
   delay: number;
 }
 
+const TYPING_INDICATOR_DELAY_RATIO = 0.3;
+
 const DEMO_MESSAGES: DemoMessage[] = [
   {
-    role: 'assistant',
     delay: 800,
     nodes: [
       {
-        type: 'text',
         content: "Great choice! Let's plan your trip to **Barcelona**.",
+        type: 'text',
       },
     ],
+    role: 'assistant',
   },
   {
-    role: 'assistant',
     delay: 1200,
     nodes: [
       {
-        type: 'travel_plan_form',
         fields: [
           {
-            name: 'origin',
-            label: 'Origin',
             field_type: 'text',
+            label: 'Origin',
+            name: 'origin',
             placeholder: 'City or airport',
             required: true,
           },
           {
-            name: 'departure_date',
+            field_type: 'date',
             label: 'Departure date',
-            field_type: 'date',
+            name: 'departure_date',
             required: true,
           },
           {
-            name: 'return_date',
+            field_type: 'date',
             label: 'Return date',
-            field_type: 'date',
+            name: 'return_date',
             required: true,
           },
           {
-            name: 'budget',
-            label: 'Budget',
             field_type: 'number',
+            label: 'Budget',
+            name: 'budget',
             placeholder: '$3000',
             required: true,
           },
           {
-            name: 'travelers',
-            label: 'Travelers',
             field_type: 'number',
+            label: 'Travelers',
+            name: 'travelers',
             placeholder: '2',
             required: true,
           },
         ],
+        type: 'travel_plan_form',
       },
     ],
+    role: 'assistant',
   },
   {
-    role: 'user',
     delay: 2000,
     nodes: [
       {
-        type: 'text',
         content:
           "I'm traveling from San Francisco, from April 15, 2026 to April 22, 2026, with a $3000 budget, for 2 travelers.",
+        type: 'text',
       },
     ],
+    role: 'user',
   },
   {
-    role: 'assistant',
     delay: 2400,
     nodes: [
       {
-        type: 'text',
         content: 'Will you be flying or driving?',
+        type: 'text',
       },
       {
-        type: 'quick_replies',
         options: ["I'll be flying", "I'll drive"],
+        type: 'quick_replies',
       },
     ],
+    role: 'assistant',
   },
   {
-    role: 'user',
     delay: 1800,
     nodes: [
       {
-        type: 'text',
         content: "I'll drive",
+        type: 'text',
       },
     ],
+    role: 'user',
   },
   {
-    role: 'assistant',
     delay: 2200,
     nodes: [
       {
-        type: 'text',
         content: 'Do you need a hotel?',
+        type: 'text',
       },
       {
-        type: 'quick_replies',
         options: ['Yes, find me a hotel', 'No, I have lodging'],
+        type: 'quick_replies',
       },
     ],
+    role: 'assistant',
   },
   {
-    role: 'user',
     delay: 1800,
     nodes: [
       {
-        type: 'text',
         content: 'Yes, find me a hotel',
+        type: 'text',
       },
     ],
+    role: 'user',
   },
   {
-    role: 'assistant',
     delay: 2800,
     nodes: [
       {
-        type: 'text',
         content: 'Here are some hotels in Barcelona.',
+        type: 'text',
       },
       {
-        type: 'offer_tiles',
         offer_kind: 'hotel',
-        selectable: false,
         offers: [
           {
-            id: 'demo-hotel-1',
-            title: 'W Barcelona',
-            subtitle: 'Barcelona',
-            selection_label: 'W Barcelona, Barcelona',
-            price: 2023,
-            currency: 'USD',
-            price_unit: 'total',
             badges: ['5-star'],
+            currency: 'USD',
             detail: {
-              name: 'W Barcelona',
-              city: 'Barcelona',
-              star_rating: 5,
-              price_per_night: 289,
-              total_price: 2023,
               check_in: '2026-04-15',
               check_out: '2026-04-22',
+              city: 'Barcelona',
+              name: 'W Barcelona',
+              price_per_night: 289,
+              star_rating: 5,
+              total_price: 2023,
             },
+            id: 'demo-hotel-1',
+            price: 2023,
+            price_unit: 'total',
+            selection_label: 'W Barcelona, Barcelona',
+            subtitle: 'Barcelona',
+            title: 'W Barcelona',
           },
           {
-            id: 'demo-hotel-2',
-            title: 'Hotel Arts Barcelona',
-            subtitle: 'Barcelona',
-            selection_label: 'Hotel Arts Barcelona, Barcelona',
-            price: 2513,
-            currency: 'USD',
-            price_unit: 'total',
             badges: ['5-star'],
+            currency: 'USD',
             detail: {
-              name: 'Hotel Arts Barcelona',
-              city: 'Barcelona',
-              star_rating: 5,
-              price_per_night: 359,
-              total_price: 2513,
               check_in: '2026-04-15',
               check_out: '2026-04-22',
+              city: 'Barcelona',
+              name: 'Hotel Arts Barcelona',
+              price_per_night: 359,
+              star_rating: 5,
+              total_price: 2513,
             },
+            id: 'demo-hotel-2',
+            price: 2513,
+            price_unit: 'total',
+            selection_label: 'Hotel Arts Barcelona, Barcelona',
+            subtitle: 'Barcelona',
+            title: 'Hotel Arts Barcelona',
           },
         ],
+        selectable: false,
+        type: 'offer_tiles',
       },
     ],
+    role: 'assistant',
   },
   {
-    role: 'user',
     delay: 2000,
     nodes: [
       {
-        type: 'text',
         content: "I've selected W Barcelona",
+        type: 'text',
       },
     ],
+    role: 'user',
   },
   {
-    role: 'assistant',
     delay: 2400,
     nodes: [
       {
-        type: 'text',
         content: 'Great picks!',
+        type: 'text',
       },
       {
-        type: 'budget_bar',
         allocated: 2023,
-        total: 3000,
         currency: 'USD',
+        total: 3000,
+        type: 'budget_bar',
       },
     ],
+    role: 'assistant',
   },
 ];
 
@@ -238,7 +240,7 @@ export function MockChatBox() {
     // Show typing indicator first
     const typingTimer = setTimeout(() => {
       setShowTyping(true);
-    }, delay * 0.3);
+    }, delay * TYPING_INDICATOR_DELAY_RATIO);
 
     // Then reveal the message
     const msgTimer = setTimeout(() => {
@@ -256,8 +258,8 @@ export function MockChatBox() {
   useEffect(() => {
     if (listRef.current) {
       listRef.current.scrollTo({
-        top: listRef.current.scrollHeight,
         behavior: 'smooth',
+        top: listRef.current.scrollHeight,
       });
     }
   }, [visibleCount, showTyping]);

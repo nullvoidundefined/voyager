@@ -41,26 +41,26 @@ interface VirtualizedChatProps {
 
 // Height estimates by node type for initial virtualized sizing
 const NODE_HEIGHT_ESTIMATES: Partial<Record<ChatNode['type'], number>> = {
-  text: 60,
-  travel_plan_form: 300,
-  itinerary: 200,
   advisory: 80,
-  weather_forecast: 120,
-  budget_bar: 48,
-  quick_replies: 48,
-  tool_progress: 32,
   booking_prompt: 96,
+  budget_bar: 48,
+  itinerary: 200,
   plan_card: 280,
+  quick_replies: 48,
+  text: 60,
+  tool_progress: 32,
+  travel_plan_form: 300,
+  weather_forecast: 120,
 };
 
 const TOOL_LABELS: Record<string, string> = {
-  search_flights: 'Searching flights',
-  search_hotels: 'Searching hotels',
+  calculate_remaining_budget: 'Calculating budget',
+  format_response: 'Assembling response',
+  get_destination_info: 'Looking up destination',
   search_car_rentals: 'Searching car rentals',
   search_experiences: 'Finding experiences',
-  calculate_remaining_budget: 'Calculating budget',
-  get_destination_info: 'Looking up destination',
-  format_response: 'Assembling response',
+  search_flights: 'Searching flights',
+  search_hotels: 'Searching hotels',
 };
 
 function getToolLabelForName(toolName: string): string {
@@ -68,35 +68,40 @@ function getToolLabelForName(toolName: string): string {
   return TOOL_LABELS[toolName] ?? toolName.replace(/_/g, ' ');
 }
 
+const DEFAULT_NODE_HEIGHT_PX = 60;
+const EMPTY_MESSAGE_HEIGHT_PX = 40;
+const MESSAGE_BASE_PADDING_PX = 16;
+const AT_BOTTOM_THRESHOLD_PX = 50;
+
 function estimateNodeHeight(node: ChatNode): number {
   if (node.type === 'offer_tiles') {
     return getOfferTileHeightEstimate(node.offer_kind);
   }
-  return NODE_HEIGHT_ESTIMATES[node.type] ?? 60;
+  return NODE_HEIGHT_ESTIMATES[node.type] ?? DEFAULT_NODE_HEIGHT_PX;
 }
 
 function estimateMessageHeight(nodes: ChatNode[]): number {
-  if (nodes.length === 0) return 40;
+  if (nodes.length === 0) return EMPTY_MESSAGE_HEIGHT_PX;
   return nodes.reduce(
     (sum, node) => sum + estimateNodeHeight(node),
-    16, // base padding
+    MESSAGE_BASE_PADDING_PX,
   );
 }
 
 export function VirtualizedChat({
-  messages,
-  streamingNodes,
-  toolProgress,
-  streamingText,
+  initialDestination,
   isSending,
   isStreaming,
-  onQuickReply,
-  onSelectItem,
+  messages,
   onBookNow,
+  onConfirmPlan,
   onFormSubmit,
   onFormValuesChange,
-  onConfirmPlan,
-  initialDestination,
+  onQuickReply,
+  onSelectItem,
+  streamingNodes,
+  streamingText,
+  toolProgress,
 }: VirtualizedChatProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const wasAtBottomRef = useRef(true);
@@ -107,17 +112,17 @@ export function VirtualizedChat({
       isSending &&
       (streamingNodes.length > 0 || toolProgress.length > 0 || streamingText)
         ? {
+            created_at: new Date().toISOString(),
             id: '__streaming__',
-            role: 'assistant',
             nodes: [
               ...toolProgress,
               ...streamingNodes,
               ...(streamingText
-                ? [{ type: 'text' as const, content: streamingText }]
+                ? [{ content: streamingText, type: 'text' as const }]
                 : []),
             ],
+            role: 'assistant',
             sequence: messages.length + 1,
-            created_at: new Date().toISOString(),
           }
         : null,
 
@@ -131,15 +136,15 @@ export function VirtualizedChat({
 
   const virtualizer = useVirtualizer({
     count: allMessages.length,
-    getScrollElement: () => parentRef.current,
     estimateSize: (index) =>
       estimateMessageHeight(allMessages[index]?.nodes ?? []),
-    overscan: 3,
+    getScrollElement: () => parentRef.current,
     measureElement:
       typeof window !== 'undefined' &&
       navigator.userAgent.indexOf('Firefox') === -1
         ? (element) => element.getBoundingClientRect().height
         : undefined,
+    overscan: 3,
   });
 
   // Auto-scroll to bottom on new messages, but only if user was already at bottom
@@ -147,14 +152,69 @@ export function VirtualizedChat({
     if (wasAtBottomRef.current && allMessages.length > 0) {
       virtualizer.scrollToIndex(allMessages.length - 1, { align: 'end' });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Deps intentionally omit the virtualizer instance: scroll only reacts to
+    // new content, not re-created virtualizer objects.
+    // eslint-disable-next-line
   }, [allMessages.length, streamingText]);
+
+  function renderBubbleContent(
+    message: (typeof allMessages)[number],
+    messageIndex: number,
+  ) {
+    const toolNodes = message.nodes.filter(
+      (n): n is Extract<ChatNode, { type: 'tool_progress' }> =>
+        n.type === 'tool_progress',
+    );
+    const otherNodes = message.nodes.filter((n) => n.type !== 'tool_progress');
+    const latestRunning = toolNodes
+      .filter((n) => n.status === 'running')
+      .at(-1);
+    const latestAny = toolNodes.at(-1);
+    const latestToolName =
+      latestRunning?.tool_name ?? latestAny?.tool_name ?? '';
+    return (
+      <>
+        {toolNodes.length > 0 && (
+          <ChatProgressBar
+            mode='determinate'
+            done={toolNodes.filter((n) => n.status === 'done').length}
+            total={toolNodes.length}
+            latestLabel={getToolLabelForName(latestToolName)}
+          />
+        )}
+        {otherNodes.map((node, nodeIdx) => (
+          <NodeRenderer
+            key={`${message.id}-${nodeIdx}`}
+            node={node}
+            callbacks={{
+              disabled: isSending || messageIndex !== allMessages.length - 1,
+              initialValues:
+                initialDestination &&
+                initialDestination !== 'New trip' &&
+                initialDestination !== 'Planning...'
+                  ? { destination: initialDestination }
+                  : undefined,
+              onBookNow,
+              onConfirmOffer: (kind, label, data) => {
+                onSelectItem?.(kind, data);
+                onQuickReply(buildOfferSelectionMessage(kind, label));
+              },
+              onConfirmPlan,
+              onFormSubmit,
+              onFormValuesChange,
+              onQuickReply,
+            }}
+          />
+        ))}
+      </>
+    );
+  }
 
   const handleScroll = useCallback(() => {
     const el = parentRef.current;
     if (!el) return;
     wasAtBottomRef.current =
-      el.scrollHeight - el.scrollTop - el.clientHeight < 50;
+      el.scrollHeight - el.scrollTop - el.clientHeight < AT_BOTTOM_THRESHOLD_PX;
   }, []);
 
   return (
@@ -203,8 +263,8 @@ export function VirtualizedChat({
       <div
         style={{
           height: `${virtualizer.getTotalSize()}px`,
-          width: '100%',
           position: 'relative',
+          width: '100%',
         }}
       >
         {virtualizer.getVirtualItems().map((virtualItem) => {
@@ -217,11 +277,11 @@ export function VirtualizedChat({
               ref={virtualizer.measureElement}
               data-index={virtualItem.index}
               style={{
+                left: 0,
                 position: 'absolute',
                 top: 0,
-                left: 0,
-                width: '100%',
                 transform: `translateY(${virtualItem.start}px)`,
+                width: '100%',
               }}
             >
               <div
@@ -232,64 +292,7 @@ export function VirtualizedChat({
                   {message.role === 'user' ? 'You' : APP_NAME}
                 </div>
                 <div className={styles.bubble}>
-                  {(() => {
-                    const toolNodes = message.nodes.filter(
-                      (n): n is Extract<ChatNode, { type: 'tool_progress' }> =>
-                        n.type === 'tool_progress',
-                    );
-                    const otherNodes = message.nodes.filter(
-                      (n) => n.type !== 'tool_progress',
-                    );
-                    const latestRunning = toolNodes
-                      .filter((n) => n.status === 'running')
-                      .at(-1);
-                    const latestAny = toolNodes.at(-1);
-                    const latestToolName =
-                      latestRunning?.tool_name ?? latestAny?.tool_name ?? '';
-                    return (
-                      <>
-                        {toolNodes.length > 0 && (
-                          <ChatProgressBar
-                            mode='determinate'
-                            done={
-                              toolNodes.filter((n) => n.status === 'done')
-                                .length
-                            }
-                            total={toolNodes.length}
-                            latestLabel={getToolLabelForName(latestToolName)}
-                          />
-                        )}
-                        {otherNodes.map((node, nodeIdx) => (
-                          <NodeRenderer
-                            key={`${message.id}-${nodeIdx}`}
-                            node={node}
-                            callbacks={{
-                              disabled:
-                                isSending ||
-                                virtualItem.index !== allMessages.length - 1,
-                              onQuickReply,
-                              onBookNow,
-                              onFormSubmit,
-                              onFormValuesChange,
-                              onConfirmPlan,
-                              initialValues:
-                                initialDestination &&
-                                initialDestination !== 'New trip' &&
-                                initialDestination !== 'Planning...'
-                                  ? { destination: initialDestination }
-                                  : undefined,
-                              onConfirmOffer: (kind, label, data) => {
-                                onSelectItem?.(kind, data);
-                                onQuickReply(
-                                  buildOfferSelectionMessage(kind, label),
-                                );
-                              },
-                            }}
-                          />
-                        ))}
-                      </>
-                    );
-                  })()}
+                  {renderBubbleContent(message, virtualItem.index)}
                 </div>
               </div>
             </div>

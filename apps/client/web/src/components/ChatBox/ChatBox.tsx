@@ -45,15 +45,15 @@ interface ChatBoxProps {
 }
 
 export function ChatBox({
-  tripId,
-  initialDestination,
+  carRentalsEmpty,
+  experiencesEmpty,
   hasFlights,
   hasHotels,
-  experiencesEmpty,
-  carRentalsEmpty,
-  tripStatus,
-  onBookTrip,
+  initialDestination,
   isDemoMode,
+  onBookTrip,
+  tripId,
+  tripStatus,
 }: ChatBoxProps) {
   const queryClient = useQueryClient();
   const [input, setInput] = useState('');
@@ -70,11 +70,11 @@ export function ChatBox({
   );
 
   const { data: serverMessages } = useQuery({
-    queryKey: ['messages', tripId],
     queryFn: () =>
       get<{ messages: ChatMessage[] }>(`/trips/${tripId}/messages`).then(
         (r) => r.messages,
       ),
+    queryKey: ['messages', tripId],
   });
 
   // trip-costs is event-driven, not polled. The underlying value only
@@ -82,11 +82,11 @@ export function ChatBox({
   // so refetching on a 5s interval was wasted DB load. Invalidation
   // happens in useSSEChat's onComplete callback below.
   const { data: costsData } = useQuery({
-    queryKey: ['trip-costs', tripId],
     queryFn: () =>
       get<{ total_tokens: number; total_cost_usd: string }>(
         `/trips/${tripId}/costs`,
       ),
+    queryKey: ['trip-costs', tripId],
   });
 
   // Merge server messages with optimistic pending user message
@@ -99,22 +99,22 @@ export function ChatBox({
   );
 
   const {
-    sendMessage,
-    isSending,
-    streamingNodes,
-    toolProgress,
-    streamingText,
-    liveTokens,
-    error: sseError,
     clearError: clearSseError,
+    error: sseError,
+    isSending,
+    liveTokens,
+    sendMessage,
+    streamingNodes,
+    streamingText,
+    toolProgress,
   } = useSSEChat({
-    tripId,
     onComplete: () => {
       setPendingUserMessage(null);
       void queryClient.invalidateQueries({
         queryKey: ['trip-costs', tripId],
       });
     },
+    tripId,
   });
 
   const timelineToolCalls = useMemo<ToolCall[]>(
@@ -124,10 +124,10 @@ export function ChatBox({
         .map((n) => {
           const node = n as Extract<typeof n, { type: 'tool_progress' }>;
           return {
-            id: node.tool_id,
-            toolName: node.tool_name,
-            status: node.status === 'running' ? 'running' : 'done',
             durationMs: 0,
+            id: node.tool_id,
+            status: node.status === 'running' ? 'running' : 'done',
+            toolName: node.tool_name,
           };
         }),
     [toolProgress],
@@ -191,11 +191,11 @@ export function ChatBox({
 
       // Optimistic: show user message immediately
       setPendingUserMessage({
-        id: `pending-${Date.now()}`,
-        role: 'user',
-        nodes: [{ type: 'text', content: msg }],
-        sequence: (serverMessages?.length ?? 0) + 1,
         created_at: new Date().toISOString(),
+        id: `pending-${Date.now()}`,
+        nodes: [{ content: msg, type: 'text' }],
+        role: 'user',
+        sequence: (serverMessages?.length ?? 0) + 1,
       });
       void sendMessage(msg);
     },
@@ -256,7 +256,7 @@ export function ChatBox({
   const handleSelectItem = useCallback(
     async (type: string, data: Record<string, unknown>) => {
       try {
-        await post(`/trips/${tripId}/selections`, { type, data });
+        await post(`/trips/${tripId}/selections`, { data, type });
         void queryClient.invalidateQueries({ queryKey: ['trips', tripId] });
       } catch (err) {
         console.error('Failed to persist selection:', err);
@@ -268,11 +268,11 @@ export function ChatBox({
   const handleConfirmPlan = useCallback(
     (confirmedCard: TripPlanCard, summaryMessage: string) => {
       setPendingUserMessage({
-        id: `pending-${Date.now()}`,
-        role: 'user',
-        nodes: [{ type: 'text', content: summaryMessage }],
-        sequence: (serverMessages?.length ?? 0) + 1,
         created_at: new Date().toISOString(),
+        id: `pending-${Date.now()}`,
+        nodes: [{ content: summaryMessage, type: 'text' }],
+        role: 'user',
+        sequence: (serverMessages?.length ?? 0) + 1,
       });
       void sendMessage(summaryMessage, { planConfirmation: confirmedCard });
     },
@@ -290,16 +290,16 @@ export function ChatBox({
   const messagesWithBookingPrompt = useMemo<ChatMessage[]>(() => {
     if (!showBookingActions) return allMessages;
     const promptNode = {
-      type: 'booking_prompt' as const,
-      experiences_empty: experiencesEmpty ?? true,
       car_rentals_empty: carRentalsEmpty ?? true,
+      experiences_empty: experiencesEmpty ?? true,
+      type: 'booking_prompt' as const,
     };
     const promptMessage: ChatMessage = {
-      id: '__booking_prompt__',
-      role: 'assistant',
-      nodes: [promptNode],
-      sequence: allMessages.length + 1,
       created_at: new Date().toISOString(),
+      id: '__booking_prompt__',
+      nodes: [promptNode],
+      role: 'assistant',
+      sequence: allMessages.length + 1,
     };
     return [...allMessages, promptMessage];
   }, [allMessages, showBookingActions, experiencesEmpty, carRentalsEmpty]);

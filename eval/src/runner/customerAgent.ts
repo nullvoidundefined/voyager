@@ -14,14 +14,14 @@ function buildCustomerPrompt(persona: Persona): string {
     ? `$${persona.budget}`
     : 'no specific budget';
   const styleGuide: Record<string, string> = {
-    detailed:
-      'You provide all information upfront in complete sentences. You are cooperative and thorough.',
-    terse:
-      'You give short, minimal answers. One word or one sentence max. Make the agent work for information.',
     conversational:
       'You chat naturally, share some details, ask questions back. Normal human conversation.',
+    detailed:
+      'You provide all information upfront in complete sentences. You are cooperative and thorough.',
     impatient:
       'You want things done fast. Skip categories you don\'t care about. Say "just skip that" for things you don\'t need.',
+    terse:
+      'You give short, minimal answers. One word or one sentence max. Make the agent work for information.',
   };
 
   return `You are a customer planning a trip. Stay in character throughout.
@@ -56,8 +56,8 @@ export async function getCustomerResponse(
   // Swap roles: from the customer's perspective, the travel agent's messages
   // are "user" (incoming) and the customer's own messages are "assistant" (outgoing)
   const messages = transcript.map((t) => ({
-    role: (t.role === 'user' ? 'assistant' : 'user') as 'user' | 'assistant',
     content: t.content,
+    role: (t.role === 'user' ? 'assistant' : 'user') as 'user' | 'assistant',
   }));
 
   // The inverted history starts with the customer's own opener (assistant),
@@ -66,17 +66,17 @@ export async function getCustomerResponse(
   // to canned strings.
   if (messages[0]?.role === 'assistant') {
     messages.unshift({
-      role: 'user',
       content:
         '[You reached the Voyager travel agent. Start or continue the conversation.]',
+      role: 'user',
     });
   }
 
   const response = await getClient().messages.create({
-    model: 'claude-sonnet-4-6',
     max_tokens: 300,
-    system: buildCustomerPrompt(persona),
     messages,
+    model: 'claude-sonnet-4-6',
+    system: buildCustomerPrompt(persona),
   });
 
   const text =

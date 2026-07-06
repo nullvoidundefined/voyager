@@ -196,12 +196,7 @@ export function formatChecklist(
   tracker: CompletionTracker,
   ctx: TripContext,
 ): string {
-  const icon = (status: TrackerStatus) =>
-    status === 'selected'
-      ? '✅'
-      : status === 'skipped' || status === 'not_applicable'
-        ? '⏭️'
-        : '⬜';
+  const icon = (status: TrackerStatus) => statusIcon(status);
 
   const lines: string[] = ['## Trip Planning Checklist'];
 
@@ -282,4 +277,11 @@ export function formatChecklist(
   );
 
   return lines.join('\n');
+}
+
+/** Checklist marker for a segment status (no nested ternary, R-327). */
+function statusIcon(status: TrackerStatus): string {
+  if (status === 'selected') return '✅';
+  if (status === 'skipped' || status === 'not_applicable') return '⏭️';
+  return '⬜';
 }

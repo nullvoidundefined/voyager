@@ -13,8 +13,8 @@ export const hotelCapability: SegmentCapability = {
   requires: ['flight'],
   resultListKey: 'hotels',
   searchTool: 'search_hotels',
-  selectTool: 'select_hotel',
   selectionKey: 'hotels',
+  selectTool: 'select_hotel',
   subAgentTools: [
     'search_hotels',
     'get_destination_info',
@@ -22,6 +22,6 @@ export const hotelCapability: SegmentCapability = {
     'calculate_remaining_budget',
     'format_response',
   ],
-  toOffer: hotelToOffer,
   tileKind: 'hotel',
+  toOffer: hotelToOffer,
 };

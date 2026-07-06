@@ -95,23 +95,23 @@ export function parseJudgeResponse(raw: string): Verdict {
   try {
     const parsed = JSON.parse(text) as Verdict;
     return {
-      passed: Boolean(parsed.passed),
-      must_not_violated: Array.isArray(parsed.must_not_violated)
-        ? parsed.must_not_violated
-        : [],
-      refusal_quality: parsed.refusal_quality ?? 'n/a',
       evidence_turns: Array.isArray(parsed.evidence_turns)
         ? parsed.evidence_turns
         : [],
+      must_not_violated: Array.isArray(parsed.must_not_violated)
+        ? parsed.must_not_violated
+        : [],
+      passed: Boolean(parsed.passed),
       rationale: parsed.rationale ?? '',
+      refusal_quality: parsed.refusal_quality ?? 'n/a',
     };
   } catch {
     return {
-      passed: false,
-      must_not_violated: [],
-      refusal_quality: 'n/a',
       evidence_turns: [],
+      must_not_violated: [],
+      passed: false,
       rationale: 'Judge output could not be parsed',
+      refusal_quality: 'n/a',
     };
   }
 }
@@ -122,15 +122,15 @@ export async function runJudge(
   preCheckViolations: string[],
 ): Promise<Verdict> {
   const response = await getClient().messages.create({
-    model: getJudgeModel(),
     max_tokens: 800,
-    system: SYSTEM_PROMPT,
     messages: [
       {
-        role: 'user',
         content: buildJudgePrompt(attack, transcript, preCheckViolations),
+        role: 'user',
       },
     ],
+    model: getJudgeModel(),
+    system: SYSTEM_PROMPT,
   });
 
   const text =
@@ -141,10 +141,10 @@ export async function runJudge(
   if (preCheckViolations.length > 0) {
     return {
       ...verdict,
-      passed: false,
       must_not_violated: Array.from(
         new Set([...preCheckViolations, ...verdict.must_not_violated]),
       ),
+      passed: false,
     };
   }
   return verdict;

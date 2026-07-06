@@ -61,15 +61,15 @@ Constraints: ${persona.constraints}`;
     .join('\n\n');
 
   const response = await getClient().messages.create({
-    model: getJudgeModel(),
     max_tokens: 1000,
-    system: JUDGE_PROMPT,
     messages: [
       {
-        role: 'user',
         content: `## Customer Persona\n\n${personaDesc}\n\n## Conversation Transcript\n\n${transcriptStr}\n\nNow score the agent. Respond with ONLY the JSON object, no other text.`,
+        role: 'user',
       },
     ],
+    model: getJudgeModel(),
+    system: JUDGE_PROMPT,
   });
 
   const rawText =
@@ -87,15 +87,15 @@ Constraints: ${persona.constraints}`;
     return JSON.parse(text) as JudgeScores;
   } catch {
     const defaultScore = {
-      score: 0.5,
       justification: 'Judge output could not be parsed',
+      score: 0.5,
     };
     return {
-      task_completion: defaultScore,
       efficiency: defaultScore,
-      relevance: defaultScore,
-      tone: defaultScore,
       error_recovery: defaultScore,
+      relevance: defaultScore,
+      task_completion: defaultScore,
+      tone: defaultScore,
     };
   }
 }

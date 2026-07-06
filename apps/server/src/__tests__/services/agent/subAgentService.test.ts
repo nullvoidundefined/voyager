@@ -11,13 +11,11 @@ import {
   isResolved,
   needsWork,
 } from 'app/prompts/bookingSteps.js';
-import {
-  type SubAgentType,
-  buildDefaultPlanCard,
-  getSubAgentRequiredTools,
-  getSubAgentTools,
-  selectSubAgent,
-} from 'app/services/agent/subAgentService.js';
+import { buildDefaultPlanCard } from 'app/services/agent/buildDefaultPlanCard.js';
+import { getSubAgentRequiredTools } from 'app/services/agent/getSubAgentRequiredTools.js';
+import { getSubAgentTools } from 'app/services/agent/getSubAgentTools.js';
+import { selectSubAgent } from 'app/services/agent/selectSubAgent.js';
+import type { SubAgentType } from 'app/services/agent/subAgentTypes.js';
 
 const baseTripState: TripState = {
   destination: 'New Orleans',

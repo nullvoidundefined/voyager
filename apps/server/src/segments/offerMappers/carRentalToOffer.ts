@@ -31,15 +31,15 @@ export function carRentalToOffer(item: unknown): Offer {
 
   return {
     id: resolveOfferId(rental.id),
-    title: rental.car_name,
-    subtitle: rental.provider,
     selection_label: `${rental.car_name} (${rental.provider})`,
+    subtitle: rental.provider,
+    title: rental.car_name,
     ...(rental.image_url ? { image_url: rental.image_url } : {}),
-    price: rental.total_price,
-    currency: rental.currency,
-    price_unit: 'total',
     badges: rental.features ?? [],
+    currency: rental.currency,
     detail,
+    price: rental.total_price,
+    price_unit: 'total',
     ...(rental.booking_url ? { booking_url: rental.booking_url } : {}),
   };
 }
@@ -49,8 +49,8 @@ function buildCarRentalDetail(
   rental: CarRentalItem,
 ): Record<string, string | number> {
   const detail: Record<string, string | number> = {
-    provider: rental.provider,
     car_name: rental.car_name,
+    provider: rental.provider,
     total_price: rental.total_price,
   };
   if (rental.car_type) detail.car_type = rental.car_type;

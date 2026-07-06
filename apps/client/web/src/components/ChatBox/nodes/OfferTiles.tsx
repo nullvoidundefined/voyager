@@ -19,10 +19,10 @@ interface OfferTilesProps {
 }
 
 export function OfferTiles({
+  confirmedId,
+  disabled,
   node,
   onConfirm,
-  disabled,
-  confirmedId,
 }: OfferTilesProps) {
   const entry = resolveOfferCard(node.offer_kind);
   const OfferCard = entry.Card;
@@ -42,9 +42,9 @@ export function OfferTiles({
   }
 
   const items = node.offers.map((offer) => ({
+    data: buildConfirmData(offer),
     id: offer.id,
     label: offer.selection_label ?? offer.title,
-    data: buildConfirmData(offer),
     node: (selected: boolean, onClick: () => void) => (
       <OfferCard offer={offer} selected={selected} onClick={onClick} />
     ),
@@ -64,8 +64,8 @@ export function OfferTiles({
 function buildConfirmData(offer: Offer): Record<string, unknown> {
   return {
     ...(offer.detail ?? {}),
-    price: offer.price,
     currency: offer.currency,
+    price: offer.price,
     ...(offer.booking_url ? { booking_url: offer.booking_url } : {}),
   };
 }

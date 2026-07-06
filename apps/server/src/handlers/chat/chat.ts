@@ -32,13 +32,11 @@ import { findByUserId as findUserPreferences } from 'app/repositories/userPrefer
 import { planCardSchema } from 'app/schemas/planCard.js';
 import { SEGMENT_PROMPT_BUILDERS } from 'app/segments/segmentPrompts.js';
 import { runAgentLoop } from 'app/services/agent/agentService.js';
+import { buildDefaultPlanCard } from 'app/services/agent/buildDefaultPlanCard.js';
+import { getSubAgentRequiredTools } from 'app/services/agent/getSubAgentRequiredTools.js';
+import { getSubAgentTools } from 'app/services/agent/getSubAgentTools.js';
 import { normalizeLegacyNode } from 'app/services/agent/normalizeLegacyNode.js';
-import {
-  buildDefaultPlanCard,
-  getSubAgentRequiredTools,
-  getSubAgentTools,
-  selectSubAgent,
-} from 'app/services/agent/subAgentService.js';
+import { selectSubAgent } from 'app/services/agent/selectSubAgent.js';
 import {
   addTokenUsage,
   isOverDailyBudget,
@@ -56,6 +54,12 @@ import {
   flushSSE,
   toFlowInput,
 } from './helpers.js';
+
+const HTTP_TOO_MANY_REQUESTS = 429;
+const HTTP_CONFLICT = 409;
+const HTTP_OK = 200;
+/** Socket idle timeout: SSE turns can legitimately run for minutes. */
+const CHAT_SOCKET_TIMEOUT_MS = 150_000;
 
 // In-memory lock for single-replica defense; Redis SET NX EX layer
 // (acquireConversationLock below) prevents concurrent agent loops
@@ -136,7 +140,7 @@ export async function chat(req: Request, res: Response) {
       properties: { trip_id: tripId },
     });
     throw new ApiError(
-      429,
+      HTTP_TOO_MANY_REQUESTS,
       ERROR_CODES.DAILY_BUDGET_EXCEEDED,
       "You have reached today's agent usage limit. This is a portfolio demo with a conservative per-user daily budget to keep LLM costs bounded. The limit resets at UTC midnight.",
     );
@@ -152,7 +156,7 @@ export async function chat(req: Request, res: Response) {
 
   if (!(await acquireConversationLock(conversation.id))) {
     throw new ApiError(
-      409,
+      HTTP_CONFLICT,
       ERROR_CODES.CONFLICT,
       'A response is already being generated for this trip. Please wait.',
     );
@@ -163,15 +167,15 @@ export async function chat(req: Request, res: Response) {
   const tripContext = buildTripContext(trip, userPrefs);
 
   // Set up SSE
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
+  res.writeHead(HTTP_OK, {
     'Cache-Control': 'no-cache',
     Connection: 'keep-alive',
+    'Content-Type': 'text/event-stream',
     'X-Accel-Buffering': 'no',
   });
   res.flushHeaders();
   res.setTimeout(0);
-  req.socket.setTimeout(150_000);
+  req.socket.setTimeout(CHAT_SOCKET_TIMEOUT_MS);
 
   req.on('close', () => {
     void releaseConversationLock(conversation.id);
@@ -179,19 +183,19 @@ export async function chat(req: Request, res: Response) {
 
   // Persist user message
   await insertMessage({
-    conversation_id: conversation.id,
-    role: 'user',
     content: message,
-    nodes: [{ type: 'text', content: message }],
+    conversation_id: conversation.id,
+    nodes: [{ content: message, type: 'text' }],
+    role: 'user',
   });
   posthog.capture({
     distinctId: userId,
     event: 'chat message sent',
     properties: {
-      trip_id: tripId,
       conversation_id: conversation.id,
-      message_length: message.length,
       is_first_message: history.length === 0,
+      message_length: message.length,
+      trip_id: tripId,
     },
   });
 
@@ -260,7 +264,7 @@ export async function chat(req: Request, res: Response) {
       tripContext,
       onEvent,
       conversation.id,
-      { tripId, userId, requestId: req.id as string },
+      { requestId: req.id as string, tripId, userId },
       enrichmentNodes,
       flowPosition,
       { hasCriticalAdvisory, nudge },
@@ -286,11 +290,11 @@ export async function chat(req: Request, res: Response) {
       distinctId: userId,
       event: 'agent turn completed',
       properties: {
-        trip_id: tripId,
         conversation_id: conversation.id,
-        tool_call_count: result.tool_calls?.length ?? 0,
         input_tokens: result.total_tokens?.input ?? 0,
         output_tokens: outputTokens,
+        tool_call_count: result.tool_calls?.length ?? 0,
+        trip_id: tripId,
       },
     });
 
@@ -316,9 +320,9 @@ export async function chat(req: Request, res: Response) {
         noEngagement(newTracker)
       ) {
         result.nodes.push({
-          type: 'text',
           content:
             "You haven't selected anything for your trip yet. Want to go back and explore some options?",
+          type: 'text',
         });
       }
 
@@ -327,30 +331,30 @@ export async function chat(req: Request, res: Response) {
 
     // Persist assistant message
     const assistantMessage = await insertMessage({
-      conversation_id: conversation.id,
-      role: 'assistant',
       content: result.response,
+      conversation_id: conversation.id,
+      nodes: result.nodes,
+      role: 'assistant',
+      token_count: result.total_tokens.input + result.total_tokens.output,
       tool_calls_json:
         result.tool_calls.length > 0 ? result.tool_calls : undefined,
-      nodes: result.nodes,
-      token_count: result.total_tokens.input + result.total_tokens.output,
     });
 
     const chatMessage: ChatMessage = {
-      id: assistantMessage.id,
-      role: 'assistant',
-      nodes: result.nodes,
-      sequence: assistantMessage.sequence,
       created_at: assistantMessage.created_at,
+      id: assistantMessage.id,
+      nodes: result.nodes,
+      role: 'assistant',
+      sequence: assistantMessage.sequence,
     };
     res.write(
-      `event: done\ndata: ${JSON.stringify({ type: 'done', message: chatMessage })}\n\n`,
+      `event: done\ndata: ${JSON.stringify({ message: chatMessage, type: 'done' })}\n\n`,
     );
     flushSSE(res);
   } catch (err) {
     logger.error({ err, tripId }, 'Agent loop failed');
     res.write(
-      `event: error\ndata: ${JSON.stringify({ type: 'error', error: 'Agent encountered an error' })}\n\n`,
+      `event: error\ndata: ${JSON.stringify({ error: 'Agent encountered an error', type: 'error' })}\n\n`,
     );
     flushSSE(res);
   } finally {
@@ -374,14 +378,14 @@ export async function getMessages(req: Request, res: Response) {
   const messages: ChatMessage[] = dbMessages
     .filter((m) => m.role !== 'tool')
     .map((m) => ({
+      created_at: m.created_at,
       id: m.id,
-      role: m.role as 'user' | 'assistant',
       nodes:
         m.nodes && m.nodes.length > 0
           ? m.nodes.map(normalizeLegacyNode)
-          : [{ type: 'text' as const, content: m.content ?? '' }],
+          : [{ content: m.content ?? '', type: 'text' as const }],
+      role: m.role as 'user' | 'assistant',
       sequence: m.sequence,
-      created_at: m.created_at,
     }));
 
   if (messages.length === 0) {
@@ -395,11 +399,11 @@ export async function getMessages(req: Request, res: Response) {
       : `Great choice! Let's plan your trip to **${trip.destination}**. When are you traveling, what's your budget, and where will you be coming from?`;
 
     messages.unshift({
-      id: 'welcome',
-      role: 'assistant',
-      nodes: [{ type: 'text', content: welcomeText }],
-      sequence: 0,
       created_at: new Date().toISOString(),
+      id: 'welcome',
+      nodes: [{ content: welcomeText, type: 'text' }],
+      role: 'assistant',
+      sequence: 0,
     });
   }
 

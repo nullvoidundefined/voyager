@@ -9,6 +9,8 @@ import { formatCurrency, formatShortDate } from '@/services/format';
 
 import styles from './CarRentalCard.module.scss';
 
+const PROVIDER_CODE_LENGTH = 2;
+
 interface CarRentalCardProps {
   rental: CarRental;
   selected?: boolean;
@@ -16,11 +18,13 @@ interface CarRentalCardProps {
 }
 
 export function CarRentalCard({
+  onClick,
   rental,
   selected = false,
-  onClick,
 }: CarRentalCardProps) {
-  const fallbackCode = rental.provider.slice(0, 2).toUpperCase();
+  const fallbackCode = rental.provider
+    .slice(0, PROVIDER_CODE_LENGTH)
+    .toUpperCase();
 
   return (
     <button

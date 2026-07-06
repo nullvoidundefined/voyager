@@ -25,8 +25,8 @@ export function experienceToOffer(item: unknown): Offer {
   const estimatedCost = experience.estimated_cost ?? 0;
 
   const detail: Record<string, string | number> = {
-    name: experience.name,
     estimated_cost: estimatedCost,
+    name: experience.name,
   };
   if (experience.category) detail.category = experience.category;
   if (typeof experience.rating === 'number') {
@@ -38,12 +38,12 @@ export function experienceToOffer(item: unknown): Offer {
     id: resolveOfferId(experience.id),
     title: experience.name,
     ...(experience.category ? { subtitle: experience.category } : {}),
-    selection_label: experience.name,
-    price: estimatedCost,
-    currency: experience.currency ?? 'USD',
-    price_unit: 'per_person',
     badges: [],
+    currency: experience.currency ?? 'USD',
     detail,
+    price: estimatedCost,
+    price_unit: 'per_person',
+    selection_label: experience.name,
     ...(experience.booking_url ? { booking_url: experience.booking_url } : {}),
     ...(typeof experience.lat === 'number' ? { lat: experience.lat } : {}),
     ...(typeof experience.lon === 'number' ? { lon: experience.lon } : {}),

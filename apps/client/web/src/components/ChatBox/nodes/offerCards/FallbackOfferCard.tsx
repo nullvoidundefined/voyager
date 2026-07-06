@@ -15,8 +15,8 @@ interface OfferCardProps {
 
 export function FallbackOfferCard({
   offer,
-  selected = false,
   onClick,
+  selected = false,
 }: OfferCardProps) {
   return (
     <button
