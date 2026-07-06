@@ -36,4 +36,16 @@ export interface SegmentCapability {
    *  prompt gates experiences on hotel while routing gates on flight. Prompt
    *  generation uses presentationRequires ?? requires. */
   presentationRequires?: SegmentKind[];
+  /** Opt-in cold-path web discovery for modes without a structured API; the
+   *  query builder turns the validated search params into a search string. */
+  webDiscovery?: {
+    buildQuery: (input: WebDiscoveryQueryInput) => string;
+  };
+}
+
+export interface WebDiscoveryQueryInput {
+  kind: SegmentKind;
+  region: string;
+  routeKey?: string;
+  params: Record<string, unknown>;
 }
