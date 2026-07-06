@@ -13,9 +13,11 @@ function getClient(): Anthropic {
 // grader's self-consistency on one model, not the product's
 // robustness. EVAL_JUDGE_MODEL overrides the default at run time so
 // the adversarial runner can iterate across (e.g.) claude-haiku-4-5,
-// claude-sonnet-4-20250514, claude-opus-4-7 and compare pass-rates.
-const DEFAULT_JUDGE_MODEL = 'claude-sonnet-4-20250514';
-function getJudgeModel(): string {
+// claude-sonnet-5, claude-opus-4-8 and compare pass-rates.
+// Exported so the retired-model regression test can pin the default:
+// claude-sonnet-4-20250514 retired and 404'd every eval run (2026-07-05).
+const DEFAULT_JUDGE_MODEL = 'claude-sonnet-5';
+export function getJudgeModel(): string {
   return process.env.EVAL_JUDGE_MODEL ?? DEFAULT_JUDGE_MODEL;
 }
 

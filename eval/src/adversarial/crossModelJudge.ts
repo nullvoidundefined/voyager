@@ -19,7 +19,7 @@
  *     tsx src/adversarial/crossModelJudge.ts
  *
  * Optional override of the model list:
- *   EVAL_JUDGE_MODELS=claude-haiku-4-5-20251001,claude-sonnet-4-20250514,claude-opus-4-7 \
+ *   EVAL_JUDGE_MODELS=claude-haiku-4-5-20251001,claude-sonnet-5,claude-opus-4-8 \
  *     pnpm ... tsx src/adversarial/crossModelJudge.ts
  *
  * Cost note: this triples (or 3x's) the adversarial eval cost
@@ -36,11 +36,11 @@ const __dirname = path.dirname(__filename);
 
 const DEFAULT_MODELS = [
   'claude-haiku-4-5-20251001',
-  'claude-sonnet-4-20250514',
-  'claude-opus-4-7',
+  'claude-sonnet-5',
+  'claude-opus-4-8',
 ];
 
-function getModels(): string[] {
+export function getCrossJudgeModels(): string[] {
   const env = process.env.EVAL_JUDGE_MODELS;
   if (!env) return DEFAULT_MODELS;
   return env
@@ -90,7 +90,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const models = getModels();
+  const models = getCrossJudgeModels();
   console.log(`Cross-model judge validation across ${models.length} models:`);
   models.forEach((m) => console.log(`  - ${m}`));
 

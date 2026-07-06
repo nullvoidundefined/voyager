@@ -397,3 +397,7 @@ Worktree commit `4945b06` maps Google Places types (`tourist_attraction`, `museu
 Worktree commit `667a88f` is docs-only: adds inline comments to complex orchestration code (agent.service.ts, node-builder.ts, hotels.tool.ts, CircuitBreaker.ts; +41 lines across 8 files). With the orchestrator architecture having changed materially since this commit (T5-T14 sub-agent rollout), the original comments may no longer match the current code. Likely skip; re-document in place if/when those files are touched again.
 
 **Scope:** Review whether any of the 8 files' current code is similar enough to the commit's old code that the comments would still be accurate. If yes, hand-apply selected comments. If no, drop this forward-port.
+
+## EVAL-01: judge failure discards completed persona conversations
+
+`eval/src/index.ts` wraps the conversation AND the judge in one try/catch; when `runJudge` throws (as it did on 2026-07-05 when the judge model id had retired), the catch zeroes out the persona result including the transcript and turn count of a conversation that ran and billed successfully. Split the error handling so a judge failure preserves the transcript and assertion scores, and only zeroes the judge dimensions.
