@@ -81,10 +81,10 @@ export async function getTripWithDetails(
 
   return {
     ...trip,
-    flights: flightsResult.rows,
-    hotels: hotelsResult.rows,
     car_rentals: carRentalsResult.rows,
     experiences: experiencesResult.rows,
+    flights: flightsResult.rows,
+    hotels: hotelsResult.rows,
   };
 }
 
@@ -144,7 +144,7 @@ export async function updateTrip(
 // Matches "YYYY-MM-DD HH:MM" / "YYYY-MM-DDTHH:MM" with optional seconds,
 // sub-seconds, and zone suffix; captures the date and the HH:MM.
 const DATE_TIME_SEGMENT_PATTERN =
-  /^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?$/;
+  /^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})(?::\d{2}(?:\.\d{1,9})?)?(?:Z|[+-]\d{2}:?\d{2})?$/;
 
 /**
  * Derives a stable per-trip dedupe key for a selection by joining canonicalized
@@ -338,23 +338,29 @@ export async function getActualCostsForTrip(
   );
 
   const row = result.rows[0];
-  // pg returns ARRAY_AGG as a JS array when the driver parses it, or as a
-  // Postgres literal string like '{50,75}' otherwise.
-  const rawCosts = row?.experience_costs;
-  const costsArray = Array.isArray(rawCosts)
-    ? rawCosts
-    : typeof rawCosts === 'string' && rawCosts.startsWith('{')
-      ? rawCosts.slice(1, -1).split(',').filter(Boolean)
-      : [];
   return {
-    total_budget: Number(row?.budget_total ?? 0),
+    car_rental_cost: Number(row?.car_rental_cost ?? 0),
+    experience_costs: listExperienceCosts(row?.experience_costs)
+      .map((cost) => Number(cost))
+      .filter((cost) => !Number.isNaN(cost)),
     flight_cost: Number(row?.flight_cost ?? 0),
     hotel_total_cost: Number(row?.hotel_total_cost ?? 0),
-    car_rental_cost: Number(row?.car_rental_cost ?? 0),
-    experience_costs: costsArray
-      .map((c) => Number(c))
-      .filter((n) => !Number.isNaN(n)),
+    total_budget: Number(row?.budget_total ?? 0),
   };
+}
+
+// pg returns ARRAY_AGG as a JS array when the driver parses it, or as a
+// Postgres literal string like '{50,75}' otherwise.
+function listExperienceCosts(
+  rawCosts: string[] | string | null | undefined,
+): string[] {
+  if (Array.isArray(rawCosts)) {
+    return rawCosts;
+  }
+  if (typeof rawCosts === 'string' && rawCosts.startsWith('{')) {
+    return rawCosts.slice(1, -1).split(',').filter(Boolean);
+  }
+  return [];
 }
 
 export async function clearSelectionsForTrip(tripId: string): Promise<void> {
