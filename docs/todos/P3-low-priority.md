@@ -398,6 +398,7 @@ Worktree commit `667a88f` is docs-only: adds inline comments to complex orchestr
 
 **Scope:** Review whether any of the 8 files' current code is similar enough to the commit's old code that the comments would still be accurate. If yes, hand-apply selected comments. If no, drop this forward-port.
 
-## EVAL-01: judge failure discards completed persona conversations
 
-`eval/src/index.ts` wraps the conversation AND the judge in one try/catch; when `runJudge` throws (as it did on 2026-07-05 when the judge model id had retired), the catch zeroes out the persona result including the transcript and turn count of a conversation that ran and billed successfully. Split the error handling so a judge failure preserves the transcript and assertion scores, and only zeroes the judge dimensions.
+## PRM-01: quota_exhausted message not surfaced verbatim
+
+`flightPrompt`/`hotelPrompt` instruct the agent to surface the quota_exhausted message verbatim ("monthly quota reached"), but in adversarial H1 runs it consistently paraphrases ("no live inventory for this route") - arguably friendlier. Decide: relax the verbatim instruction to match behavior, or tighten if the exact wording matters for support/debugging.

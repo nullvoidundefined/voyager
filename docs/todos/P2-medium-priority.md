@@ -27,3 +27,7 @@ The agent should emit `update_trip` tool_use when the form payload arrives, then
 The agent should emit a `format_response` containing a `plan_card` node on the first turn after trip details are collected, then wait for `planConfirmation` to advance. Add a `planCard` scenario that detects the absence of `plan_confirmed` in the booking_state and emits the plan card; once confirmed, advances to the search step.
 
 Once these two scenarios exist, restore US-19, US-23, and US-36 in `e2e/chat-booking-flow.spec.ts` and remove the `void tripUrl;` guard in `e2e/real/happy-path-real.spec.ts:169`.
+
+## ENR-01: state_dept advisory source returns HTML, JSON.parse fails every turn
+
+`apps/server/src/services/external/enrichmentSources/stateDept.ts` logs `SyntaxError: Unexpected token '<'` on every chat turn (seen throughout eval run 2026-07-06); the endpoint now serves an HTML page. Enrichment degrades silently. Add a content-type check and either fix the endpoint or drop the source.
