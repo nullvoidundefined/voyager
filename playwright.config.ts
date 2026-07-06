@@ -106,6 +106,15 @@ export default defineConfig({
     {
       command: 'npx next dev --port 3000',
       cwd: path.resolve(ROOT_DIR, 'apps/client/web'),
+      env: {
+        ...(process.env as Record<string, string>),
+        // The trip-map pins query is gated on this token. Airport pins
+        // resolve through the backend IATA endpoint and need no real
+        // token, so CI (which has none) gets a dummy value; specs block
+        // api.mapbox.com themselves.
+        NEXT_PUBLIC_MAPBOX_TOKEN:
+          process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? 'pk.e2e-dummy-token',
+      },
       port: 3000,
       reuseExistingServer: !process.env.CI,
       timeout: 30_000,

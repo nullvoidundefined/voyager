@@ -1,13 +1,18 @@
 /**
- * Express router for the places surface, exposing the photo-proxy endpoint.
- * Keeps places route wiring separate from the handler that hides the Google API
- * key.
+ * Express router for the places surface, exposing the photo-proxy and
+ * airport-coordinates endpoints. Keeps places route wiring separate from the
+ * handlers.
  */
 import express from 'express';
 
+import { airportCoordinatesHandler } from 'app/handlers/airportCoordinates.handler.js';
 import { photoProxyHandler } from 'app/handlers/photoProxy.handler.js';
 
 const placesRouter = express.Router();
+
+// Public reference data: IATA code -> city coordinates for trip-map pins.
+// Backed by the local CITY_DATABASE, never free-text geocoding.
+placesRouter.get('/airport/:code', airportCoordinatesHandler);
 
 // SEC-01 (2026-04-06 audit): the photo proxy is protected by strict
 // ref-format validation in photoProxyHandler (PHOTO_REF_PATTERN) which

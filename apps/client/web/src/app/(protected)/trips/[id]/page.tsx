@@ -25,12 +25,12 @@ import type { Leg } from '@/components/LegList/LegList';
 import { LegList } from '@/components/LegList/LegList';
 import { Skeleton } from '@/components/Skeleton/Skeleton';
 import { Toast } from '@/components/Toast/Toast';
-import type { MapPin } from '@/components/TripMap/TripMap';
 import { TripMap } from '@/components/TripMap/TripMap';
 import { budgetBarDivisor, isOverBudget } from '@/services/budget';
 import { getDestinationImage } from '@/services/destinationImage';
 import { downloadICS } from '@/services/exportIcs';
 import { formatCurrency, formatShortDate } from '@/services/format';
+import { buildTripMapPins } from '@/services/tripMapPins';
 
 import styles from './tripDetail.module.scss';
 
@@ -38,6 +38,9 @@ const TripPDFButton = dynamic(
   () => import('@/components/TripPDF/TripPDF').then((m) => m.TripPDFButton),
   { ssr: false },
 );
+
+// Converts a 0-1 budget ratio to a CSS percentage width.
+const PERCENT_MULTIPLIER = 100;
 
 interface TripFlight {
   id: string;
@@ -111,20 +114,20 @@ export default function TripDetailPage() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['trips', id],
     queryFn: () => get<{ trip: Trip }>(`/trips/${id}`).then((r) => r.trip),
+    queryKey: ['trips', id],
   });
 
   const { data: legsData } = useQuery({
-    queryKey: ['trip-legs', id],
-    queryFn: () => get<{ legs: Leg[] }>(`/trips/${id}/legs`),
     enabled: trip?.trip_structure === 'multi_city',
+    queryFn: () => get<{ legs: Leg[] }>(`/trips/${id}/legs`),
+    queryKey: ['trip-legs', id],
   });
 
   const { data: scheduleData } = useQuery({
-    queryKey: ['trip-schedule', id],
-    queryFn: () => get<{ days: ScheduleDay[] }>(`/trips/${id}/schedule`),
     enabled: !!id,
+    queryFn: () => get<{ days: ScheduleDay[] }>(`/trips/${id}/schedule`),
+    queryKey: ['trip-schedule', id],
   });
 
   // Map pins are derived server state (Mapbox geocoding), so they live in
@@ -132,6 +135,9 @@ export default function TripDetailPage() {
   // geocode inputs so pins re-resolve when hotels/experiences/flights change
   // but stay cached (no re-geocoding) across navigation when they do not.
   const { data: pins = [] } = useQuery({
+    enabled: !!trip && !!process.env.NEXT_PUBLIC_MAPBOX_TOKEN,
+    queryFn: () =>
+      buildTripMapPins(trip!, process.env.NEXT_PUBLIC_MAPBOX_TOKEN!),
     queryKey: [
       'trip-map-pins',
       id,
@@ -144,9 +150,6 @@ export default function TripDetailPage() {
           })
         : null,
     ],
-    enabled: !!trip && !!process.env.NEXT_PUBLIC_MAPBOX_TOKEN,
-    queryFn: () =>
-      buildTripMapPins(trip!, process.env.NEXT_PUBLIC_MAPBOX_TOKEN!),
   });
 
   const handleConfirmBooking = useCallback(async () => {
@@ -214,7 +217,7 @@ export default function TripDetailPage() {
     trip.budget_total != null && Number.isFinite(trip.budget_total - allocated)
       ? trip.budget_total - allocated
       : null;
-  const budgetState = { budgetTotal: trip.budget_total, allocated };
+  const budgetState = { allocated, budgetTotal: trip.budget_total };
   const overBudget = isOverBudget(budgetState);
   const barDivisor = budgetBarDivisor(budgetState);
 
@@ -229,24 +232,24 @@ export default function TripDetailPage() {
         id: f.id,
         label:
           `${f.airline ?? ''} ${f.flight_number ?? ''} ${f.origin} to ${f.destination}`.trim(),
-        url: f.booking_url!,
         type: 'flight' as const,
+        url: f.booking_url!,
       })),
     ...trip.hotels
       .filter((h) => h.booking_url)
       .map((h) => ({
         id: h.id,
         label: h.name ?? 'Hotel',
-        url: h.booking_url!,
         type: 'hotel' as const,
+        url: h.booking_url!,
       })),
     ...trip.car_rentals
       .filter((c) => c.booking_url)
       .map((c) => ({
         id: c.id,
         label: `${c.provider} ${c.car_name}`,
-        url: c.booking_url!,
         type: 'car_rental' as const,
+        url: c.booking_url!,
       })),
   ];
 
@@ -426,8 +429,8 @@ export default function TripDetailPage() {
                   <div
                     className={styles.budgetSegment}
                     style={{
-                      width: `${(flightTotal / barDivisor) * 100}%`,
                       background: 'var(--ocean)',
+                      width: `${(flightTotal / barDivisor) * PERCENT_MULTIPLIER}%`,
                     }}
                   />
                 )}
@@ -435,8 +438,8 @@ export default function TripDetailPage() {
                   <div
                     className={styles.budgetSegment}
                     style={{
-                      width: `${(hotelTotal / barDivisor) * 100}%`,
                       background: 'var(--sand)',
+                      width: `${(hotelTotal / barDivisor) * PERCENT_MULTIPLIER}%`,
                     }}
                   />
                 )}
@@ -444,8 +447,8 @@ export default function TripDetailPage() {
                   <div
                     className={styles.budgetSegment}
                     style={{
-                      width: `${(experienceTotal / barDivisor) * 100}%`,
                       background: 'var(--lagoon)',
+                      width: `${(experienceTotal / barDivisor) * PERCENT_MULTIPLIER}%`,
                     }}
                   />
                 )}
@@ -453,8 +456,8 @@ export default function TripDetailPage() {
                   <div
                     className={styles.budgetSegment}
                     style={{
-                      width: `${(carRentalTotal / barDivisor) * 100}%`,
                       background: 'var(--sunset)',
+                      width: `${(carRentalTotal / barDivisor) * PERCENT_MULTIPLIER}%`,
                     }}
                   />
                 )}
@@ -685,80 +688,4 @@ export default function TripDetailPage() {
       )}
     </div>
   );
-}
-
-async function buildTripMapPins(trip: Trip, token: string): Promise<MapPin[]> {
-  const tasks: Promise<MapPin | null>[] = [];
-
-  for (const hotel of trip.hotels) {
-    const query = [hotel.name, hotel.city].filter(Boolean).join(', ');
-    if (!query) continue;
-    tasks.push(
-      geocodePlace(query, token).then((coords) =>
-        coords
-          ? {
-              id: hotel.id,
-              lat: coords[1],
-              lng: coords[0],
-              label: hotel.name ?? 'Hotel',
-              type: 'hotel' as const,
-            }
-          : null,
-      ),
-    );
-  }
-
-  for (const exp of trip.experiences) {
-    if (!exp.name) continue;
-    tasks.push(
-      geocodePlace(`${exp.name}, ${trip.destination}`, token).then((coords) =>
-        coords
-          ? {
-              id: exp.id,
-              lat: coords[1],
-              lng: coords[0],
-              label: exp.name!,
-              type: 'experience' as const,
-            }
-          : null,
-      ),
-    );
-  }
-
-  const seenAirports = new Set<string>();
-  for (const flight of trip.flights) {
-    for (const code of [flight.origin, flight.destination]) {
-      if (!code || seenAirports.has(code)) continue;
-      seenAirports.add(code);
-      tasks.push(
-        geocodePlace(`${code} airport`, token).then((coords) =>
-          coords
-            ? {
-                id: `airport-${code}`,
-                lat: coords[1],
-                lng: coords[0],
-                label: `${code} Airport`,
-                type: 'leg' as const,
-              }
-            : null,
-        ),
-      );
-    }
-  }
-
-  const results = await Promise.all(tasks);
-  return results.filter((p): p is MapPin => p !== null);
-}
-
-async function geocodePlace(
-  query: string,
-  token: string,
-): Promise<[number, number] | null> {
-  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${token}&limit=1`;
-  const res = await fetch(url);
-  if (!res.ok) return null;
-  const data = (await res.json()) as {
-    features: { center: [number, number] }[];
-  };
-  return data.features[0]?.center ?? null;
 }
