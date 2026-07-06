@@ -89,6 +89,13 @@ jobs:
       - name: Web-client unit tests with coverage
         run: pnpm --filter voyager-web run test:coverage
 
+      # Audit 2026-07-06 F-01: the eval harness (adversarial attacks, judges,
+      # scoring assertions) is fully offline/mockable and was never wired into
+      # CI, so regressions in the eval guardrail shipped silently. Runs after
+      # "Build server" because serverPoolPath.test.ts asserts against dist/.
+      - name: Eval harness tests
+        run: pnpm --filter voyager-eval test
+
       - name: Server integration tests
         run: pnpm --filter voyager-server run test:integration
         env:

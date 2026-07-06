@@ -4,14 +4,6 @@ Fix in the first work session. These are trust-breakers, layout inversions, or m
 
 ---
 
-## Wire the eval test suite into CI (audit 2026-07-06, F-01)
-
-The 12 eval test files (91 tests: adversarial harness, judges, scoring assertions) are fully mockable/offline but `.github/workflows/ci.yml` never runs them, so regressions in the eval harness ship silently.
-
-**Why P1:** the adversarial suite is the guardrail for the multimodal paths; an unwired guardrail is a false sense of coverage. Fix is a CI job step (`pnpm -C eval exec vitest run`), no secrets needed.
-
----
-
 ## Sign Anthropic DPA
 
 Every registered user's messages are sent to Anthropic. Without a signed DPA, no GDPR data subject deletion request can be honored downstream.
