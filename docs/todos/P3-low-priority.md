@@ -4,6 +4,18 @@ Nice-to-haves, minor polish, and cleanup. Fix when touching the relevant file or
 
 ---
 
+## Engineering Audit (2026-07-06)
+
+### F-06: judge default model inconsistent across judge modules
+
+`eval/src/adversarial/judge.ts:19` defaults to `claude-sonnet-4-6` while `eval/src/scoring/judge.ts` defaults to `claude-sonnet-5`. Align on one default (env override already exists in both).
+
+### F-07: commit `7eb0410` labels the subAgentService R-319 module split as `style:`
+
+Historical mislabel (5 subAgent* files split in a style-tagged commit); not rewritable, recorded so the pattern is watched in review.
+
+---
+
 ## Engineering Audit (2026-05-28)
 
 ### `eval/personas-cache.json` Committed to Repo
