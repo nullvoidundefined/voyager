@@ -60,6 +60,18 @@ export async function getCustomerResponse(
     content: t.content,
   }));
 
+  // The inverted history starts with the customer's own opener (assistant),
+  // which the API rejects as the first message. Seed a user turn so every
+  // request is valid; without this, every customer reply silently fell back
+  // to canned strings.
+  if (messages[0]?.role === 'assistant') {
+    messages.unshift({
+      role: 'user',
+      content:
+        '[You reached the Voyager travel agent. Start or continue the conversation.]',
+    });
+  }
+
   const response = await getClient().messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 300,

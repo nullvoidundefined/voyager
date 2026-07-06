@@ -103,3 +103,22 @@ describe('judges send no assistant prefill', () => {
     expect(verdict.refusal_quality).toBe('graceful');
   });
 });
+
+describe('customer simulator message shape', () => {
+  it('never sends a conversation starting or ending with an assistant message', async () => {
+    createMessage.mockResolvedValue({
+      content: [{ type: 'text', text: 'Sounds great!' }],
+    });
+    const { getCustomerResponse } = await import('../runner/customerAgent.js');
+    await getCustomerResponse(PERSONA, [
+      { role: 'user', content: 'I want to go to Prague' }, // customer opener
+      { role: 'assistant', content: 'Great! When are you traveling?' }, // agent
+    ]);
+
+    const request = createMessage.mock.calls[0]![0] as {
+      messages: Array<{ role: string }>;
+    };
+    expect(request.messages[0]!.role).toBe('user');
+    expect(request.messages[request.messages.length - 1]!.role).toBe('user');
+  });
+});
