@@ -104,7 +104,7 @@ async function main() {
       join(serverDist, 'services', 'cache', 'tokenBudgetService.js')
     );
     resetTokenBudget = budgetModule.resetTokenBudget;
-    const dbModule = await import(join(serverDist, 'db', 'pool', 'pool.js'));
+    const dbModule = await import(join(serverDist, 'database', 'pool.js'));
     query = dbModule.query;
   } catch (err) {
     console.error('Failed to import server modules. Build the server first:');
