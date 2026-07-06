@@ -62,6 +62,20 @@ describe('buildOfferTilesNode', () => {
     }
   });
 
+  // Audit 2026-07-06 F-03: the local item extractor lacked the null guard
+  // extractResultItems has, so a tool returning null/undefined crashed the
+  // node build with a TypeError instead of rendering an empty tile list.
+  it('returns empty offers instead of throwing when the result is null or undefined', () => {
+    for (const emptyResult of [null, undefined]) {
+      const node = buildOfferTilesNode(ferryCapability, emptyResult);
+      if (node?.type === 'offer_tiles') {
+        expect(node.offers).toEqual([]);
+      } else {
+        throw new Error('expected offer_tiles node');
+      }
+    }
+  });
+
   it('returns empty offers when the result has neither array nor named key', () => {
     const node = buildOfferTilesNode(ferryCapability, { unrelated: true });
     if (node?.type === 'offer_tiles') {

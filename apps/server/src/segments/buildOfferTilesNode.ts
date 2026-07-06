@@ -6,6 +6,7 @@
  */
 import type { ChatNode } from '@repo/types';
 
+import { extractResultItems } from 'app/segments/extractResultItems.js';
 import type { SegmentCapability } from 'app/segments/segmentCapability.js';
 
 export function buildOfferTilesNode(
@@ -13,7 +14,7 @@ export function buildOfferTilesNode(
   result: unknown,
 ): ChatNode | null {
   if (!shouldRenderTiles(result)) return null;
-  const items = extractItems(result, capability.resultListKey);
+  const items = extractResultItems(result, capability.resultListKey);
   return {
     offer_kind: capability.tileKind,
     offers: items.map((item) => capability.toOffer(item)),
@@ -30,13 +31,4 @@ function shouldRenderTiles(result: unknown): boolean {
   const status = (result as { status?: unknown }).status;
   if (typeof status !== 'string') return true;
   return status === 'ok';
-}
-
-// Tool results may be arrays directly (e.g. search_flights returns Flight[])
-// or objects with a named key (e.g. { flights: Flight[] }). Handle both.
-function extractItems(result: unknown, key: string): unknown[] {
-  if (Array.isArray(result)) return result;
-  const data = result as Record<string, unknown>;
-  if (Array.isArray(data[key])) return data[key] as unknown[];
-  return [];
 }

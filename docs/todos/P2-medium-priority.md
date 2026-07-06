@@ -6,10 +6,6 @@ All code-side P2 items shipped. Remaining work is either follow-up to user-actio
 
 ## Engineering Audit (2026-07-06)
 
-### F-03: `buildOfferTilesNode.ts` duplicates `extractResultItems` minus the null guard
-
-`apps/server/src/segments/buildOfferTilesNode.ts:37-42` carries a private `extractItems` that duplicates `extractResultItems.ts` but skips the `result == null || typeof result !== 'object'` guard. Verified crash path: `shouldRenderTiles(null)` returns `true`, so a tool returning `null` reaches `data[key]` on `null` and throws. Fix: delete the local copy, import `extractResultItems`.
-
 ### F-02: eval tests regress the package `__tests__/` convention (R-313/R-314)
 
 Nine co-located `*.test.ts` in `eval/src/adversarial/` plus `eval/src/scoring/assertions.test.ts`, while `eval/src/__tests__/` already exists with three tests. Move the co-located files into `eval/src/__tests__/` mirroring source paths.
