@@ -160,7 +160,7 @@ describe('insertTripFlight string-price coercion', () => {
     expect(typeof values[priceIndex]).toBe('number');
   });
 
-  it('upserts via ON CONFLICT on the selection dedupe key', async () => {
+  it('upserts via ON CONFLICT on the canonical route+departure dedupe key', async () => {
     await insertTripFlight('trip-789', {
       airline: 'Iberia',
       flight_number: 'IB3156',
@@ -172,38 +172,102 @@ describe('insertTripFlight string-price coercion', () => {
     const sql = mockQuery.mock.calls[0]![0] as string;
     const values = mockQuery.mock.calls[0]![1] as unknown[];
     expect(sql).toContain('ON CONFLICT (trip_id, selection_key) DO UPDATE');
-    // selection_key is derived from booking_url and bound as the last value.
-    expect(values[values.length - 1]).toBe('https://book/xyz');
+    // selection_key derives from route + departure instant, never booking_url.
+    expect(values[values.length - 1]).toBe('jfk|mad|2026-07-01T10:00');
   });
 });
 
 describe('buildSelectionKey', () => {
-  it('uses booking_url as the key when present', () => {
+  it('joins canonicalized key columns and ignores booking_url', () => {
     expect(
-      buildSelectionKey({ booking_url: 'https://book/abc', name: 'X' }, [
-        'name',
-      ]),
-    ).toBe('https://book/abc');
+      buildSelectionKey(
+        { booking_url: 'https://book/abc', name: 'Louvre Tour' },
+        ['name'],
+      ),
+    ).toBe('louvre tour');
   });
 
-  it('falls back to joined key columns when booking_url is absent', () => {
+  it('joins key columns lowercased and trimmed', () => {
     expect(
-      buildSelectionKey({ airline: 'Iberia', flight_number: 'IB3156' }, [
+      buildSelectionKey({ airline: ' Iberia ', flight_number: 'IB3156' }, [
         'airline',
         'flight_number',
       ]),
-    ).toBe('Iberia|IB3156');
-  });
-
-  it('treats an empty booking_url as absent', () => {
-    expect(
-      buildSelectionKey({ booking_url: '', name: 'Louvre' }, ['name']),
-    ).toBe('Louvre');
+    ).toBe('iberia|ib3156');
   });
 
   it('renders missing key columns as empty segments', () => {
     expect(buildSelectionKey({ name: 'Louvre' }, ['name', 'category'])).toBe(
-      'Louvre|',
+      'louvre|',
+    );
+  });
+});
+
+describe('flight selection dedupe key (2026-07-06 duplicate-flight incident)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockQuery.mockResolvedValue({ rows: [], rowCount: 1 } as never);
+  });
+
+  // Captured from production tool_call_log, conversation d0c7419a: the
+  // tile-click POST and the agent's select_flight persisted the SAME
+  // flight with paraphrased airline/flight_number strings and different
+  // timestamp formats, producing two selection_keys and a double-counted
+  // budget. The key must derive only from fields both writers state
+  // identically (route + departure instant), canonicalized.
+  const tileClickPayload = {
+    airline: 'American',
+    flight_number: 'AA 2614',
+    origin: 'SFO',
+    destination: 'AUH',
+    departure_time: '2026-07-08 06:04',
+    price: 1186,
+    currency: 'USD',
+  };
+  const agentSelectPayload = {
+    airline: 'American and Etihad',
+    flight_number: 'AA 2614 - EY 12',
+    origin: 'SFO',
+    destination: 'AUH',
+    departure_time: '2026-07-08T06:04:00',
+    price: 1186,
+    currency: 'USD',
+  };
+
+  it('binds the same selection_key for the tile-click and agent payloads', async () => {
+    await insertTripFlight('trip-1', tileClickPayload);
+    await insertTripFlight('trip-1', agentSelectPayload);
+    const firstValues = mockQuery.mock.calls[0]![1] as unknown[];
+    const secondValues = mockQuery.mock.calls[1]![1] as unknown[];
+    expect(firstValues[firstValues.length - 1]).toBe(
+      secondValues[secondValues.length - 1],
+    );
+  });
+
+  it('a booking_url present on only one writer does not split the key', async () => {
+    await insertTripFlight('trip-1', {
+      ...tileClickPayload,
+      booking_url: 'https://serpapi/booking/abc123',
+    });
+    await insertTripFlight('trip-1', agentSelectPayload);
+    const firstValues = mockQuery.mock.calls[0]![1] as unknown[];
+    const secondValues = mockQuery.mock.calls[1]![1] as unknown[];
+    expect(firstValues[firstValues.length - 1]).toBe(
+      secondValues[secondValues.length - 1],
+    );
+  });
+
+  it('canonicalizes timestamp format and letter case in key segments', () => {
+    expect(
+      buildSelectionKey({ departure_time: '2026-07-08 06:04', origin: 'SFO' }, [
+        'origin',
+        'departure_time',
+      ]),
+    ).toBe(
+      buildSelectionKey(
+        { departure_time: '2026-07-08T06:04:00', origin: 'sfo' },
+        ['origin', 'departure_time'],
+      ),
     );
   });
 });

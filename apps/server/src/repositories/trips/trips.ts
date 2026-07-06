@@ -141,20 +141,36 @@ export async function updateTrip(
   return result.rows[0] ?? null;
 }
 
+// Matches "YYYY-MM-DD HH:MM" / "YYYY-MM-DDTHH:MM" with optional seconds,
+// sub-seconds, and zone suffix; captures the date and the HH:MM.
+const DATE_TIME_SEGMENT_PATTERN =
+  /^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?$/;
+
 /**
- * Derives a stable per-trip dedupe key for a selection. Prefers the booking_url
- * (the most specific identifier); falls back to joining the natural-key columns
- * so re-selecting the same item never inserts a duplicate row.
+ * Derives a stable per-trip dedupe key for a selection by joining canonicalized
+ * natural-key columns. Two writers persist the same selection with different
+ * surface forms (the deterministic tile-click POST and the agent's select_*
+ * paraphrase; see the 2026-07-06 duplicate-flight incident), so the key uses
+ * only fields both writers state identically, lowercased, with timestamps
+ * normalized to YYYY-MM-DDTHH:MM. booking_url is deliberately NOT used: it is
+ * present on only some writers and would split the key.
  */
 export function buildSelectionKey(
   input: Record<string, unknown>,
   keyColumns: string[],
 ): string {
-  const bookingUrl = input.booking_url;
-  if (typeof bookingUrl === 'string' && bookingUrl.length > 0) {
-    return bookingUrl;
+  return keyColumns
+    .map((column) => canonicalizeKeySegment(input[column]))
+    .join('|');
+}
+
+function canonicalizeKeySegment(value: unknown): string {
+  const trimmed = String(value ?? '').trim();
+  const dateTimeMatch = DATE_TIME_SEGMENT_PATTERN.exec(trimmed);
+  if (dateTimeMatch) {
+    return `${dateTimeMatch[1]}T${dateTimeMatch[2]}`;
   }
-  return keyColumns.map((column) => String(input[column] ?? '')).join('|');
+  return trimmed.toLowerCase();
 }
 
 /**
@@ -216,7 +232,10 @@ export async function insertTripFlight(
       'currency',
       'booking_url',
     ],
-    ['airline', 'flight_number', 'origin', 'destination', 'departure_time'],
+    // Route + departure instant only: airline and flight_number are excluded
+    // because the agent paraphrases them ("American + Etihad", "AA 2614 / EY
+    // 12") while the tile path sends the canonical strings, splitting the key.
+    ['origin', 'destination', 'departure_time'],
     input,
     new Set(['price']),
   );
