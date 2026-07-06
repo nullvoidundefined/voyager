@@ -28,6 +28,11 @@ config({ path: resolve(process.cwd(), '../apps/server/.env') });
 const { Pool } = pg;
 
 const QUERY_LIMIT = parseInt(process.env.LIMIT ?? '25', 10);
+const DIMENSION_PRECISION = 10;
+const SCORE_PRECISION = 100;
+const PERCENT = 100;
+const ID_PREVIEW_LENGTH = 8;
+const DATE_PART_LENGTH = 10;
 
 interface MessageRow {
   id: string;
@@ -125,19 +130,19 @@ function isPlanningTurn(row: MessageRow): boolean {
 
 function buildTurnInput(row: MessageRow): PlanTurnInput {
   const tripContext: TripContext = {
+    budget_currency: row.budget_currency,
+    budget_total: row.budget_total,
+    departure_date: row.departure_date ?? '',
     destination: row.destination,
     origin: row.origin ?? 'unknown',
-    budget_total: row.budget_total,
-    budget_currency: row.budget_currency,
-    travelers: row.travelers,
-    departure_date: row.departure_date ?? '',
     return_date: row.return_date ?? null,
+    travelers: row.travelers,
   };
   return {
-    user_input: row.user_message,
-    trip_context: tripContext,
-    tool_calls: row.tool_calls_json ?? [],
     response_nodes: row.nodes,
+    tool_calls: row.tool_calls_json ?? [],
+    trip_context: tripContext,
+    user_input: row.user_message,
   };
 }
 
@@ -148,8 +153,8 @@ async function scoreAllTurns(rows: MessageRow[]): Promise<ScoredTurn[]> {
     try {
       const result = await runPlanJudge(input);
       results.push({
-        id: row.id,
         created_at: row.created_at,
+        id: row.id,
         input,
         result,
         score: computePlanScore(result),
@@ -190,7 +195,9 @@ function computeDimensionAverages(
   }
   const averages: Record<string, number> = {};
   for (const [dim, total] of Object.entries(sums)) {
-    averages[dim] = Math.round((total / (counts[dim] ?? 1)) * 10) / 10;
+    averages[dim] =
+      Math.round((total / (counts[dim] ?? 1)) * DIMENSION_PRECISION) /
+      DIMENSION_PRECISION;
   }
   return averages;
 }
@@ -207,8 +214,9 @@ function printReport(
   const overallAvg =
     validScores.length > 0
       ? Math.round(
-          (validScores.reduce((s, v) => s + v, 0) / validScores.length) * 100,
-        ) / 100
+          (validScores.reduce((s, v) => s + v, 0) / validScores.length) *
+            SCORE_PRECISION,
+        ) / SCORE_PRECISION
       : 0;
   const dimAvgs = computeDimensionAverages(scored);
   const flags = tallyFlags(scored);
@@ -237,18 +245,18 @@ function printFlagFrequencies(flags: FlagTally, total: number): void {
   for (const [flag, count] of Object.entries(flags).sort(
     (a, b) => b[1] - a[1],
   )) {
-    const pct = Math.round((count / total) * 100);
+    const pct = Math.round((count / total) * PERCENT);
     console.info(`  ${flag}: ${count}/${total} (${pct}%)`);
   }
 }
 
 function printPerTurnScores(scored: ScoredTurn[]): void {
   console.info('\nPer-turn scores (newest first):');
-  for (const { id, created_at, score, result } of scored) {
+  for (const { created_at, id, result, score } of scored) {
     const flagStr =
       result.flags.length > 0 ? ` [${result.flags.join(', ')}]` : '';
     console.info(
-      `  ${id.slice(0, 8)} ${created_at.slice(0, 10)} score=${score}${flagStr}`,
+      `  ${id.slice(0, ID_PREVIEW_LENGTH)} ${created_at.slice(0, DATE_PART_LENGTH)} score=${score}${flagStr}`,
     );
     console.info(`    ${result.verdict}`);
   }

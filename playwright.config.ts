@@ -9,8 +9,20 @@ import { defineConfig, devices } from '@playwright/test';
 // (where the @playwright/test binary lives).
 const ROOT_DIR = __dirname;
 
+// ENG-13 (2026-04-06): bump CI workers from 1 to 2. The
+// E2E suite was sequential because the seedUser fixture races
+// on /auth/register if multiple workers hit the same DB row
+// by coincidence. Two workers is the largest safe value:
+// each test seeds a unique email (uniq() in test-users.ts)
+// so collisions are impossible, and Playwright distributes
+// specs round-robin so the two workers stay balanced. Higher
+// worker counts on a single Postgres instance start hitting
+// pool exhaustion (server pool max=10) when chat-flow tests
+// also start firing.
+const CI_WORKERS = 2;
+const CI_RETRIES = 2;
+
 export default defineConfig({
-  testDir: path.resolve(ROOT_DIR, 'e2e'),
   // ENG-14 (2026-04-06): run scripts/e2e-smoke.sh once after the
   // webServers report ready and before any spec executes. The
   // smoke validates that the server is healthy AND that CORS is
@@ -18,32 +30,22 @@ export default defineConfig({
   // Playwright aborts in seconds with a clear error instead of
   // letting every spec time out three times.
   globalSetup: path.resolve(ROOT_DIR, 'playwright.global-setup.ts'),
-  timeout: 30_000,
-  retries: process.env.CI ? 2 : 1,
-  // ENG-13 (2026-04-06): bump CI workers from 1 to 2. The
-  // E2E suite was sequential because the seedUser fixture races
-  // on /auth/register if multiple workers hit the same DB row
-  // by coincidence. Two workers is the largest safe value:
-  // each test seeds a unique email (uniq() in test-users.ts)
-  // so collisions are impossible, and Playwright distributes
-  // specs round-robin so the two workers stay balanced. Higher
-  // worker counts on a single Postgres instance start hitting
-  // pool exhaustion (server pool max=10) when chat-flow tests
-  // also start firing.
-  workers: process.env.CI ? 2 : undefined,
-  reporter: process.env.CI ? 'html' : 'list',
-  use: {
-    baseURL: 'http://localhost:3000',
-    headless: true,
-    screenshot: 'only-on-failure',
-    trace: 'on-first-retry',
-  },
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
   ],
+  reporter: process.env.CI ? 'html' : 'list',
+  retries: process.env.CI ? CI_RETRIES : 1,
+  testDir: path.resolve(ROOT_DIR, 'e2e'),
+  timeout: 30_000,
+  use: {
+    baseURL: 'http://localhost:3000',
+    headless: true,
+    screenshot: 'only-on-failure',
+    trace: 'on-first-retry',
+  },
   webServer: [
     {
       command: 'npx tsx src/index.ts',
@@ -54,9 +56,6 @@ export default defineConfig({
       // `cd server && ...` shell trick we previously used
       // crashed in CI because apps/client/web/server does not exist.
       cwd: path.resolve(ROOT_DIR, 'apps/server'),
-      port: 3001,
-      timeout: 15_000,
-      reuseExistingServer: !process.env.CI,
       env: {
         // Forward the parent process env so DATABASE_URL,
         // REDIS_URL, and other server boot requirements survive.
@@ -64,8 +63,8 @@ export default defineConfig({
         // wholesale and the server crashes with "DATABASE_URL is
         // required" before any test runs.
         ...(process.env as Record<string, string>),
-        PORT: '3001',
         NODE_ENV: 'test',
+        PORT: '3001',
         // ENG-16 (2026-04-07): prefer DATABASE_URL_E2E_LOCAL over
         // the inherited DATABASE_URL when it is set. This lets
         // a developer point local e2e runs at a dedicated test
@@ -78,35 +77,39 @@ export default defineConfig({
         ...(process.env.DATABASE_URL_E2E_LOCAL
           ? { DATABASE_URL: process.env.DATABASE_URL_E2E_LOCAL }
           : {}),
-        // Plan B: force the server to use mock tool adapters so
-        // E2E runs do not burn real SerpApi / Google Places
-        // quota.
-        E2E_MOCK_TOOLS: '1',
-        // Option B (2026-04-06): swap the real Anthropic SDK for
-        // a deterministic stub so the suite needs no API key
-        // and burns no tokens. The orchestrator falls back to
-        // the real client when this is unset.
-        E2E_MOCK_ANTHROPIC: '1',
-        // The 35 story specs each call /auth/register from the
-        // same IP. Without bypassing the auth rate limit (10 per
-        // 15 min) the run would 429 after the 10th test. Unit
-        // and integration tests do NOT set this flag and still
-        // exercise the limiter behavior.
-        E2E_BYPASS_RATE_LIMITS: '1',
         // The corsConfig default is http://localhost:5173 (a
         // legacy Vite port). Next.js dev runs on :3000, so
         // without this override every browser request from the
         // test runner is blocked with net::ERR_FAILED before it
         // even reaches the auth handler.
         CORS_ORIGIN: 'http://localhost:3000',
+        // The 35 story specs each call /auth/register from the
+        // same IP. Without bypassing the auth rate limit (10 per
+        // 15 min) the run would 429 after the 10th test. Unit
+        // and integration tests do NOT set this flag and still
+        // exercise the limiter behavior.
+        E2E_BYPASS_RATE_LIMITS: '1',
+        // Option B (2026-04-06): swap the real Anthropic SDK for
+        // a deterministic stub so the suite needs no API key
+        // and burns no tokens. The orchestrator falls back to
+        // the real client when this is unset.
+        E2E_MOCK_ANTHROPIC: '1',
+        // Plan B: force the server to use mock tool adapters so
+        // E2E runs do not burn real SerpApi / Google Places
+        // quota.
+        E2E_MOCK_TOOLS: '1',
       },
+      port: 3001,
+      reuseExistingServer: !process.env.CI,
+      timeout: 15_000,
     },
     {
       command: 'npx next dev --port 3000',
       cwd: path.resolve(ROOT_DIR, 'apps/client/web'),
       port: 3000,
-      timeout: 30_000,
       reuseExistingServer: !process.env.CI,
+      timeout: 30_000,
     },
   ],
+  workers: process.env.CI ? CI_WORKERS : undefined,
 });

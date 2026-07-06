@@ -9,6 +9,7 @@ import type { ReadableStream as WebReadableStream } from 'node:stream/web';
 import type { Request, Response } from 'express';
 
 import { env } from 'app/config/env.js';
+import { HTTP_STATUS } from 'app/constants/httpStatus.js';
 
 const GOOGLE_API_KEY = env.GOOGLE_PLACES_API_KEY ?? '';
 
@@ -43,7 +44,7 @@ export async function photoProxyHandler(req: Request, res: Response) {
 
   if (!ref) {
     res
-      .status(400)
+      .status(HTTP_STATUS.BAD_REQUEST)
       .json({ error: 'MISSING_PARAM', message: 'ref is required' });
     return;
   }
@@ -51,7 +52,7 @@ export async function photoProxyHandler(req: Request, res: Response) {
   // SEC-01: reject malformed or potentially malicious ref values
   // before touching the upstream API.
   if (!PHOTO_REF_PATTERN.test(ref)) {
-    res.status(400).json({
+    res.status(HTTP_STATUS.BAD_REQUEST).json({
       error: 'INVALID_REF',
       message: 'ref must match Google Places photo reference format',
     });
@@ -75,6 +76,6 @@ export async function photoProxyHandler(req: Request, res: Response) {
 
     Readable.fromWeb(response.body as WebReadableStream).pipe(res);
   } catch {
-    res.status(502).json({ error: 'PHOTO_PROXY_ERROR' });
+    res.status(HTTP_STATUS.BAD_GATEWAY).json({ error: 'PHOTO_PROXY_ERROR' });
   }
 }

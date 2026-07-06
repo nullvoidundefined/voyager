@@ -14,21 +14,21 @@ import { defineConfig, devices } from '@playwright/test';
 const ROOT_DIR = __dirname;
 
 export default defineConfig({
-  testDir: path.resolve(ROOT_DIR, 'e2e/production'),
-  timeout: 30_000,
-  retries: 1,
-  workers: 1,
-  reporter: process.env.CI ? 'html' : 'list',
-  use: {
-    baseURL: 'https://voyager.iangreenoughdeveloper.com',
-    headless: true,
-    screenshot: 'only-on-failure',
-    trace: 'retain-on-failure',
-  },
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
   ],
+  reporter: process.env.CI ? 'html' : 'list',
+  retries: 1,
+  testDir: path.resolve(ROOT_DIR, 'e2e/production'),
+  timeout: 30_000,
+  use: {
+    baseURL: 'https://voyager.iangreenoughdeveloper.com',
+    headless: true,
+    screenshot: 'only-on-failure',
+    trace: 'retain-on-failure',
+  },
+  workers: 1,
 });

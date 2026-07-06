@@ -4,6 +4,8 @@ import { getCustomerResponse } from './customerAgent.js';
 import { createMockReq, createMockRes, parseSSEChunks } from './harness.js';
 
 const MAX_TURNS = 10;
+const HTTP_OK = 200;
+const ENTRIES_PER_TURN = 2;
 
 export interface ToolResult {
   tool_name: string;
@@ -35,7 +37,7 @@ export async function runConversation(
   let pendingPlanConfirmation: Record<string, unknown> | undefined;
 
   for (let turn = 0; turn < MAX_TURNS; turn++) {
-    transcript.push({ role: 'user', content: customerMessage });
+    transcript.push({ content: customerMessage, role: 'user' });
 
     const req = createMockReq(
       tripId,
@@ -50,26 +52,26 @@ export async function runConversation(
       await chatHandler(req, res);
     } catch (err) {
       return {
-        transcript,
-        turns: turn + 1,
         completed: false,
         error: `Agent error on turn ${turn + 1}: ${err instanceof Error ? err.message : String(err)}`,
         tool_calls: allToolCalls,
         tool_results: allToolResults,
+        transcript,
         tripId,
+        turns: turn + 1,
       };
     }
 
     // Check for non-SSE error responses (e.g., 409 conflict, 400 validation)
-    if (res.statusCode !== 200 || res.jsonData) {
+    if (res.statusCode !== HTTP_OK || res.jsonData) {
       return {
-        transcript,
-        turns: turn + 1,
         completed: false,
         error: `HTTP ${res.statusCode}: ${JSON.stringify(res.jsonData)}`,
         tool_calls: allToolCalls,
         tool_results: allToolResults,
+        transcript,
         tripId,
+        turns: turn + 1,
       };
     }
 
@@ -79,13 +81,13 @@ export async function runConversation(
 
     if (errorEvent) {
       return {
-        transcript,
-        turns: turn + 1,
         completed: false,
         error: `SSE error: ${JSON.stringify(errorEvent.data)}`,
         tool_calls: allToolCalls,
         tool_results: allToolResults,
+        transcript,
         tripId,
+        turns: turn + 1,
       };
     }
 
@@ -94,10 +96,10 @@ export async function runConversation(
 
     // Map node types back to tool names for tool_results extraction
     const nodeTypeToTool: Record<string, string> = {
-      flight_tiles: 'search_flights',
-      hotel_tiles: 'search_hotels',
       car_rental_tiles: 'search_car_rentals',
       experience_tiles: 'search_experiences',
+      flight_tiles: 'search_flights',
+      hotel_tiles: 'search_hotels',
     };
 
     if (doneEvent?.data?.message) {
@@ -123,7 +125,7 @@ export async function runConversation(
         // Capture structured tool results from tile nodes
         const toolName = nodeTypeToTool[node.type as string];
         if (toolName) {
-          allToolResults.push({ tool_name: toolName, result: node });
+          allToolResults.push({ result: node, tool_name: toolName });
         }
       }
     }
@@ -141,8 +143,8 @@ export async function runConversation(
     agentText = agentText.trim() || '[No text response]';
     allToolCalls.push(...turnToolCalls);
     transcript.push({
-      role: 'assistant',
       content: agentText,
+      role: 'assistant',
       tool_calls: turnToolCalls.length > 0 ? turnToolCalls : undefined,
     });
 
@@ -152,22 +154,12 @@ export async function runConversation(
       nextMessage = await getCustomerResponse(persona, transcript);
     } catch (_err) {
       // If customer agent fails, generate contextual fallback
-      const lastAgent = transcript.filter((t) => t.role === 'assistant').pop();
-      nextMessage = lastAgent?.content.includes('flight')
-        ? 'Yes, show me flight options'
-        : lastAgent?.content.includes('hotel')
-          ? 'Yes, find me a hotel'
-          : "Sounds good, let's continue planning";
+      nextMessage = buildFallbackCustomerMessage(transcript);
     }
 
     if (!nextMessage || nextMessage.trim() === '') {
       // Empty response — generate contextual fallback
-      const lastAgent = transcript.filter((t) => t.role === 'assistant').pop();
-      nextMessage = lastAgent?.content.includes('flight')
-        ? 'Yes, show me flight options'
-        : lastAgent?.content.includes('hotel')
-          ? 'Yes, find me a hotel'
-          : "Sounds good, let's continue planning";
+      nextMessage = buildFallbackCustomerMessage(transcript);
     }
 
     customerMessage = nextMessage;
@@ -179,13 +171,23 @@ export async function runConversation(
   }
 
   return {
-    transcript,
-    turns: Math.ceil(transcript.length / 2),
     completed,
     tool_calls: allToolCalls,
     tool_results: allToolResults,
+    transcript,
     tripId,
+    turns: Math.ceil(transcript.length / ENTRIES_PER_TURN),
   };
+}
+
+function buildFallbackCustomerMessage(
+  transcript: { role: string; content: string }[],
+): string {
+  const lastAgent = transcript.filter((t) => t.role === 'assistant').pop();
+  if (lastAgent?.content.includes('flight'))
+    return 'Yes, show me flight options';
+  if (lastAgent?.content.includes('hotel')) return 'Yes, find me a hotel';
+  return "Sounds good, let's continue planning";
 }
 
 function generateFirstMessage(persona: Persona): string {

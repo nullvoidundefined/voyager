@@ -15,11 +15,16 @@ import { defineConfig, devices } from '@playwright/test';
 const ROOT_DIR = __dirname;
 
 export default defineConfig({
+  projects: [
+    {
+      name: 'chromium-real',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+  reporter: process.env.CI ? 'html' : 'list',
+  retries: 0,
   testDir: path.resolve(ROOT_DIR, 'e2e/real'),
   timeout: 300_000,
-  retries: 0,
-  workers: 1,
-  reporter: process.env.CI ? 'html' : 'list',
   use: {
     baseURL: 'http://localhost:3000',
     headless: true,
@@ -27,36 +32,31 @@ export default defineConfig({
     trace: 'retain-on-failure',
     video: 'retain-on-failure',
   },
-  projects: [
-    {
-      name: 'chromium-real',
-      use: { ...devices['Desktop Chrome'] },
-    },
-  ],
   webServer: [
     {
       command: 'npx tsx src/index.ts',
       cwd: path.resolve(ROOT_DIR, 'apps/server'),
-      port: 3001,
-      timeout: 30_000,
-      reuseExistingServer: !process.env.CI,
       env: {
         ...(process.env as Record<string, string>),
-        PORT: '3001',
         NODE_ENV: 'test',
+        PORT: '3001',
         ...(process.env.DATABASE_URL_E2E_LOCAL
           ? { DATABASE_URL: process.env.DATABASE_URL_E2E_LOCAL }
           : {}),
-        E2E_BYPASS_RATE_LIMITS: '1',
         CORS_ORIGIN: 'http://localhost:3000',
+        E2E_BYPASS_RATE_LIMITS: '1',
       },
+      port: 3001,
+      reuseExistingServer: !process.env.CI,
+      timeout: 30_000,
     },
     {
       command: 'npx next dev --port 3000',
       cwd: path.resolve(ROOT_DIR, 'apps/client/web'),
       port: 3000,
-      timeout: 60_000,
       reuseExistingServer: !process.env.CI,
+      timeout: 60_000,
     },
   ],
+  workers: 1,
 });

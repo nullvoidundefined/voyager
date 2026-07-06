@@ -5,6 +5,19 @@ import type { Archetype, Persona } from '../types.js';
 
 import { DESTINATIONS, ORIGINS, TEMPLATES } from './templates.js';
 
+const JSON_INDENT = 2;
+const MS_PER_DAY = 86_400_000;
+const MIN_LEAD_DAYS = 14;
+const DEPARTURE_WINDOW_DAYS = 180;
+const MIN_GOALS = 2;
+const MAX_GOALS = 4;
+const BUDGET_ROUNDING = 100;
+const EDGE_CASE_VARIANTS = 3;
+const EDGE_CASE_TIGHT_BUDGET = 200;
+const MIN_TRIP_DAYS = 3;
+const MAX_TRIP_DAYS = 14;
+const SHUFFLE_OFFSET = 0.5;
+
 const CACHE_PATH = join(
   new URL('.', import.meta.url).pathname,
   '..',
@@ -23,7 +36,11 @@ export function loadCachedPersonas(): Persona[] | null {
 }
 
 export function saveCachedPersonas(personas: Persona[]): void {
-  writeFileSync(CACHE_PATH, JSON.stringify(personas, null, 2), 'utf-8');
+  writeFileSync(
+    CACHE_PATH,
+    JSON.stringify(personas, null, JSON_INDENT),
+    'utf-8',
+  );
 }
 
 function randomInt(min: number, max: number): number {
@@ -35,14 +52,14 @@ function pick<T>(arr: T[]): T {
 }
 
 function pickN<T>(arr: T[], n: number): T[] {
-  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  const shuffled = [...arr].sort(() => Math.random() - SHUFFLE_OFFSET);
   return shuffled.slice(0, n);
 }
 
 function randomFutureDate(withinDays: number): string {
   const now = new Date();
-  const offset = randomInt(14, withinDays);
-  const date = new Date(now.getTime() + offset * 24 * 60 * 60 * 1000);
+  const offset = randomInt(MIN_LEAD_DAYS, withinDays);
+  const date = new Date(now.getTime() + offset * MS_PER_DAY);
   return date.toISOString().split('T')[0]!;
 }
 
@@ -52,34 +69,32 @@ function generatePersonaFromTemplate(
 ): Persona {
   const destination = pick(DESTINATIONS);
   const origin = pick(ORIGINS);
-  const departureDate = randomFutureDate(180);
+  const departureDate = randomFutureDate(DEPARTURE_WINDOW_DAYS);
   const tripType = pick(template.trip_type);
   const travelers = randomInt(
     template.travelers_range[0],
     template.travelers_range[1],
   );
   const style = pick(template.communication_styles);
-  const goals = pickN(template.goals_pool, randomInt(2, 4));
+  const goals = pickN(template.goals_pool, randomInt(MIN_GOALS, MAX_GOALS));
 
   let budget: number | null = null;
   if (template.budget_range) {
     budget = randomInt(template.budget_range[0], template.budget_range[1]);
-    budget = Math.round(budget / 100) * 100;
+    budget = Math.round(budget / BUDGET_ROUNDING) * BUDGET_ROUNDING;
   }
 
   if (template.archetype === 'edge_case') {
-    const edgeType = index % 3;
-    if (edgeType === 0) budget = 200;
+    const edgeType = index % EDGE_CASE_VARIANTS;
+    if (edgeType === 0) budget = EDGE_CASE_TIGHT_BUDGET;
     else if (edgeType === 1) budget = null;
   }
 
   let returnDate: string | null = null;
   if (tripType === 'round_trip') {
     const depDate = new Date(departureDate);
-    const tripLength = randomInt(3, 14);
-    const retDate = new Date(
-      depDate.getTime() + tripLength * 24 * 60 * 60 * 1000,
-    );
+    const tripLength = randomInt(MIN_TRIP_DAYS, MAX_TRIP_DAYS);
+    const retDate = new Date(depDate.getTime() + tripLength * MS_PER_DAY);
     returnDate = retDate.toISOString().split('T')[0]!;
   }
 
@@ -88,18 +103,18 @@ function generatePersonaFromTemplate(
   const name = `${travelParty} ${destination} ${budgetLabel}`;
 
   return {
-    name,
     archetype: template.archetype,
-    destination,
-    origin,
     budget,
-    departure_date: departureDate,
-    return_date: returnDate,
-    travelers,
-    travel_party: travelParty,
     communication_style: style,
-    goals,
     constraints: template.constraints,
+    departure_date: departureDate,
+    destination,
+    goals,
+    name,
+    origin,
+    return_date: returnDate,
+    travel_party: travelParty,
+    travelers,
     trip_type: tripType,
   };
 }

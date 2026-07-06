@@ -32,6 +32,7 @@ import type { TripScenario } from './scenarios.js';
 
 config({ path: resolve(process.cwd(), '../apps/server/.env') });
 
+const MESSAGE_PREVIEW_LENGTH = 60;
 const BASE_URL = process.env.SEEDER_BASE_URL ?? 'http://localhost:3001';
 const SEEDER_EMAIL = process.env.SEEDER_EMAIL ?? 'eval-seeder@voyager.test';
 const SEEDER_PASSWORD = process.env.SEEDER_PASSWORD ?? 'Seeder!2026';
@@ -65,7 +66,9 @@ async function runScenario(
 
   let seededTurns = 0;
   for (const turn of scenario.turns) {
-    process.stdout.write(`    -> "${turn.message.slice(0, 60)}"\n`);
+    process.stdout.write(
+      `    -> "${turn.message.slice(0, MESSAGE_PREVIEW_LENGTH)}"\n`,
+    );
     const result = await client.sendChatMessage(
       trip.id,
       turn.message,

@@ -3,6 +3,10 @@ import { readFileSync } from 'node:fs';
 import type { EvalReport } from '../types.js';
 
 const REGRESSION_THRESHOLD = 0.1;
+const DIVIDER_WIDTH = 50;
+const TITLE_PADDING = 28;
+const ARCHETYPE_COLUMN_WIDTH = 20;
+const SCORE_DECIMALS = 2;
 
 export function compareReports(
   current: EvalReport,
@@ -12,16 +16,18 @@ export function compareReports(
   const baseline = JSON.parse(baselineJson) as EvalReport;
 
   console.log('');
-  console.log('\u256d' + '\u2500'.repeat(50) + '\u256e');
-  console.log('\u2502  Regression Comparison' + ' '.repeat(28) + '\u2502');
-  console.log('\u2570' + '\u2500'.repeat(50) + '\u256f');
+  console.log('\u256d' + '\u2500'.repeat(DIVIDER_WIDTH) + '\u256e');
+  console.log(
+    '\u2502  Regression Comparison' + ' '.repeat(TITLE_PADDING) + '\u2502',
+  );
+  console.log('\u2570' + '\u2500'.repeat(DIVIDER_WIDTH) + '\u256f');
   console.log('');
 
   const overallDiff = current.summary.overall - baseline.summary.overall;
   const overallFlag =
     overallDiff < -REGRESSION_THRESHOLD ? ' \u26a0\ufe0f REGRESSION' : '';
   console.log(
-    `Overall: ${baseline.summary.overall.toFixed(2)} \u2192 ${current.summary.overall.toFixed(2)} (${overallDiff >= 0 ? '+' : ''}${overallDiff.toFixed(2)})${overallFlag}`,
+    `Overall: ${baseline.summary.overall.toFixed(SCORE_DECIMALS)} \u2192 ${current.summary.overall.toFixed(SCORE_DECIMALS)} (${overallDiff >= 0 ? '+' : ''}${overallDiff.toFixed(SCORE_DECIMALS)})${overallFlag}`,
   );
   console.log('');
 
@@ -58,7 +64,7 @@ export function compareReports(
     const diff = currAvg - baseAvg;
     const flag = diff < -REGRESSION_THRESHOLD ? ' \u26a0\ufe0f REGRESSION' : '';
     console.log(
-      `  ${archetype.replace(/_/g, ' ').padEnd(20)} ${baseAvg.toFixed(2)} \u2192 ${currAvg.toFixed(2)} (${diff >= 0 ? '+' : ''}${diff.toFixed(2)})${flag}`,
+      `  ${archetype.replace(/_/g, ' ').padEnd(ARCHETYPE_COLUMN_WIDTH)} ${baseAvg.toFixed(SCORE_DECIMALS)} \u2192 ${currAvg.toFixed(SCORE_DECIMALS)} (${diff >= 0 ? '+' : ''}${diff.toFixed(SCORE_DECIMALS)})${flag}`,
     );
   }
 

@@ -14,15 +14,7 @@ export default defineConfig({
     },
   },
   test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./src/__tests__/setup.ts'],
-    include: ['src/__tests__/**/*.test.{ts,tsx}'],
-    exclude: ['node_modules', '.next', 'e2e'],
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'lcov'],
-      reportsDirectory: 'coverage',
       exclude: [
         '**/*.config.*',
         '**/*.d.ts',
@@ -36,6 +28,9 @@ export default defineConfig({
         'src/app/**/error.tsx',
         'src/app/**/not-found.tsx',
       ],
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+      reportsDirectory: 'coverage',
       // Initial gate calibrated below current numbers (lines 71%,
       // branches 73%, functions 52%, statements 72% as of 2026-05-29)
       // so CI catches regressions without flaking. Raise this when
@@ -47,5 +42,10 @@ export default defineConfig({
         statements: 65,
       },
     },
+    environment: 'jsdom',
+    exclude: ['node_modules', '.next', 'e2e'],
+    globals: true,
+    include: ['src/__tests__/**/*.test.{ts,tsx}'],
+    setupFiles: ['./src/__tests__/setup.ts'],
   },
 });

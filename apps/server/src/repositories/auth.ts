@@ -13,6 +13,7 @@ import { query, withTransaction } from 'app/database/pool.js';
 import type { User } from 'app/schemas/auth.js';
 
 const SALT_ROUNDS = 12;
+const SESSION_TOKEN_BYTES = 32;
 
 /** Hash session token for storage. Cookie holds raw token; DB holds hash so a dump doesn't expose sessions. */
 function hashSessionToken(token: string): string {
@@ -71,7 +72,7 @@ export async function createSession(
   userId: string,
   client?: PoolClient,
 ): Promise<string> {
-  const token = crypto.randomBytes(32).toString('hex');
+  const token = crypto.randomBytes(SESSION_TOKEN_BYTES).toString('hex');
   const idHash = hashSessionToken(token);
   const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
   await query(
@@ -141,6 +142,6 @@ export async function createUserAndSession(
   return withTransaction(async (client) => {
     const user = await createUser(email, password, firstName, lastName, client);
     const sessionId = await createSession(user.id, client);
-    return { user, sessionId };
+    return { sessionId, user };
   });
 }

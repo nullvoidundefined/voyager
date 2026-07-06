@@ -3,18 +3,9 @@ import path from 'node:path';
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  images: {},
   output: 'standalone',
   outputFileTracingRoot: path.resolve(__dirname, '../../../'),
-  transpilePackages: ['@repo/types'],
-  images: {},
-  webpack(config: Parameters<NonNullable<NextConfig['webpack']>>[0]) {
-    config.resolve.extensionAlias = {
-      ...config.resolve.extensionAlias,
-      '.js': ['.ts', '.tsx', '.js'],
-      '.mjs': ['.mts', '.mjs'],
-    };
-    return config;
-  },
   async rewrites() {
     const apiUrl =
       process.env.API_URL ??
@@ -22,10 +13,19 @@ const nextConfig: NextConfig = {
       'http://localhost:3001';
     return [
       {
-        source: '/api/:path*',
         destination: `${apiUrl}/:path*`,
+        source: '/api/:path*',
       },
     ];
+  },
+  transpilePackages: ['@repo/types'],
+  webpack(config: Parameters<NonNullable<NextConfig['webpack']>>[0]) {
+    config.resolve.extensionAlias = {
+      ...config.resolve.extensionAlias,
+      '.js': ['.ts', '.tsx', '.js'],
+      '.mjs': ['.mts', '.mjs'],
+    };
+    return config;
   },
 };
 

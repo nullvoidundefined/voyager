@@ -21,6 +21,7 @@ import { posthog } from 'app/clients/posthog.js';
 import { corsConfig } from 'app/config/corsConfig.js';
 import { readDeployedCommit } from 'app/config/deployedCommit.js';
 import { env, validateProductionEnv } from 'app/config/env.js';
+import { HTTP_STATUS } from 'app/constants/httpStatus.js';
 import { pool, query } from 'app/database/pool.js';
 import { getSharedTripHandler } from 'app/handlers/trips/share.js';
 import { csrfGuard } from 'app/middleware/csrfGuard.js';
@@ -96,7 +97,7 @@ app.use((_req, res, next) => {
   res.setTimeout(REQUEST_TIMEOUT_MS, () => {
     if (!res.headersSent) {
       res
-        .status(408)
+        .status(HTTP_STATUS.REQUEST_TIMEOUT)
         .json({ error: 'REQUEST_TIMEOUT', message: 'Request timeout' });
     }
   });
@@ -106,7 +107,7 @@ app.use((_req, res, next) => {
 // DB health check moved into startServer() for test isolation
 
 app.get('/health', (_req, res) => {
-  res.status(200).json({ status: 'ok' });
+  res.status(HTTP_STATUS.OK).json({ status: 'ok' });
 });
 
 app.get('/health/ready', async (_req, res) => {
@@ -141,13 +142,14 @@ app.get('/health/ready', async (_req, res) => {
   }
 
   const status = dbStatus === 'connected' ? 'ok' : 'degraded';
-  const statusCode = dbStatus === 'connected' ? 200 : 503;
+  const statusCode =
+    dbStatus === 'connected' ? HTTP_STATUS.OK : HTTP_STATUS.SERVICE_UNAVAILABLE;
   res.status(statusCode).json({
-    status,
-    db: dbStatus,
-    cache: cacheStatus,
     activeConversations,
+    cache: cacheStatus,
     commit: readCommitSha(),
+    db: dbStatus,
+    status,
   });
 });
 
@@ -187,7 +189,9 @@ app.get('/shared/:shareId', getSharedTripHandler);
 if (process.env.NODE_ENV !== 'production') {
   app.post('/api/test/mock-scenario', (req, res) => {
     if (!isAnthropicMockMode()) {
-      res.status(404).json({ error: 'Not available outside mock mode' });
+      res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json({ error: 'Not available outside mock mode' });
       return;
     }
     const VALID_SCENARIOS: MockScenarioName[] = [
@@ -197,13 +201,13 @@ if (process.env.NODE_ENV !== 'production') {
     ];
     const { scenario } = req.body as { scenario?: string };
     if (!VALID_SCENARIOS.includes(scenario as MockScenarioName)) {
-      res.status(400).json({
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
         error: `Invalid scenario. Must be one of: ${VALID_SCENARIOS.join(', ')}.`,
       });
       return;
     }
     setMockScenario(scenario as MockScenarioName);
-    res.status(200).json({ scenario });
+    res.status(HTTP_STATUS.OK).json({ scenario });
   });
 }
 
@@ -211,7 +215,8 @@ if (process.env.NODE_ENV !== 'production') {
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-const PORT = Number(process.env.PORT) || 3001;
+const DEFAULT_PORT = 3001;
+const PORT = Number(process.env.PORT) || DEFAULT_PORT;
 const HOST = '0.0.0.0';
 
 export function startServer(): void {
@@ -269,7 +274,7 @@ export function startServer(): void {
   process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
-const CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
+const CLEANUP_INTERVAL_MS = 3_600_000;
 
 /** Hourly sweep dropping expired sessions and idempotency keys from the database. */
 function scheduleExpiryCleanup(): void {

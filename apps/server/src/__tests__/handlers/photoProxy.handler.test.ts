@@ -1,5 +1,6 @@
 import { Readable } from 'node:stream';
 
+import type { Request, Response } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const FAKE_API_KEY = 'test-google-api-key-12345';
@@ -11,18 +12,18 @@ vi.stubEnv('GOOGLE_PLACES_API_KEY', FAKE_API_KEY);
 const { photoProxyHandler } =
   await import('app/handlers/photoProxy.handler.js');
 
-function mockReq(query: Record<string, string> = {}) {
-  return { query } as any;
+function mockReq(query: Record<string, string> = {}): Request {
+  return { query } as unknown as Request;
 }
 
-function mockRes() {
-  const res: any = {
-    status: vi.fn().mockReturnThis(),
+function mockRes(): Response {
+  const res = {
     json: vi.fn().mockReturnThis(),
-    setHeader: vi.fn(),
     pipe: vi.fn(),
+    setHeader: vi.fn(),
+    status: vi.fn().mockReturnThis(),
   };
-  return res;
+  return res as unknown as Response;
 }
 
 describe('photoProxyHandler', () => {
