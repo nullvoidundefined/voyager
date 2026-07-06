@@ -30,6 +30,8 @@ import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { getCrossJudgeModels } from './getCrossJudgeModels.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -39,21 +41,6 @@ const MODEL_COLUMN_WIDTH = 32;
 const MIN_RUNS_FOR_SPREAD = 2;
 const MAX_ACCEPTABLE_SPREAD = 0.05;
 const EXIT_SPREAD_EXCEEDED = 2;
-
-const DEFAULT_MODELS = [
-  'claude-haiku-4-5-20251001',
-  'claude-sonnet-5',
-  'claude-opus-4-8',
-];
-
-export function getCrossJudgeModels(): string[] {
-  const env = process.env.EVAL_JUDGE_MODELS;
-  if (!env) return DEFAULT_MODELS;
-  return env
-    .split(',')
-    .map((m) => m.trim())
-    .filter(Boolean);
-}
 
 interface RunSummary {
   model: string;

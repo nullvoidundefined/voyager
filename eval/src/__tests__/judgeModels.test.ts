@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { getCrossJudgeModels } from '../adversarial/crossModelJudge.js';
+import { getCrossJudgeModels } from '../adversarial/getCrossJudgeModels.js';
 import { getJudgeModel } from '../scoring/judge.js';
 
 // Retired Anthropic model ids 404 at request time; a default pinned to one
