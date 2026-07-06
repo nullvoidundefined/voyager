@@ -182,6 +182,11 @@ export function ChatBox({
           formData.flexible_dates = vals.flexible_dates === 'true';
 
         if (Object.keys(formData).length > 0) {
+          // Clear the snapshot before the PUT resolves: form values persist
+          // at most once (invariant 17). Re-PUTting them on a later send
+          // would overwrite trip fields the agent has updated since (the
+          // 2026-07-06 budget-revert incident).
+          formValuesRef.current = {};
           put(`/trips/${tripId}`, formData).catch((err) =>
             console.error('Failed to auto-save form data:', err),
           );
@@ -247,6 +252,9 @@ export function ChatBox({
         console.error('Failed to update trip:', err);
       }
 
+      // The submitted values are persisted; drop the auto-save snapshot so
+      // later sends never re-PUT them over agent-made updates (invariant 17).
+      formValuesRef.current = {};
       skipFormAutoSave.current = true;
       handleSend(displayMessage);
     },

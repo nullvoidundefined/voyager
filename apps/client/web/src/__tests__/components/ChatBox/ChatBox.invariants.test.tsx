@@ -699,6 +699,100 @@ describe('ChatBox invariants', () => {
   });
 });
 
+describe('invariant 17: form auto-save persists form values at most once', () => {
+  // Root cause of the 2026-07-06 budget-revert incident: handleSend PUT
+  // /trips/:id with formValuesRef on EVERY send, so a form snapshot taken
+  // early in the conversation (budget: 100) silently overwrote trip fields
+  // the agent had since updated via update_trip (budget: 10000). Form
+  // values must persist at most once; later sends must not re-PUT them.
+  it('a second chat send does not re-PUT stale form values after auto-save', async () => {
+    const put = vi.fn().mockResolvedValue({});
+    const formMessage: ChatMessage = {
+      id: 'form-1',
+      role: 'assistant',
+      nodes: [
+        {
+          type: 'travel_plan_form',
+          fields: [
+            {
+              name: 'budget',
+              label: 'Total budget in USD (optional)',
+              field_type: 'number',
+              required: false,
+            },
+          ],
+        },
+      ],
+      sequence: 1,
+      created_at: '2026-07-06T00:00:00.000Z',
+    };
+
+    vi.resetModules();
+    vi.doMock('@/components/ChatBox/useSSEChat', () => ({
+      useSSEChat: () => ({
+        sendMessage: vi.fn(),
+        isSending: false,
+        streamingNodes: [],
+        toolProgress: [],
+        streamingText: '',
+        error: null,
+        clearError: () => {},
+      }),
+    }));
+    vi.doMock('@/api/request', () => ({
+      get: vi
+        .fn()
+        .mockImplementation((url: string) =>
+          url.endsWith('/costs')
+            ? Promise.resolve({ total_tokens: 0, total_cost_usd: '0.00' })
+            : Promise.resolve({ messages: [formMessage] }),
+        ),
+      post: vi.fn().mockResolvedValue({}),
+      put,
+    }));
+    vi.doMock('@/services/demoScript', () => ({
+      runDemoScript: () => () => undefined,
+    }));
+
+    const { ChatBox } = await import('@/components/ChatBox/ChatBox');
+    const { QueryClient, QueryClientProvider } =
+      await import('@tanstack/react-query');
+    const { fireEvent } = await import('@testing-library/react');
+
+    const qc = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    render(
+      <QueryClientProvider client={qc}>
+        <ChatBox tripId='trip-1' />
+      </QueryClientProvider>,
+    );
+
+    // Wait for the messages query to land and the form to render, then
+    // type a budget into the form without submitting it.
+    const budgetInput = await screen.findByLabelText(/Total budget in USD/i);
+    fireEvent.change(budgetInput, { target: { value: '100' } });
+
+    const chatInput = screen.getByRole('textbox');
+    const chatForm = chatInput.closest('form');
+    expect(chatForm).not.toBeNull();
+
+    // First send: unsaved form data is treated as canonical and saved.
+    fireEvent.change(chatInput, { target: { value: 'set my budget' } });
+    fireEvent.submit(chatForm!);
+    expect(put).toHaveBeenCalledTimes(1);
+    expect(put).toHaveBeenCalledWith('/trips/trip-1', { budget_total: 100 });
+
+    // Second send: the snapshot was already persisted. Re-PUTting it would
+    // overwrite any trip fields the agent updated in between.
+    fireEvent.change(chatInput, {
+      target: { value: 'update my budget to $10,000' },
+    });
+    fireEvent.submit(chatForm!);
+    expect(put).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('ChatBox invariants: generic offer tiles (multimodal refactor)', () => {
   function makeOfferTilesNode(
     kind: string,
