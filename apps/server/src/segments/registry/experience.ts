@@ -3,6 +3,9 @@ import { experienceToOffer } from 'app/segments/offerMappers/experienceToOffer.j
 import type { SegmentCapability } from 'app/segments/segmentCapability.js';
 
 export const experienceCapability: SegmentCapability = {
+  buildSearchKeys: (params) => ({
+    region: String(params.location ?? '').toLowerCase(),
+  }),
   kind: 'experience',
   label: 'Experiences',
   planCategoryId: 'experiences',

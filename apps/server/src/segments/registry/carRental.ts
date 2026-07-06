@@ -3,6 +3,9 @@ import { carRentalToOffer } from 'app/segments/offerMappers/carRentalToOffer.js'
 import type { SegmentCapability } from 'app/segments/segmentCapability.js';
 
 export const carRentalCapability: SegmentCapability = {
+  buildSearchKeys: (params) => ({
+    region: String(params.pickup_location ?? '').toLowerCase(),
+  }),
   kind: 'car_rental',
   label: 'Car rental',
   planCategoryId: 'car_rental',

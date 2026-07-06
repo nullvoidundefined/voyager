@@ -27,6 +27,7 @@ import {
   insertTripHotel,
   updateTrip,
 } from 'app/repositories/trips/trips.js';
+import { searchSegment } from 'app/segments/searchSegment.js';
 import { calculateRemainingBudget } from 'app/tools/budgetTool.js';
 import { searchCarRentals } from 'app/tools/carRentalsTool.js';
 import { getDestinationInfo } from 'app/tools/destinationTool.js';
@@ -126,19 +127,34 @@ export async function executeTool(
     case 'search_flights': {
       const parsed = parseInput(toolName, searchFlightsSchema, input);
       if ('error' in parsed) return parsed;
-      return adapters.searchFlights(parsed.data);
+      return searchSegment(
+        'flight',
+        parsed.data as unknown as Record<string, unknown>,
+        () => adapters.searchFlights(parsed.data),
+        context?.requestId,
+      );
     }
 
     case 'search_hotels': {
       const parsed = parseInput(toolName, searchHotelsSchema, input);
       if ('error' in parsed) return parsed;
-      return adapters.searchHotels(parsed.data);
+      return searchSegment(
+        'hotel',
+        parsed.data as unknown as Record<string, unknown>,
+        () => adapters.searchHotels(parsed.data),
+        context?.requestId,
+      );
     }
 
     case 'search_experiences': {
       const parsed = parseInput(toolName, searchExperiencesSchema, input);
       if ('error' in parsed) return parsed;
-      return adapters.searchExperiences(parsed.data);
+      return searchSegment(
+        'experience',
+        parsed.data as unknown as Record<string, unknown>,
+        () => adapters.searchExperiences(parsed.data),
+        context?.requestId,
+      );
     }
 
     case 'calculate_remaining_budget': {
@@ -181,7 +197,12 @@ export async function executeTool(
     case 'search_car_rentals': {
       const parsed = parseInput(toolName, searchCarRentalsSchema, input);
       if ('error' in parsed) return parsed;
-      return adapters.searchCarRentals(parsed.data);
+      return searchSegment(
+        'car_rental',
+        parsed.data as unknown as Record<string, unknown>,
+        () => adapters.searchCarRentals(parsed.data),
+        context?.requestId,
+      );
     }
 
     case 'select_flight': {

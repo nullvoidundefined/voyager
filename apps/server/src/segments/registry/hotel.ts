@@ -3,6 +3,9 @@ import { hotelToOffer } from 'app/segments/offerMappers/hotelToOffer.js';
 import type { SegmentCapability } from 'app/segments/segmentCapability.js';
 
 export const hotelCapability: SegmentCapability = {
+  buildSearchKeys: (params) => ({
+    region: String(params.city ?? '').toLowerCase(),
+  }),
   kind: 'hotel',
   label: 'Hotel',
   planCategoryId: 'hotels',

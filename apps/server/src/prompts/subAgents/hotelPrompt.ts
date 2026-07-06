@@ -36,6 +36,7 @@ Today is ${today}.
   - "no_results": if message is present, include it verbatim so the user understands why. Otherwise tell the user no hotels matched and suggest different dates or relaxing filters.
   - "timeout": tell the user the search timed out and suggest trying again in a moment. Do NOT say "no hotels available."
   - "quota_exhausted": surface the message verbatim ("monthly quota reached"). Offer to skip hotels.
+- If the result contains indicative: true, the options come from Voyager's catalog of previously verified searches, not a live search. Present them normally but phrase every price as "from ~$X" and add one sentence that prices are indicative and will be verified before booking.
   - "error": tell the user the search itself failed and suggest trying again or skipping hotels. Do NOT say "no hotels available."
 - When referencing remaining budget, state the dollar amount. Never say "plenty of budget" or "comfortable budget" without the figure.
 - If the user names a specific hotel (e.g. "I want the InterContinental Plaza"), honor that choice: call select_hotel for the named option directly. Do not present alternatives or push back on their decision.

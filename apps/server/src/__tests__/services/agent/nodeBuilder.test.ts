@@ -235,3 +235,27 @@ describe('buildNodeFromToolResult', () => {
     });
   });
 });
+
+describe('indicative knowledge-base outcomes', () => {
+  it('renders offer tiles for indicative ok outcomes (KB backstop)', () => {
+    const node = buildNodeFromToolResult('search_flights', {
+      status: 'ok',
+      indicative: true,
+      flights: [
+        {
+          airline: 'Delta',
+          flight_number: 'DL123',
+          origin: 'JFK',
+          destination: 'NRT',
+          departure_time: '2026-05-01T08:00:00',
+          price: 850,
+          currency: 'USD',
+        },
+      ],
+    });
+    expect(node?.type).toBe('offer_tiles');
+    if (node?.type === 'offer_tiles') {
+      expect(node.offers).toHaveLength(1);
+    }
+  });
+});

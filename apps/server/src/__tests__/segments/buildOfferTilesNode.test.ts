@@ -12,6 +12,7 @@ const ferryCapability: SegmentCapability = {
   label: 'Ferry',
   planCategoryId: 'flights',
   requiredTools: [],
+  buildSearchKeys: () => ({ region: 'aegean' }),
   resultListKey: 'ferries',
   searchTool: 'search_ferries',
   selectTool: 'select_ferry',

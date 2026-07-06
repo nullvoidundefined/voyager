@@ -94,3 +94,25 @@ describe('segment capability registry', () => {
     expect(getSegmentCapability('experience').requiredTools).toEqual([]);
   });
 });
+
+describe('buildSearchKeys', () => {
+  it('derives normalized knowledge-base keys from search params', () => {
+    expect(
+      getSegmentCapability('flight').buildSearchKeys({
+        origin: 'JFK',
+        destination: 'NRT',
+      }),
+    ).toEqual({ region: 'nrt', routeKey: 'jfk->nrt' });
+    expect(
+      getSegmentCapability('hotel').buildSearchKeys({ city: 'Barcelona' }),
+    ).toEqual({ region: 'barcelona' });
+    expect(
+      getSegmentCapability('car_rental').buildSearchKeys({
+        pickup_location: 'NRT Airport',
+      }),
+    ).toEqual({ region: 'nrt airport' });
+    expect(
+      getSegmentCapability('experience').buildSearchKeys({ location: 'Tokyo' }),
+    ).toEqual({ region: 'tokyo' });
+  });
+});

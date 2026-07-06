@@ -3,6 +3,11 @@ import { flightToOffer } from 'app/segments/offerMappers/flightToOffer.js';
 import type { SegmentCapability } from 'app/segments/segmentCapability.js';
 
 export const flightCapability: SegmentCapability = {
+  buildSearchKeys: (params) => ({
+    region: String(params.destination ?? '').toLowerCase(),
+    routeKey:
+      `${String(params.origin ?? '')}->${String(params.destination ?? '')}`.toLowerCase(),
+  }),
   kind: 'flight',
   label: 'Flight',
   planCategoryId: 'flights',

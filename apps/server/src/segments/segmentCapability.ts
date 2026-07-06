@@ -36,11 +36,19 @@ export interface SegmentCapability {
    *  prompt gates experiences on hotel while routing gates on flight. Prompt
    *  generation uses presentationRequires ?? requires. */
   presentationRequires?: SegmentKind[];
+  /** Derives the knowledge-base lookup keys (normalized region and optional
+   *  route) from the search tool's validated params. */
+  buildSearchKeys: (params: Record<string, unknown>) => SegmentSearchKeys;
   /** Opt-in cold-path web discovery for modes without a structured API; the
    *  query builder turns the validated search params into a search string. */
   webDiscovery?: {
     buildQuery: (input: WebDiscoveryQueryInput) => string;
   };
+}
+
+export interface SegmentSearchKeys {
+  region: string;
+  routeKey?: string;
 }
 
 export interface WebDiscoveryQueryInput {
