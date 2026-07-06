@@ -9,6 +9,7 @@
  * change what the model previously saw.
  */
 import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
 import { TOOL_DEFINITIONS } from 'app/tools/definitions.js';

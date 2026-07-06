@@ -18,8 +18,9 @@
  *     sets tracker.plan_confirmed=true and routes to the flight or hotel sub-agent.
  *     These are the turns that runProductionEval scores.
  */
-import { config } from 'dotenv';
 import { resolve } from 'node:path';
+
+import { config } from 'dotenv';
 
 import {
   type PlanCard,

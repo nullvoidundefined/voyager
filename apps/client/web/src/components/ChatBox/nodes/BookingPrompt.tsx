@@ -4,6 +4,7 @@
  * advance the trip toward checkout without a free-text turn.
  */
 import { QuickReplyChips } from '../widgets/QuickReplyChips';
+
 import styles from './BookingPrompt.module.scss';
 
 interface BookingPromptProps {

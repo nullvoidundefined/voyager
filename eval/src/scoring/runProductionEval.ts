@@ -10,8 +10,9 @@
  * Reads ANTHROPIC_API_KEY and DATABASE_URL from the environment (or .env).
  * Override the judge model with EVAL_PLAN_JUDGE_MODEL.
  */
-import { config } from 'dotenv';
 import { resolve } from 'node:path';
+
+import { config } from 'dotenv';
 import pg from 'pg';
 
 import { computePlanScore, runPlanJudge } from './planJudge.js';

@@ -13,8 +13,8 @@ export const hotelCapability: SegmentCapability = {
   requires: ['flight'],
   resultListKey: 'hotels',
   searchTool: 'search_hotels',
-  selectionKey: 'hotels',
   selectTool: 'select_hotel',
+  selectionKey: 'hotels',
   subAgentTools: [
     'search_hotels',
     'get_destination_info',

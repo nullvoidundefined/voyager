@@ -3,8 +3,9 @@
  * session token storage and lookup. Isolates all credential and session
  * persistence so hashing and TTL rules live in one place below the handlers.
  */
-import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
+
+import bcrypt from 'bcrypt';
 
 import { SESSION_TTL_MS } from 'app/constants/session.js';
 import type { PoolClient } from 'app/database/pool.js';

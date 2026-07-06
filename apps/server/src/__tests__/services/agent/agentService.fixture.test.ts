@@ -9,9 +9,10 @@
  * causes the mock to script a different iteration order will be
  * caught here before reaching production.
  */
-import Anthropic from '@anthropic-ai/sdk';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+
+import Anthropic from '@anthropic-ai/sdk';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { insertToolCallLog } from 'app/repositories/toolCallLog.js';

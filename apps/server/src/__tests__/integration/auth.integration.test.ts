@@ -1,4 +1,5 @@
-import type { Server } from 'http';
+import type { Server } from 'node:http';
+
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 

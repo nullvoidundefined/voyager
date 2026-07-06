@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { ToolResult } from '../runner/conversation.js';
+
 import { detectMustNotViolations } from './mustNot.js';
 
 describe('detectMustNotViolations', () => {

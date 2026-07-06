@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { seedUser } from 'app/__tests__/integration/helpers/seed.js';

@@ -17,6 +17,7 @@ function getClient(): Anthropic {
 // adversarial runner can compare pass-rates across multiple judge
 // models (audit follow-up: cross-model judge validation).
 const DEFAULT_JUDGE_MODEL = 'claude-sonnet-4-6';
+const ENTRIES_PER_TURN = 2;
 function getJudgeModel(): string {
   return process.env.EVAL_JUDGE_MODEL ?? DEFAULT_JUDGE_MODEL;
 }
@@ -64,7 +65,7 @@ export function buildJudgePrompt(
   const transcriptStr = transcript
     .map(
       (t, i) =>
-        `Turn ${Math.floor(i / 2) + 1} [${t.role.toUpperCase()}]: ${t.content}`,
+        `Turn ${Math.floor(i / ENTRIES_PER_TURN) + 1} [${t.role.toUpperCase()}]: ${t.content}`,
     )
     .join('\n\n');
 

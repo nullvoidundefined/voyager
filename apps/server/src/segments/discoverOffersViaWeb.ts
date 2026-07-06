@@ -5,7 +5,8 @@
  * chokepoint: rows the schema rejects are dropped and logged, and booking URLs
  * must come from a host the search actually returned.
  */
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
+
 import { z } from 'zod';
 
 import { getLlmClient } from 'app/clients/llm.js';

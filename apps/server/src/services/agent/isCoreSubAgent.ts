@@ -3,14 +3,13 @@
  * tool-partition lookups know whether to read the core table or the segment
  * registry.
  */
-import type {
-  CoreSubAgentType,
-  SubAgentType,
-} from 'app/services/agent/subAgentTypes.js';
+import type { SegmentKind } from '@repo/types';
+
+import type { SubAgentType } from 'app/services/agent/subAgentTypes.js';
 
 export function isCoreSubAgent(
   subAgent: SubAgentType,
-): subAgent is CoreSubAgentType {
+): subAgent is Exclude<SubAgentType, SegmentKind> {
   return (
     subAgent === 'detail' || subAgent === 'plan' || subAgent === 'conversation'
   );

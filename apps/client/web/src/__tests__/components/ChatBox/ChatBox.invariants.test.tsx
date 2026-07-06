@@ -1,7 +1,8 @@
-import type { ChatMessage } from '@repo/types';
-import { cleanup, render, screen } from '@testing-library/react';
 import fs from 'node:fs';
 import path from 'node:path';
+
+import type { ChatMessage } from '@repo/types';
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { VirtualizedChat } from '@/components/ChatBox/VirtualizedChat';

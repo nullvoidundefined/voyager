@@ -16,6 +16,7 @@ import { QueryProvider } from '@/state/QueryProvider';
 import { TelemetryProvider } from '@/state/TelemetryProvider';
 
 import '../styles/animations.scss';
+
 import './globals.scss';
 import styles from './layout.module.scss';
 

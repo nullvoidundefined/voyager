@@ -8,6 +8,7 @@
 import type { ChatNodeOfType, Offer } from '@repo/types';
 
 import { SelectableCardGroup } from '../widgets/SelectableCardGroup';
+
 import styles from './TileLayout.module.scss';
 import { resolveOfferCard } from './offerCardRegistry';
 

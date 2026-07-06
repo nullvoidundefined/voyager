@@ -45,7 +45,8 @@
  *     That belongs in trip-selections.integration.test.ts when ENG-17
  *     lands.
  */
-import type { Server } from 'http';
+import type { Server } from 'node:http';
+
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 

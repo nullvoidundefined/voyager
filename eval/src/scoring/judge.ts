@@ -17,6 +17,7 @@ function getClient(): Anthropic {
 // Exported so the retired-model regression test can pin the default:
 // claude-sonnet-4-20250514 retired and 404'd every eval run (2026-07-05).
 const DEFAULT_JUDGE_MODEL = 'claude-sonnet-5';
+const SCORE_PRECISION = 100;
 export function getJudgeModel(): string {
   return process.env.EVAL_JUDGE_MODEL ?? DEFAULT_JUDGE_MODEL;
 }
@@ -109,7 +110,8 @@ export function computeJudgeScore(scores: JudgeScores): number {
     scores.error_recovery.score,
   ];
   return (
-    Math.round((values.reduce((sum, v) => sum + v, 0) / values.length) * 100) /
-    100
+    Math.round(
+      (values.reduce((sum, v) => sum + v, 0) / values.length) * SCORE_PRECISION,
+    ) / SCORE_PRECISION
   );
 }

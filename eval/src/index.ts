@@ -1,7 +1,8 @@
 #!/usr/bin/env node
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { config } from 'dotenv';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
 
 import {
   generatePersonas,
@@ -39,8 +40,16 @@ config({ path: join(__dirname, '..', '..', 'apps', 'server', '.env') });
 process.env.NODE_ENV = 'test';
 process.env.EVAL_MOCK_SEARCH = 'true';
 
+const ARGV_OPTIONS_START = 2;
+const DIVIDER_WIDTH = 40;
+const ASSERTION_WEIGHT = 0.3;
+const JUDGE_WEIGHT = 0.7;
+const CRITICAL_FAILURE_SCORE_CAP = 0.4;
+const SCORE_PRECISION = 100;
+const SCORE_DECIMALS = 2;
+
 // Parse CLI args
-const args = process.argv.slice(2);
+const args = process.argv.slice(ARGV_OPTIONS_START);
 function getArg(name: string): string | undefined {
   const arg = args.find((a) => a.startsWith(`--${name}=`));
   return arg?.split('=')[1];
@@ -57,7 +66,7 @@ async function main() {
 
   console.log('');
   console.log('\ud83e\udded Voyager Eval Suite');
-  console.log('\u2500'.repeat(40));
+  console.log('\u2500'.repeat(DIVIDER_WIDTH));
 
   // 1. Generate personas
   // Check for --regenerate flag
@@ -231,11 +240,12 @@ async function main() {
       const judgeScore = computeJudgeScore(judgeScores);
 
       // Compute overall (30% assertions, 70% judge)
-      let overall = assertionScore * 0.3 + judgeScore * 0.7;
+      let overall =
+        assertionScore * ASSERTION_WEIGHT + judgeScore * JUDGE_WEIGHT;
       if (isCriticalFailure(assertions)) {
-        overall = Math.min(overall, 0.4);
+        overall = Math.min(overall, CRITICAL_FAILURE_SCORE_CAP);
       }
-      overall = Math.round(overall * 100) / 100;
+      overall = Math.round(overall * SCORE_PRECISION) / SCORE_PRECISION;
 
       totalTurns += convResult.turns;
 
@@ -253,7 +263,9 @@ async function main() {
         turns: convResult.turns,
       });
 
-      console.log(`  Score: ${overall.toFixed(2)} (${convResult.turns} turns)`);
+      console.log(
+        `  Score: ${overall.toFixed(SCORE_DECIMALS)} (${convResult.turns} turns)`,
+      );
     } catch (err) {
       console.error(
         `  Error: ${err instanceof Error ? err.message : String(err)}`,
@@ -305,8 +317,8 @@ async function main() {
     results.length > 0
       ? Math.round(
           (results.reduce((sum, r) => sum + r.overall, 0) / results.length) *
-            100,
-        ) / 100
+            SCORE_PRECISION,
+        ) / SCORE_PRECISION
       : 0;
 
   const assertionsPassed = results.reduce(

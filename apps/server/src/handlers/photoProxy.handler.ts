@@ -3,9 +3,10 @@
  * never exposed to the client. Streams the upstream image response straight
  * through to the caller.
  */
-import type { Request, Response } from 'express';
 import { Readable } from 'node:stream';
 import type { ReadableStream as WebReadableStream } from 'node:stream/web';
+
+import type { Request, Response } from 'express';
 
 import { env } from 'app/config/env.js';
 

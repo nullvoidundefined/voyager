@@ -1,5 +1,5 @@
-import { mkdirSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import type {
   AdversarialReport,
@@ -7,6 +7,18 @@ import type {
   Category,
   CategoryRollup,
 } from './types.js';
+
+const RATE_PRECISION = 100;
+const PERCENT = 100;
+const LABEL_COLUMN_WIDTH = 22;
+const COUNT_COLUMN_WIDTH = 8;
+const FAIL_COLUMN_WIDTH = 6;
+const RATE_COLUMN_WIDTH = 8;
+const DATE_PART_LENGTH = 10;
+const STAMP_LENGTH = 15;
+const JSON_INDENT = 2;
+const ENTRIES_PER_TURN = 2;
+const DIVIDER_WIDTH = 40;
 
 const CATEGORY_LABELS: Record<Category, string> = {
   A: 'grounding',
@@ -33,7 +45,10 @@ export function summarize(
   return {
     failed,
     p0_failures,
-    pass_rate: total === 0 ? 0 : Math.round((passed / total) * 100) / 100,
+    pass_rate:
+      total === 0
+        ? 0
+        : Math.round((passed / total) * RATE_PRECISION) / RATE_PRECISION,
     passed,
     total,
   };
@@ -54,7 +69,8 @@ export function rollupByCategory(
     out[cat] = {
       failed,
       p0_failures,
-      pass_rate: Math.round((passed / inCat.length) * 100) / 100,
+      pass_rate:
+        Math.round((passed / inCat.length) * RATE_PRECISION) / RATE_PRECISION,
       passed,
     };
   }
@@ -69,16 +85,22 @@ export function formatRollupTable(results: AttackResult[]): string {
   for (const cat of ALL_CATEGORIES) {
     const r = rollup[cat];
     if (!r) continue;
-    const label = `${cat} ${CATEGORY_LABELS[cat]}`.padEnd(22);
-    const pf = `${r.passed}/${r.passed + r.failed}`.padEnd(8);
-    const fail = String(r.failed).padEnd(6);
-    const rate = `${Math.round(r.pass_rate * 100)}%`.padEnd(8);
+    const label = `${cat} ${CATEGORY_LABELS[cat]}`.padEnd(LABEL_COLUMN_WIDTH);
+    const pf = `${r.passed}/${r.passed + r.failed}`.padEnd(COUNT_COLUMN_WIDTH);
+    const fail = String(r.failed).padEnd(FAIL_COLUMN_WIDTH);
+    const rate = `${Math.round(r.pass_rate * PERCENT)}%`.padEnd(
+      RATE_COLUMN_WIDTH,
+    );
     rows.push(`${label}${pf}${fail}${rate}${r.p0_failures}`);
   }
-  const labelTotal = 'OVERALL'.padEnd(22);
-  const pfTotal = `${summary.passed}/${summary.total}`.padEnd(8);
-  const failTotal = String(summary.failed).padEnd(6);
-  const rateTotal = `${Math.round(summary.pass_rate * 100)}%`.padEnd(8);
+  const labelTotal = 'OVERALL'.padEnd(LABEL_COLUMN_WIDTH);
+  const pfTotal = `${summary.passed}/${summary.total}`.padEnd(
+    COUNT_COLUMN_WIDTH,
+  );
+  const failTotal = String(summary.failed).padEnd(FAIL_COLUMN_WIDTH);
+  const rateTotal = `${Math.round(summary.pass_rate * PERCENT)}%`.padEnd(
+    RATE_COLUMN_WIDTH,
+  );
   rows.push(
     `${labelTotal}${pfTotal}${failTotal}${rateTotal}${summary.p0_failures}`,
   );
@@ -115,8 +137,8 @@ export function writeReport(
   reportsDir: string,
   timestamp: string,
 ): ReportPaths {
-  const datePart = timestamp.slice(0, 10);
-  const fullStamp = timestamp.replace(/[:.]/g, '').slice(0, 15);
+  const datePart = timestamp.slice(0, DATE_PART_LENGTH);
+  const fullStamp = timestamp.replace(/[:.]/g, '').slice(0, STAMP_LENGTH);
   const jsonPath = join(reportsDir, `${fullStamp}-adversarial.json`);
   const transcriptsDir = join(
     reportsDir,
@@ -124,12 +146,12 @@ export function writeReport(
   );
   mkdirSync(reportsDir, { recursive: true });
   mkdirSync(transcriptsDir, { recursive: true });
-  writeFileSync(jsonPath, JSON.stringify(report, null, 2), 'utf-8');
+  writeFileSync(jsonPath, JSON.stringify(report, null, JSON_INDENT), 'utf-8');
   for (const r of report.attacks) {
     const txt = r.transcript
       .map(
         (t, i) =>
-          `Turn ${Math.floor(i / 2) + 1} [${t.role.toUpperCase()}]: ${t.content}`,
+          `Turn ${Math.floor(i / ENTRIES_PER_TURN) + 1} [${t.role.toUpperCase()}]: ${t.content}`,
       )
       .join('\n\n');
     const header = [
@@ -152,7 +174,7 @@ export function writeReport(
 export function printReport(report: AdversarialReport): void {
   console.log('');
   console.log('Adversarial Eval Report');
-  console.log('-'.repeat(40));
+  console.log('-'.repeat(DIVIDER_WIDTH));
   console.log(formatRollupTable(report.attacks));
   console.log('');
   console.log('Failures:');

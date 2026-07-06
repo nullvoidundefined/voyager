@@ -14,8 +14,8 @@ export const flightCapability: SegmentCapability = {
   requiredTools: ['search_flights'],
   resultListKey: 'flights',
   searchTool: 'search_flights',
-  selectionKey: 'flights',
   selectTool: 'select_flight',
+  selectionKey: 'flights',
   subAgentTools: [
     'search_flights',
     'get_destination_info',

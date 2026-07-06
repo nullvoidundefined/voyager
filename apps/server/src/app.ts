@@ -4,11 +4,12 @@
  * HTTP surface is assembled in one place separate from the process entry point.
  */
 // Static destinations data: public, aggressively cached
+import fs from 'node:fs';
+import path from 'node:path';
+
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import helmet from 'helmet';
-import fs from 'node:fs';
-import path from 'node:path';
 
 import {
   type MockScenarioName,

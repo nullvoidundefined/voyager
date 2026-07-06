@@ -1,5 +1,6 @@
-import { defineConfig, devices } from '@playwright/test';
 import path from 'node:path';
+
+import { defineConfig, devices } from '@playwright/test';
 
 // Playwright loads this config via CommonJS so __dirname is the
 // directory of this file regardless of CWD. We use it to keep

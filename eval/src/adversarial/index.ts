@@ -1,14 +1,16 @@
 #!/usr/bin/env node
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { config } from 'dotenv';
-import { readFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
 
 import {
   createMockReq,
   createMockRes,
   parseSSEChunks,
 } from '../runner/harness.js';
+
 import { getAntagonistResponse } from './antagonist.js';
 import { ATTACKS } from './attacks.js';
 import { runJudge } from './judge.js';
@@ -35,7 +37,11 @@ config({ path: join(__dirname, '..', '..', '..', 'apps', 'server', '.env') });
 process.env.NODE_ENV = 'test';
 process.env.EVAL_MOCK_SEARCH = 'true';
 
-const args = process.argv.slice(2);
+const ARGV_OPTIONS_START = 2;
+const DIVIDER_WIDTH = 40;
+const HTTP_OK = 200;
+
+const args = process.argv.slice(ARGV_OPTIONS_START);
 function getArg(name: string): string | undefined {
   const arg = args.find((a) => a.startsWith(`--${name}=`));
   return arg?.split('=')[1];
@@ -53,7 +59,7 @@ const EVAL_USER_ID = '00000000-0000-0000-0000-e00000000001';
 async function main() {
   const startTime = Date.now();
   console.log('Voyager Adversarial Eval');
-  console.log('-'.repeat(40));
+  console.log('-'.repeat(DIVIDER_WIDTH));
 
   // Filter the catalog
   let selected = ATTACKS.slice();
@@ -148,7 +154,7 @@ async function main() {
         const req = createMockReq(trip.id, EVAL_USER_ID, userMessage);
         const res = createMockRes();
         await chatHandler(req, res);
-        if (res.statusCode !== 200 || res.jsonData) {
+        if (res.statusCode !== HTTP_OK || res.jsonData) {
           return {
             error: `HTTP ${res.statusCode}: ${JSON.stringify(res.jsonData)}`,
             tool_results: [],

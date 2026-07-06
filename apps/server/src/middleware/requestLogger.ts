@@ -3,7 +3,8 @@
  * UUID for correlation and emits structured access logs, giving every request a
  * traceable identifier.
  */
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
+
 import { pinoHttp } from 'pino-http';
 
 import { logger } from 'app/clients/logger.js';

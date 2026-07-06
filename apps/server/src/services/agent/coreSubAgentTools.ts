@@ -2,9 +2,14 @@
  * Tool partitions for the three core (non-segment) sub-agents; segment
  * partitions live on their capabilities in the segment registry.
  */
-import type { CoreSubAgentType } from 'app/services/agent/subAgentTypes.js';
+import type { SegmentKind } from '@repo/types';
 
-export const CORE_SUB_AGENT_TOOLS: Record<CoreSubAgentType, string[]> = {
+import type { SubAgentType } from 'app/services/agent/subAgentTypes.js';
+
+export const CORE_SUB_AGENT_TOOLS: Record<
+  Exclude<SubAgentType, SegmentKind>,
+  string[]
+> = {
   conversation: [
     'update_trip',
     'get_destination_info',

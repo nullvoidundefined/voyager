@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 // Guards that the pre-push hook actually runs unit tests locally. The 2026-06-24

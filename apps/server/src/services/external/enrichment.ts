@@ -7,6 +7,7 @@
 import type { ChatNode } from '@repo/types';
 
 import { lookupCity } from '../../data/cities.js';
+
 import { getDrivingRequirements } from './enrichmentSources/driving.js';
 import { fetchFCDOAdvisory } from './enrichmentSources/fcdo.js';
 import { fetchWeatherForecast } from './enrichmentSources/openMeteo.js';

@@ -17,8 +17,8 @@ export const experienceCapability: SegmentCapability = {
   requires: ['flight'],
   resultListKey: 'experiences',
   searchTool: 'search_experiences',
-  selectionKey: 'experiences',
   selectTool: 'select_experience',
+  selectionKey: 'experiences',
   subAgentTools: [
     'search_experiences',
     'select_experience',

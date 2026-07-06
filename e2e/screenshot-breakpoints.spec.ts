@@ -1,5 +1,6 @@
-import { expect, test } from '@playwright/test';
 import path from 'node:path';
+
+import { expect, test } from '@playwright/test';
 
 import { existingUser, seedUser } from './fixtures/test-users';
 import { login } from './helpers/auth';

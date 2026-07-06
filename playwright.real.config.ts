@@ -1,5 +1,6 @@
-import { defineConfig, devices } from '@playwright/test';
 import path from 'node:path';
+
+import { defineConfig, devices } from '@playwright/test';
 
 // Real-API E2E config: runs specs in e2e/real/ against an
 // un-mocked server (no E2E_MOCK_ANTHROPIC, no E2E_MOCK_TOOLS,

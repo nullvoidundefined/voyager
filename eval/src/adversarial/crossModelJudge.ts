@@ -1,5 +1,4 @@
 #!/usr/bin/env tsx
-
 /**
  * Cross-model judge validation runner (audit follow-up).
  *
@@ -33,6 +32,13 @@ import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const STDOUT_TAIL_CHARS = 500;
+const RATE_DECIMALS = 2;
+const MODEL_COLUMN_WIDTH = 32;
+const MIN_RUNS_FOR_SPREAD = 2;
+const MAX_ACCEPTABLE_SPREAD = 0.05;
+const EXIT_SPREAD_EXCEEDED = 2;
 
 const DEFAULT_MODELS = [
   'claude-haiku-4-5-20251001',
@@ -80,7 +86,7 @@ async function runOne(model: string): Promise<RunSummary> {
     exitCode: result.status,
     model,
     passRate: parsePassRate(stdout),
-    rawOutputTail: stdout.slice(-500),
+    rawOutputTail: stdout.slice(-STDOUT_TAIL_CHARS),
   };
 }
 
@@ -105,12 +111,15 @@ async function main(): Promise<void> {
     .filter((r): r is number => r != null);
 
   for (const s of summaries) {
-    const rate = s.passRate == null ? 'PARSE FAILED' : s.passRate.toFixed(2);
+    const rate =
+      s.passRate == null ? 'PARSE FAILED' : s.passRate.toFixed(RATE_DECIMALS);
     const exit = s.exitCode == null ? '?' : s.exitCode;
-    console.log(`  ${s.model.padEnd(32)} pass-rate=${rate}  exit=${exit}`);
+    console.log(
+      `  ${s.model.padEnd(MODEL_COLUMN_WIDTH)} pass-rate=${rate}  exit=${exit}`,
+    );
   }
 
-  if (rates.length < 2) {
+  if (rates.length < MIN_RUNS_FOR_SPREAD) {
     console.log(
       '\nCannot compute spread: fewer than 2 successful runs returned a parseable pass-rate.',
     );
@@ -122,14 +131,14 @@ async function main(): Promise<void> {
   const spread = max - min;
 
   console.log(
-    `\nMin: ${min.toFixed(2)}, Max: ${max.toFixed(2)}, Spread: ${spread.toFixed(2)}`,
+    `\nMin: ${min.toFixed(RATE_DECIMALS)}, Max: ${max.toFixed(RATE_DECIMALS)}, Spread: ${spread.toFixed(RATE_DECIMALS)}`,
   );
 
-  if (spread > 0.05) {
+  if (spread > MAX_ACCEPTABLE_SPREAD) {
     console.log(
-      `Spread > 0.05: the published pass-rate is grader-specific. Report as a range (${min.toFixed(2)}-${max.toFixed(2)}), not a point.`,
+      `Spread > ${MAX_ACCEPTABLE_SPREAD}: the published pass-rate is grader-specific. Report as a range (${min.toFixed(RATE_DECIMALS)}-${max.toFixed(RATE_DECIMALS)}), not a point.`,
     );
-    process.exit(2);
+    process.exit(EXIT_SPREAD_EXCEEDED);
   }
 
   console.log(
