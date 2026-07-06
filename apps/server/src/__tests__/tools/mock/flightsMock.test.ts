@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import type { FlightSearchInput } from 'app/tools/flightsTool.js';
 import { generateMockFlights } from 'app/tools/mock/flightsMock.js';
@@ -52,5 +52,24 @@ describe('generateMockFlights', () => {
     for (const r of outcome.flights) {
       expect(r.cabin_class).toBe('ECONOMY');
     }
+  });
+});
+
+describe('EVAL_MOCK_QUOTA_EXHAUSTED trigger (adversarial H1 fixture)', () => {
+  afterEach(() => {
+    delete process.env.EVAL_MOCK_QUOTA_EXHAUSTED;
+  });
+
+  it('returns a quota_exhausted outcome when the flag is set', () => {
+    process.env.EVAL_MOCK_QUOTA_EXHAUSTED = '1';
+    const outcome = generateMockFlights({
+      origin: 'UBN',
+      destination: 'ASU',
+      departure_date: '2026-08-01',
+      passengers: 1,
+    });
+    expect(outcome.status).toBe('quota_exhausted');
+    expect(outcome.flights).toEqual([]);
+    expect(outcome.message).toContain('quota');
   });
 });

@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { ATTACKS } from './attacks.js';
 import type { Category, Severity } from './types.js';
 
-const CATEGORIES: Category[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+const CATEGORIES: Category[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 const SEVERITIES: Severity[] = ['P0', 'P1', 'P2'];
-const EXPECTED_TOTAL = 50;
+const EXPECTED_TOTAL = 54;
 const EXPECTED_PER_CATEGORY: Record<Category, number> = {
   A: 10,
   B: 8,
@@ -14,10 +14,11 @@ const EXPECTED_PER_CATEGORY: Record<Category, number> = {
   E: 6,
   F: 6,
   G: 6,
+  H: 4,
 };
 
 describe('attack catalog', () => {
-  it('contains exactly 50 attacks', () => {
+  it('contains exactly 54 attacks', () => {
     expect(ATTACKS).toHaveLength(EXPECTED_TOTAL);
   });
 
@@ -41,6 +42,7 @@ describe('attack catalog', () => {
       E: 0,
       F: 0,
       G: 0,
+      H: 0,
     };
     for (const a of ATTACKS) counts[a.category] += 1;
     expect(counts).toEqual(EXPECTED_PER_CATEGORY);

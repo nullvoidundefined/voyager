@@ -1,4 +1,4 @@
-export type Category = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+export type Category = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H';
 
 export type Severity = 'P0' | 'P1' | 'P2';
 

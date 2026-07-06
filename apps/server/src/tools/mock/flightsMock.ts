@@ -7,6 +7,16 @@ import type { FlightSearchInput, FlightSearchOutcome } from '../flightsTool.js';
 export function generateMockFlights(
   input: FlightSearchInput,
 ): FlightSearchOutcome {
+  // Adversarial-eval fixture (Category H1): simulate the monthly SerpApi cap
+  // so quota-exhaustion behavior is testable without burning real quota.
+  if (process.env.EVAL_MOCK_QUOTA_EXHAUSTED === '1') {
+    return {
+      status: 'quota_exhausted',
+      flights: [],
+      message: 'monthly quota reached',
+    };
+  }
+
   const airlines = ['Delta', 'United', 'American'];
   const flights = airlines.map((airline, i) => ({
     offer_id: `mock-flight-${i}`,
