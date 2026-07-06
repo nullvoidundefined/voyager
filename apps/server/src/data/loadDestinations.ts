@@ -7,6 +7,8 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import type { PriceLevel } from 'app/schemas/priceLevel.js';
+
 export interface DestinationExperience {
   category: string;
   description: string;
@@ -18,7 +20,7 @@ export interface DestinationDining {
   cuisine: string;
   description: string;
   name: string;
-  price_level: 1 | 2 | 3 | 4;
+  price_level: PriceLevel;
 }
 
 export interface DestinationWeather {
@@ -39,7 +41,7 @@ export interface Destination {
   language: string;
   name: string;
   neighborhoods: Array<{ description: string; name: string }>;
-  price_level: 1 | 2 | 3 | 4;
+  price_level: PriceLevel;
   slug: string;
   top_experiences: DestinationExperience[];
   visa_summary: string;

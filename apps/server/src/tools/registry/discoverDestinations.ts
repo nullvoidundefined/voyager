@@ -1,7 +1,10 @@
 /** discover_destinations tool: rank curated destinations by travel criteria. */
 import { z } from 'zod';
 
+import { priceLevelSchema } from 'app/schemas/priceLevel.js';
 import type { ToolModule } from 'app/tools/registry/toolModule.js';
+
+const MAX_DISCOVERY_LIMIT = 10;
 
 export const discoverDestinationsSchema = z.object({
   climate: z
@@ -12,7 +15,7 @@ export const discoverDestinationsSchema = z.object({
     .number()
     .int()
     .min(1)
-    .max(10)
+    .max(MAX_DISCOVERY_LIMIT)
     .optional()
     .describe('Maximum destinations to return (default 5).'),
   max_daily_budget_usd: z
@@ -20,8 +23,7 @@ export const discoverDestinationsSchema = z.object({
     .positive()
     .optional()
     .describe('Upper bound on the budget daily spend in USD.'),
-  max_price_level: z
-    .union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)])
+  max_price_level: priceLevelSchema
     .optional()
     .describe('Upper bound on cost tier: 1 cheapest, 4 priciest.'),
   month: z

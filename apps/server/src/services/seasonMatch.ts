@@ -22,6 +22,7 @@ const MONTH_NAMES = [
 ];
 
 const YEAR_ROUND = 'year-round';
+const SEASON_RANGE_PARTS = 2;
 
 export function isMonthInBestSeason(
   bestSeason: string,
@@ -44,7 +45,7 @@ function parseSeasonRange(
   bestSeason: string,
 ): { start: number; end: number } | undefined {
   const parts = bestSeason.split('-').map((part) => part.trim());
-  if (parts.length !== 2) return undefined;
+  if (parts.length !== SEASON_RANGE_PARTS) return undefined;
 
   const start = monthNameToIndex(parts[0] ?? '');
   const end = monthNameToIndex(parts[1] ?? '');

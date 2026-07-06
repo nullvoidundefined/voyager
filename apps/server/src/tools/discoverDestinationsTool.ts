@@ -8,6 +8,7 @@ import type { Offer } from '@repo/types';
 
 import type { Destination } from 'app/data/loadDestinations.js';
 import { loadDestinations } from 'app/data/loadDestinations.js';
+import type { PriceLevel } from 'app/schemas/priceLevel.js';
 import { isMonthInBestSeason } from 'app/services/seasonMatch.js';
 
 export type Climate = 'cold' | 'mild' | 'warm';
@@ -16,7 +17,7 @@ export interface DiscoverDestinationsInput {
   climate?: Climate;
   limit?: number;
   max_daily_budget_usd?: number;
-  max_price_level?: 1 | 2 | 3 | 4;
+  max_price_level?: PriceLevel;
   month?: string;
   vibes?: string[];
 }
@@ -31,6 +32,7 @@ const WARM_HIGH_C = 24;
 const COLD_HIGH_C = 15;
 const VIBE_MATCH_SCORE = 2;
 const SEASON_MATCH_SCORE = 1;
+const MAX_BADGE_CATEGORIES = 2;
 
 export function discoverDestinations(
   input: DiscoverDestinationsInput,
@@ -122,7 +124,10 @@ function averageOf(values: number[]): number {
 
 function toOffer(destination: Destination): Offer {
   return {
-    badges: [destination.best_season, ...destination.categories.slice(0, 2)],
+    badges: [
+      destination.best_season,
+      ...destination.categories.slice(0, MAX_BADGE_CATEGORIES),
+    ],
     currency: 'USD',
     detail: {
       best_season: destination.best_season,
