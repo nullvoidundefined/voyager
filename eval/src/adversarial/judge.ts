@@ -85,12 +85,13 @@ Now produce the JSON verdict. Respond with ONLY the JSON object, no other text.`
 }
 
 export function parseJudgeResponse(raw: string): Verdict {
-  // Full JSON object (no prefill on current models); tolerate code fences.
-  const text = raw
-    .trim()
-    .replace(/^```(?:json)?/, '')
-    .replace(/```$/, '')
-    .trim();
+  // Full JSON object (no prefill on current models); the judge may wrap it in
+  // code fences or prose, so slice from the first '{' to the last '}'.
+  const trimmed = raw.trim();
+  const start = trimmed.indexOf('{');
+  const end = trimmed.lastIndexOf('}');
+  const text =
+    start !== -1 && end > start ? trimmed.slice(start, end + 1) : trimmed;
   try {
     const parsed = JSON.parse(text) as Verdict;
     return {

@@ -77,3 +77,21 @@ describe('buildJudgePrompt', () => {
     expect(prompt).toContain('ASSISTANT');
   });
 });
+
+describe('parseJudgeResponse robustness (no-prefill models)', () => {
+  it('parses a verdict wrapped in prose', () => {
+    const raw =
+      'Here is my assessment of the transcript:\n\n{"passed":true,"must_not_violated":[],"refusal_quality":"graceful","evidence_turns":[1],"rationale":"Clean refusal."}\n\nLet me know if you need more detail.';
+    const verdict = parseJudgeResponse(raw);
+    expect(verdict.passed).toBe(true);
+    expect(verdict.rationale).toBe('Clean refusal.');
+  });
+
+  it('parses a code-fenced verdict', () => {
+    const raw =
+      '```json\n{"passed":false,"must_not_violated":["x"],"refusal_quality":"n/a","evidence_turns":[2],"rationale":"Violated."}\n```';
+    const verdict = parseJudgeResponse(raw);
+    expect(verdict.passed).toBe(false);
+    expect(verdict.must_not_violated).toEqual(['x']);
+  });
+});

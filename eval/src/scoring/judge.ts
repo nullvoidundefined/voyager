@@ -75,12 +75,13 @@ Constraints: ${persona.constraints}`;
   const rawText =
     response.content[0]?.type === 'text' ? response.content[0].text : '';
   // Current models reject assistant prefill, so the judge returns the full
-  // JSON object (possibly fenced); strip fences before parsing.
-  const text = rawText
-    .trim()
-    .replace(/^```(?:json)?/, '')
-    .replace(/```$/, '')
-    .trim();
+  // JSON object, possibly wrapped in code fences or prose; slice from the
+  // first '{' to the last '}'.
+  const trimmed = rawText.trim();
+  const start = trimmed.indexOf('{');
+  const end = trimmed.lastIndexOf('}');
+  const text =
+    start !== -1 && end > start ? trimmed.slice(start, end + 1) : trimmed;
 
   try {
     return JSON.parse(text) as JudgeScores;
