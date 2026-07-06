@@ -7,6 +7,7 @@
  */
 import type { ChatNodeOfType, Citation } from '@repo/types';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 import styles from './MarkdownText.module.scss';
 
@@ -48,7 +49,9 @@ export function MarkdownText({ node }: MarkdownTextProps) {
   return (
     <div className={styles.wrapper}>
       <div className={styles.prose}>
-        <ReactMarkdown>{node.content}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {node.content}
+        </ReactMarkdown>
       </div>
       {citations.length > 0 && <CitationList citations={citations} />}
     </div>

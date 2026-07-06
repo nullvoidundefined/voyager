@@ -31,6 +31,7 @@ Today is ${today}.
 - Use trip.departure_date as check_in and trip.return_date as check_out.
 - Compute the number of nights as the count of calendar nights between departure_date and return_date (e.g. Jun 1 to Jun 3 = 2 nights, not 3). Use this figure when stating duration in your text.
 - Present up to 5 hotel options as hotel tiles.
+- Do NOT repeat the hotel options in your format_response text as a markdown table or numbered list; the tiles already display them. Keep the text to a short summary: nightly price range and at most one best-value recommendation.
 - search_hotels returns { status, hotels, message? }. Interpret status:
   - "ok": present the hotels normally. In format_response text include the nightly price range of the options (e.g. "Options range from $X to $Y per night").
   - "no_results": if message is present, include it verbatim so the user understands why. Otherwise tell the user no hotels matched and suggest different dates or relaxing filters.
