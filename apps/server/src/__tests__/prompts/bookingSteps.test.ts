@@ -299,6 +299,39 @@ describe('getFlowPosition', () => {
     const trip = { ...baseTripState, budget_total: null };
     expect(getFlowPosition(trip, confirmedTracker).phase).toBe('PLANNING');
   });
+
+  it('routes an undecided trip (no destination) to DISCOVER', () => {
+    const trip = { ...baseTripState, destination: '', status: 'planning' };
+    expect(getFlowPosition(trip)).toEqual({ phase: 'DISCOVER' });
+  });
+
+  it('routes the "New trip" placeholder destination to DISCOVER', () => {
+    const trip = {
+      ...baseTripState,
+      destination: 'New trip',
+      status: 'planning',
+    };
+    expect(getFlowPosition(trip)).toEqual({ phase: 'DISCOVER' });
+  });
+
+  it('routes the "Planning..." placeholder destination to DISCOVER', () => {
+    const trip = {
+      ...baseTripState,
+      destination: 'Planning...',
+      status: 'planning',
+    };
+    expect(getFlowPosition(trip)).toEqual({ phase: 'DISCOVER' });
+  });
+
+  it('still routes to COLLECT_DETAILS once a destination is chosen', () => {
+    const trip = {
+      ...baseTripState,
+      destination: 'Lisbon',
+      origin: null,
+      status: 'planning',
+    };
+    expect(getFlowPosition(trip)).toEqual({ phase: 'COLLECT_DETAILS' });
+  });
 });
 
 describe('allCategoriesResolved', () => {

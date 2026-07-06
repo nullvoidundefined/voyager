@@ -196,7 +196,11 @@ export function VirtualizedChat({
                   : undefined,
               onBookNow,
               onConfirmOffer: (kind, label, data) => {
-                onSelectItem?.(kind, data);
+                // 'destination' is non-bookable: no select tool or repository
+                // exists for it server-side, so only the chat pivot message fires.
+                if (kind !== 'destination') {
+                  onSelectItem?.(kind, data);
+                }
                 onQuickReply(buildOfferSelectionMessage(kind, label));
               },
               onConfirmPlan,

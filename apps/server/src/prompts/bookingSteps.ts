@@ -10,6 +10,7 @@ import {
   type SegmentKind,
 } from '@repo/types';
 
+import { isPlaceholderDestination } from 'app/constants/placeholderDestinations.js';
 import { getJourneyType } from 'app/journeys/registry.js';
 import { getSegmentKindForPlanCategory } from 'app/segments/planCategoryIndex.js';
 import { getSegmentCapability } from 'app/segments/registry/index.js';
@@ -326,9 +327,10 @@ function migrateV3ToV4(v3: V3Tracker): CompletionTracker {
 
 export type FlowPosition =
   | { phase: 'COLLECT_DETAILS' }
+  | { phase: 'COMPLETE' }
+  | { phase: 'DISCOVER' }
   | { phase: 'PLAN_TRIP' }
-  | { phase: 'PLANNING' }
-  | { phase: 'COMPLETE' };
+  | { phase: 'PLANNING' };
 
 export interface TripState {
   destination: string;
@@ -351,6 +353,10 @@ export function getFlowPosition(
 ): FlowPosition {
   if (trip.status !== 'planning') {
     return { phase: 'COMPLETE' };
+  }
+
+  if (isPlaceholderDestination(trip.destination)) {
+    return { phase: 'DISCOVER' };
   }
 
   const needsReturnDate = trip.trip_type !== 'one_way';

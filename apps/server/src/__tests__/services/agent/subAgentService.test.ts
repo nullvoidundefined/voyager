@@ -405,12 +405,21 @@ describe('selectSubAgent', () => {
       expect(selectSubAgent({ phase: 'PLANNING' }, tracker)).toBe('car_rental');
     });
   });
+
+  describe('DISCOVER phase', () => {
+    it('routes to discover agent', () => {
+      expect(
+        selectSubAgent({ phase: 'DISCOVER' }, DEFAULT_COMPLETION_TRACKER),
+      ).toBe('discover');
+    });
+  });
 });
 
 const ALL_SUB_AGENT_TYPES: SubAgentType[] = [
   'detail',
   'plan',
   'conversation',
+  'discover',
   'flight',
   'hotel',
   'car_rental',
@@ -448,6 +457,13 @@ describe('getSubAgentTools', () => {
   it('conversation agent has re_open_category', () => {
     expect(getSubAgentTools('conversation')).toContain('re_open_category');
     expect(getSubAgentTools('conversation')).not.toContain('search_flights');
+  });
+
+  it('discover agent has its grazing tools but not search_flights', () => {
+    expect(getSubAgentTools('discover')).toContain('discover_destinations');
+    expect(getSubAgentTools('discover')).toContain('search_experiences');
+    expect(getSubAgentTools('discover')).toContain('update_trip');
+    expect(getSubAgentTools('discover')).not.toContain('search_flights');
   });
 
   it('ORC-01: every executor-implemented leg/schedule tool is in at least one partition', () => {

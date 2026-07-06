@@ -21,6 +21,7 @@ export function selectSubAgent(
   tracker: CompletionTracker,
 ): SubAgentType {
   if (flowPosition.phase === 'COLLECT_DETAILS') return 'detail';
+  if (flowPosition.phase === 'DISCOVER') return 'discover';
   if (flowPosition.phase === 'PLAN_TRIP') return 'plan';
   if (flowPosition.phase === 'COMPLETE') return 'conversation';
 

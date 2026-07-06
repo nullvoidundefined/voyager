@@ -99,9 +99,18 @@ function collectMismatches(
 
 describe('Zod-derived tool definitions preserve the baseline contract', () => {
   it('derives one definition per baseline tool, no more no less', () => {
+    // Baseline is a fixed snapshot captured before the derive-from-Zod
+    // refactor; it covers only the tools that existed at that time. Tools
+    // added afterward (e.g. discover_destinations) are not regressions
+    // against this baseline, so assert each baseline tool maps to exactly
+    // one derived definition rather than requiring an exact set match.
     const baselineNames = baseline.map((t) => t.name).sort();
     const derivedNames = TOOL_DEFINITIONS.map((t) => t.name).sort();
-    expect(derivedNames).toEqual(baselineNames);
+    for (const name of baselineNames) {
+      expect(
+        derivedNames.filter((derivedName) => derivedName === name),
+      ).toHaveLength(1);
+    }
   });
 
   for (const baseTool of baseline) {

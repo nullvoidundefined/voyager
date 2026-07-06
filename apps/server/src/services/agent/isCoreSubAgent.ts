@@ -11,6 +11,9 @@ export function isCoreSubAgent(
   subAgent: SubAgentType,
 ): subAgent is Exclude<SubAgentType, SegmentKind> {
   return (
-    subAgent === 'detail' || subAgent === 'plan' || subAgent === 'conversation'
+    subAgent === 'detail' ||
+    subAgent === 'discover' ||
+    subAgent === 'plan' ||
+    subAgent === 'conversation'
   );
 }

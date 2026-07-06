@@ -5,6 +5,7 @@
  */
 export { addLegSchema } from 'app/tools/registry/addLeg.js';
 export { calculateBudgetSchema } from 'app/tools/registry/calculateRemainingBudget.js';
+export { discoverDestinationsSchema } from 'app/tools/registry/discoverDestinations.js';
 export { formatResponseSchema } from 'app/tools/registry/formatResponse.js';
 export { getDestinationInfoSchema } from 'app/tools/registry/getDestinationInfo.js';
 export { planDailyScheduleSchema } from 'app/tools/registry/planDailySchedule.js';

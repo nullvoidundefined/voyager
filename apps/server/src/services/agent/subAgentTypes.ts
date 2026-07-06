@@ -4,4 +4,9 @@
  */
 import type { SegmentKind } from '@repo/types';
 
-export type SubAgentType = 'detail' | 'plan' | 'conversation' | SegmentKind;
+export type SubAgentType =
+  | 'conversation'
+  | 'detail'
+  | 'discover'
+  | 'plan'
+  | SegmentKind;

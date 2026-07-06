@@ -4,7 +4,7 @@
  * registry to a generic offer_tiles node, so a new travel mode reaches the
  * client by registration, never by adding a switch arm here.
  */
-import type { ChatNode } from '@repo/types';
+import type { ChatNode, Offer } from '@repo/types';
 
 import { buildOfferTilesNode } from 'app/segments/buildOfferTilesNode.js';
 import { SEGMENT_CAPABILITIES } from 'app/segments/registry/index.js';
@@ -36,6 +36,17 @@ export function buildNodeFromToolResult(
       currency: (data.currency as string) ?? 'USD',
       total: (data.total_budget as number) ?? 0,
       type: 'budget_bar',
+    };
+  }
+
+  if (toolName === 'discover_destinations') {
+    const offers = (result as { destinations?: Offer[] }).destinations ?? [];
+    if (offers.length === 0) return null;
+    return {
+      offer_kind: 'destination',
+      offers,
+      selectable: true,
+      type: 'offer_tiles',
     };
   }
 

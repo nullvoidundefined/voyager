@@ -27,6 +27,12 @@ describe('buildSystemPrompt', () => {
     expect(result).toContain('Trip Booked');
   });
 
+  it('should include DISCOVER addendum for that phase', () => {
+    const result = buildSystemPrompt(undefined, { phase: 'DISCOVER' });
+    expect(result).toContain('Current Phase: Discovery');
+    expect(result).toContain('discover_destinations');
+  });
+
   it('should not include phase addendum for PLANNING', () => {
     const result = buildSystemPrompt(undefined, { phase: 'PLANNING' });
     expect(result).not.toContain('Collecting Details');

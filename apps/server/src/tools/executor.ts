@@ -31,6 +31,7 @@ import { searchSegment } from 'app/segments/searchSegment.js';
 import { calculateRemainingBudget } from 'app/tools/budgetTool.js';
 import { searchCarRentals } from 'app/tools/carRentalsTool.js';
 import { getDestinationInfo } from 'app/tools/destinationTool.js';
+import { discoverDestinations } from 'app/tools/discoverDestinationsTool.js';
 import { searchExperiences } from 'app/tools/experiencesTool.js';
 import { searchFlights } from 'app/tools/flightsTool.js';
 import { searchHotels } from 'app/tools/hotelsTool.js';
@@ -43,6 +44,7 @@ import { handlePlanDailySchedule } from 'app/tools/scheduleTool.js';
 import {
   addLegSchema,
   calculateBudgetSchema,
+  discoverDestinationsSchema,
   formatResponseSchema,
   getDestinationInfoSchema,
   planDailyScheduleSchema,
@@ -175,6 +177,12 @@ export async function executeTool(
       const parsed = parseInput(toolName, getDestinationInfoSchema, input);
       if ('error' in parsed) return parsed;
       return adapters.getDestinationInfo(parsed.data);
+    }
+
+    case 'discover_destinations': {
+      const parsed = parseInput(toolName, discoverDestinationsSchema, input);
+      if ('error' in parsed) return parsed;
+      return discoverDestinations(parsed.data);
     }
 
     case 'update_trip': {

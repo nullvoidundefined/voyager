@@ -39,6 +39,14 @@ A form is being shown to collect trip details (origin, dates, budget). If the us
 const COMPLETE_ADDENDUM = `\n\n## Current Phase: Trip Booked
 The trip is booked. Answer follow-up questions about the trip.`;
 
+const DISCOVER_ADDENDUM = `\n\n## Current Phase: Discovery
+The user has not chosen a destination. Do not present the trip-details form. Help them decide where to go and answer open-ended, curiosity-driven questions.
+- Call discover_destinations to surface candidate places from criteria like climate, budget, month, or vibe. It returns destination cards; never restate what a card shows.
+- Call search_experiences for in-place curiosity ("good restaurants in Lisbon", "what is worth doing there").
+- Present only grounded facts. Budgets are curated estimates; write them as "from ~$X/day (est.)" and never invent live prices.
+- When the user commits to a place (picks a card or names one), call update_trip with that destination, then help collect trip details.
+Keep replies under ~100 words.`;
+
 export interface PromptOptions {
   hasCriticalAdvisory?: boolean;
   nudge?: string | null;
@@ -92,7 +100,9 @@ export function buildSystemPrompt(
   );
 
   // Phase-specific addendum
-  if (!flowPosition || flowPosition.phase === 'COLLECT_DETAILS') {
+  if (flowPosition?.phase === 'DISCOVER') {
+    parts.push(DISCOVER_ADDENDUM);
+  } else if (!flowPosition || flowPosition.phase === 'COLLECT_DETAILS') {
     parts.push(COLLECT_DETAILS_ADDENDUM);
   } else if (flowPosition.phase === 'COMPLETE') {
     parts.push(COMPLETE_ADDENDUM);

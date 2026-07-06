@@ -9,6 +9,7 @@ import type { Request, Response } from 'express';
 import { logger } from 'app/clients/logger.js';
 import { posthog } from 'app/clients/posthog.js';
 import { ERROR_CODES } from 'app/constants/errorCodes.js';
+import { isPlaceholderDestination } from 'app/constants/placeholderDestinations.js';
 import { ApiError } from 'app/errors/ApiError.js';
 import { getAuthUser } from 'app/middleware/requireAuth/getAuthUser.js';
 import {
@@ -249,9 +250,11 @@ export async function chat(req: Request, res: Response) {
     );
   } else if (subAgentType === 'conversation') {
     systemPromptOverride = buildConversationAgentPrompt(tripContext, tracker);
-  } else if (subAgentType !== 'detail') {
+  } else if (subAgentType !== 'detail' && subAgentType !== 'discover') {
     // Segment sub-agents route through the registry; a new mode adds a
-    // SEGMENT_PROMPT_BUILDERS entry, never a case here.
+    // SEGMENT_PROMPT_BUILDERS entry, never a case here. 'detail' and
+    // 'discover' fall through to the default buildSystemPrompt, which
+    // selects their addendum from flowPosition.
     systemPromptOverride = SEGMENT_PROMPT_BUILDERS[subAgentType](
       tripContext,
       tracker,
@@ -389,10 +392,7 @@ export async function getMessages(req: Request, res: Response) {
     }));
 
   if (messages.length === 0) {
-    const isPlaceholder =
-      !trip.destination ||
-      trip.destination === 'Planning...' ||
-      trip.destination === 'New trip';
+    const isPlaceholder = isPlaceholderDestination(trip.destination);
 
     const welcomeText = isPlaceholder
       ? "Hi! I'd love to help plan your trip. Where would you like to go, when are you traveling, and what's your budget?"

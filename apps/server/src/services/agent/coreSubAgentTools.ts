@@ -24,5 +24,12 @@ export const CORE_SUB_AGENT_TOOLS: Record<
     'format_response',
   ],
   detail: ['update_trip', 'get_destination_info', 'format_response'],
+  discover: [
+    'discover_destinations',
+    'search_experiences',
+    'get_destination_info',
+    'update_trip',
+    'format_response',
+  ],
   plan: ['update_trip', 'format_response'],
 };

@@ -14,7 +14,7 @@ export const SEGMENT_KINDS = [
 
 export type SegmentKind = (typeof SEGMENT_KINDS)[number];
 
-export type OfferKind = SegmentKind;
+export type OfferKind = SegmentKind | 'destination';
 
 /** Placeholder alias until Phase 5 introduces real roles ('arrival_at_port'). */
 export type SegmentRole = SegmentKind;

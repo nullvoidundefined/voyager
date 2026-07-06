@@ -8,6 +8,7 @@
  */
 import { addLegTool } from 'app/tools/registry/addLeg.js';
 import { calculateRemainingBudgetTool } from 'app/tools/registry/calculateRemainingBudget.js';
+import { discoverDestinationsTool } from 'app/tools/registry/discoverDestinations.js';
 import { formatResponseTool } from 'app/tools/registry/formatResponse.js';
 import { getDestinationInfoTool } from 'app/tools/registry/getDestinationInfo.js';
 import { planDailyScheduleTool } from 'app/tools/registry/planDailySchedule.js';
@@ -29,6 +30,7 @@ export const TOOL_REGISTRY: ToolModule[] = [
   searchFlightsTool,
   searchHotelsTool,
   searchExperiencesTool,
+  discoverDestinationsTool,
   calculateRemainingBudgetTool,
   updateTripTool,
   getDestinationInfoTool,

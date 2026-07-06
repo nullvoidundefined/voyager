@@ -9,6 +9,7 @@ import type { ReactNode } from 'react';
 import type { Offer, OfferKind } from '@repo/types';
 
 import { CarRentalOfferCard } from './offerCards/CarRentalOfferCard';
+import { DestinationOfferCard } from './offerCards/DestinationOfferCard';
 import { ExperienceOfferCard } from './offerCards/ExperienceOfferCard';
 import { FallbackOfferCard } from './offerCards/FallbackOfferCard';
 import { FlightOfferCard } from './offerCards/FlightOfferCard';
@@ -36,6 +37,11 @@ const OFFER_CARD_REGISTRY: Partial<Record<OfferKind, OfferCardEntry>> = {
     Card: CarRentalOfferCard,
     heightEstimate: 240,
     selectionMessage: (label) => `I've selected the ${label} rental`,
+  },
+  destination: {
+    Card: DestinationOfferCard,
+    heightEstimate: 300,
+    selectionMessage: (label) => `Let us plan a trip to ${label}`,
   },
   experience: {
     Card: ExperienceOfferCard,

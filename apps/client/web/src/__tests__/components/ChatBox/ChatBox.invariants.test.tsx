@@ -138,6 +138,50 @@ describe('ChatBox invariants', () => {
     });
   });
 
+  describe('invariant 17: destination offer_tiles cards persist after the stream ends', () => {
+    it('persists destination discovery cards after the stream ends', () => {
+      const destinationTilesMessage = makeAssistantMessage('msg-1', [
+        {
+          type: 'offer_tiles',
+          offer_kind: 'destination',
+          offers: [
+            { id: 'lisbon', title: 'Lisbon', price: 90, currency: 'USD' },
+            { id: 'porto', title: 'Porto', price: 75, currency: 'USD' },
+          ],
+          selectable: true,
+        },
+      ]);
+
+      // While streaming
+      const { rerender } = render(
+        <VirtualizedChat
+          messages={[destinationTilesMessage]}
+          streamingNodes={[]}
+          toolProgress={[]}
+          streamingText=''
+          isSending
+          onQuickReply={noop}
+        />,
+      );
+      expect(screen.getByText('Lisbon')).toBeInTheDocument();
+      expect(screen.getByText('Porto')).toBeInTheDocument();
+
+      // After stream ends
+      rerender(
+        <VirtualizedChat
+          messages={[destinationTilesMessage]}
+          streamingNodes={[]}
+          toolProgress={[]}
+          streamingText=''
+          isSending={false}
+          onQuickReply={noop}
+        />,
+      );
+      expect(screen.getByText('Lisbon')).toBeInTheDocument();
+      expect(screen.getByText('Porto')).toBeInTheDocument();
+    });
+  });
+
   describe('invariant 2: text nodes never duplicate when the agent re-emits text', () => {
     it('does not double-render the same text content across stream-end transition', () => {
       const persistedMessage = makeAssistantMessage('msg-1', [

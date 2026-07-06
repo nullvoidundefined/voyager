@@ -1,3 +1,4 @@
+import type { Offer } from '@repo/types';
 import { describe, expect, it } from 'vitest';
 
 import { buildNodeFromToolResult } from 'app/services/agent/nodeBuilder.js';
@@ -257,5 +258,31 @@ describe('indicative knowledge-base outcomes', () => {
     if (node?.type === 'offer_tiles') {
       expect(node.offers).toHaveLength(1);
     }
+  });
+});
+
+describe('discover_destinations node mapping', () => {
+  it('builds a destination offer_tiles node from discover_destinations', () => {
+    const offers: Offer[] = [
+      { currency: 'USD', id: 'lisbon', price: 90, title: 'Lisbon' },
+    ];
+    const node = buildNodeFromToolResult('discover_destinations', {
+      destinations: offers,
+      status: 'ok',
+    });
+    expect(node).toEqual({
+      offer_kind: 'destination',
+      offers,
+      selectable: true,
+      type: 'offer_tiles',
+    });
+  });
+
+  it('returns null when discovery found no destinations', () => {
+    const node = buildNodeFromToolResult('discover_destinations', {
+      destinations: [],
+      status: 'no_results',
+    });
+    expect(node).toBeNull();
   });
 });
