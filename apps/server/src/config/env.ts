@@ -34,6 +34,8 @@ const envSchema = z.object({
   POSTHOG_HOST: z.string().optional(),
   REDIS_URL: z.string().optional(),
   SERPAPI_API_KEY: z.string().optional(),
+  TAVILY_API_KEY: z.string().optional(),
+  WEB_DISCOVERY_ENABLED: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
