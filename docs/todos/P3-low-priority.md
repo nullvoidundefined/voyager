@@ -414,3 +414,27 @@ Worktree commit `667a88f` is docs-only: adds inline comments to complex orchestr
 ## PRM-01: quota_exhausted message not surfaced verbatim
 
 `flightPrompt`/`hotelPrompt` instruct the agent to surface the quota_exhausted message verbatim ("monthly quota reached"), but in adversarial H1 runs it consistently paraphrases ("no live inventory for this route") - arguably friendlier. Decide: relax the verbatim instruction to match behavior, or tighten if the exact wording matters for support/debugging.
+
+## E2E Coverage Audit (2026-07-07)
+
+Source: `docs/audits/2026-07-07-e2e-coverage-synthesis.md`.
+
+### Decide: real-API E2E coverage of the agent reasoning loop
+
+`e2e/real/happy-path-real.spec.ts` self-skips without `ANTHROPIC_API_KEY`, which CI never sets, so the actual agent reasoning loop has zero automated coverage, ever.
+
+**Why P3:** A coverage-philosophy decision, not a single test; the mocked suite covers the plumbing.
+
+**Scope:** Decide to accept the gap or add a gated nightly real-API run with a spend cap.
+
+**Source:** 2026-07-07 E2E coverage audit (criticism)
+
+### E2E: chat markdown renders formatted (low, already unit-covered)
+
+`remark-gfm` is wired and `MarkdownText.test.tsx` already asserts a table renders as a real table element, so behavior is unit-covered; only an E2E through the live chat is missing.
+
+**Why P3:** Regression risk is low given the unit test; an E2E would catch a wiring regression only.
+
+**Scope:** Optional: assert a table in an agent message renders as an HTML table in an E2E chat turn.
+
+**Source:** 2026-07-07 E2E coverage audit (engineering, downgraded on verification)
