@@ -252,7 +252,7 @@ export function VirtualizedChat({
             <ChatProgressBar mode='indeterminate' label='Thinking' />
           </div>
         )}
-      {isStreaming && (
+      {isStreaming && streamingMessage !== null && (
         <div
           className={styles.thinkingIndicator}
           aria-live='polite'

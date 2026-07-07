@@ -837,6 +837,50 @@ describe('invariant 17: form auto-save persists form values at most once', () =>
   });
 });
 
+describe('invariant 18: at most one thinking indicator (no dual loader)', () => {
+  // 2026-07-07 live bug: ChatBox wires isStreaming={isSending}, and the dots
+  // "Thinking..." indicator (VirtualizedChat) was gated only on isStreaming
+  // with no phase guard, so at the start of every turn it co-rendered with the
+  // guarded pending "Thinking" progressbar. Exactly one loader per phase.
+  it('waiting phase (sending, streaming, no content) shows only the pending bar, not the dots', () => {
+    const userMsg = makeUserMessage('m1', 'Plan a trip');
+    render(
+      <VirtualizedChat
+        messages={[userMsg]}
+        streamingNodes={[]}
+        toolProgress={[]}
+        streamingText=''
+        isSending
+        isStreaming
+        onQuickReply={noop}
+      />,
+    );
+    expect(
+      screen.getByRole('progressbar', { name: /thinking/i }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Thinking\.\.\./)).not.toBeInTheDocument();
+  });
+
+  it('streaming phase (content present) shows the dots, not the pending bar', () => {
+    const userMsg = makeUserMessage('m1', 'Plan a trip');
+    render(
+      <VirtualizedChat
+        messages={[userMsg]}
+        streamingNodes={[]}
+        toolProgress={[]}
+        streamingText='Looking at your options'
+        isSending
+        isStreaming
+        onQuickReply={noop}
+      />,
+    );
+    expect(screen.getByText(/Thinking\.\.\./)).toBeInTheDocument();
+    expect(
+      screen.queryByRole('progressbar', { name: /thinking/i }),
+    ).not.toBeInTheDocument();
+  });
+});
+
 describe('ChatBox invariants: generic offer tiles (multimodal refactor)', () => {
   function makeOfferTilesNode(
     kind: string,

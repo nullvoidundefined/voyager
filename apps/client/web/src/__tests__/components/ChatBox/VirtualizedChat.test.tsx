@@ -107,14 +107,29 @@ describe('VirtualizedChat empty state', () => {
 });
 
 describe('VirtualizedChat thinking indicator', () => {
-  it('shows thinking indicator when isStreaming is true', () => {
-    render(<VirtualizedChat {...defaultProps} isStreaming={true} />);
-    expect(screen.getByText(/thinking/i)).toBeInTheDocument();
+  it('shows the thinking dots while content is actively streaming', () => {
+    render(
+      <VirtualizedChat
+        {...defaultProps}
+        isSending
+        isStreaming
+        streamingText='Looking at your options'
+      />,
+    );
+    expect(screen.getByText(/Thinking\.\.\./)).toBeInTheDocument();
   });
 
-  it('hides thinking indicator when isStreaming is false', () => {
+  it('does not show the thinking dots in the waiting phase before content streams', () => {
+    // 2026-07-07 dual-loader bug: isStreaming alone must not render the dots;
+    // they belong to the streaming phase, mutually exclusive with the pending
+    // indicator. This is the prop combination that occurs in production.
+    render(<VirtualizedChat {...defaultProps} isSending isStreaming />);
+    expect(screen.queryByText(/Thinking\.\.\./)).not.toBeInTheDocument();
+  });
+
+  it('hides the thinking dots when a turn is not in flight', () => {
     render(<VirtualizedChat {...defaultProps} isStreaming={false} />);
-    expect(screen.queryByText(/thinking/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Thinking\.\.\./)).not.toBeInTheDocument();
   });
 });
 
