@@ -82,6 +82,10 @@ test.describe('Checkout', () => {
     // "Delta" and flight number "DL100". Verify the line item
     // text appears inside the dialog.
     await expect(dialog.getByText(/Delta DL100/i).first()).toBeVisible();
+    // 2026-07-07 audit: assert the computed grand total equals the sum of the
+    // seeded prices (flight 300 + hotel 660 + car 180 + experience 75 = 1215),
+    // the exact surface a double-counted selection would become visible on.
+    await expect(dialog.getByText('$1,215')).toBeVisible();
   });
 
   test('US-27: confirm and book the trip', async ({ page }) => {
