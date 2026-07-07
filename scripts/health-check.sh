@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE_URL="${1:?Usage: health-check.sh <base-url> [frontend-url] [csrf-app]}"
+BASE_URL="${1:?Usage: health-check.sh <base-url> [frontend-url]}"
 FRONTEND_URL="${2:-}"
-CSRF_APP="${3:-true}"
 FAILURES=0
 
 check() {
@@ -19,14 +18,14 @@ check() {
     --max-time 10 2>/dev/null || echo "000")
 
   if [ "$response" != "$expected_status" ]; then
-    echo "FAIL: $description — expected $expected_status, got $response"
+    echo "FAIL: $description, expected $expected_status, got $response"
     FAILURES=$((FAILURES + 1))
     return
   fi
 
   if [ -n "$body_check" ]; then
     if ! grep -q "$body_check" /tmp/hc_body 2>/dev/null; then
-      echo "FAIL: $description — response body missing '$body_check'"
+      echo "FAIL: $description, response body missing '$body_check'"
       FAILURES=$((FAILURES + 1))
       return
     fi
@@ -52,28 +51,16 @@ check_cors() {
 }
 
 check_login_rejects_bad_creds() {
-  if [ "$CSRF_APP" = "true" ]; then
-    csrf_response=$(curl -s -c /tmp/hc_cookies "$BASE_URL/api/csrf-token" \
-      -H "Origin: ${FRONTEND_URL:-http://localhost:3000}" \
-      --max-time 10 2>/dev/null)
-    csrf_token=$(echo "$csrf_response" | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
-
-    login_status=$(curl -s -o /tmp/hc_body -w "%{http_code}" \
-      -X POST "$BASE_URL/auth/login" \
-      -H "Content-Type: application/json" \
-      -H "X-Requested-With: XMLHttpRequest" \
-      -H "X-CSRF-Token: $csrf_token" \
-      -b /tmp/hc_cookies \
-      -d '{"email":"smoke@test.invalid","password":"wrongpassword"}' \
-      --max-time 10 2>/dev/null || echo "000")
-  else
-    login_status=$(curl -s -o /tmp/hc_body -w "%{http_code}" \
-      -X POST "$BASE_URL/auth/login" \
-      -H "Content-Type: application/json" \
-      -H "X-Requested-With: XMLHttpRequest" \
-      -d '{"email":"smoke@test.invalid","password":"wrongpassword"}' \
-      --max-time 10 2>/dev/null || echo "000")
-  fi
+  # This app uses origin-based CSRF (csrfGuard middleware validates the Origin
+  # header against an allowlist); there is no CSRF-token endpoint. Send a valid
+  # Origin so the guard passes, then bad credentials should yield 401.
+  login_status=$(curl -s -o /tmp/hc_body -w "%{http_code}" \
+    -X POST "$BASE_URL/auth/login" \
+    -H "Content-Type: application/json" \
+    -H "X-Requested-With: XMLHttpRequest" \
+    -H "Origin: ${FRONTEND_URL:-http://localhost:3000}" \
+    -d '{"email":"smoke@test.invalid","password":"wrongpassword"}' \
+    --max-time 10 2>/dev/null || echo "000")
 
   if [ "$login_status" = "401" ]; then
     echo "PASS: Login rejects bad credentials with 401"
@@ -90,10 +77,6 @@ check "GET /health" "$BASE_URL/health" "200" "ok"
 check "GET /health/ready (db)" "$BASE_URL/health/ready" "200" '"db":"connected"'
 check "GET /health/ready (cache)" "$BASE_URL/health/ready" "200" '"cache":"connected"'
 check "GET /health/ready (commit)" "$BASE_URL/health/ready" "200" '"commit":"'
-
-if [ "$CSRF_APP" = "true" ]; then
-  check "GET /api/csrf-token" "$BASE_URL/api/csrf-token" "200" "token"
-fi
 
 check_cors "$BASE_URL/health/ready"
 check_login_rejects_bad_creds
