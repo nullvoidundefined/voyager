@@ -23,7 +23,7 @@ export async function buildTripMapPins(
   const tasks: Promise<MapPin | null>[] = [];
 
   for (const hotel of trip.hotels) {
-    tasks.push(buildHotelPin(hotel, token));
+    tasks.push(buildHotelPin(hotel, trip.destination, token));
   }
 
   for (const experience of trip.experiences) {
@@ -47,9 +47,15 @@ export async function buildTripMapPins(
 
 async function buildHotelPin(
   hotel: TripMapSource['hotels'][number],
+  destination: string,
   token: string,
 ): Promise<MapPin | null> {
-  const query = [hotel.name, hotel.city].filter(Boolean).join(', ');
+  // Anchor the geocode with the hotel city, falling back to the trip
+  // destination so a city-less hotel never geocodes on its bare name alone
+  // (which can resolve to an unrelated place).
+  const query = [hotel.name, hotel.city || destination]
+    .filter(Boolean)
+    .join(', ');
   if (!query) return null;
   const coords = await geocodePlace(query, token);
   if (!coords) return null;

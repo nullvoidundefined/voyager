@@ -121,4 +121,45 @@ describe('buildTripMapPins', () => {
     );
     expect(hotelGeocodeCall).toBeDefined();
   });
+
+  function geocodeUrlFor(fragment: string): string | undefined {
+    return mockFetch.mock.calls
+      .map(([url]) => decodeURIComponent(String(url)))
+      .find((url) => url.includes(fragment));
+  }
+
+  it('anchors the hotel geocode query with the hotel city', async () => {
+    const trip = makeTrip({
+      destination: 'Abu Dhabi',
+      hotels: [{ city: 'Abu Dhabi', id: 'h1', name: 'Emirates Palace' }],
+    });
+
+    await buildTripMapPins(trip, TOKEN);
+
+    expect(geocodeUrlFor('Emirates Palace')).toContain('Abu Dhabi');
+  });
+
+  it('anchors a city-less hotel with the trip destination', async () => {
+    const trip = makeTrip({
+      destination: 'Abu Dhabi',
+      hotels: [{ city: null, id: 'h1', name: 'The Grand Hotel' }],
+    });
+
+    await buildTripMapPins(trip, TOKEN);
+
+    // Without a city, the query must still carry the destination anchor, not
+    // just the bare name (the 2026-07-07 map-pin audit gap).
+    expect(geocodeUrlFor('The Grand Hotel')).toContain('Abu Dhabi');
+  });
+
+  it('anchors the experience geocode query with the trip destination', async () => {
+    const trip = makeTrip({
+      destination: 'Abu Dhabi',
+      experiences: [{ id: 'e1', name: 'Sheikh Zayed Grand Mosque' }],
+    });
+
+    await buildTripMapPins(trip, TOKEN);
+
+    expect(geocodeUrlFor('Sheikh Zayed Grand Mosque')).toContain('Abu Dhabi');
+  });
 });
