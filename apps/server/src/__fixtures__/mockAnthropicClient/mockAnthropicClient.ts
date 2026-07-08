@@ -46,6 +46,11 @@ const MOCK_BOOKING_CONFIRMATION_TEXT =
 const MOCK_BOOKING_QUICK_REPLIES = ['Confirm booking', 'Change selection'];
 
 const SELECTION_KEYWORDS = ['cheapest', 'first', 'take'];
+// E2E-only marker: a user message containing this makes the mock agent throw so
+// a spec can assert the error-state UI recovers (input usable, no stuck
+// spinner). Per message, so it needs no global scenario switch and cannot race
+// parallel workers.
+const E2E_ERROR_MARKER = '__e2e_force_error__';
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -55,8 +60,8 @@ interface MessageParam {
 }
 
 interface StreamParams {
-  messages: MessageParam[];
   [key: string]: unknown;
+  messages: MessageParam[];
 }
 
 interface MockStreamListeners {
@@ -228,9 +233,18 @@ function buildSelectFlightCall(): MockFinalMessage {
   };
 }
 
+function buildForcedError(): MockFinalMessage {
+  throw new Error('E2E forced agent error');
+}
+
 // ── Scenario scripts ───────────────────────────────────────────────
 
 const DEFAULT_SCRIPT: ScenarioScript = [
+  {
+    condition: (msgs) =>
+      lastUserMessageContainsKeyword(msgs, [E2E_ERROR_MARKER]),
+    response: buildForcedError,
+  },
   {
     condition: (msgs) => countAssistantMessages(msgs) === 0,
     response: buildIterationOneToolUse,
