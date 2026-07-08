@@ -54,35 +54,13 @@ Commit `f36d7d6` added a live Mapbox public token (`pk.*`) to `web-client/.env.e
 
 ## E2E Coverage Audit (2026-07-07)
 
-Source: `docs/audits/2026-07-07-e2e-coverage-synthesis.md` (engineering + criticism, each finding verified against the code). Audit-surfaced P0/P1 E2E gaps; the first item is a live bug, not only a missing test.
+Source: `docs/audits/2026-07-07-e2e-coverage-synthesis.md`. Shipped and removed from this list: the loader dual-render bug (fixed + deployed, `7f7b16b`) and the selection dual-writer E2E (`e2e/selection-dedup.spec.ts`, `62f63fb`).
 
-### Fix the duplicate loading indicator, then guard it with an E2E
+### Budget persistence: unit-covered, E2E intentionally not built
 
-`ChatBox.tsx:333` wires `isStreaming={isSending}`, so `VirtualizedChat` renders both the `pendingIndicator` "Thinking" bar (`:246-254`) and the `thinkingIndicator` dots (`:255-266`) at the start of every turn; the dots also persist through tool-progress and streaming. Live in production. The only test on this path (`VirtualizedChat.test.tsx:110-118`) uses `isSending=false`, a combination impossible in production.
+The 2026-07-06 budget-revert fix is covered by ChatBox invariant 17 (two chat sends, `put` called once). A full-stack E2E was attempted and found unreliable: the trip form re-emits on every chat turn, and each fresh instance resets the shared `formValuesRef`, which masks the stale-snapshot behavior the bug depends on, so an E2E could pass whether or not the bug is present. The component test is the correct level for this client-state bug.
 
-**Why P1:** A visible dual-loader on every chat turn, on the protagonist flow, in production now.
-
-**Scope:** Test-first. Decouple `isStreaming` from `isSending`, or give the dots indicator the `pendingIndicator`'s mutual-exclusion guards. Add an E2E asserting exactly one "Thinking" indicator during a live turn and none once content streams.
-
-**Source:** 2026-07-07 E2E coverage audit (engineering + criticism)
-
-### E2E: a single flight selected via both writers stays one row and one budget line
-
-Every selection E2E uses the test-only `/trips/:id/test-selections` backdoor; nothing drives the real tile-click `POST /trips/:id/selections` plus the agent `select_flight` for the same flight, the dual-write path behind the duplicate-flight / double-budget incident (dedup at `trips.ts:149-156, 210-214`). The MockAnthropic `selectFlight` scenario (commit `0bc5b4a`) drives the agent side.
-
-**Why P1:** Directly reproduces a real production incident; the dedup fix has zero end-to-end coverage.
-
-**Scope:** New E2E: select a flight via the tile and via the agent for the same flight; assert one `trip_flights` row and the correct sidebar budget total.
-
-**Source:** 2026-07-07 E2E coverage audit (engineering + criticism)
-
-### E2E: budget set in chat persists across the next turn
-
-Invariant 17 mocks `put`, so it cannot catch two real writes colliding (the 2026-07-06 budget-revert). No E2E covers the form-auto-save-vs-agent-`update_trip` seam.
-
-**Why P1:** Reproduces a real production incident on the budget sidebar; the fix is only unit-covered with a mocked network layer.
-
-**Scope:** New E2E: set budget in the trip form, send a message that updates budget, assert the sidebar Total Budget shows the agent value and survives the next send.
+**Scope:** No E2E. Revisit only if the trip-form lifecycle changes such that a single form instance persists across turns.
 
 **Source:** 2026-07-07 E2E coverage audit (engineering + criticism)
 

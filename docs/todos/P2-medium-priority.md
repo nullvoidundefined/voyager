@@ -50,37 +50,7 @@ Once these two scenarios exist, restore US-19, US-23, and US-36 in `e2e/chat-boo
 
 ## E2E Coverage Audit (2026-07-07)
 
-Source: `docs/audits/2026-07-07-e2e-coverage-synthesis.md`. Audit-surfaced P2 E2E gaps.
-
-### E2E: agent/tool error and quota states render a Toast, not a stuck UI
-
-No E2E forces a null tool result, quota exhaustion, or Anthropic overload mid-conversation, despite the real F-03 crash in that class.
-
-**Why P2:** A whole error class with zero end-to-end coverage; a stuck spinner on the protagonist flow reads as broken.
-
-**Scope:** New E2E forcing each error via the mock; assert a Toast appears and the input re-enables (no stuck spinner).
-
-**Source:** 2026-07-07 E2E coverage audit (criticism)
-
-### E2E: hotel and experience map pins center near the destination
-
-`tripMapPins.ts` free-text-geocodes hotels (`:54`) and experiences (`:71`) unconstrained; only airports use the backend IATA endpoint. Lower severity than the airport case (hotel names resolve), but no regression test or destination-anchored fallback.
-
-**Why P2:** Same failure family as the Iloilo-City map bug, one layer over.
-
-**Scope:** Coverage that a known hotel geocodes near the trip destination, not elsewhere.
-
-**Source:** 2026-07-07 E2E coverage audit (engineering)
-
-### E2E: checkout confirmation total equals the sum of selections
-
-`checkout.spec.ts` US-26 checks line-item presence but never asserts the dialog total equals the sum of seeded prices, the surface a double-count would show on.
-
-**Why P2:** Cheap assertion on the exact spot a budget defect becomes visible before save.
-
-**Scope:** Extend `checkout.spec.ts` to assert the computed total equals the known sum of `defaultSelections()`.
-
-**Source:** 2026-07-07 E2E coverage audit (engineering)
+Source: `docs/audits/2026-07-07-e2e-coverage-synthesis.md`. All three P2 E2E gaps shipped and are removed: the agent-error recovery E2E (`e2e/error-state.spec.ts`), the hotel/experience map-pin anchoring fix + coverage (`4cc3615`), and the checkout-total assertion (`checkout.spec.ts` US-26, `ded0450`). Nuance from building the error test: the client degrades gracefully on an agent error rather than showing a Toast, so the E2E asserts turn recovery (input usable, spinner clears), which is the guarantee that actually matters.
 
 ### US-19 / US-23 / US-36 restoration reaffirmed
 
